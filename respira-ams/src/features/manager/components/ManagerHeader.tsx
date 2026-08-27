@@ -5,7 +5,7 @@ import { SearchInput } from "./SearchInput";
 import { AccountSection } from "./AccountSection";
 
 // Các path không hiển thị search bar
-const HIDE_SEARCH_PATHS = ["/dashboard", "/manager/diseases/"];
+const HIDE_SEARCH_PATHS = ["/manage/dashboard", "/manager/diseases/"];
 
 export function ManagerHeader() {
 	const pathname = usePathname();

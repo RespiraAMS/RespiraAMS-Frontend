@@ -1,7 +1,7 @@
 import { ManagerSidebar } from "@/features/manager/components/ManagerSidebar";
 import { ManagerHeader } from "@/features/manager/components/ManagerHeader";
 
-export default function DashboardLayout({
+export default function ManageLayout({
 	children,
 }: {
 	children: React.ReactNode;

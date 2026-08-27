@@ -39,7 +39,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-	{ icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+	{ icon: LayoutDashboard, label: "Dashboard", href: "/manage/dashboard" },
 	{ icon: Contact, label: "Bác sĩ", href: "/manager/doctors" },
 	{ icon: Microscope, label: "Phổ kháng sinh", href: "/manager/antibiotic-spectra" },
 	{ icon: Pill, label: "Kháng sinh", href: "/manager/antibiotics" },
