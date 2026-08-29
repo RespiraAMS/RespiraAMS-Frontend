@@ -40,11 +40,11 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
 	{ icon: LayoutDashboard, label: "Dashboard", href: "/manage/dashboard" },
-	{ icon: Contact, label: "Bác sĩ", href: "/manager/doctors" },
-	{ icon: Microscope, label: "Phổ kháng sinh", href: "/manager/antibiotic-spectra" },
-	{ icon: Pill, label: "Kháng sinh", href: "/manager/antibiotics" },
-	{ icon: Atom, label: "Tác nhân gây bệnh", href: "/manager/pathogens" },
-	{ icon: Biohazard, label: "Bệnh truyền nhiễm", href: "/manager/diseases" },
+	{ icon: Contact, label: "Bác sĩ", href: "/manage/doctors" },
+	{ icon: Microscope, label: "Phổ kháng sinh", href: "/manage/antibiotic-spectra" },
+	{ icon: Pill, label: "Kháng sinh", href: "/manage/antibiotics" },
+	{ icon: Atom, label: "Tác nhân gây bệnh", href: "/manage/pathogens" },
+	{ icon: Biohazard, label: "Bệnh truyền nhiễm", href: "/manage/diseases" },
 	{ icon: BarChart2, label: "Phân tích & Thống kê", href: "/analytics" },
 	{ icon: FileText, label: "Báo cáo", href: "/reports" },
 	{ icon: Settings, label: "Cài đặt", href: "/settings" },
