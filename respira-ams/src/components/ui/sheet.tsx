@@ -38,9 +38,11 @@ function SheetContent({
   className,
   children,
   side = "right",
+  showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left"
+  showCloseButton?: boolean
 }) {
   return (
     <SheetPortal>
@@ -58,10 +60,12 @@ function SheetContent({
         {...props}
       >
         <div className="flex flex-col gap-4 p-6 overflow-y-auto flex-1">{children}</div>
-        <SheetPrimitive.Close className="ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
-          <XIcon className="size-4" />
-          <span className="sr-only">Close</span>
-        </SheetPrimitive.Close>
+        {showCloseButton && (
+          <SheetPrimitive.Close className="ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+            <XIcon className="size-4" />
+            <span className="sr-only">Close</span>
+          </SheetPrimitive.Close>
+        )}
       </SheetPrimitive.Content>
     </SheetPortal>
   )
@@ -84,7 +88,14 @@ function SheetDescription({ className, ...props }: React.ComponentProps<typeof S
 }
 
 export {
-  Sheet, SheetClose, SheetContent, SheetDescription,
-  SheetFooter, SheetHeader, SheetOverlay, SheetPortal,
-  SheetTitle, SheetTrigger,
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetOverlay,
+  SheetPortal,
+  SheetTitle,
+  SheetTrigger,
 }

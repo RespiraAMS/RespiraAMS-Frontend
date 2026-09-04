@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
@@ -93,6 +95,12 @@ function TableCaption({ className, ...props }: React.ComponentProps<"caption">) 
 }
 
 export {
-  Table, TableHeader, TableBody, TableFooter,
-  TableHead, TableRow, TableCell, TableCaption,
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
 }
