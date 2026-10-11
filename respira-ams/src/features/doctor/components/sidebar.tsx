@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
 	Tooltip,
 	TooltipContent,
@@ -13,18 +10,17 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-	ChevronLeft,
-	ChevronRight,
-	type LucideIcon,
-	Stethoscope,
-	History,
+	User,
+	Search,
+	CheckCircle2,
+	Calculator,
 	BarChart3,
-	BookOpen,
+	type LucideIcon,
 } from "lucide-react";
 import AccountSection from "@/features/doctor/components/accountSection";
 import { useSidebarStore } from "@/features/doctor/components/sidebarStore";
 
-interface NavItem {
+export interface NavItem {
 	icon: LucideIcon;
 	label: string;
 	href: string;
@@ -37,11 +33,32 @@ interface NavItemProps {
 	active: boolean;
 }
 
-const NAV_ITEMS: NavItem[] = [
-	{ icon: Stethoscope, label: "Chẩn đoán", href: "/doctor/diagnose" },
-	{ icon: BookOpen, label: "Tra cứu", href: "/doctor/info" },
-	{ icon: History, label: "Lịch sử", href: "/doctor/history" },
-	{ icon: BarChart3, label: "Thống kê", href: "/doctor/statistics" },
+export const DOCTOR_NAV_ITEMS: NavItem[] = [
+	{
+		icon: User,
+		label: "Quản lý bệnh nhân",
+		href: "/doctor/patients",
+	},
+	{
+		icon: Search,
+		label: "Tra cứu",
+		href: "/doctor/info",
+	},
+	{
+		icon: CheckCircle2,
+		label: "Chẩn đoán lâm sàng",
+		href: "/doctor/diagnose",
+	},
+	{
+		icon: Calculator,
+		label: "Máy tính y khoa",
+		href: "/doctor/calculator",
+	},
+	{
+		icon: BarChart3,
+		label: "Thống kê & Giám sát AMR",
+		href: "/doctor/statistics",
+	},
 ];
 
 function NavItemLink({ item, collapsed, active }: NavItemProps) {
@@ -51,32 +68,50 @@ function NavItemLink({ item, collapsed, active }: NavItemProps) {
 		<Link
 			href={href}
 			className={cn(
-				"flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
-				"transition-all duration-150 group relative",
+				"flex items-center gap-3.5 px-4 transition-all group relative select-none",
 				active
-					? "bg-primary text-primary-foreground shadow-sm"
-					: "text-muted-foreground hover:text-foreground hover:bg-accent"
+					? "rounded-[16px] bg-[#F0F7FF] border border-[#E0F0FE] text-[#0088FF] font-semibold py-3 shadow-[0_2px_8px_rgba(0,136,255,0.06)]"
+					: "rounded-[12px] text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium py-2.5 border border-transparent"
 			)}
 		>
 			<Icon
 				className={cn(
-					"shrink-0 h-4 w-4 transition-colors",
+					"shrink-0 h-5 w-5 transition-colors",
 					active
-						? "text-primary-foreground"
-						: "text-muted-foreground group-hover:text-foreground"
+						? "text-[#0088FF]"
+						: "text-slate-400 group-hover:text-slate-600"
 				)}
 			/>
 
-			{!collapsed && <span className="truncate leading-none">{label}</span>}
+			{!collapsed && (
+				<div className="flex-1 leading-snug">
+					{label === "Thống kê & Giám sát AMR" ? (
+						<>
+							<span className="block text-[13.5px] leading-tight">Thống kê & Giám sát</span>
+							<span className="block text-[13.5px] leading-tight font-bold">AMR</span>
+						</>
+					) : (
+						<span className="text-[13.5px] leading-tight">{label}</span>
+					)}
+				</div>
+			)}
 
-			{!collapsed && badge != null && (
-				<span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/15 px-1.5 text-[11px] font-semibold text-primary">
+			{!collapsed && active && (
+				<span className="h-2 w-2 rounded-full bg-[#0088FF] shrink-0 self-center ml-2" />
+			)}
+
+			{!collapsed && !active && badge != null && (
+				<span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-100 px-1.5 text-[11px] font-semibold text-slate-600">
 					{badge}
 				</span>
 			)}
 
-			{collapsed && badge != null && (
-				<span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary" />
+			{collapsed && (
+				active ? (
+					<span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-[#0088FF]" />
+				) : badge != null ? (
+					<span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-slate-400" />
+				) : null
 			)}
 		</Link>
 	);
@@ -85,10 +120,10 @@ function NavItemLink({ item, collapsed, active }: NavItemProps) {
 		return (
 			<Tooltip>
 				<TooltipTrigger asChild>{linkContent}</TooltipTrigger>
-				<TooltipContent side="right" className="flex items-center gap-2">
+				<TooltipContent side="right" className="flex items-center gap-2 font-medium rounded-[8px]">
 					{label}
 					{badge != null && (
-						<span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/15 px-1.5 text-[11px] font-semibold text-primary">
+						<span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-sky-100 px-1 text-[10px] font-bold text-[#0088FF]">
 							{badge}
 						</span>
 					)}
@@ -102,112 +137,87 @@ function NavItemLink({ item, collapsed, active }: NavItemProps) {
 
 export function DoctorSidebar() {
 	const collapsed = useSidebarStore((state) => state.collapsed);
-	const collapse = useSidebarStore((state) => state.collapse);
-	const expand = useSidebarStore((state) => state.expand);
 	const pathname = usePathname();
-	const [logoError, setLogoError] = useState(false);
 
 	return (
 		<TooltipProvider delayDuration={0}>
 			<aside
 				className={cn(
-					"sticky top-0 flex flex-col h-screen border-r bg-background z-30",
+					"sticky top-0 flex flex-col h-screen border-r border-slate-100 bg-white z-30 select-none",
 					"transition-[width] duration-300 ease-in-out shrink-0",
-					collapsed ? "w-16" : "w-60"
+					collapsed ? "w-20" : "w-[260px]"
 				)}
 			>
-				{/* Top Logo / Brand */}
+				{/* Top Logo / Brand with horizontal divider border-b */}
 				<div
 					className={cn(
-						"flex items-center h-16 px-3 border-b shrink-0 overflow-hidden",
-						collapsed ? "justify-center" : "justify-between"
+						"flex items-center h-[72px] px-5 border-b border-slate-100 shrink-0",
+						collapsed ? "justify-center" : "justify-start"
 					)}
 				>
 					<Link
-						href="/"
-						className="flex items-center gap-2.5 min-w-0 overflow-hidden"
+						href="/doctor/statistics"
+						className="flex items-center gap-3 min-w-0"
+						id="doctor-brand-link"
 					>
-						<div className="relative h-8 w-8 shrink-0">
-							{logoError && (
-								<span className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">
-									R
-								</span>
-							)}
-							<Image
-								src="/Background.png"
-								alt="RespiraAMS logo"
-								fill
-								sizes="32px"
-								className={cn(
-									"rounded-lg object-cover",
-									logoError ? "hidden" : "block"
-								)}
-								onError={() => setLogoError(true)}
-							/>
+						{/* App Icon with explicit rounded-[16px] and soft glow shadow */}
+						<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] bg-[#0088FF] text-white font-bold text-lg shadow-[0_4px_14px_rgba(0,136,255,0.3)]">
+							R.
 						</div>
 
-						<span
-							className={cn(
-								"overflow-hidden transition-all duration-300",
-								collapsed ? "max-w-0 opacity-0" : "max-w-40 opacity-100"
-							)}
-						>
-							<span className="font-semibold text-sm truncate block">
-								RespiraAMS
-							</span>
-						</span>
+						{/* Brand Titles */}
+						{!collapsed && (
+							<div className="min-w-0 flex-1">
+								<div className="flex items-center text-lg leading-tight">
+									<span className="font-bold text-slate-900 tracking-tight">
+										Respira
+									</span>
+									<span className="font-bold text-[#0088FF] tracking-tight">
+										AMS
+									</span>
+								</div>
+								<span className="text-[9.5px] font-semibold text-slate-400 tracking-wider uppercase block mt-0.5 leading-none">
+									Hệ thống vi sinh lâm sàng
+								</span>
+							</div>
+						)}
 					</Link>
-
-					{!collapsed && (
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
-							onClick={collapse}
-							aria-label="Thu gọn sidebar"
-							id="doctor-sidebar-collapse-btn"
-						>
-							<ChevronLeft className="h-4 w-4" />
-						</Button>
-					)}
 				</div>
 
-				{/* Floating Expand button when collapsed */}
-				{collapsed && (
-					<div className="absolute -right-3 top-[52px] z-40">
-						<Button
-							variant="outline"
-							size="icon"
-							className="h-6 w-6 rounded-full bg-background shadow-md border"
-							onClick={expand}
-							aria-label="Mở rộng sidebar"
-							id="doctor-sidebar-expand-btn"
-						>
-							<ChevronRight className="h-3 w-3" />
-						</Button>
+				{/* Category Section Header */}
+				{!collapsed ? (
+					<div className="px-5 pt-6 pb-2.5">
+						<span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+							Danh mục chuyên môn
+						</span>
 					</div>
+				) : (
+					<div className="h-3" />
 				)}
 
 				{/* Navigation Links */}
 				<nav
 					aria-label="Doctor navigation"
-					className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-0.5"
+					className="flex-1 overflow-y-auto overflow-x-hidden px-3 space-y-1.5"
 				>
-					{NAV_ITEMS.map((item) => (
-						<NavItemLink
-							key={item.href}
-							item={item}
-							collapsed={collapsed}
-							active={
-								pathname === item.href ||
-								pathname.startsWith(item.href + "/")
-							}
-						/>
-					))}
+					{DOCTOR_NAV_ITEMS.map((item) => {
+						const isItemActive =
+							pathname === item.href ||
+							(item.href !== "/doctor" && pathname.startsWith(item.href + "/"));
+
+						return (
+							<NavItemLink
+								key={item.href}
+								item={item}
+								collapsed={collapsed}
+								active={isItemActive}
+							/>
+						);
+					})}
 				</nav>
 
 				{/* Footer Account Section */}
-				<div className="border-t px-2 py-3 shrink-0">
+				<div className="p-3.5 shrink-0 border-t border-slate-100">
 					<AccountSection collapsed={collapsed} />
 				</div>
 			</aside>

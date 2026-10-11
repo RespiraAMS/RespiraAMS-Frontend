@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogOut, Settings, User } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -12,113 +11,190 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export interface UserInfo {
 	name: string;
-	email: string;
+	title?: string;
+	department?: string;
+	hospital?: string;
+	email?: string;
 	avatarUrl?: string;
 	initials: string;
 }
 
 export const MOCK_DOCTOR_USER: UserInfo = {
-	name: "Bác sĩ Demo",
-	email: "doctor@respira.com",
-	initials: "BD",
+	name: "BS.CKII Lê Hoàng Minh",
+	title: "Bác sĩ Chuyên khoa II",
+	department: "Hồi sức Tích cực",
+	hospital: "BV TW",
+	email: "minh.le@respira.com",
+	initials: "HM",
 };
 
 export interface AccountSectionProps {
 	user?: UserInfo;
 	collapsed?: boolean;
+	className?: string;
 }
 
 export function AccountSection({
 	user = MOCK_DOCTOR_USER,
-	collapsed,
+	collapsed = false,
+	className,
 }: AccountSectionProps) {
 	const router = useRouter();
 
-	const handleLogout = () => {
-		// Mock logout – chuyển hướng về trang đăng nhập
+	const handleLogout = (e: React.MouseEvent) => {
+		e.stopPropagation();
 		router.push("/login");
 	};
 
-	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<button
-					type="button"
-					className={cn(
-						"flex items-center rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-accent overflow-hidden w-full text-left",
-						collapsed ? "justify-center px-0" : "gap-2.5"
-					)}
-					id="doctor-account-trigger"
-				>
-					<Avatar className="h-8 w-8 shrink-0">
-						<AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-							{user.initials}
-						</AvatarFallback>
-					</Avatar>
-					<div
-						className={cn(
-							"overflow-hidden transition-all duration-300",
-							collapsed ? "max-w-0 opacity-0" : "max-w-40 opacity-100"
-						)}
-					>
-						<div className="text-left w-max">
-							<p className="text-sm font-medium leading-none">{user.name}</p>
-							<p className="text-xs text-muted-foreground leading-none mt-1">
-								{user.email}
+	if (collapsed) {
+		return (
+			<DropdownMenu>
+				<TooltipProvider delayDuration={0}>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<DropdownMenuTrigger asChild>
+								<button
+									type="button"
+									className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0088FF] font-bold text-xs hover:ring-2 hover:ring-sky-300 transition-all mx-auto cursor-pointer"
+									id="doctor-account-trigger-collapsed"
+								>
+									<span>{user.initials}</span>
+									<span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-[#22C55E] ring-2 ring-white" />
+								</button>
+							</DropdownMenuTrigger>
+						</TooltipTrigger>
+						<TooltipContent side="right">
+							<p className="font-semibold text-xs">{user.name}</p>
+							<p className="text-[11px] text-muted-foreground">
+								{user.department} - {user.hospital}
+							</p>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+
+				<DropdownMenuContent align="end" side="right" className="w-56">
+					<DropdownMenuLabel className="font-normal">
+						<div className="flex flex-col gap-0.5">
+							<p className="text-sm font-semibold">{user.name}</p>
+							<p className="text-xs text-muted-foreground">
+								{user.department} - {user.hospital}
 							</p>
 						</div>
-					</div>
-				</button>
-			</DropdownMenuTrigger>
+					</DropdownMenuLabel>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem asChild>
+						<Link href="/profile" className="flex items-center gap-2 cursor-pointer">
+							<User className="h-4 w-4" />
+							Thông tin cá nhân
+						</Link>
+					</DropdownMenuItem>
+					<DropdownMenuItem asChild>
+						<Link href="/settings" className="flex items-center gap-2 cursor-pointer">
+							<Settings className="h-4 w-4" />
+							Cài đặt
+						</Link>
+					</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem
+						onClick={handleLogout}
+						className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2"
+					>
+						<LogOut className="h-4 w-4" />
+						Đăng xuất
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		);
+	}
 
-			<DropdownMenuContent align="end" className="w-56">
+	return (
+		<DropdownMenu>
+			<div
+				className={cn(
+					"group flex items-center justify-between gap-2.5 p-2 rounded-[16px] border border-slate-200/80 bg-white hover:border-slate-300 shadow-2xs transition-all",
+					className
+				)}
+			>
+				{/* Avatar & Info */}
+				<DropdownMenuTrigger asChild>
+					<button
+						type="button"
+						className="flex items-center gap-2.5 min-w-0 text-left flex-1 cursor-pointer focus:outline-hidden"
+						id="doctor-account-trigger"
+					>
+						{/* Avatar Circle with Online Dot */}
+						<div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0088FF] font-bold text-xs select-none">
+							<span>{user.initials}</span>
+							<span
+								className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-[#22C55E] ring-2 ring-white"
+								title="Đang trực tuyến"
+							/>
+						</div>
+
+						{/* Doctor Name and Department */}
+						<div className="min-w-0 flex-1">
+							<p className="truncate text-xs font-bold text-slate-800 leading-tight">
+								{user.name}
+							</p>
+							<p className="truncate text-[10px] text-slate-400 font-medium leading-tight mt-0.5">
+								{user.department} - {user.hospital}
+							</p>
+						</div>
+					</button>
+				</DropdownMenuTrigger>
+
+				{/* Logout / Action Button */}
+				<button
+					type="button"
+					onClick={handleLogout}
+					title="Đăng xuất"
+					aria-label="Đăng xuất"
+					className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+					id="doctor-logout-button"
+				>
+					<LogOut className="h-4 w-4" />
+				</button>
+			</div>
+
+			<DropdownMenuContent align="end" className="w-56 mb-2 rounded-[14px]">
 				<DropdownMenuLabel className="font-normal">
-					<div className="flex flex-col gap-1">
-						<p className="text-sm font-medium">{user.name}</p>
-						<p className="text-xs text-muted-foreground">{user.email}</p>
+					<div className="flex flex-col gap-0.5">
+						<p className="text-sm font-semibold text-slate-900">{user.name}</p>
+						<p className="text-xs text-muted-foreground">
+							{user.department} - {user.hospital}
+						</p>
 					</div>
 				</DropdownMenuLabel>
-
 				<DropdownMenuSeparator />
-
 				<DropdownMenuItem asChild>
-					<Link
-						href="/profile"
-						className="flex items-center gap-2 cursor-pointer"
-						id="doctor-profile-link"
-					>
+					<Link href="/profile" className="flex items-center gap-2 cursor-pointer">
 						<User className="h-4 w-4" />
-						Quản lý tài khoản
+						Thông tin cá nhân
 					</Link>
 				</DropdownMenuItem>
-
 				<DropdownMenuItem asChild>
-					<Link
-						href="/settings"
-						className="flex items-center gap-2 cursor-pointer"
-						id="doctor-settings-link"
-					>
+					<Link href="/settings" className="flex items-center gap-2 cursor-pointer">
 						<Settings className="h-4 w-4" />
 						Cài đặt
 					</Link>
 				</DropdownMenuItem>
-
 				<DropdownMenuSeparator />
-
-				<DropdownMenuItem asChild>
-					<button
-						type="button"
-						onClick={handleLogout}
-						className="flex w-full items-center gap-2 cursor-pointer text-destructive focus:text-destructive px-2 py-1.5 text-sm"
-						id="doctor-logout-button"
-					>
-						<LogOut className="h-4 w-4" />
-						Đăng xuất
-					</button>
+				<DropdownMenuItem
+					onClick={handleLogout}
+					className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2"
+				>
+					<LogOut className="h-4 w-4" />
+					Đăng xuất
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
