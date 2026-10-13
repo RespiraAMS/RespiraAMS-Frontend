@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { Download } from "lucide-react";
 
 const PAGE_TITLES: Record<string, string> = {
-	"/doctor/patients": "Quản lý bệnh nhân",
+	"/doctor/patients": "Danh sách bệnh nhân",
 	"/doctor/info": "Tra cứu",
 	"/doctor/diagnose": "Chẩn đoán lâm sàng",
 	"/doctor/calculator": "Máy tính y khoa",
@@ -14,25 +14,35 @@ const PAGE_TITLES: Record<string, string> = {
 
 export function DoctorHeader() {
 	const pathname = usePathname();
-	const title =
-		Object.entries(PAGE_TITLES).find(
-			([href]) => pathname === href || pathname.startsWith(href + "/")
-		)?.[1] ?? "RespiraAMS";
+	let title = "RespiraAMS";
+
+	if (pathname.startsWith("/doctor/patients/")) {
+		title = "Chi tiết bệnh nhân";
+	} else {
+		title =
+			Object.entries(PAGE_TITLES).find(
+				([href]) => pathname === href || pathname.startsWith(href + "/")
+			)?.[1] ?? "RespiraAMS";
+	}
+
+	const showExportBtn = pathname === "/doctor/statistics";
 
 	return (
-		<header className="sticky top-0 z-20 flex h-[72px] shrink-0 items-center justify-between gap-4 border-b border-slate-100 bg-white px-8">
-			<h1 className="truncate text-xl font-bold tracking-tight text-slate-900">
+		<header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-100 bg-white px-6">
+			<h1 className="truncate text-lg font-bold tracking-tight text-slate-900">
 				{title}
 			</h1>
 
-			<button
-				type="button"
-				id="doctor-export-report-btn"
-				className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-[10px] bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#0077EE]"
-			>
-				<Download className="h-4 w-4" />
-				<span>Xuất báo cáo Vi sinh</span>
-			</button>
+			{showExportBtn && (
+				<button
+					type="button"
+					id="doctor-export-report-btn"
+					className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-[10px] bg-[#0EA5E9] hover:bg-[#25B4F8] px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-md hover:shadow-sky-500/15 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+				>
+					<Download className="h-4 w-4" />
+					<span>Xuất báo cáo Vi sinh</span>
+				</button>
+			)}
 		</header>
 	);
 }
