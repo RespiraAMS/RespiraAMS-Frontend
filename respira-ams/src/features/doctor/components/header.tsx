@@ -37,6 +37,7 @@ export function DoctorHeader() {
 				<button
 					type="button"
 					id="doctor-export-report-btn"
+					style={{ borderRadius: "10px" }}
 					className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-[10px] bg-[#0EA5E9] hover:bg-[#25B4F8] px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-md hover:shadow-sky-500/15 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
 				>
 					<Download className="h-4 w-4" />
