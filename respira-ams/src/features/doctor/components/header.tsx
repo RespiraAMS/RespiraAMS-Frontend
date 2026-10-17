@@ -5,7 +5,7 @@ import { Download } from "lucide-react";
 
 const PAGE_TITLES: Record<string, string> = {
 	"/doctor/patients": "Danh sách bệnh nhân",
-	"/doctor/info": "Tra cứu",
+	"/doctor/info": "Danh sách kháng sinh",
 	"/doctor/diagnose": "Chẩn đoán lâm sàng",
 	"/doctor/calculator": "Máy tính y khoa",
 	"/doctor/statistics": "Thống kê & Giám sát Vi sinh Lâm sàng",
@@ -18,6 +18,8 @@ export function DoctorHeader() {
 
 	if (pathname.startsWith("/doctor/patients/")) {
 		title = "Chi tiết bệnh nhân";
+	} else if (pathname.startsWith("/doctor/info/")) {
+		title = "Chi tiết kháng sinh";
 	} else {
 		title =
 			Object.entries(PAGE_TITLES).find(
