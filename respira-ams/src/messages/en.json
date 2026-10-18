@@ -1,0 +1,22 @@
+{
+  "common": {
+    "welcome": "Welcome back",
+    "dashboard": "Dashboard",
+    "language": "Language"
+  },
+  "dashboard": {
+    "title": "System Overview",
+    "stats": "Monthly Statistics",
+    "activeUsers": "{count} active users"
+  },
+  "forms": {
+    "email": "Email Address",
+    "password": "Password",
+    "submit": "Submit",
+    "validation": {
+      "emailRequired": "Email is required",
+      "invalidEmail": "Invalid email address",
+      "passwordMin": "Password must be at least {min} characters"
+    }
+  }
+}

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 
 const inter = Inter({
     subsets: ['latin'],
@@ -13,10 +15,21 @@ export const metadata: Metadata = {
     description: 'Respiratory Airway Management System',
 };
 
-export default function RootLayout({ children }: LayoutProps<'/'>) {
-    return (
-        <html lang="en" className={`${inter.variable} h-full antialiased`}>
-            <body className="min-h-full flex flex-col">{children}</body>
-        </html>
-    );
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
+  return (
+    <html lang={locale}>
+      <body>
+        <NextIntlClientProvider messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
 }

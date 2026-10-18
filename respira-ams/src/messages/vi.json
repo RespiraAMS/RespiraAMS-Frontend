@@ -1,0 +1,22 @@
+{
+  "common": {
+    "welcome": "Chào mừng trở lại",
+    "dashboard": "Bảng điều khiển",
+    "language": "Ngôn ngữ"
+  },
+  "dashboard": {
+    "title": "Tổng quan hệ thống",
+    "stats": "Thống kê tháng này",
+    "activeUsers": "{count} người dùng đang hoạt động"
+  },
+  "forms": {
+    "email": "Địa chỉ Email",
+    "password": "Mật khẩu",
+    "submit": "Gửi thông tin",
+    "validation": {
+      "emailRequired": "Vui lòng nhập email",
+      "invalidEmail": "Email không hợp lệ",
+      "passwordMin": "Mật khẩu phải chứa ít nhất {min} ký tự"
+    }
+  }
+}
