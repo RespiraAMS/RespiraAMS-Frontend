@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { SearchInput } from "./SearchInput";
-import { AccountSection } from "./AccountSection";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 

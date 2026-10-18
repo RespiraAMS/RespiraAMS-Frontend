@@ -3,7 +3,6 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export default async function DashboardPage() {
-  const t = await getTranslations('dashboard');
   const commonT = await getTranslations('common');
 
   return (
@@ -15,11 +14,6 @@ export default async function DashboardPage() {
       </header>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">{t('title')}</h2>
-        <p className="text-gray-600">{t('stats')}</p>
-        <div className="p-4 bg-blue-50 text-blue-900 rounded-lg font-medium">
-          {t('activeUsers', { count: 1250 })}
-        </div>
       </section>
     </div>
   );

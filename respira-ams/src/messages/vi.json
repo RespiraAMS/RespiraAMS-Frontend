@@ -39,7 +39,7 @@
     },
     "antibiotics": {
       "title": "Kháng sinh",
-      "description": "Quản lý danh sách kháng sinh theo phổ và phân loại AWaRe.",
+      "description": "Quản lý danh sách kháng sinh theo nhóm và phân loại AWaRe.",
       "addButton": "Thêm kháng sinh",
       "dialog": {
         "createTitle": "Tạo mới Kháng sinh",
@@ -55,8 +55,8 @@
       "form": {
         "nameLabel": "Tên kháng sinh",
         "namePlaceholder": "Nhập tên kháng sinh...",
-        "spectrumLabel": "Phổ kháng sinh",
-        "selectSpectrumPlaceholder": "-- Chọn phổ kháng sinh --",
+        "groupLabel": "Nhóm kháng sinh",
+        "selectGroupPlaceholder": "-- Chọn nhóm kháng sinh --",
         "categoryLabel": "Phân loại AWaRe",
         "selectCategoryPlaceholder": "-- Chọn phân loại --",
         "routesDosagesLabel": "Đường dùng & Liều lượng",
@@ -67,7 +67,7 @@
       },
       "validation": {
         "nameRequired": "Vui lòng nhập tên kháng sinh!",
-        "spectrumRequired": "Vui lòng chọn phổ kháng sinh!",
+        "groupRequired": "Vui lòng chọn nhóm kháng sinh!",
         "categoryRequired": "Vui lòng chọn phân loại AWaRe!",
         "routesRequired": "Chọn ít nhất một đường dùng!",
         "dosagesRequired": "Vui lòng nhập ít nhất một liều dùng cho đường này!"
@@ -75,7 +75,7 @@
       "table": {
         "colName": "Tên kháng sinh",
         "colCategory": "Phân loại AWaRe",
-        "colSpectrum": "Phổ kháng sinh",
+        "colGroup": "Nhóm kháng sinh",
         "colDosages": "Liều dùng",
         "filterBy": "Lọc theo",
         "clearFilter": "Xóa tất cả bộ lọc",

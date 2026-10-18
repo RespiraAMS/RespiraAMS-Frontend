@@ -39,7 +39,7 @@
     },
     "antibiotics": {
       "title": "Antibiotics",
-      "description": "Manage antibiotics list by spectrum and AWaRe classification.",
+      "description": "Manage antibiotics list by group and AWaRe classification.",
       "addButton": "Add Antibiotic",
       "dialog": {
         "createTitle": "Create New Antibiotic",
@@ -55,8 +55,8 @@
       "form": {
         "nameLabel": "Antibiotic Name",
         "namePlaceholder": "Enter antibiotic name...",
-        "spectrumLabel": "Antibiotic Spectrum",
-        "selectSpectrumPlaceholder": "-- Select spectrum --",
+        "groupLabel": "Antibiotic Group",
+        "selectGroupPlaceholder": "-- Select group --",
         "categoryLabel": "AWaRe Classification",
         "selectCategoryPlaceholder": "-- Select classification --",
         "routesDosagesLabel": "Administration Routes & Dosages",
@@ -67,15 +67,15 @@
       },
       "validation": {
         "nameRequired": "Please enter an antibiotic name!",
-        "spectrumRequired": "Please select an antibiotic spectrum!",
+        "groupRequired": "Please select an antibiotic group!",
         "categoryRequired": "Please select an AWaRe classification!",
         "routesRequired": "Select at least one administration route!",
         "dosagesRequired": "Please enter at least one dosage for this route!"
       },
       "table": {
         "colName": "Antibiotic Name",
-        "colCategory": "AWaRe Category",
-        "colSpectrum": "Spectrum",
+        "colCategory": "AWaRe Classification",
+        "colGroup": "Group",
         "colDosages": "Dosage",
         "filterBy": "Filter by",
         "clearFilter": "Clear all filters",
