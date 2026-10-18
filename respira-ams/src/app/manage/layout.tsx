@@ -7,11 +7,11 @@ export default function ManageLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="flex h-screen overflow-hidden">
+		<div className="flex h-screen overflow-hidden bg-background text-foreground">
 			<ManagerSidebar />
 			<div className="flex flex-1 flex-col overflow-hidden">
 				<ManagerHeader />
-				<main className="flex-1 overflow-auto">{children}</main>
+				<main className="flex-1 overflow-auto bg-background text-foreground">{children}</main>
 			</div>
 		</div>
 	);

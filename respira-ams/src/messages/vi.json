@@ -3,22 +3,15 @@
     "welcome": "Chào mừng trở lại",
     "dashboard": "Bảng điều khiển",
     "language": "Ngôn ngữ",
-    "add": "Thêm"
-  },
-  "dashboard": {
-    "title": "Tổng quan hệ thống",
-    "stats": "Thống kê tháng này",
-    "activeUsers": "{count} người dùng đang hoạt động"
-  },
-  "forms": {
-    "email": "Địa chỉ Email",
-    "password": "Mật khẩu",
-    "submit": "Gửi thông tin",
-    "validation": {
-      "emailRequired": "Vui lòng nhập email",
-      "invalidEmail": "Email không hợp lệ",
-      "passwordMin": "Mật khẩu phải chứa ít nhất {min} ký tự"
-    }
+    "add": "Thêm",
+    "cancel": "Hủy",
+    "confirmDelete": "Xác nhận Xóa",
+    "create": "Tạo mới",
+    "update": "Cập nhật",
+    "saving": "Đang lưu...",
+    "all": "Tất cả",
+    "actions": "Thao tác",
+    "pageOf": "Trang {page} / {totalPages}"
   },
   "manager": {
     "account": {
@@ -43,6 +36,51 @@
       "analytics": "Phân tích & Thống kê",
       "reports": "Báo cáo",
       "settings": "Cài đặt"
+    },
+    "antibiotics": {
+      "title": "Kháng sinh",
+      "description": "Quản lý danh sách kháng sinh theo phổ và phân loại AWaRe.",
+      "addButton": "Thêm kháng sinh",
+      "dialog": {
+        "createTitle": "Tạo mới Kháng sinh",
+        "createDesc": "Điền thông tin để tạo kháng sinh mới.",
+        "updateTitle": "Cập nhật Kháng sinh",
+        "updateDesc": "Chỉnh sửa thông tin kháng sinh."
+      },
+      "sheet": {
+        "deleteTitle": "Xóa Kháng sinh",
+        "deleteDesc": "Thao tác này sẽ xóa kháng sinh khỏi hệ thống và không thể hoàn tác.",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa kháng sinh \"{name}\" không?"
+      },
+      "form": {
+        "nameLabel": "Tên kháng sinh",
+        "namePlaceholder": "Nhập tên kháng sinh...",
+        "spectrumLabel": "Phổ kháng sinh",
+        "selectSpectrumPlaceholder": "-- Chọn phổ kháng sinh --",
+        "categoryLabel": "Phân loại AWaRe",
+        "selectCategoryPlaceholder": "-- Chọn phân loại --",
+        "routesDosagesLabel": "Đường dùng & Liều lượng",
+        "routeIntravenous": "Intravenous (Tiêm tĩnh mạch)",
+        "routeOral": "Oral (Uống)",
+        "dosagePlaceholder": "Ví dụ: 500 mg mỗi 8h",
+        "addDosage": "Thêm liều"
+      },
+      "validation": {
+        "nameRequired": "Vui lòng nhập tên kháng sinh!",
+        "spectrumRequired": "Vui lòng chọn phổ kháng sinh!",
+        "categoryRequired": "Vui lòng chọn phân loại AWaRe!",
+        "routesRequired": "Chọn ít nhất một đường dùng!",
+        "dosagesRequired": "Vui lòng nhập ít nhất một liều dùng cho đường này!"
+      },
+      "table": {
+        "colName": "Tên kháng sinh",
+        "colCategory": "Phân loại AWaRe",
+        "colSpectrum": "Phổ kháng sinh",
+        "colDosages": "Liều dùng",
+        "filterBy": "Lọc theo",
+        "clearFilter": "Xóa tất cả bộ lọc",
+        "empty": "Không tìm thấy kháng sinh nào."
+      }
     }
   }
 }

@@ -3,22 +3,15 @@
     "welcome": "Welcome back",
     "dashboard": "Dashboard",
     "language": "Language",
-    "add": "Add"
-  },
-  "dashboard": {
-    "title": "System Overview",
-    "stats": "Monthly Statistics",
-    "activeUsers": "{count} active users"
-  },
-  "forms": {
-    "email": "Email Address",
-    "password": "Password",
-    "submit": "Submit",
-    "validation": {
-      "emailRequired": "Email is required",
-      "invalidEmail": "Invalid email address",
-      "passwordMin": "Password must be at least {min} characters"
-    }
+    "add": "Add",
+    "cancel": "Cancel",
+    "confirmDelete": "Confirm Delete",
+    "create": "Create",
+    "update": "Update",
+    "saving": "Saving...",
+    "all": "All",
+    "actions": "Actions",
+    "pageOf": "Page {page} of {totalPages}"
   },
   "manager": {
     "account": {
@@ -43,6 +36,51 @@
       "analytics": "Analytics & Statistics",
       "reports": "Reports",
       "settings": "Settings"
+    },
+    "antibiotics": {
+      "title": "Antibiotics",
+      "description": "Manage antibiotics list by spectrum and AWaRe classification.",
+      "addButton": "Add Antibiotic",
+      "dialog": {
+        "createTitle": "Create New Antibiotic",
+        "createDesc": "Fill in the details to create a new antibiotic.",
+        "updateTitle": "Update Antibiotic",
+        "updateDesc": "Edit antibiotic details."
+      },
+      "sheet": {
+        "deleteTitle": "Delete Antibiotic",
+        "deleteDesc": "This action will delete the antibiotic from the system and cannot be undone.",
+        "deleteConfirmMsg": "Are you sure you want to delete the antibiotic \"{name}\"?"
+      },
+      "form": {
+        "nameLabel": "Antibiotic Name",
+        "namePlaceholder": "Enter antibiotic name...",
+        "spectrumLabel": "Antibiotic Spectrum",
+        "selectSpectrumPlaceholder": "-- Select spectrum --",
+        "categoryLabel": "AWaRe Classification",
+        "selectCategoryPlaceholder": "-- Select classification --",
+        "routesDosagesLabel": "Administration Routes & Dosages",
+        "routeIntravenous": "Intravenous",
+        "routeOral": "Oral",
+        "dosagePlaceholder": "E.g., 500 mg every 8h",
+        "addDosage": "Add Dosage"
+      },
+      "validation": {
+        "nameRequired": "Please enter an antibiotic name!",
+        "spectrumRequired": "Please select an antibiotic spectrum!",
+        "categoryRequired": "Please select an AWaRe classification!",
+        "routesRequired": "Select at least one administration route!",
+        "dosagesRequired": "Please enter at least one dosage for this route!"
+      },
+      "table": {
+        "colName": "Antibiotic Name",
+        "colCategory": "AWaRe Category",
+        "colSpectrum": "Spectrum",
+        "colDosages": "Dosage",
+        "filterBy": "Filter by",
+        "clearFilter": "Clear all filters",
+        "empty": "No antibiotics found."
+      }
     }
   }
 }

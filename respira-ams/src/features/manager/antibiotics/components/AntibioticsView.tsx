@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
 	Dialog,
 	DialogContent,
@@ -24,6 +25,9 @@ import { type AntibioticItem } from "../types";
 type ActiveView = "create" | "update" | "delete" | null;
 
 export function AntibioticsView() {
+	const t = useTranslations("manager.antibiotics");
+	const tCommon = useTranslations("common");
+
 	const [activeView, setActiveView] = useState<ActiveView>(null);
 	const [selected, setSelected] = useState<AntibioticItem | null>(null);
 
@@ -40,9 +44,9 @@ export function AntibioticsView() {
 	return (
 		<>
 			<TableTitle
-				title="Kháng sinh"
-				description="Quản lý danh sách kháng sinh theo phổ và phân loại AWaRe."
-				buttonLabel="Thêm kháng sinh"
+				title={t("title")}
+				description={t("description")}
+				buttonLabel={t("addButton")}
 				onClick={() => openView("create")}
 			/>
 
@@ -56,15 +60,15 @@ export function AntibioticsView() {
 				open={activeView === "create" || activeView === "update"}
 				onOpenChange={(open) => { if (!open) closeView(); }}
 			>
-				<DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+				<DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-popover text-popover-foreground border-border">
 					<DialogHeader>
-						<DialogTitle>
-							{activeView === "create" && "Tạo mới Kháng sinh"}
-							{activeView === "update" && "Cập nhật Kháng sinh"}
+						<DialogTitle className="text-foreground">
+							{activeView === "create" && t("dialog.createTitle")}
+							{activeView === "update" && t("dialog.updateTitle")}
 						</DialogTitle>
-						<DialogDescription>
-							{activeView === "create" && "Điền thông tin để tạo kháng sinh mới."}
-							{activeView === "update" && "Chỉnh sửa thông tin kháng sinh."}
+						<DialogDescription className="text-muted-foreground">
+							{activeView === "create" && t("dialog.createDesc")}
+							{activeView === "update" && t("dialog.updateDesc")}
 						</DialogDescription>
 					</DialogHeader>
 
@@ -85,27 +89,24 @@ export function AntibioticsView() {
 				open={activeView === "delete"}
 				onOpenChange={(open) => { if (!open) closeView(); }}
 			>
-				<SheetContent side="right">
+				<SheetContent side="right" className="bg-popover text-popover-foreground border-border">
 					<SheetHeader>
-						<SheetTitle>Xóa Kháng sinh</SheetTitle>
-						<SheetDescription>
-							Xác nhận xóa kháng sinh{" "}
-							<strong className="text-red-600">{selected?.name}</strong>. Thao
-							tác này không thể hoàn tác.
+						<SheetTitle className="text-foreground">{t("sheet.deleteTitle")}</SheetTitle>
+						<SheetDescription className="text-muted-foreground">
+							{t("sheet.deleteDesc")}
 						</SheetDescription>
 					</SheetHeader>
 
 					<div className="mt-6 flex flex-col gap-4 px-1">
-						<div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">
-							Bạn có chắc chắn muốn xóa kháng sinh{" "}
-							<span className="font-bold">{selected?.name}</span> không?
+						<div className="rounded-md bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive">
+							{t("sheet.deleteConfirmMsg", { name: selected?.name ?? "" })}
 						</div>
 						<div className="flex gap-2 justify-end">
-							<Button variant="outline" onClick={closeView} id="delete-antibiotic-cancel">
-								Hủy
+							<Button variant="outline" onClick={closeView} id="delete-antibiotic-cancel" className="border-border text-foreground hover:bg-accent">
+								{tCommon("cancel")}
 							</Button>
 							<Button variant="destructive" onClick={closeView} id="delete-antibiotic-confirm">
-								Xác nhận Xóa
+								{tCommon("confirmDelete")}
 							</Button>
 						</div>
 					</div>
