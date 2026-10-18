@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LogOut, Settings, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
@@ -20,7 +21,6 @@ export interface UserInfo {
 	avatarUrl?: string;
 }
 
-// Mock user – thay bằng auth thực khi tích hợp API
 export const MOCK_USER: UserInfo = {
 	name: "Nguyễn Văn An",
 	email: "nguyen.vanan@respira.vn",
@@ -36,12 +36,14 @@ export function AccountSection({
 	user = MOCK_USER,
 	collapsed,
 }: AccountSectionProps) {
+	const t = useTranslations("manager.account");
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<div
 					className={cn(
-						"flex items-center rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-accent cursor-pointer overflow-hidden",
+						"flex items-center rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer overflow-hidden",
 						collapsed ? "justify-center w-full px-0" : "gap-2.5"
 					)}
 					id="manager-account-trigger"
@@ -58,7 +60,7 @@ export function AccountSection({
 						)}
 					>
 						<div className="text-left w-max">
-							<p className="text-sm font-medium leading-none">{user.name}</p>
+							<p className="text-sm font-medium leading-none text-foreground">{user.name}</p>
 							<p className="text-xs text-muted-foreground leading-none mt-1">
 								{user.email}
 							</p>
@@ -70,7 +72,7 @@ export function AccountSection({
 			<DropdownMenuContent align="end" className="w-56">
 				<DropdownMenuLabel className="font-normal">
 					<div className="flex flex-col gap-1">
-						<p className="text-sm font-medium">{user.name}</p>
+						<p className="text-sm font-medium text-foreground">{user.name}</p>
 						<p className="text-xs text-muted-foreground">{user.email}</p>
 					</div>
 				</DropdownMenuLabel>
@@ -84,7 +86,7 @@ export function AccountSection({
 						id="account-profile-link"
 					>
 						<User className="h-4 w-4" />
-						Quản lý tài khoản
+						{t("profile")}
 					</Link>
 				</DropdownMenuItem>
 
@@ -95,7 +97,7 @@ export function AccountSection({
 						id="account-settings-link"
 					>
 						<Settings className="h-4 w-4" />
-						Cài đặt
+						{t("settings")}
 					</Link>
 				</DropdownMenuItem>
 
@@ -103,11 +105,11 @@ export function AccountSection({
 
 				<DropdownMenuItem asChild>
 					<button
-						className="flex w-full items-center gap-2 cursor-pointer text-destructive focus:text-destructive px-2 py-1.5 text-sm"
+						className="flex w-full items-center gap-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10 px-2 py-1.5 text-sm"
 						id="account-logout-button"
 					>
 						<LogOut className="h-4 w-4" />
-						Đăng xuất
+						{t("logout")}
 					</button>
 				</DropdownMenuItem>
 			</DropdownMenuContent>

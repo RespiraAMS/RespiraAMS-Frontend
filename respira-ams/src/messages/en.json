@@ -2,7 +2,8 @@
   "common": {
     "welcome": "Welcome back",
     "dashboard": "Dashboard",
-    "language": "Language"
+    "language": "Language",
+    "add": "Add"
   },
   "dashboard": {
     "title": "System Overview",
@@ -17,6 +18,31 @@
       "emailRequired": "Email is required",
       "invalidEmail": "Invalid email address",
       "passwordMin": "Password must be at least {min} characters"
+    }
+  },
+  "manager": {
+    "account": {
+      "profile": "Account Profile",
+      "settings": "Settings",
+      "logout": "Sign Out"
+    },
+    "search": {
+      "placeholder": "Search...",
+      "button": "Search"
+    },
+    "nav": {
+      "mainNavigation": "Main Navigation",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar",
+      "dashboard": "Dashboard",
+      "doctors": "Doctors",
+      "antibioticSpectra": "Antibiotic Spectra",
+      "antibiotics": "Antibiotics",
+      "pathogens": "Pathogens",
+      "diseases": "Infectious Diseases",
+      "analytics": "Analytics & Statistics",
+      "reports": "Reports",
+      "settings": "Settings"
     }
   }
 }

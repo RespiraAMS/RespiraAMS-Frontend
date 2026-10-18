@@ -3,8 +3,9 @@
 import { usePathname } from "next/navigation";
 import { SearchInput } from "./SearchInput";
 import { AccountSection } from "./AccountSection";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 
-// Các path không hiển thị search bar
 const HIDE_SEARCH_PATHS = ["/manage/dashboard", "/manage/diseases/"];
 
 export function ManagerHeader() {
@@ -14,11 +15,12 @@ export function ManagerHeader() {
 	);
 
 	return (
-		<header className="flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6 justify-between">
-			{showSearch && <SearchInput placeholder="Tìm kiếm..." />}
+		<header className="flex h-16 shrink-0 items-center gap-4 border-b border-border bg-background px-6 justify-between text-foreground">
+			{showSearch && <SearchInput />}
 
 			<div className={`flex items-center gap-2 ${showSearch ? "" : "ml-auto"}`}>
-				<AccountSection />
+				<LanguageSwitcher />
+				<ThemeToggle />
 			</div>
 		</header>
 	);

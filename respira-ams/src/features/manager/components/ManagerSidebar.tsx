@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,71 +30,64 @@ import {
 import { AccountSection } from "./AccountSection";
 import { useSidebarStore } from "../stores/sidebarStore";
 
-// ─── Nav Items ────────────────────────────────────────────────────────────────
-
-interface NavItem {
+export interface NavItemConfig {
+	key: string;
 	icon: LucideIcon;
-	label: string;
 	href: string;
 	badge?: number;
 }
 
-const NAV_ITEMS: NavItem[] = [
-	{ icon: LayoutDashboard, label: "Dashboard", href: "/manage/dashboard" },
-	{ icon: Contact, label: "Bác sĩ", href: "/manage/doctors" },
-	{ icon: Microscope, label: "Phổ kháng sinh", href: "/manage/antibiotic-spectra" },
-	{ icon: Pill, label: "Kháng sinh", href: "/manage/antibiotics" },
-	{ icon: Atom, label: "Tác nhân gây bệnh", href: "/manage/pathogens" },
-	{ icon: Biohazard, label: "Bệnh truyền nhiễm", href: "/manage/diseases" },
-	{ icon: BarChart2, label: "Phân tích & Thống kê", href: "/analytics" },
-	{ icon: FileText, label: "Báo cáo", href: "/reports" },
-	{ icon: Settings, label: "Cài đặt", href: "/settings" },
+const NAV_CONFIGS: NavItemConfig[] = [
+	{ key: "dashboard", icon: LayoutDashboard, href: "/manage/dashboard" },
+	{ key: "doctors", icon: Contact, href: "/manage/doctors" },
+	{ key: "antibioticSpectra", icon: Microscope, href: "/manage/antibiotic-spectra" },
+	{ key: "antibiotics", icon: Pill, href: "/manage/antibiotics" },
+	{ key: "pathogens", icon: Atom, href: "/manage/pathogens" },
+	{ key: "diseases", icon: Biohazard, href: "/manage/diseases" },
+	{ key: "analytics", icon: BarChart2, href: "/analytics" },
+	{ key: "reports", icon: FileText, href: "/reports" },
+	{ key: "settings", icon: Settings, href: "/settings" },
 ];
-
-// ─── NavItemLink ──────────────────────────────────────────────────────────────
 
 function NavItemLink({
 	item,
+	label,
 	collapsed,
 	active,
 }: {
-	item: NavItem;
+	item: NavItemConfig;
+	label: string;
 	collapsed: boolean;
 	active: boolean;
 }) {
-	const { icon: Icon, label, href, badge } = item;
+	const { icon: Icon, href, badge } = item;
 
 	const linkContent = (
 		<Link
 			href={href}
 			className={cn(
-				"flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
-				"transition-all duration-150 group relative",
+				"flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group relative",
 				active
-					? "bg-primary text-primary-foreground shadow-sm"
-					: "text-muted-foreground hover:text-foreground hover:bg-accent"
+					? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+					: "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
 			)}
 		>
 			<Icon
 				className={cn(
 					"shrink-0 h-4 w-4 transition-colors",
 					active
-						? "text-primary-foreground"
-						: "text-muted-foreground group-hover:text-foreground"
+						? "text-sidebar-primary-foreground"
+						: "text-muted-foreground group-hover:text-sidebar-foreground"
 				)}
 			/>
-			{!collapsed && (
-				<span className="truncate leading-none">{label}</span>
-			)}
-			{/* Badge – expanded */}
+			{!collapsed && <span className="truncate leading-none">{label}</span>}
 			{!collapsed && badge != null && (
-				<span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/15 px-1.5 text-[11px] font-semibold text-primary">
+				<span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-sidebar-primary/15 px-1.5 text-[11px] font-semibold text-sidebar-primary">
 					{badge}
 				</span>
 			)}
-			{/* Badge dot – collapsed */}
 			{collapsed && badge != null && (
-				<span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary" />
+				<span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-sidebar-primary" />
 			)}
 		</Link>
 	);
@@ -117,16 +111,15 @@ function NavItemLink({
 	return linkContent;
 }
 
-// ─── ManagerSidebar ───────────────────────────────────────────────────────────
-
 export function ManagerSidebar({
 	className,
-	navItems = NAV_ITEMS,
+	navConfigs = NAV_CONFIGS,
 }: {
 	className?: string;
-	navItems?: NavItem[];
+	navConfigs?: NavItemConfig[];
 }) {
 	const pathname = usePathname();
+	const tNav = useTranslations("manager.nav");
 	const [logoError, setLogoError] = useState(false);
 	const collapsed = useSidebarStore((state) => state.collapsed);
 	const collapse = useSidebarStore((state) => state.collapse);
@@ -136,7 +129,7 @@ export function ManagerSidebar({
 		<TooltipProvider delayDuration={0}>
 			<aside
 				className={cn(
-					"relative flex flex-col h-screen border-r bg-background",
+					"relative flex flex-col h-screen border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
 					"transition-[width] duration-300 ease-in-out",
 					collapsed ? "w-16" : "w-60",
 					className
@@ -145,7 +138,7 @@ export function ManagerSidebar({
 				{/* Logo / Header */}
 				<div
 					className={cn(
-						"flex items-center h-16 px-3 border-b shrink-0 overflow-hidden",
+						"flex items-center h-16 px-3 border-b border-sidebar-border shrink-0 overflow-hidden",
 						collapsed ? "justify-center" : "justify-between"
 					)}
 				>
@@ -155,7 +148,7 @@ export function ManagerSidebar({
 					>
 						<div className="relative h-8 w-8 shrink-0">
 							{logoError && (
-								<span className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">
+								<span className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-sm font-bold">
 									R
 								</span>
 							)}
@@ -183,14 +176,13 @@ export function ManagerSidebar({
 						</span>
 					</Link>
 
-					{/* Collapse button – shown when expanded */}
 					{!collapsed && (
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
+							className="h-7 w-7 shrink-0 text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
 							onClick={collapse}
-							aria-label="Thu gọn sidebar"
+							aria-label={tNav("collapseSidebar")}
 							id="sidebar-collapse-btn"
 						>
 							<ChevronLeft className="h-4 w-4" />
@@ -204,9 +196,9 @@ export function ManagerSidebar({
 						<Button
 							variant="outline"
 							size="icon"
-							className="h-6 w-6 rounded-full bg-background shadow-md border"
+							className="h-6 w-6 rounded-full bg-background border-border shadow-md hover:bg-accent"
 							onClick={expand}
-							aria-label="Mở rộng sidebar"
+							aria-label={tNav("expandSidebar")}
 							id="sidebar-expand-btn"
 						>
 							<ChevronRight className="h-3 w-3" />
@@ -216,13 +208,14 @@ export function ManagerSidebar({
 
 				{/* Nav Links */}
 				<nav
-					aria-label="Main navigation"
+					aria-label={tNav("mainNavigation")}
 					className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-0.5"
 				>
-					{navItems.map((item) => (
+					{navConfigs.map((item) => (
 						<NavItemLink
 							key={item.href}
 							item={item}
+							label={tNav(item.key)}
 							collapsed={collapsed}
 							active={
 								pathname === item.href ||
@@ -233,7 +226,7 @@ export function ManagerSidebar({
 				</nav>
 
 				{/* Account Section */}
-				<div className="border-t px-2 py-3 shrink-0">
+				<div className="border-t border-sidebar-border px-2 py-3 shrink-0">
 					<AccountSection collapsed={collapsed} />
 				</div>
 			</aside>

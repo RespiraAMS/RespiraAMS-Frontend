@@ -2,15 +2,13 @@
 
 import { useState } from "react";
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSearchStore } from "../stores/searchStore";
 
-export function SearchInput({
-	placeholder = "Tìm kiếm...",
-}: {
-	placeholder?: string;
-}) {
+export function SearchInput({ placeholder }: { placeholder?: string }) {
+	const t = useTranslations("manager.search");
 	const [value, setValue] = useState("");
 	const setSearchValue = useSearchStore((s) => s.setValue);
 
@@ -26,17 +24,18 @@ export function SearchInput({
 					value={value}
 					onChange={(e) => setValue(e.target.value)}
 					onKeyDown={handleKeyDown}
-					placeholder={placeholder}
-					className="pl-9"
+					placeholder={placeholder ?? t("placeholder")}
+					className="pl-9 bg-background text-foreground placeholder:text-muted-foreground"
 					id="manager-search-input"
 				/>
 			</div>
 			<Button
 				onClick={() => setSearchValue(value)}
 				id="manager-search-button"
-				className="inline-flex items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-white"
+				className="inline-flex items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
 			>
-				<Search className="h-4 w-4 mr-1" /> Tìm kiếm
+				<Search className="h-4 w-4 mr-1" />
+				{t("button")}
 			</Button>
 		</div>
 	);

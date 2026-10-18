@@ -2,7 +2,8 @@
   "common": {
     "welcome": "Chào mừng trở lại",
     "dashboard": "Bảng điều khiển",
-    "language": "Ngôn ngữ"
+    "language": "Ngôn ngữ",
+    "add": "Thêm"
   },
   "dashboard": {
     "title": "Tổng quan hệ thống",
@@ -17,6 +18,31 @@
       "emailRequired": "Vui lòng nhập email",
       "invalidEmail": "Email không hợp lệ",
       "passwordMin": "Mật khẩu phải chứa ít nhất {min} ký tự"
+    }
+  },
+  "manager": {
+    "account": {
+      "profile": "Quản lý tài khoản",
+      "settings": "Cài đặt",
+      "logout": "Đăng xuất"
+    },
+    "search": {
+      "placeholder": "Tìm kiếm...",
+      "button": "Tìm kiếm"
+    },
+    "nav": {
+      "mainNavigation": "Điều hướng chính",
+      "collapseSidebar": "Thu gọn thanh điều hướng",
+      "expandSidebar": "Mở rộng thanh điều hướng",
+      "dashboard": "Dashboard",
+      "doctors": "Bác sĩ",
+      "antibioticSpectra": "Phổ kháng sinh",
+      "antibiotics": "Kháng sinh",
+      "pathogens": "Tác nhân gây bệnh",
+      "diseases": "Bệnh truyền nhiễm",
+      "analytics": "Phân tích & Thống kê",
+      "reports": "Báo cáo",
+      "settings": "Cài đặt"
     }
   }
 }
