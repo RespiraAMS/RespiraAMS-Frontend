@@ -12,6 +12,7 @@ import {
 import {
 	User,
 	Search,
+	Bug,
 	CheckCircle2,
 	Calculator,
 	BarChart3,
@@ -43,6 +44,11 @@ export const DOCTOR_NAV_ITEMS: NavItem[] = [
 		icon: Search,
 		label: "Tra cứu",
 		href: "/doctor/info",
+	},
+	{
+		icon: Bug,
+		label: "Tác nhân gây bệnh",
+		href: "/doctor/pathogens",
 	},
 	{
 		icon: CheckCircle2,
