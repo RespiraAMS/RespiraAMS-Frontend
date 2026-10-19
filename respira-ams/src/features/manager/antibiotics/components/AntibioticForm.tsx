@@ -4,12 +4,11 @@ import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Trash2, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { AwareCategory, type AntibioticItem, type CreateAntibioticRequest } from "../types";
+import { AwareCategory, type AntibioticItem, type CreateAntibioticRequest, type UpdateAntibioticRequest } from "../types";
 import { useAntibioticGroups } from "../queries";
 
 const selectCls = (hasError?: boolean) =>
@@ -21,9 +20,17 @@ const selectCls = (hasError?: boolean) =>
 
 interface AntibioticFormProps {
     initialData?: AntibioticItem | null;
-    onSubmit: (data: CreateAntibioticRequest) => void;
+    onSubmit: (data: CreateAntibioticRequest | UpdateAntibioticRequest) => void;
     onCancel: () => void;
     isPending?: boolean;
+}
+
+interface FormValues {
+    name: string;
+    antibioticGroupId: string;
+    classification: string;
+    routeOfAdministration?: string;
+    standardDose?: string;
 }
 
 export function AntibioticForm({ initialData, onSubmit, onCancel, isPending = false }: AntibioticFormProps) {
@@ -36,34 +43,38 @@ export function AntibioticForm({ initialData, onSubmit, onCancel, isPending = fa
     const antibioticGroups = groupsData?.antibioticGroups || [];
 
     const ROUTE_OPTIONS = [
-        { label: t("form.routeIntravenous"), value: "intravenous" },
-        { label: t("form.routeOral"), value: "oral" },
+        { label: t("form.routeIntravenous"), value: "Intravenous" }, 
+        { label: t("form.routeOral"), value: "Oral" },
     ];
 
-    const antibioticSchema = useMemo(
-        () =>
-            z.object({
+    const antibioticSchema = useMemo(() => {
+        return z
+            .object({
                 name: z.string().trim().min(1, tVal("nameRequired")),
-                antibioticGroupId: z.string().min(1, tVal("spectrumRequired")),
+                antibioticGroupId: z.string().min(1, tVal("groupRequired")),
                 classification: z.string().min(1, tVal("categoryRequired")),
-                routes: z.array(z.string()).min(1, tVal("routesRequired")),
-                dosages: z.record(z.string(), z.array(z.string())),
-            }).superRefine((data, ctx) => {
-                data.routes.forEach((route) => {
-                    const validDoses = (data.dosages[route] || []).filter((d) => d.trim() !== "");
-                    if (validDoses.length === 0) {
+                routeOfAdministration: z.string().optional(),
+                standardDose: z.string().optional(),
+            })
+            .superRefine((data, ctx) => {
+                if (!isEdit) {
+                    if (!data.routeOfAdministration || data.routeOfAdministration.trim() === "") {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            message: tVal("routesRequired"),
+                            path: ["routeOfAdministration"],
+                        });
+                    }
+                    if (!data.standardDose || data.standardDose.trim() === "") {
                         ctx.addIssue({
                             code: z.ZodIssueCode.custom,
                             message: tVal("dosagesRequired"),
-                            path: ["dosages", route],
+                            path: ["standardDose"],
                         });
                     }
-                });
-            }),
-        [tVal]
-    );
-
-    type FormValues = z.infer<typeof antibioticSchema>;
+                }
+            });
+    }, [isEdit, tVal]);
 
     const initialFormValues: FormValues = useMemo(() => {
         if (!initialData) {
@@ -71,64 +82,26 @@ export function AntibioticForm({ initialData, onSubmit, onCancel, isPending = fa
                 name: "",
                 antibioticGroupId: "",
                 classification: "",
-                routes: [],
-                dosages: {},
+                routeOfAdministration: "",
+                standardDose: "",
             };
         }
         return {
             name: initialData.name ?? "",
             antibioticGroupId: initialData.antibioticGroup?.id ?? "",
             classification: initialData.classification ?? "",
-            routes: initialData.routeOfAdministrations ?? Object.keys(initialData.dosages ?? {}),
-            dosages: initialData.dosages ?? {},
+            routeOfAdministration: "",
+            standardDose: "",
         };
     }, [initialData]);
 
-    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormValues>({
+    const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
         resolver: zodResolver(antibioticSchema),
         values: initialFormValues,
     });
 
-    const routes = watch("routes") || [];
-    const dosages = watch("dosages") || {};
-
-    const handleRouteChange = (routeValue: string, checked: boolean) => {
-        if (checked) {
-            setValue("routes", [...routes, routeValue], { shouldValidate: true });
-            setValue("dosages", { ...dosages, [routeValue]: dosages[routeValue]?.length ? dosages[routeValue] : [""] }, { shouldValidate: true });
-        } else {
-            const nextDosages = { ...dosages };
-            delete nextDosages[routeValue];
-            setValue("routes", routes.filter((r) => r !== routeValue), { shouldValidate: true });
-            setValue("dosages", nextDosages, { shouldValidate: true });
-        }
-    };
-
-    const handleDosageChange = (route: string, index: number, value: string) => {
-        const routeDosages = [...(dosages[route] || [])];
-        routeDosages[index] = value;
-        setValue(`dosages.${route}`, routeDosages, { shouldValidate: true });
-    };
-
-    const addDosage = (route: string) => {
-        setValue(`dosages.${route}`, [...(dosages[route] || []), ""], { shouldValidate: true });
-    };
-
-    const removeDosage = (route: string, index: number) => {
-        setValue(`dosages.${route}`, (dosages[route] || []).filter((_, i) => i !== index), { shouldValidate: true });
-    };
-
     const onValidSubmit = (data: FormValues) => {
-        const cleanDosages: Record<string, string[]> = {};
-        for (const route of data.routes) {
-            cleanDosages[route] = (data.dosages[route] || []).filter((d) => d.trim() !== "");
-        }
-        onSubmit({
-            name: data.name,
-            antibioticGroupId: data.antibioticGroupId,
-            classification: data.classification,
-            dosages: cleanDosages,
-        });
+        onSubmit(data as CreateAntibioticRequest | UpdateAntibioticRequest);
     };
 
     return (
@@ -143,11 +116,11 @@ export function AntibioticForm({ initialData, onSubmit, onCancel, isPending = fa
 
             <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">
-                    {t("form.spectrumLabel")} <span className="text-destructive">*</span>
+                    {t("form.groupLabel")} <span className="text-destructive">*</span>
                 </label>
                 <div className="relative">
                     <select {...register("antibioticGroupId")} disabled={isPending || isLoadingGroups} className={selectCls(!!errors.antibioticGroupId)}>
-                        <option value="" disabled>{t("form.selectSpectrumPlaceholder")}</option>
+                        <option value="" disabled>{t("form.selectGroupPlaceholder")}</option>
                         {antibioticGroups.map((group) => (
                             <option key={group.id} value={group.id}>{group.name}</option>
                         ))}
@@ -170,42 +143,39 @@ export function AntibioticForm({ initialData, onSubmit, onCancel, isPending = fa
                 {errors.classification && <p className="text-sm text-destructive font-medium">{errors.classification.message}</p>}
             </div>
 
-            <div className="flex flex-col gap-4">
-                <div>
-                    <label className="text-sm font-medium">{t("form.routesDosagesLabel")} <span className="text-destructive">*</span></label>
-                    {errors.routes && <p className="text-sm text-destructive font-medium mt-1">{errors.routes.message}</p>}
-                </div>
-                {ROUTE_OPTIONS.map((route) => {
-                    const isChecked = routes.includes(route.value);
-                    const currentDosages = dosages[route.value] || [];
-                    const routeError = (errors.dosages as Record<string, { message?: string }> | undefined)?.[route.value]?.message;
+            {!isEdit && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium">
+                            {t("form.routeLabel")} <span className="text-destructive">*</span>
+                        </label>
+                        <select
+                            {...register("routeOfAdministration")}
+                            disabled={isPending}
+                            className={selectCls(!!errors.routeOfAdministration)}
+                        >
+                            <option value="" disabled>{t("form.selectRoutePlaceholder")}</option>
+                            {ROUTE_OPTIONS.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                        </select>
+                        {errors.routeOfAdministration && <p className="text-sm text-destructive font-medium">{errors.routeOfAdministration.message}</p>}
+                    </div>
 
-                    return (
-                        <div key={route.value} className={`rounded-xl border p-4 space-y-4 shadow-sm bg-muted/40 ${routeError ? "border-destructive" : "border-border"}`}>
-                            <div className="flex items-center gap-3">
-                                <Checkbox id={`route-${route.value}`} checked={isChecked} onCheckedChange={(val) => handleRouteChange(route.value, !!val)} disabled={isPending} />
-                                <label htmlFor={`route-${route.value}`} className="font-semibold text-sm cursor-pointer text-foreground">{route.label}</label>
-                            </div>
-                            {isChecked && (
-                                <div className="space-y-3 pl-7">
-                                    {currentDosages.map((dosage, index) => (
-                                        <div key={index} className="flex items-center gap-2">
-                                            <Input value={dosage} placeholder={t("form.dosagePlaceholder")} onChange={(e) => handleDosageChange(route.value, index, e.target.value)} disabled={isPending} className={routeError ? "border-destructive" : ""} />
-                                            <Button type="button" size="icon" variant="destructive" disabled={isPending} onClick={() => removeDosage(route.value, index)}>
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    ))}
-                                    {routeError && <p className="text-sm text-destructive font-medium">{routeError}</p>}
-                                    <Button type="button" variant="outline" size="sm" className="gap-2" disabled={isPending} onClick={() => addDosage(route.value)}>
-                                        <Plus className="h-4 w-4" /> {t("form.addDosage")}
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium">
+                            {t("form.standardDoseLabel")} <span className="text-destructive">*</span>
+                        </label>
+                        <Input
+                            {...register("standardDose")}
+                            disabled={isPending}
+                            placeholder={t("form.dosagePlaceholder")}
+                            className={errors.standardDose ? "border-destructive focus-visible:ring-destructive" : ""}
+                        />
+                        {errors.standardDose && <p className="text-sm text-destructive font-medium">{errors.standardDose.message}</p>}
+                    </div>
+                </div>
+            )}
 
             <div className="flex gap-2 justify-end mt-4 pt-4 border-t border-border">
                 <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>{tCommon("cancel")}</Button>

@@ -30,3 +30,17 @@ export interface CreateAntibioticRequest {
     classification: string;
     dosages?: Record<string, string[]>;
 }
+
+export interface CreateAntibioticRequest {
+    name: string;
+    antibioticGroupId: string;
+    classification: string;
+    routeOfAdministration: string; 
+    standardDose: string;
+}
+
+export interface UpdateAntibioticRequest {
+    name: string;
+    antibioticGroupId: string;
+    classification: string;
+}

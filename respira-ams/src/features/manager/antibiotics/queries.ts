@@ -7,7 +7,7 @@ import {
     updateAntibiotic,
     deleteAntibiotic
 } from "./api";
-import { CreateAntibioticRequest } from "./types";
+import { CreateAntibioticRequest, UpdateAntibioticRequest } from "./types";
 
 export const antibioticKeys = {
     all: ["antibiotics"] as const,
@@ -50,7 +50,7 @@ export function useAntibioticMutations() {
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: string; data: CreateAntibioticRequest }) => updateAntibiotic(id, data),
+        mutationFn: ({ id, data }: { id: string; data: UpdateAntibioticRequest }) => updateAntibiotic(id, data),
         onSuccess: invalidateList,
     });
 

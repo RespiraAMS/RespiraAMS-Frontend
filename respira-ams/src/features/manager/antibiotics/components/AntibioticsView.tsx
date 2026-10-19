@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { TableTitle } from "@/features/manager/components/TableTitle"; // Đảm bảo component này có tồn tại
 import { AntibioticsTable } from "./AntibioticsTable";
 import { AntibioticForm } from "./AntibioticForm";
-import { type AntibioticItem, type CreateAntibioticRequest } from "../types";
+import { UpdateAntibioticRequest, type AntibioticItem, type CreateAntibioticRequest } from "../types";
 import { useAntibioticMutations } from "../queries";
 
 type ActiveView = "create" | "update" | "delete" | null;
@@ -33,11 +33,11 @@ export function AntibioticsView() {
         setSelected(null);
     };
 
-    const handleFormSubmit = (data: CreateAntibioticRequest) => {
+    const handleFormSubmit = (data: CreateAntibioticRequest | UpdateAntibioticRequest) => {
         if (activeView === "create") {
-            createMutation.mutate(data, { onSuccess: closeView });
+            createMutation.mutate(data as CreateAntibioticRequest, { onSuccess: closeView });
         } else if (activeView === "update" && selected) {
-            updateMutation.mutate({ id: selected.id, data }, { onSuccess: closeView });
+            updateMutation.mutate({ id: selected.id, data: data as UpdateAntibioticRequest }, { onSuccess: closeView });
         }
     };
 

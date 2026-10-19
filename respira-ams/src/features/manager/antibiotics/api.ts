@@ -1,6 +1,6 @@
 import { apiFetch, API_BASE, API_BASE_SERVER } from "@/lib/api";
 import { Pagination } from "@/lib/models";
-import { AntibioticItem, AntibioticGroupsResponse, CreateAntibioticRequest } from "./types";
+import { AntibioticItem, AntibioticGroupsResponse, CreateAntibioticRequest, UpdateAntibioticRequest } from "./types";
 
 export async function getAntibiotics(
     page: number, 
@@ -44,7 +44,7 @@ export async function createAntibiotic(data: CreateAntibioticRequest): Promise<{
     return result!;
 }
 
-export async function updateAntibiotic(id: string, data: CreateAntibioticRequest): Promise<void> {
+export async function updateAntibiotic(id: string, data: UpdateAntibioticRequest): Promise<void> {
     await apiFetch(`${API_BASE_SERVER}${API_BASE}/antibiotics/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),
