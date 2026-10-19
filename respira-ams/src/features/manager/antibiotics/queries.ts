@@ -5,15 +5,18 @@ import {
     getAntibioticGroups,
     createAntibiotic,
     updateAntibiotic,
-    deleteAntibiotic
+    deleteAntibiotic,
+    getAntibioticDetail,
 } from "./api";
 import { CreateAntibioticRequest, UpdateAntibioticRequest } from "./types";
 
 export const antibioticKeys = {
     all: ["antibiotics"] as const,
     lists: () => [...antibioticKeys.all, "list"] as const,
-    list: (page: number, size: number, searchTerm: string, classification: string, groupId: string) => 
-        [...antibioticKeys.lists(), page, size, searchTerm, classification, groupId] as const,
+    list: (page: number, size: number, searchTerm: string, category: string, groupId: string) => 
+        [...antibioticKeys.lists(), page, size, searchTerm, category, groupId] as const,
+    details: () => [...antibioticKeys.all, "detail"] as const,
+    detail: (id: string) => [...antibioticKeys.details(), id] as const,
     groups: () => ["antibiotic-groups"] as const,
 };
 
@@ -50,8 +53,11 @@ export function useAntibioticMutations() {
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: string; data: UpdateAntibioticRequest }) => updateAntibiotic(id, data),
-        onSuccess: invalidateList,
+    mutationFn: ({ id, data }: { id: string; data: UpdateAntibioticRequest }) => updateAntibiotic(id, data),
+    onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({ queryKey: antibioticKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: antibioticKeys.detail(variables.id) });
+        },
     });
 
     const deleteMutation = useMutation({
@@ -60,4 +66,12 @@ export function useAntibioticMutations() {
     });
 
     return { createMutation, updateMutation, deleteMutation };
+}
+
+export function useAntibioticDetail(id: string | null) {
+    return useQuery({
+        queryKey: antibioticKeys.detail(id!),
+        queryFn: () => getAntibioticDetail(id!),
+        enabled: !!id,
+    });
 }

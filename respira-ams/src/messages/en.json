@@ -5,6 +5,7 @@
     "language": "Language",
     "add": "Add",
     "cancel": "Cancel",
+    "delete": "Delete",
     "confirmDelete": "Confirm Delete",
     "create": "Create",
     "update": "Update",
@@ -83,6 +84,20 @@
         "filterBy": "Filter by",
         "clearFilter": "Clear all filters",
         "empty": "No antibiotics found."
+      },
+      "detail": {
+        "title": "Antibiotic Details",
+        "groupInfo": "Group Information",
+        "parentGroup": "Parent Group",
+        "noDescription": "No description available.",
+        "dosages": "Dosages",
+        "noDosages": "No dosage data available.",
+        "route": "Route",
+        "dose": "Dose",
+        "crcl": "CrCl (mL/min)",
+        "allCrcl": "All levels",
+        "standardDose": "Standard Dose",
+        "back": "Back to List"
       }
     }
   }

@@ -1,116 +1,113 @@
-// src/features/manager/antibiotics/components/AntibioticsView.tsx
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { TableTitle } from "@/features/manager/components/TableTitle"; // Đảm bảo component này có tồn tại
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"; // Import Dialog
+
 import { AntibioticsTable } from "./AntibioticsTable";
 import { AntibioticForm } from "./AntibioticForm";
-import { UpdateAntibioticRequest, type AntibioticItem, type CreateAntibioticRequest } from "../types";
+import { DeleteAntibioticSheet } from "./DeleteAntibioticSheet";
 import { useAntibioticMutations } from "../queries";
-
-type ActiveView = "create" | "update" | "delete" | null;
+import { type AntibioticItem, type CreateAntibioticRequest, type UpdateAntibioticRequest } from "../types";
 
 export function AntibioticsView() {
     const t = useTranslations("manager.antibiotics");
     const tCommon = useTranslations("common");
+    const router = useRouter();
 
-    const [activeView, setActiveView] = useState<ActiveView>(null);
+    const [modalMode, setModalMode] = useState<"create" | "update" | null>(null);
     const [selected, setSelected] = useState<AntibioticItem | null>(null);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
     const { createMutation, updateMutation, deleteMutation } = useAntibioticMutations();
 
-    const openView = (view: ActiveView, item?: AntibioticItem) => {
-        setSelected(item ?? null);
-        setActiveView(view);
+    const openCreate = () => {
+        setSelected(null);
+        setModalMode("create");
     };
 
-    const closeView = () => {
-        setActiveView(null);
+    const openUpdate = (item: AntibioticItem) => {
+        setSelected(item);
+        setModalMode("update");
+    };
+
+    const openDetail = (id: string) => {
+        router.push(`/manage/antibiotics/${id}`); 
+    };
+
+    const openDelete = (item: AntibioticItem) => {
+        setSelected(item);
+        setIsDeleteOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalMode(null);
         setSelected(null);
     };
 
     const handleFormSubmit = (data: CreateAntibioticRequest | UpdateAntibioticRequest) => {
-        if (activeView === "create") {
-            createMutation.mutate(data as CreateAntibioticRequest, { onSuccess: closeView });
-        } else if (activeView === "update" && selected) {
-            updateMutation.mutate({ id: selected.id, data: data as UpdateAntibioticRequest }, { onSuccess: closeView });
+        if (modalMode === "create") {
+            createMutation.mutate(data as CreateAntibioticRequest, { onSuccess: closeModal });
+        } else if (modalMode === "update" && selected) {
+            updateMutation.mutate({ id: selected.id, data: data as UpdateAntibioticRequest }, { onSuccess: closeModal });
         }
     };
 
     const handleDelete = () => {
         if (selected) {
-            deleteMutation.mutate(selected.id, { onSuccess: closeView });
+            deleteMutation.mutate(selected.id, { onSuccess: () => setIsDeleteOpen(false) });
         }
     };
 
-    const isPending = createMutation.isPending || updateMutation.isPending;
-
     return (
-        <>
-            <TableTitle
-                title={t("title")}
-                description={t("description")}
-                buttonLabel={t("addButton")}
-                onClick={() => openView("create")}
-            />
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h2>
+                    <p className="text-muted-foreground">{t("description")}</p>
+                </div>
+                <Button onClick={openCreate} className="bg-primary text-primary-foreground">
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t("addButton")}
+                </Button>
+            </div>
+            
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto">
+                <AntibioticsTable 
+                    onViewDetail={openDetail} 
+                    onEdit={openUpdate} 
+                    onDelete={openDelete} 
+                />
+            </div>
 
-            <AntibioticsTable
-                onEdit={(item) => openView("update", item)}
-                onDelete={(item) => openView("delete", item)}
-            />
-
-            {/* Modal Create / Update */}
-            <Dialog open={activeView === "create" || activeView === "update"} onOpenChange={(open) => { if (!open && !isPending) closeView(); }}>
-                <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-popover text-popover-foreground border-border">
+            <Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
+                <DialogContent className="sm:max-w-[600px] border-border bg-card text-card-foreground">
                     <DialogHeader>
-                        <DialogTitle className="text-foreground">
-                            {activeView === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}
+                        <DialogTitle className="text-xl">
+                            {modalMode === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}
                         </DialogTitle>
-                        <DialogDescription className="text-muted-foreground">
-                            {activeView === "create" ? t("dialog.createDesc") : t("dialog.updateDesc")}
-                        </DialogDescription>
                     </DialogHeader>
-
-                    <div className="py-2">
-                        {(activeView === "create" || (activeView === "update" && selected)) && (
-                            <AntibioticForm
-                                initialData={activeView === "update" ? selected : null}
-                                onSubmit={handleFormSubmit}
-                                onCancel={closeView}
-                                isPending={isPending}
-                            />
-                        )}
-                    </div>
+                    {modalMode && (
+                        <AntibioticForm
+                            initialData={selected}
+                            onSubmit={handleFormSubmit}
+                            onCancel={closeModal}
+                            isPending={createMutation.isPending || updateMutation.isPending}
+                        />
+                    )}
                 </DialogContent>
             </Dialog>
 
-            {/* Sheet Delete */}
-            <Sheet open={activeView === "delete"} onOpenChange={(open) => { if (!open && !deleteMutation.isPending) closeView(); }}>
-                <SheetContent side="right" className="bg-popover text-popover-foreground border-border">
-                    <SheetHeader>
-                        <SheetTitle className="text-foreground">{t("sheet.deleteTitle")}</SheetTitle>
-                        <SheetDescription className="text-muted-foreground">{t("sheet.deleteDesc")}</SheetDescription>
-                    </SheetHeader>
-
-                    <div className="mt-6 flex flex-col gap-4 px-1">
-                        <div className="rounded-md bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive">
-                            {t("sheet.deleteConfirmMsg", { name: selected?.name ?? "" })}
-                        </div>
-                        <div className="flex gap-2 justify-end">
-                            <Button variant="outline" onClick={closeView} disabled={deleteMutation.isPending} className="border-border text-foreground hover:bg-accent">
-                                {tCommon("cancel")}
-                            </Button>
-                            <Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
-                                {deleteMutation.isPending ? "..." : tCommon("confirmDelete")}
-                            </Button>
-                        </div>
-                    </div>
-                </SheetContent>
-            </Sheet>
-        </>
+            <DeleteAntibioticSheet
+                isOpen={isDeleteOpen}
+                onClose={() => setIsDeleteOpen(false)}
+                onConfirm={handleDelete}
+                antibioticName={selected?.name || ""}
+                isDeleting={deleteMutation.isPending}
+            />
+        </div>
     );
 }

@@ -5,6 +5,7 @@
     "language": "Ngôn ngữ",
     "add": "Thêm",
     "cancel": "Hủy",
+    "delete": "Xóa",
     "confirmDelete": "Xác nhận Xóa",
     "create": "Tạo mới",
     "update": "Cập nhật",
@@ -63,8 +64,8 @@
         "routeLabel": "Đường dùng",
         "selectRoutePlaceholder": "-- Chọn đường dùng --",
         "standardDoseLabel": "Liều lượng tiêu chuẩn",
-        "routeIntravenous": "Intravenous (Tiêm tĩnh mạch)",
-        "routeOral": "Oral (Uống)",
+        "routeIntravenous": "Tiêm tĩnh mạch",
+        "routeOral": "Uống",
         "dosagePlaceholder": "Ví dụ: 500 mg mỗi 8h",
         "addDosage": "Thêm liều"
       },
@@ -83,6 +84,20 @@
         "filterBy": "Lọc theo",
         "clearFilter": "Xóa tất cả bộ lọc",
         "empty": "Không tìm thấy kháng sinh nào."
+      },
+      "detail": {
+        "title": "Chi tiết Kháng sinh",
+        "groupInfo": "Thông tin Nhóm",
+        "parentGroup": "Nhóm cha",
+        "noDescription": "Không có thông tin mô tả.",
+        "dosages": "Liều lượng",
+        "noDosages": "Không có dữ liệu liều lượng.",
+        "route": "Đường dùng",
+        "dose": "Liều dùng",
+        "crcl": "CrCl (mL/phút)",
+        "allCrcl": "Tất cả (Mọi mức)",
+        "standardDose": "Liều tiêu chuẩn",
+        "back": "Quay lại danh sách"
       }
     }
   }

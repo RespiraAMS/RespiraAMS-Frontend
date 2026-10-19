@@ -1,8 +1,7 @@
-// src/features/manager/antibiotics/components/AntibioticsTable.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { Edit, ListFilter, Trash, Loader2 } from "lucide-react";
+import { Edit, ListFilter, Trash, Loader2, Eye } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -33,11 +32,12 @@ function CategoryBadge({ category }: { category: string }) {
 }
 
 interface AntibioticsTableProps {
+    onViewDetail: (id: string) => void; 
     onEdit: (item: AntibioticItem) => void;
     onDelete: (item: AntibioticItem) => void;
 }
 
-export function AntibioticsTable({ onEdit, onDelete }: AntibioticsTableProps) {
+export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: AntibioticsTableProps) {
     const t = useTranslations("manager.antibiotics");
     const tCommon = useTranslations("common");
 
@@ -157,6 +157,9 @@ export function AntibioticsTable({ onEdit, onDelete }: AntibioticsTableProps) {
                                 </TableCell>
                                 <TableCell className="align-middle whitespace-normal">
                                     <div className="flex gap-1 justify-end">
+                                        <Button variant="ghost" size="icon" onClick={() => onViewDetail(item.id)} className="hover:bg-accent text-foreground">
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
                                         <Button variant="ghost" size="icon" onClick={() => onEdit(item)} className="hover:bg-accent text-foreground">
                                             <Edit className="h-4 w-4" />
                                         </Button>

@@ -28,13 +28,6 @@ export interface CreateAntibioticRequest {
     name: string;
     antibioticGroupId: string;
     classification: string;
-    dosages?: Record<string, string[]>;
-}
-
-export interface CreateAntibioticRequest {
-    name: string;
-    antibioticGroupId: string;
-    classification: string;
     routeOfAdministration: string; 
     standardDose: string;
 }
@@ -43,4 +36,27 @@ export interface UpdateAntibioticRequest {
     name: string;
     antibioticGroupId: string;
     classification: string;
+}
+
+export interface CrCl {
+    min: number;
+    isMinExclusive: boolean;
+    max: number;
+    isMaxExclusive: boolean;
+    unit: string | null;
+}
+
+export interface DosageItem {
+    id: string;
+    routeOfAdministration: string;
+    dose: string;
+    crcl: CrCl | null;
+}
+
+export interface AntibioticDetailResponse {
+    id: string;
+    name: string;
+    antibioticGroup: AntibioticGroup & { description?: string; parentId?: string; parentName?: string };
+    classification: string;
+    dosages: DosageItem[];
 }

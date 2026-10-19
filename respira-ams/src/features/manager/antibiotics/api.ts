@@ -1,6 +1,6 @@
 import { apiFetch, API_BASE, API_BASE_SERVER } from "@/lib/api";
 import { Pagination } from "@/lib/models";
-import { AntibioticItem, AntibioticGroupsResponse, CreateAntibioticRequest, UpdateAntibioticRequest } from "./types";
+import { AntibioticItem, AntibioticGroupsResponse, CreateAntibioticRequest, UpdateAntibioticRequest, AntibioticDetailResponse } from "./types";
 
 export async function getAntibiotics(
     page: number, 
@@ -55,4 +55,9 @@ export async function deleteAntibiotic(id: string): Promise<void> {
     await apiFetch(`${API_BASE_SERVER}${API_BASE}/antibiotics/${id}`, {
         method: "DELETE",
     });
+}
+
+export async function getAntibioticDetail(id: string): Promise<AntibioticDetailResponse> {
+    const result = await apiFetch<AntibioticDetailResponse>(`${API_BASE_SERVER}${API_BASE}/antibiotics/${id}`);
+    return result!;
 }
