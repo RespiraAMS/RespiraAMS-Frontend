@@ -53,6 +53,14 @@
         "deleteDesc": "This action will delete the antibiotic from the system and cannot be undone.",
         "deleteConfirmMsg": "Are you sure you want to delete the antibiotic \"{name}\"?"
       },
+      "deleteDosageModal": {
+        "title": "Confirm Delete Dosage",
+        "desc": "Are you sure you want to delete this dosage row? This action cannot be undone."
+      },
+      "dosageModal": {
+        "createTitle": "Add New Dosage",
+        "updateTitle": "Update Dosage"
+      },
       "form": {
         "nameLabel": "Antibiotic Name",
         "namePlaceholder": "Enter antibiotic name...",
@@ -67,14 +75,31 @@
         "routeIntravenous": "Intravenous",
         "routeOral": "Oral",
         "dosagePlaceholder": "E.g., 500 mg every 8h",
-        "addDosage": "Add Dosage"
+        "addDosage": "Add Dosage",
+        "doseLabel": "Dosage",
+        "isStandardDoseLabel": "Standard dose (CrCl/GFR independent)",
+        "crclRangeLabel": "Creatinine Clearance Range (CrCl)",
+        "minLabel": "Min",
+        "maxLabel": "Max",
+        "isMinExclusiveLabel": "Exclusive (>)",
+        "isMaxExclusiveLabel": "Exclusive (<)",
+        "unlimitedPlaceholder": "Unlimited"
       },
       "validation": {
         "nameRequired": "Please enter an antibiotic name!",
         "groupRequired": "Please select an antibiotic group!",
         "categoryRequired": "Please select an AWaRe classification!",
         "routesRequired": "Select at least one administration route!",
-        "dosagesRequired": "Please enter at least one dosage for this route!"
+        "dosagesRequired": "Please enter at least one dosage for this route!",
+        "routeRequired": "Please select a route of administration!",
+        "doseRequired": "Please enter a dosage!",
+        "minNumber": "Min value must be a number!",
+        "minNonNegative": "Min value must be a non-negative number!",
+        "maxNumber": "Max value must be a number!",
+        "maxNonNegative": "Max value must be a non-negative number!",
+        "minLessThanMax": "Min value must be less than Max!",
+        "hasStandardDose": "Route {route} already has a standard dose!",
+        "crclOverlap": "CrCl range [{min} - {max}] overlaps with an existing CrCl range for route {route}!"
       },
       "table": {
         "colName": "Antibiotic Name",
@@ -97,7 +122,25 @@
         "crcl": "CrCl (mL/min)",
         "allCrcl": "All levels",
         "standardDose": "Standard Dose",
-        "back": "Back to List"
+        "back": "Back to List",
+        "addDosage": "Add Dosage"
+      },
+      "toast": {
+        "createSuccess": "New antibiotic added successfully!",
+        "createError": "An error occurred while adding the antibiotic.",
+        "updateSuccess": "Antibiotic updated successfully!",
+        "updateError": "An error occurred while updating the antibiotic.",
+        "deleteSuccess": "Deleted antibiotic \"{name}\"!",
+        "deleteError": "Failed to delete this antibiotic.",
+        "createDosageSuccess": "Dosage added successfully!",
+        "createDosageError": "An error occurred while adding dosage.",
+        "updateDosageSuccess": "Dosage updated successfully!",
+        "updateDosageError": "An error occurred while updating dosage.",
+        "deleteDosageSuccess": "Dosage deleted successfully!",
+        "deleteDosageError": "Failed to delete this dosage.",
+        "cannotDeleteTitle": "Cannot Delete",
+        "cannotDeleteHasCrcl": "Route {route} contains CrCl-adjusted doses. You must delete all CrCl doses before deleting this standard dose.",
+        "cannotDeleteMinStandard": "An antibiotic must have at least 1 standard dose."
       }
     }
   }

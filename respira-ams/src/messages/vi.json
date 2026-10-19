@@ -53,6 +53,14 @@
         "deleteDesc": "Thao tác này sẽ xóa kháng sinh khỏi hệ thống và không thể hoàn tác.",
         "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa kháng sinh \"{name}\" không?"
       },
+      "deleteDosageModal": {
+        "title": "Xác nhận xóa liều dùng",
+        "desc": "Bạn có chắc chắn muốn xóa dòng liều dùng này không? Thao tác này không thể hoàn tác."
+      },
+      "dosageModal": {
+        "createTitle": "Thêm liều dùng mới",
+        "updateTitle": "Cập nhật liều dùng"
+      },
       "form": {
         "nameLabel": "Tên kháng sinh",
         "namePlaceholder": "Nhập tên kháng sinh...",
@@ -67,14 +75,31 @@
         "routeIntravenous": "Tiêm tĩnh mạch",
         "routeOral": "Uống",
         "dosagePlaceholder": "Ví dụ: 500 mg mỗi 8h",
-        "addDosage": "Thêm liều"
+        "addDosage": "Thêm liều",
+        "doseLabel": "Liều lượng",
+        "isStandardDoseLabel": "Là liều tiêu chuẩn (Không phụ thuộc CrCl/GFR)",
+        "crclRangeLabel": "Khoảng lọc cầu thận (CrCl)",
+        "minLabel": "Min",
+        "maxLabel": "Max",
+        "isMinExclusiveLabel": "Không bao gồm (>)",
+        "isMaxExclusiveLabel": "Không bao gồm (<)",
+        "unlimitedPlaceholder": "Không giới hạn"
       },
       "validation": {
         "nameRequired": "Vui lòng nhập tên kháng sinh!",
         "groupRequired": "Vui lòng chọn nhóm kháng sinh!",
         "categoryRequired": "Vui lòng chọn phân loại AWaRe!",
         "routesRequired": "Chọn ít nhất một đường dùng!",
-        "dosagesRequired": "Vui lòng nhập ít nhất một liều dùng cho đường này!"
+        "dosagesRequired": "Vui lòng nhập ít nhất một liều dùng cho đường này!",
+        "routeRequired": "Vui lòng chọn đường dùng!",
+        "doseRequired": "Vui lòng nhập liều dùng!",
+        "minNumber": "Giá trị Min phải là số!",
+        "minNonNegative": "Giá trị Min phải là số không âm!",
+        "maxNumber": "Giá trị Max phải là số!",
+        "maxNonNegative": "Giá trị Max phải là số không âm!",
+        "minLessThanMax": "Giá trị Min phải nhỏ hơn Max!",
+        "hasStandardDose": "Đường dùng {route} đã có liều tiêu chuẩn!",
+        "crclOverlap": "Mức CrCl [{min} - {max}] bị trùng lặp với mức CrCl đã tồn tại của đường {route}!"
       },
       "table": {
         "colName": "Tên kháng sinh",
@@ -97,7 +122,25 @@
         "crcl": "CrCl (mL/phút)",
         "allCrcl": "Tất cả (Mọi mức)",
         "standardDose": "Liều tiêu chuẩn",
-        "back": "Quay lại danh sách"
+        "back": "Quay lại danh sách",
+        "addDosage": "Thêm liều"
+      },
+      "toast": {
+        "createSuccess": "Thêm kháng sinh mới thành công!",
+        "createError": "Có lỗi xảy ra khi thêm kháng sinh.",
+        "updateSuccess": "Cập nhật thông tin kháng sinh thành công!",
+        "updateError": "Có lỗi xảy ra khi cập nhật kháng sinh.",
+        "deleteSuccess": "Đã xóa kháng sinh \"{name}\"!",
+        "deleteError": "Không thể xóa kháng sinh này.",
+        "createDosageSuccess": "Thêm mới liều lượng thành công!",
+        "createDosageError": "Có lỗi xảy ra khi thêm mới liều lượng.",
+        "updateDosageSuccess": "Cập nhật liều lượng thành công!",
+        "updateDosageError": "Có lỗi xảy ra khi cập nhật liều lượng.",
+        "deleteDosageSuccess": "Đã xóa liều lượng!",
+        "deleteDosageError": "Không thể xóa liều lượng này.",
+        "cannotDeleteTitle": "Không thể xóa",
+        "cannotDeleteHasCrcl": "Đường dùng {route} đang có các liều chỉnh theo thận. Bạn phải xóa các liều CrCl trước khi xóa liều tiêu chuẩn này.",
+        "cannotDeleteMinStandard": "Bắt buộc một kháng sinh phải có ít nhất 1 liều tiêu chuẩn."
       }
     }
   }

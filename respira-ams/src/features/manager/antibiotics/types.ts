@@ -60,3 +60,17 @@ export interface AntibioticDetailResponse {
     classification: string;
     dosages: DosageItem[];
 }
+
+export interface CrClRequest {
+    min: number;
+    isMinExclusive: boolean;
+    max: number;
+    isMaxExclusive: boolean;
+    unit: null;
+}
+
+export interface DosageRequest {
+    routeOfAdministration: string;
+    dose: string;
+    crcl: CrClRequest | null;
+}

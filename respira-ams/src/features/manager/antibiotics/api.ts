@@ -1,6 +1,6 @@
 import { apiFetch, API_BASE, API_BASE_SERVER } from "@/lib/api";
 import { Pagination } from "@/lib/models";
-import { AntibioticItem, AntibioticGroupsResponse, CreateAntibioticRequest, UpdateAntibioticRequest, AntibioticDetailResponse } from "./types";
+import { AntibioticItem, AntibioticGroupsResponse, CreateAntibioticRequest, UpdateAntibioticRequest, AntibioticDetailResponse, DosageRequest } from "./types";
 
 export async function getAntibiotics(
     page: number, 
@@ -60,4 +60,24 @@ export async function deleteAntibiotic(id: string): Promise<void> {
 export async function getAntibioticDetail(id: string): Promise<AntibioticDetailResponse> {
     const result = await apiFetch<AntibioticDetailResponse>(`${API_BASE_SERVER}${API_BASE}/antibiotics/${id}`);
     return result!;
+}
+
+export async function createDosage(antibioticId: string, data: DosageRequest): Promise<void> {
+    await apiFetch(`${API_BASE_SERVER}${API_BASE}/antibiotics/${antibioticId}/dosages`, {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
+}
+
+export async function updateDosage(antibioticId: string, dosageId: string, data: DosageRequest): Promise<void> {
+    await apiFetch(`${API_BASE_SERVER}${API_BASE}/antibiotics/${antibioticId}/dosages/${dosageId}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+    });
+}
+
+export async function deleteDosage(antibioticId: string, dosageId: string): Promise<void> {
+    await apiFetch(`${API_BASE_SERVER}${API_BASE}/antibiotics/${antibioticId}/dosages/${dosageId}`, {
+        method: "DELETE",
+    });
 }

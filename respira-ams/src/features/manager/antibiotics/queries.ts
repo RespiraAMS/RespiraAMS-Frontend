@@ -7,8 +7,11 @@ import {
     updateAntibiotic,
     deleteAntibiotic,
     getAntibioticDetail,
+    updateDosage,
+    deleteDosage,
+    createDosage,
 } from "./api";
-import { CreateAntibioticRequest, UpdateAntibioticRequest } from "./types";
+import { DosageRequest, UpdateAntibioticRequest } from "./types";
 
 export const antibioticKeys = {
     all: ["antibiotics"] as const,
@@ -74,4 +77,30 @@ export function useAntibioticDetail(id: string | null) {
         queryFn: () => getAntibioticDetail(id!),
         enabled: !!id,
     });
+}
+
+export function useDosageMutations(antibioticId: string) {
+    const queryClient = useQueryClient();
+
+    const invalidateDetail = () => {
+        queryClient.invalidateQueries({ queryKey: antibioticKeys.detail(antibioticId) });
+    };
+
+    const createDosageMutation = useMutation({
+        mutationFn: (data: DosageRequest) => createDosage(antibioticId, data),
+        onSuccess: invalidateDetail,
+    });
+
+    const updateDosageMutation = useMutation({
+        mutationFn: ({ dosageId, data }: { dosageId: string; data: DosageRequest }) =>
+            updateDosage(antibioticId, dosageId, data),
+        onSuccess: invalidateDetail,
+    });
+
+    const deleteDosageMutation = useMutation({
+        mutationFn: (dosageId: string) => deleteDosage(antibioticId, dosageId),
+        onSuccess: invalidateDetail,
+    });
+
+    return { createDosageMutation, updateDosageMutation, deleteDosageMutation };
 }
