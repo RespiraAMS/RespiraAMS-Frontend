@@ -144,6 +144,50 @@
         "cannotDeleteHasCrcl": "Đường dùng {route} đang có các liều chỉnh theo thận. Bạn phải xóa các liều CrCl trước khi xóa liều tiêu chuẩn này.",
         "cannotDeleteMinStandard": "Bắt buộc một kháng sinh phải có ít nhất 1 liều tiêu chuẩn."
       }
+    },
+    "antibioticGroups": {
+      "title": "Nhóm Kháng Sinh",
+      "description": "Quản lý danh sách các nhóm và họ kháng sinh.",
+      "addButton": "Thêm nhóm mới",
+      "dialog": {
+        "createTitle": "Thêm nhóm kháng sinh",
+        "updateTitle": "Cập nhật nhóm kháng sinh"
+      },
+      "alert": {
+        "deleteTitle": "Xác nhận xóa",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa nhóm kháng sinh \"{name}\" không?",
+        "deleting": "Đang xóa..."
+      },
+      "form": {
+        "nameLabel": "Tên nhóm",
+        "namePlaceholder": "Nhập tên nhóm kháng sinh...",
+        "parentLabel": "Nhóm cha (Tùy chọn)",
+        "noParentOption": "-- Không có nhóm cha --",
+        "descriptionLabel": "Mô tả chi tiết",
+        "descriptionPlaceholder": "Nhập mô tả về phổ kháng khuẩn, ADR,..."
+      },
+      "validation": {
+        "nameRequired": "Vui lòng nhập tên nhóm kháng sinh!",
+        "descriptionRequired": "Vui lòng nhập mô tả nhóm kháng sinh!"
+      },
+      "table": {
+        "colName": "Tên nhóm",
+        "colParent": "Nhóm cha",
+        "colDescription": "Mô tả",
+        "filterData": "Lọc dữ liệu",
+        "filterByParent": "Theo nhóm cha",
+        "clearFilter": "Xóa bộ lọc",
+        "noDescription": "Chưa có mô tả.",
+        "empty": "Không tìm thấy nhóm kháng sinh nào."
+      },
+      "toast": {
+        "createSuccess": "Thêm nhóm kháng sinh thành công!",
+        "createError": "Lỗi khi thêm nhóm kháng sinh.",
+        "updateSuccess": "Cập nhật nhóm kháng sinh thành công!",
+        "updateError": "Lỗi khi cập nhật nhóm kháng sinh.",
+        "deleteSuccess": "Đã xóa nhóm \"{name}\"!",
+        "deleteError": "Lỗi khi xóa nhóm kháng sinh (có thể do đang được sử dụng)."
+      }
     }
   }
 }

@@ -144,6 +144,50 @@
         "cannotDeleteHasCrcl": "Route {route} contains CrCl-adjusted doses. You must delete all CrCl doses before deleting this standard dose.",
         "cannotDeleteMinStandard": "An antibiotic must have at least 1 standard dose."
       }
+    },
+    "antibioticGroups": {
+      "title": "Antibiotic Groups",
+      "description": "Manage list of antibiotic groups and families.",
+      "addButton": "Add New Group",
+      "dialog": {
+        "createTitle": "Add Antibiotic Group",
+        "updateTitle": "Update Antibiotic Group"
+      },
+      "alert": {
+        "deleteTitle": "Confirm Delete",
+        "deleteConfirmMsg": "Are you sure you want to delete antibiotic group \"{name}\"?",
+        "deleting": "Deleting..."
+      },
+      "form": {
+        "nameLabel": "Group Name",
+        "namePlaceholder": "Enter group name...",
+        "parentLabel": "Parent Group (Optional)",
+        "noParentOption": "-- No parent group --",
+        "descriptionLabel": "Detailed Description",
+        "descriptionPlaceholder": "Enter description about antibacterial spectrum, ADR,..."
+      },
+      "validation": {
+        "nameRequired": "Please enter group name!",
+        "descriptionRequired": "Please enter group description!"
+      },
+      "table": {
+        "colName": "Group Name",
+        "colParent": "Parent Group",
+        "colDescription": "Description",
+        "filterData": "Filter Data",
+        "filterByParent": "By parent group",
+        "clearFilter": "Clear Filter",
+        "noDescription": "No description provided.",
+        "empty": "No antibiotic groups found."
+      },
+      "toast": {
+        "createSuccess": "Antibiotic group added successfully!",
+        "createError": "Error adding antibiotic group.",
+        "updateSuccess": "Antibiotic group updated successfully!",
+        "updateError": "Error updating antibiotic group.",
+        "deleteSuccess": "Deleted group \"{name}\"!",
+        "deleteError": "Error deleting antibiotic group (may be in use)."
+      }
     }
   }
 }

@@ -1,4 +1,4 @@
-import { AntibioticSpectraView } from "@/features/manager/antibiotic-spectra/components/AntibioticSpectraView";
+import { AntibioticGroupsView } from "@/features/manager/antibiotic-groups/components/AntibioticGroupsView";
 
 export const metadata = {
 	title: "Phổ kháng sinh | RespiraAMS",
@@ -8,7 +8,7 @@ export const metadata = {
 export default function Page() {
 	return (
 		<div className="container mx-auto px-4 py-8">
-			<AntibioticSpectraView />
+			<AntibioticGroupsView />
 		</div>
 	);
 }
