@@ -29,14 +29,16 @@
       "collapseSidebar": "Collapse sidebar",
       "expandSidebar": "Expand sidebar",
       "dashboard": "Dashboard",
-      "doctors": "Doctors",
-      "antibioticSpectra": "Antibiotic Spectra",
+      "doctors": "Doctor",
+      "antibioticGroups": "Antibiotic Groups",
       "antibiotics": "Antibiotics",
-      "pathogens": "Pathogens",
-      "diseases": "Infectious Diseases",
-      "analytics": "Analytics & Statistics",
-      "reports": "Reports",
-      "settings": "Settings"
+      "pathogens": "Pathogen",
+      "suspectedCauses": "Suspected Cause",
+      "treatments": "Treatments",
+      "clinicalVariables": "Clinical Variables",
+      "criteria": "Criteria",
+      "clinicalMetrics": "Clinical Metrics",
+      "riskFactors": "Risk Factors"
     },
     "antibiotics": {
       "title": "Antibiotics",

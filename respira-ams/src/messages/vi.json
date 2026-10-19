@@ -30,13 +30,15 @@
       "expandSidebar": "Mở rộng thanh điều hướng",
       "dashboard": "Dashboard",
       "doctors": "Bác sĩ",
-      "antibioticSpectra": "Phổ kháng sinh",
+      "antibioticGroups": "Nhóm kháng sinh",
       "antibiotics": "Kháng sinh",
       "pathogens": "Tác nhân gây bệnh",
-      "diseases": "Bệnh truyền nhiễm",
-      "analytics": "Phân tích & Thống kê",
-      "reports": "Báo cáo",
-      "settings": "Cài đặt"
+      "suspectedCauses": "Tác nhân nghi ngờ",
+      "treatments": "Phác đồ điều trị",
+      "clinicalVariables": "Biến số lâm sàng",
+      "criteria": "Tiêu chí",
+      "clinicalMetrics": "Thang điểm lâm sàng",
+      "riskFactors": "Yếu tố nguy cơ"
     },
     "antibiotics": {
       "title": "Kháng sinh",

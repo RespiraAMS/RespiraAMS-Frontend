@@ -16,16 +16,18 @@ import {
 import {
 	LayoutDashboard,
 	Contact,
-	Microscope,
 	Pill,
 	Atom,
-	Biohazard,
 	BarChart2,
-	FileText,
-	Settings,
 	ChevronLeft,
 	ChevronRight,
 	type LucideIcon,
+	ShieldAlert,
+	ClipboardCheck,
+	Sliders,
+	Activity,
+	HelpCircle,
+	FolderTree,
 } from "lucide-react";
 import { AccountSection } from "./AccountSection";
 import { useSidebarStore } from "../stores/sidebarStore";
@@ -37,16 +39,18 @@ export interface NavItemConfig {
 	badge?: number;
 }
 
-const NAV_CONFIGS: NavItemConfig[] = [
+export const NAV_CONFIGS: NavItemConfig[] = [
 	{ key: "dashboard", icon: LayoutDashboard, href: "/manage/dashboard" },
 	{ key: "doctors", icon: Contact, href: "/manage/doctors" },
-	{ key: "antibioticSpectra", icon: Microscope, href: "/manage/antibiotic-spectra" },
+	{ key: "antibioticGroups", icon: FolderTree, href: "/manage/antibiotic-groups" },
 	{ key: "antibiotics", icon: Pill, href: "/manage/antibiotics" },
 	{ key: "pathogens", icon: Atom, href: "/manage/pathogens" },
-	{ key: "diseases", icon: Biohazard, href: "/manage/diseases" },
-	{ key: "analytics", icon: BarChart2, href: "/analytics" },
-	{ key: "reports", icon: FileText, href: "/reports" },
-	{ key: "settings", icon: Settings, href: "/settings" },
+	{ key: "suspectedCauses", icon: HelpCircle, href: "/manage/suspected-causes" },
+	{ key: "treatments", icon: Activity, href: "/manage/treatments" },
+	{ key: "clinicalVariables", icon: Sliders, href: "/manage/clinical-variables" },
+	{ key: "criteria", icon: ClipboardCheck, href: "/manage/criteria" },
+	{ key: "clinicalMetrics", icon: BarChart2, href: "/manage/clinical-metrics" },
+	{ key: "riskFactors", icon: ShieldAlert, href: "/manage/risk-factors" },
 ];
 
 function NavItemLink({
