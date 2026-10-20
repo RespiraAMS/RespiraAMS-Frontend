@@ -22,7 +22,8 @@
     },
     "search": {
       "placeholder": "Search...",
-      "button": "Search"
+      "button": "Search",
+      "minLengthError": "Please enter at least 2 characters to search!"
     },
     "nav": {
       "mainNavigation": "Main Navigation",
@@ -187,6 +188,49 @@
         "updateError": "Error updating antibiotic group.",
         "deleteSuccess": "Deleted group \"{name}\"!",
         "deleteError": "Error deleting antibiotic group (may be in use)."
+      }
+    },
+    "pathogens": {
+      "title": "Pathogens",
+      "description": "Manage pathogens list (bacteria, viruses, etc.).",
+      "addButton": "Add Pathogen",
+      "dialog": {
+        "createTitle": "Add New Pathogen",
+        "updateTitle": "Update Pathogen"
+      },
+      "alert": {
+        "deleteTitle": "Confirm Delete",
+        "deleteConfirmMsg": "Are you sure you want to delete pathogen \"{name}\"?",
+        "deleting": "Deleting..."
+      },
+      "form": {
+        "nameLabel": "Pathogen Name (Bacteria/Virus)",
+        "namePlaceholder": "e.g. SARS-CoV-2",
+        "descriptionLabel": "Detailed Description",
+        "descriptionPlaceholder": "Summary description of the pathogen...",
+        "isAtypicalLabel": "Is atypical bacteria (Atypical)"
+      },
+      "validation": {
+        "nameRequired": "Please enter pathogen name!",
+        "descriptionRequired": "Please enter description!"
+      },
+      "table": {
+        "colName": "Pathogen Name",
+        "colType": "Type",
+        "colDescription": "Description",
+        "filterData": "Filter Data",
+        "allTypes": "All",
+        "typical": "Typical",
+        "atypical": "Atypical",
+        "empty": "No pathogens found."
+      },
+      "toast": {
+        "createSuccess": "Pathogen added successfully!",
+        "createError": "Error adding pathogen.",
+        "updateSuccess": "Pathogen updated successfully!",
+        "updateError": "Error updating pathogen.",
+        "deleteSuccess": "Deleted pathogen \"{name}\"!",
+        "deleteError": "Cannot delete this pathogen."
       }
     }
   }

@@ -22,7 +22,8 @@
     },
     "search": {
       "placeholder": "Tìm kiếm...",
-      "button": "Tìm kiếm"
+      "button": "Tìm kiếm",
+      "minLengthError": "Vui lòng nhập ít nhất 2 ký tự để tìm kiếm!"
     },
     "nav": {
       "mainNavigation": "Điều hướng chính",
@@ -187,6 +188,49 @@
         "updateError": "Lỗi khi cập nhật nhóm kháng sinh.",
         "deleteSuccess": "Đã xóa nhóm \"{name}\"!",
         "deleteError": "Lỗi khi xóa nhóm kháng sinh (có thể do đang được sử dụng)."
+      }
+    },
+    "pathogens": {
+      "title": "Tác Nhân Gây Bệnh",
+      "description": "Quản lý danh sách các vi khuẩn, virus (Pathogens).",
+      "addButton": "Thêm tác nhân",
+      "dialog": {
+        "createTitle": "Thêm tác nhân mới",
+        "updateTitle": "Cập nhật tác nhân"
+      },
+      "alert": {
+        "deleteTitle": "Xác nhận xóa",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa tác nhân \"{name}\" không?",
+        "deleting": "Đang xóa..."
+      },
+      "form": {
+        "nameLabel": "Tên tác nhân (Vi khuẩn/Virus)",
+        "namePlaceholder": "Ví dụ: SARS-CoV-2",
+        "descriptionLabel": "Mô tả chi tiết",
+        "descriptionPlaceholder": "Mô tả tóm tắt về tác nhân gây bệnh...",
+        "isAtypicalLabel": "Là vi khuẩn không điển hình (Atypical)"
+      },
+      "validation": {
+        "nameRequired": "Vui lòng nhập tên tác nhân!",
+        "descriptionRequired": "Vui lòng nhập mô tả!"
+      },
+      "table": {
+        "colName": "Tên tác nhân",
+        "colType": "Loại",
+        "colDescription": "Mô tả",
+        "filterData": "Lọc dữ liệu",
+        "allTypes": "Tất cả",
+        "typical": "Tác nhân điển hình (Typical)",
+        "atypical": "Không điển hình (Atypical)",
+        "empty": "Không tìm thấy tác nhân gây bệnh nào."
+      },
+      "toast": {
+        "createSuccess": "Thêm tác nhân gây bệnh thành công!",
+        "createError": "Lỗi khi thêm tác nhân.",
+        "updateSuccess": "Cập nhật tác nhân thành công!",
+        "updateError": "Lỗi khi cập nhật tác nhân.",
+        "deleteSuccess": "Đã xóa tác nhân \"{name}\"!",
+        "deleteError": "Không thể xóa tác nhân này."
       }
     }
   }

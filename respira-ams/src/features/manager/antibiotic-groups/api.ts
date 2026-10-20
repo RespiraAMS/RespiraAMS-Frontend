@@ -22,9 +22,9 @@ export async function getAntibioticGroups(
 
     let endpoint = `${API_BASE_SERVER}${API_BASE}/antibiotic-groups`;
 
-    if (searchTerm) {
+    if (searchTerm && searchTerm.trim().length >= 2) {
         endpoint = `${API_BASE_SERVER}${API_BASE}/antibiotic-groups/search`;
-        params.append("SearchTerm", searchTerm);
+        params.append("SearchTerm", searchTerm.trim());
     } 
     
     if (parentId) {

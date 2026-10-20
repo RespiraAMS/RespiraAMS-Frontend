@@ -1,131 +1,148 @@
 "use client";
 
 import { useState } from "react";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogDescription,
-} from "@/components/ui/dialog";
-import {
-	Sheet,
-	SheetContent,
-	SheetHeader,
-	SheetTitle,
-	SheetDescription,
-} from "@/components/ui/sheet";
+import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
-import { TableTitle } from "@/features/manager/components/TableTitle";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+	AlertDialog,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 import { PathogensTable } from "./PathogensTable";
 import { PathogenForm } from "./PathogenForm";
-import { type PathogenItem, type CreatePathogenRequest } from "../types";
-
-type ActiveView = "create" | "update" | "delete" | null;
-
-// ─── PathogensView ────────────────────────────────────────────────────────────
+import { usePathogenMutations } from "../queries";
+import { type PathogenItem, type CreatePathogenRequest, type UpdatePathogenRequest } from "../types";
 
 export function PathogensView() {
-	const [activeView, setActiveView] = useState<ActiveView>(null);
-	const [selected, setSelected] = useState<PathogenItem | null>(null);
+	const t = useTranslations("manager.pathogens");
+	const tCommon = useTranslations("common");
 
-	const openView = (view: ActiveView, item?: PathogenItem) => {
-		setSelected(item ?? null);
-		setActiveView(view);
+	const [modalMode, setModalMode] = useState<"create" | "update" | null>(null);
+	const [selected, setSelected] = useState<PathogenItem | null>(null);
+	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+	const { createMutation, updateMutation, deleteMutation } = usePathogenMutations();
+
+	const openCreate = () => {
+		setSelected(null);
+		setModalMode("create");
 	};
 
-	const closeView = () => {
-		setActiveView(null);
+	const openUpdate = (item: PathogenItem) => {
+		setSelected(item);
+		setModalMode("update");
+	};
+
+	const openDelete = (item: PathogenItem) => {
+		setSelected(item);
+		setIsDeleteOpen(true);
+	};
+
+	const closeModal = () => {
+		setModalMode(null);
 		setSelected(null);
 	};
 
-	// UI-only: simulate submit (no API call)
-	const handleSubmit = (_data: CreatePathogenRequest) => {
-		closeView();
+	const handleFormSubmit = (data: CreatePathogenRequest | UpdatePathogenRequest) => {
+		if (modalMode === "create") {
+			createMutation.mutate(data as CreatePathogenRequest, {
+				onSuccess: () => {
+					closeModal();
+					toast.success(t("toast.createSuccess"));
+				},
+				onError: () => toast.error(t("toast.createError")),
+			});
+		} else if (modalMode === "update" && selected) {
+			updateMutation.mutate(
+				{ id: selected.id, data: data as UpdatePathogenRequest },
+				{
+					onSuccess: () => {
+						closeModal();
+						toast.success(t("toast.updateSuccess"));
+					},
+					onError: () => toast.error(t("toast.updateError")),
+				}
+			);
+		}
+	};
+
+	const handleDelete = () => {
+		if (selected) {
+			deleteMutation.mutate(selected.id, {
+				onSuccess: () => {
+					setIsDeleteOpen(false);
+					toast.success(t("toast.deleteSuccess", { name: selected.name }));
+				},
+				onError: () => toast.error(t("toast.deleteError")),
+			});
+		}
 	};
 
 	return (
-		<>
-			<TableTitle
-				title="Tác nhân gây bệnh"
-				description="Quản lý danh sách tác nhân gây bệnh hô hấp."
-				buttonLabel="Thêm tác nhân"
-				onClick={() => openView("create")}
-			/>
+		<div className="space-y-6 text-foreground bg-background">
+			{/* Header */}
+			<div className="flex items-center justify-between">
+				<div>
+					<h2 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h2>
+					<p className="text-muted-foreground">{t("description")}</p>
+				</div>
+				<Button onClick={openCreate} className="bg-primary text-primary-foreground hover:bg-primary/90">
+					<Plus className="mr-2 h-4 w-4" />
+					{t("addButton")}
+				</Button>
+			</div>
 
-			<PathogensTable
-				onEdit={(item) => openView("update", item)}
-				onDelete={(item) => openView("delete", item)}
-			/>
+			{/* Table Container */}
+			<div className="rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto text-card-foreground">
+				<PathogensTable onEdit={openUpdate} onDelete={openDelete} />
+			</div>
 
-			{/* Create / Update Dialog */}
-			<Dialog
-				open={activeView === "create" || activeView === "update"}
-				onOpenChange={(open) => { if (!open) closeView(); }}
-			>
-				<DialogContent className="sm:max-w-lg">
+			{/* Form Modal */}
+			<Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
+				<DialogContent className="sm:max-w-[500px] border-border bg-popover text-popover-foreground">
 					<DialogHeader>
-						<DialogTitle>
-							{activeView === "create" && "Tạo mới Tác nhân gây bệnh"}
-							{activeView === "update" && "Cập nhật Tác nhân gây bệnh"}
+						<DialogTitle className="text-xl text-foreground">
+							{modalMode === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}
 						</DialogTitle>
-						<DialogDescription>
-							{activeView === "create" && "Điền thông tin để tạo tác nhân gây bệnh mới."}
-							{activeView === "update" && "Chỉnh sửa thông tin tác nhân gây bệnh."}
-						</DialogDescription>
 					</DialogHeader>
-
-					<div className="py-2">
-						{(activeView === "create" || (activeView === "update" && selected)) && (
-							<PathogenForm
-								initialData={activeView === "update" ? selected : null}
-								onSubmit={handleSubmit}
-								onCancel={closeView}
-							/>
-						)}
-					</div>
+					{modalMode && (
+						<PathogenForm
+							initialData={selected}
+							onSubmit={handleFormSubmit}
+							onCancel={closeModal}
+							isPending={createMutation.isPending || updateMutation.isPending}
+						/>
+					)}
 				</DialogContent>
 			</Dialog>
 
-			{/* Delete Sheet */}
-			<Sheet
-				open={activeView === "delete"}
-				onOpenChange={(open) => { if (!open) closeView(); }}
-			>
-				<SheetContent side="right">
-					<SheetHeader>
-						<SheetTitle>Xóa Tác nhân gây bệnh</SheetTitle>
-						<SheetDescription>
-							Xác nhận xóa tác nhân{" "}
-							<strong className="text-red-600">{selected?.name}</strong>. Thao tác này
-							không thể hoàn tác.
-						</SheetDescription>
-					</SheetHeader>
-
-					<div className="mt-6 flex flex-col gap-4 px-1">
-						<div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">
-							Bạn có chắc chắn muốn xóa tác nhân gây bệnh{" "}
-							<span className="font-bold">{selected?.name}</span> không?
-						</div>
-						<div className="flex gap-2 justify-end">
-							<Button
-								variant="outline"
-								onClick={closeView}
-								id="delete-pathogen-cancel"
-							>
-								Hủy
-							</Button>
-							<Button
-								variant="destructive"
-								onClick={closeView}
-								id="delete-pathogen-confirm"
-							>
-								Xác nhận Xóa
-							</Button>
-						</div>
-					</div>
-				</SheetContent>
-			</Sheet>
-		</>
+			{/* Delete Alert */}
+			<AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+				<AlertDialogContent className="border-border bg-popover text-popover-foreground shadow-lg">
+					<AlertDialogHeader>
+						<AlertDialogTitle className="text-destructive font-semibold">{t("alert.deleteTitle")}</AlertDialogTitle>
+						<AlertDialogDescription className="text-muted-foreground">
+							{t("alert.deleteConfirmMsg", { name: selected?.name ?? "" })}
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<Button variant="outline" onClick={() => setIsDeleteOpen(false)} className="border-border text-foreground hover:bg-accent">
+							{tCommon("cancel")}
+						</Button>
+						<Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
+							{deleteMutation.isPending ? t("alert.deleting") : tCommon("delete")}
+						</Button>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+		</div>
 	);
 }

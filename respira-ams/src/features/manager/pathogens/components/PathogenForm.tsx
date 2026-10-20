@@ -1,125 +1,130 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { type PathogenItem, type CreatePathogenRequest } from "../types";
+import { Checkbox } from "@/components/ui/checkbox";
 
-// ─── Validation Schema ────────────────────────────────────────────────────────
-
-const pathogenSchema = z.object({
-	name: z.string().trim().min(1, "Vui lòng nhập tên tác nhân gây bệnh!"),
-	description: z.string().trim().min(1, "Vui lòng nhập mô tả!"),
-});
-
-// ─── Props ────────────────────────────────────────────────────────────────────
+import { type PathogenItem, type CreatePathogenRequest, type UpdatePathogenRequest } from "../types";
 
 interface PathogenFormProps {
 	initialData?: PathogenItem | null;
-	onSubmit: (data: CreatePathogenRequest) => void;
+	onSubmit: (data: CreatePathogenRequest | UpdatePathogenRequest) => void;
 	onCancel: () => void;
+	isPending?: boolean;
 }
 
-// ─── PathogenForm ─────────────────────────────────────────────────────────────
+export function PathogenForm({ initialData, onSubmit, onCancel, isPending }: PathogenFormProps) {
+	const t = useTranslations("manager.pathogens");
+	const tVal = useTranslations("manager.pathogens.validation");
+	const tCommon = useTranslations("common");
 
-export function PathogenForm({ initialData, onSubmit, onCancel }: PathogenFormProps) {
 	const isEdit = !!initialData;
 
-	const [name, setName] = useState("");
-	const [description, setDescription] = useState("");
-	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+	const pathogenSchema = useMemo(() => {
+		return z.object({
+			name: z.string().trim().min(1, tVal("nameRequired")),
+			description: z.string().trim().min(1, tVal("descriptionRequired")),
+			isAtypical: z.boolean(),
+		});
+	}, [tVal]);
 
-	useEffect(() => {
-		if (initialData) {
-			setName(initialData.name ?? "");
-			setDescription(initialData.description ?? "");
-		} else {
-			setName("");
-			setDescription("");
-		}
-		setFormErrors({});
+	type FormValues = z.infer<typeof pathogenSchema>;
+
+	const defaultValues: FormValues = useMemo(() => {
+		if (!initialData) return { name: "", description: "", isAtypical: false };
+		return {
+			name: initialData.name,
+			description: initialData.description,
+			isAtypical: initialData.isAtypical,
+		};
 	}, [initialData]);
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
+	const {
+		register,
+		handleSubmit,
+		reset,
+		setValue,
+		watch,
+		formState: { errors },
+	} = useForm<FormValues>({
+		resolver: zodResolver(pathogenSchema),
+		defaultValues,
+	});
 
-		const formData = { name, description };
-		const result = pathogenSchema.safeParse(formData);
+	useEffect(() => {
+		reset(defaultValues);
+	}, [defaultValues, reset]);
 
-		if (!result.success) {
-			const errs: Record<string, string> = {};
-			result.error.issues.forEach((issue) => {
-				const key = issue.path[0];
-				if (typeof key === "string") errs[key] = issue.message;
-			});
-			setFormErrors(errs);
-			return;
-		}
-
-		setFormErrors({});
-		onSubmit(formData);
+	const handleValidSubmit = (data: FormValues) => {
+		onSubmit(data);
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
-			{/* Name */}
-			<div className="flex flex-col gap-2">
-				<label className="text-sm font-medium">
-					Tên tác nhân gây bệnh <span className="text-red-500">*</span>
+		<form onSubmit={handleSubmit(handleValidSubmit)} className="space-y-4 text-foreground">
+			{/* Pathogen Name */}
+			<div className="space-y-2">
+				<label className="text-sm font-medium text-foreground">
+					{t("form.nameLabel")} <span className="text-destructive">*</span>
 				</label>
 				<Input
-					id="pathogen-name-input"
-					value={name}
-					onChange={(e) => {
-						setName(e.target.value);
-						if (formErrors.name) setFormErrors((p) => ({ ...p, name: "" }));
-					}}
-					placeholder="VD: Streptococcus pneumoniae"
-					className={formErrors.name ? "border-red-500 focus-visible:ring-red-500" : ""}
+					{...register("name")}
+					disabled={isPending}
+					placeholder={t("form.namePlaceholder")}
+					className="bg-background text-foreground border-input placeholder:text-muted-foreground"
 				/>
-				{formErrors.name && (
-					<p className="text-sm text-red-500 font-medium">{formErrors.name}</p>
-				)}
+				{errors.name && <p className="text-sm text-destructive font-medium">{errors.name.message}</p>}
 			</div>
 
 			{/* Description */}
-			<div className="flex flex-col gap-2">
-				<label className="text-sm font-medium">
-					Mô tả <span className="text-red-500">*</span>
+			<div className="space-y-2">
+				<label className="text-sm font-medium text-foreground">
+					{t("form.descriptionLabel")} <span className="text-destructive">*</span>
 				</label>
 				<Textarea
-					id="pathogen-description-input"
-					value={description}
-					onChange={(e) => {
-						setDescription(e.target.value);
-						if (formErrors.description)
-							setFormErrors((p) => ({ ...p, description: "" }));
-					}}
-					placeholder="Nhập thông tin mô tả về tác nhân gây bệnh..."
+					{...register("description")}
+					disabled={isPending}
 					rows={4}
-					className={
-						formErrors.description ? "border-red-500 focus-visible:ring-red-500" : ""
-					}
+					placeholder={t("form.descriptionPlaceholder")}
+					className="bg-background text-foreground border-input placeholder:text-muted-foreground resize-none"
 				/>
-				{formErrors.description && (
-					<p className="text-sm text-red-500 font-medium">{formErrors.description}</p>
-				)}
+				{errors.description && <p className="text-sm text-destructive font-medium">{errors.description.message}</p>}
+			</div>
+
+			{/* Is Atypical Checkbox */}
+			<div className="flex items-center gap-2 pt-2">
+				<Checkbox
+					id="isAtypical"
+					checked={watch("isAtypical")}
+					onCheckedChange={(checked) => setValue("isAtypical", !!checked)}
+					disabled={isPending}
+				/>
+				<label htmlFor="isAtypical" className="text-sm font-medium text-foreground cursor-pointer select-none">
+					{t("form.isAtypicalLabel")}
+				</label>
 			</div>
 
 			{/* Actions */}
-			<div className="flex gap-2 justify-end mt-4 pt-4 border-t">
+			<div className="flex justify-end gap-2 pt-4 border-t border-border mt-6">
 				<Button
 					type="button"
 					variant="outline"
 					onClick={onCancel}
-					id="pathogen-form-cancel"
+					disabled={isPending}
+					className="border-border text-foreground hover:bg-accent"
 				>
-					Hủy
+					{tCommon("cancel")}
 				</Button>
-				<Button type="submit" id="pathogen-form-submit">
-					{isEdit ? "Cập nhật" : "Tạo mới"}
+				<Button type="submit" disabled={isPending} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+					{isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+					{isEdit ? tCommon("update") : tCommon("create")}
 				</Button>
 			</div>
 		</form>
