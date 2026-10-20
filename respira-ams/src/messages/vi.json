@@ -1,0 +1,237 @@
+{
+  "common": {
+    "welcome": "Chào mừng trở lại",
+    "dashboard": "Bảng điều khiển",
+    "language": "Ngôn ngữ",
+    "add": "Thêm",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "confirmDelete": "Xác nhận Xóa",
+    "create": "Tạo mới",
+    "update": "Cập nhật",
+    "saving": "Đang lưu...",
+    "all": "Tất cả",
+    "actions": "Thao tác",
+    "pageOf": "Trang {page} / {totalPages}"
+  },
+  "manager": {
+    "account": {
+      "profile": "Quản lý tài khoản",
+      "settings": "Cài đặt",
+      "logout": "Đăng xuất"
+    },
+    "search": {
+      "placeholder": "Tìm kiếm...",
+      "button": "Tìm kiếm",
+      "minLengthError": "Vui lòng nhập ít nhất 2 ký tự để tìm kiếm!"
+    },
+    "nav": {
+      "mainNavigation": "Điều hướng chính",
+      "collapseSidebar": "Thu gọn thanh điều hướng",
+      "expandSidebar": "Mở rộng thanh điều hướng",
+      "dashboard": "Dashboard",
+      "doctors": "Bác sĩ",
+      "antibioticGroups": "Nhóm kháng sinh",
+      "antibiotics": "Kháng sinh",
+      "pathogens": "Tác nhân gây bệnh",
+      "suspectedCauses": "Tác nhân nghi ngờ",
+      "treatments": "Phác đồ điều trị",
+      "clinicalVariables": "Biến số lâm sàng",
+      "criteria": "Tiêu chí",
+      "clinicalMetrics": "Thang điểm lâm sàng",
+      "riskFactors": "Yếu tố nguy cơ"
+    },
+    "antibiotics": {
+      "title": "Kháng sinh",
+      "description": "Quản lý danh sách kháng sinh theo nhóm và phân loại AWaRe.",
+      "addButton": "Thêm kháng sinh",
+      "dialog": {
+        "createTitle": "Tạo mới Kháng sinh",
+        "createDesc": "Điền thông tin để tạo kháng sinh mới.",
+        "updateTitle": "Cập nhật Kháng sinh",
+        "updateDesc": "Chỉnh sửa thông tin kháng sinh."
+      },
+      "sheet": {
+        "deleteTitle": "Xóa Kháng sinh",
+        "deleteDesc": "Thao tác này sẽ xóa kháng sinh khỏi hệ thống và không thể hoàn tác.",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa kháng sinh \"{name}\" không?"
+      },
+      "deleteDosageModal": {
+        "title": "Xác nhận xóa liều dùng",
+        "desc": "Bạn có chắc chắn muốn xóa dòng liều dùng này không? Thao tác này không thể hoàn tác."
+      },
+      "dosageModal": {
+        "createTitle": "Thêm liều dùng mới",
+        "updateTitle": "Cập nhật liều dùng"
+      },
+      "form": {
+        "nameLabel": "Tên kháng sinh",
+        "namePlaceholder": "Nhập tên kháng sinh...",
+        "groupLabel": "Nhóm kháng sinh",
+        "selectGroupPlaceholder": "-- Chọn nhóm kháng sinh --",
+        "categoryLabel": "Phân loại AWaRe",
+        "selectCategoryPlaceholder": "-- Chọn phân loại --",
+        "routesDosagesLabel": "Đường dùng & Liều lượng",
+        "routeLabel": "Đường dùng",
+        "selectRoutePlaceholder": "-- Chọn đường dùng --",
+        "standardDoseLabel": "Liều lượng tiêu chuẩn",
+        "routeIntravenous": "Tiêm tĩnh mạch",
+        "routeOral": "Uống",
+        "dosagePlaceholder": "Ví dụ: 500 mg mỗi 8h",
+        "addDosage": "Thêm liều",
+        "doseLabel": "Liều lượng",
+        "isStandardDoseLabel": "Là liều tiêu chuẩn (Không phụ thuộc CrCl/GFR)",
+        "crclRangeLabel": "Khoảng lọc cầu thận (CrCl)",
+        "minLabel": "Min",
+        "maxLabel": "Max",
+        "isMinExclusiveLabel": "Không bao gồm (>)",
+        "isMaxExclusiveLabel": "Không bao gồm (<)",
+        "unlimitedPlaceholder": "Không giới hạn"
+      },
+      "validation": {
+        "nameRequired": "Vui lòng nhập tên kháng sinh!",
+        "groupRequired": "Vui lòng chọn nhóm kháng sinh!",
+        "categoryRequired": "Vui lòng chọn phân loại AWaRe!",
+        "routesRequired": "Chọn ít nhất một đường dùng!",
+        "dosagesRequired": "Vui lòng nhập ít nhất một liều dùng cho đường này!",
+        "routeRequired": "Vui lòng chọn đường dùng!",
+        "doseRequired": "Vui lòng nhập liều dùng!",
+        "minNumber": "Giá trị Min phải là số!",
+        "minNonNegative": "Giá trị Min phải là số không âm!",
+        "maxNumber": "Giá trị Max phải là số!",
+        "maxNonNegative": "Giá trị Max phải là số không âm!",
+        "minLessThanMax": "Giá trị Min phải nhỏ hơn Max!",
+        "hasStandardDose": "Đường dùng {route} đã có liều tiêu chuẩn!",
+        "crclOverlap": "Mức CrCl [{min} - {max}] bị trùng lặp với mức CrCl đã tồn tại của đường {route}!"
+      },
+      "table": {
+        "colName": "Tên kháng sinh",
+        "colCategory": "Phân loại AWaRe",
+        "colGroup": "Nhóm kháng sinh",
+        "colDosages": "Liều dùng",
+        "filterBy": "Lọc theo",
+        "clearFilter": "Xóa tất cả bộ lọc",
+        "empty": "Không tìm thấy kháng sinh nào."
+      },
+      "detail": {
+        "title": "Chi tiết Kháng sinh",
+        "groupInfo": "Thông tin Nhóm",
+        "parentGroup": "Nhóm cha",
+        "noDescription": "Không có thông tin mô tả.",
+        "dosages": "Liều lượng",
+        "noDosages": "Không có dữ liệu liều lượng.",
+        "route": "Đường dùng",
+        "dose": "Liều dùng",
+        "crcl": "CrCl (mL/phút)",
+        "allCrcl": "Tất cả (Mọi mức)",
+        "standardDose": "Liều tiêu chuẩn",
+        "back": "Quay lại danh sách",
+        "addDosage": "Thêm liều"
+      },
+      "toast": {
+        "createSuccess": "Thêm kháng sinh mới thành công!",
+        "createError": "Có lỗi xảy ra khi thêm kháng sinh.",
+        "updateSuccess": "Cập nhật thông tin kháng sinh thành công!",
+        "updateError": "Có lỗi xảy ra khi cập nhật kháng sinh.",
+        "deleteSuccess": "Đã xóa kháng sinh \"{name}\"!",
+        "deleteError": "Không thể xóa kháng sinh này.",
+        "createDosageSuccess": "Thêm mới liều lượng thành công!",
+        "createDosageError": "Có lỗi xảy ra khi thêm mới liều lượng.",
+        "updateDosageSuccess": "Cập nhật liều lượng thành công!",
+        "updateDosageError": "Có lỗi xảy ra khi cập nhật liều lượng.",
+        "deleteDosageSuccess": "Đã xóa liều lượng!",
+        "deleteDosageError": "Không thể xóa liều lượng này.",
+        "cannotDeleteTitle": "Không thể xóa",
+        "cannotDeleteHasCrcl": "Đường dùng {route} đang có các liều chỉnh theo thận. Bạn phải xóa các liều CrCl trước khi xóa liều tiêu chuẩn này.",
+        "cannotDeleteMinStandard": "Bắt buộc một kháng sinh phải có ít nhất 1 liều tiêu chuẩn."
+      }
+    },
+    "antibioticGroups": {
+      "title": "Nhóm Kháng Sinh",
+      "description": "Quản lý danh sách các nhóm và họ kháng sinh.",
+      "addButton": "Thêm nhóm mới",
+      "dialog": {
+        "createTitle": "Thêm nhóm kháng sinh",
+        "updateTitle": "Cập nhật nhóm kháng sinh"
+      },
+      "alert": {
+        "deleteTitle": "Xác nhận xóa",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa nhóm kháng sinh \"{name}\" không?",
+        "deleting": "Đang xóa..."
+      },
+      "form": {
+        "nameLabel": "Tên nhóm",
+        "namePlaceholder": "Nhập tên nhóm kháng sinh...",
+        "parentLabel": "Nhóm cha (Tùy chọn)",
+        "noParentOption": "-- Không có nhóm cha --",
+        "descriptionLabel": "Mô tả chi tiết",
+        "descriptionPlaceholder": "Nhập mô tả về phổ kháng khuẩn, ADR,..."
+      },
+      "validation": {
+        "nameRequired": "Vui lòng nhập tên nhóm kháng sinh!",
+        "descriptionRequired": "Vui lòng nhập mô tả nhóm kháng sinh!"
+      },
+      "table": {
+        "colName": "Tên nhóm",
+        "colParent": "Nhóm cha",
+        "colDescription": "Mô tả",
+        "filterData": "Lọc dữ liệu",
+        "filterByParent": "Theo nhóm cha",
+        "clearFilter": "Xóa bộ lọc",
+        "noDescription": "Chưa có mô tả.",
+        "empty": "Không tìm thấy nhóm kháng sinh nào."
+      },
+      "toast": {
+        "createSuccess": "Thêm nhóm kháng sinh thành công!",
+        "createError": "Lỗi khi thêm nhóm kháng sinh.",
+        "updateSuccess": "Cập nhật nhóm kháng sinh thành công!",
+        "updateError": "Lỗi khi cập nhật nhóm kháng sinh.",
+        "deleteSuccess": "Đã xóa nhóm \"{name}\"!",
+        "deleteError": "Lỗi khi xóa nhóm kháng sinh (có thể do đang được sử dụng)."
+      }
+    },
+    "pathogens": {
+      "title": "Tác Nhân Gây Bệnh",
+      "description": "Quản lý danh sách các vi khuẩn, virus (Pathogens).",
+      "addButton": "Thêm tác nhân",
+      "dialog": {
+        "createTitle": "Thêm tác nhân mới",
+        "updateTitle": "Cập nhật tác nhân"
+      },
+      "alert": {
+        "deleteTitle": "Xác nhận xóa",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa tác nhân \"{name}\" không?",
+        "deleting": "Đang xóa..."
+      },
+      "form": {
+        "nameLabel": "Tên tác nhân (Vi khuẩn/Virus)",
+        "namePlaceholder": "Ví dụ: SARS-CoV-2",
+        "descriptionLabel": "Mô tả chi tiết",
+        "descriptionPlaceholder": "Mô tả tóm tắt về tác nhân gây bệnh...",
+        "isAtypicalLabel": "Là vi khuẩn không điển hình (Atypical)"
+      },
+      "validation": {
+        "nameRequired": "Vui lòng nhập tên tác nhân!",
+        "descriptionRequired": "Vui lòng nhập mô tả!"
+      },
+      "table": {
+        "colName": "Tên tác nhân",
+        "colType": "Loại",
+        "colDescription": "Mô tả",
+        "filterData": "Lọc dữ liệu",
+        "allTypes": "Tất cả",
+        "typical": "Tác nhân điển hình (Typical)",
+        "atypical": "Không điển hình (Atypical)",
+        "empty": "Không tìm thấy tác nhân gây bệnh nào."
+      },
+      "toast": {
+        "createSuccess": "Thêm tác nhân gây bệnh thành công!",
+        "createError": "Lỗi khi thêm tác nhân.",
+        "updateSuccess": "Cập nhật tác nhân thành công!",
+        "updateError": "Lỗi khi cập nhật tác nhân.",
+        "deleteSuccess": "Đã xóa tác nhân \"{name}\"!",
+        "deleteError": "Không thể xóa tác nhân này."
+      }
+    }
+  }
+}

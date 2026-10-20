@@ -1,0 +1,237 @@
+{
+  "common": {
+    "welcome": "Welcome back",
+    "dashboard": "Dashboard",
+    "language": "Language",
+    "add": "Add",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirmDelete": "Confirm Delete",
+    "create": "Create",
+    "update": "Update",
+    "saving": "Saving...",
+    "all": "All",
+    "actions": "Actions",
+    "pageOf": "Page {page} of {totalPages}"
+  },
+  "manager": {
+    "account": {
+      "profile": "Account Profile",
+      "settings": "Settings",
+      "logout": "Sign Out"
+    },
+    "search": {
+      "placeholder": "Search...",
+      "button": "Search",
+      "minLengthError": "Please enter at least 2 characters to search!"
+    },
+    "nav": {
+      "mainNavigation": "Main Navigation",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar",
+      "dashboard": "Dashboard",
+      "doctors": "Doctor",
+      "antibioticGroups": "Antibiotic Groups",
+      "antibiotics": "Antibiotics",
+      "pathogens": "Pathogen",
+      "suspectedCauses": "Suspected Cause",
+      "treatments": "Treatments",
+      "clinicalVariables": "Clinical Variables",
+      "criteria": "Criteria",
+      "clinicalMetrics": "Clinical Metrics",
+      "riskFactors": "Risk Factors"
+    },
+    "antibiotics": {
+      "title": "Antibiotics",
+      "description": "Manage antibiotics list by group and AWaRe classification.",
+      "addButton": "Add Antibiotic",
+      "dialog": {
+        "createTitle": "Create New Antibiotic",
+        "createDesc": "Fill in the details to create a new antibiotic.",
+        "updateTitle": "Update Antibiotic",
+        "updateDesc": "Edit antibiotic details."
+      },
+      "sheet": {
+        "deleteTitle": "Delete Antibiotic",
+        "deleteDesc": "This action will delete the antibiotic from the system and cannot be undone.",
+        "deleteConfirmMsg": "Are you sure you want to delete the antibiotic \"{name}\"?"
+      },
+      "deleteDosageModal": {
+        "title": "Confirm Delete Dosage",
+        "desc": "Are you sure you want to delete this dosage row? This action cannot be undone."
+      },
+      "dosageModal": {
+        "createTitle": "Add New Dosage",
+        "updateTitle": "Update Dosage"
+      },
+      "form": {
+        "nameLabel": "Antibiotic Name",
+        "namePlaceholder": "Enter antibiotic name...",
+        "groupLabel": "Antibiotic Group",
+        "selectGroupPlaceholder": "-- Select group --",
+        "categoryLabel": "AWaRe Classification",
+        "selectCategoryPlaceholder": "-- Select classification --",
+        "routesDosagesLabel": "Administration Routes & Dosages",
+        "routeLabel": "Administration Route",
+        "selectRoutePlaceholder": "-- Select administration route --",
+        "standardDoseLabel": "Standard Dose",
+        "routeIntravenous": "Intravenous",
+        "routeOral": "Oral",
+        "dosagePlaceholder": "E.g., 500 mg every 8h",
+        "addDosage": "Add Dosage",
+        "doseLabel": "Dosage",
+        "isStandardDoseLabel": "Standard dose (CrCl/GFR independent)",
+        "crclRangeLabel": "Creatinine Clearance Range (CrCl)",
+        "minLabel": "Min",
+        "maxLabel": "Max",
+        "isMinExclusiveLabel": "Exclusive (>)",
+        "isMaxExclusiveLabel": "Exclusive (<)",
+        "unlimitedPlaceholder": "Unlimited"
+      },
+      "validation": {
+        "nameRequired": "Please enter an antibiotic name!",
+        "groupRequired": "Please select an antibiotic group!",
+        "categoryRequired": "Please select an AWaRe classification!",
+        "routesRequired": "Select at least one administration route!",
+        "dosagesRequired": "Please enter at least one dosage for this route!",
+        "routeRequired": "Please select a route of administration!",
+        "doseRequired": "Please enter a dosage!",
+        "minNumber": "Min value must be a number!",
+        "minNonNegative": "Min value must be a non-negative number!",
+        "maxNumber": "Max value must be a number!",
+        "maxNonNegative": "Max value must be a non-negative number!",
+        "minLessThanMax": "Min value must be less than Max!",
+        "hasStandardDose": "Route {route} already has a standard dose!",
+        "crclOverlap": "CrCl range [{min} - {max}] overlaps with an existing CrCl range for route {route}!"
+      },
+      "table": {
+        "colName": "Antibiotic Name",
+        "colCategory": "AWaRe Classification",
+        "colGroup": "Group",
+        "colDosages": "Dosage",
+        "filterBy": "Filter by",
+        "clearFilter": "Clear all filters",
+        "empty": "No antibiotics found."
+      },
+      "detail": {
+        "title": "Antibiotic Details",
+        "groupInfo": "Group Information",
+        "parentGroup": "Parent Group",
+        "noDescription": "No description available.",
+        "dosages": "Dosages",
+        "noDosages": "No dosage data available.",
+        "route": "Route",
+        "dose": "Dose",
+        "crcl": "CrCl (mL/min)",
+        "allCrcl": "All levels",
+        "standardDose": "Standard Dose",
+        "back": "Back to List",
+        "addDosage": "Add Dosage"
+      },
+      "toast": {
+        "createSuccess": "New antibiotic added successfully!",
+        "createError": "An error occurred while adding the antibiotic.",
+        "updateSuccess": "Antibiotic updated successfully!",
+        "updateError": "An error occurred while updating the antibiotic.",
+        "deleteSuccess": "Deleted antibiotic \"{name}\"!",
+        "deleteError": "Failed to delete this antibiotic.",
+        "createDosageSuccess": "Dosage added successfully!",
+        "createDosageError": "An error occurred while adding dosage.",
+        "updateDosageSuccess": "Dosage updated successfully!",
+        "updateDosageError": "An error occurred while updating dosage.",
+        "deleteDosageSuccess": "Dosage deleted successfully!",
+        "deleteDosageError": "Failed to delete this dosage.",
+        "cannotDeleteTitle": "Cannot Delete",
+        "cannotDeleteHasCrcl": "Route {route} contains CrCl-adjusted doses. You must delete all CrCl doses before deleting this standard dose.",
+        "cannotDeleteMinStandard": "An antibiotic must have at least 1 standard dose."
+      }
+    },
+    "antibioticGroups": {
+      "title": "Antibiotic Groups",
+      "description": "Manage list of antibiotic groups and families.",
+      "addButton": "Add New Group",
+      "dialog": {
+        "createTitle": "Add Antibiotic Group",
+        "updateTitle": "Update Antibiotic Group"
+      },
+      "alert": {
+        "deleteTitle": "Confirm Delete",
+        "deleteConfirmMsg": "Are you sure you want to delete antibiotic group \"{name}\"?",
+        "deleting": "Deleting..."
+      },
+      "form": {
+        "nameLabel": "Group Name",
+        "namePlaceholder": "Enter group name...",
+        "parentLabel": "Parent Group (Optional)",
+        "noParentOption": "-- No parent group --",
+        "descriptionLabel": "Detailed Description",
+        "descriptionPlaceholder": "Enter description about antibacterial spectrum, ADR,..."
+      },
+      "validation": {
+        "nameRequired": "Please enter group name!",
+        "descriptionRequired": "Please enter group description!"
+      },
+      "table": {
+        "colName": "Group Name",
+        "colParent": "Parent Group",
+        "colDescription": "Description",
+        "filterData": "Filter Data",
+        "filterByParent": "By parent group",
+        "clearFilter": "Clear Filter",
+        "noDescription": "No description provided.",
+        "empty": "No antibiotic groups found."
+      },
+      "toast": {
+        "createSuccess": "Antibiotic group added successfully!",
+        "createError": "Error adding antibiotic group.",
+        "updateSuccess": "Antibiotic group updated successfully!",
+        "updateError": "Error updating antibiotic group.",
+        "deleteSuccess": "Deleted group \"{name}\"!",
+        "deleteError": "Error deleting antibiotic group (may be in use)."
+      }
+    },
+    "pathogens": {
+      "title": "Pathogens",
+      "description": "Manage pathogens list (bacteria, viruses, etc.).",
+      "addButton": "Add Pathogen",
+      "dialog": {
+        "createTitle": "Add New Pathogen",
+        "updateTitle": "Update Pathogen"
+      },
+      "alert": {
+        "deleteTitle": "Confirm Delete",
+        "deleteConfirmMsg": "Are you sure you want to delete pathogen \"{name}\"?",
+        "deleting": "Deleting..."
+      },
+      "form": {
+        "nameLabel": "Pathogen Name (Bacteria/Virus)",
+        "namePlaceholder": "e.g. SARS-CoV-2",
+        "descriptionLabel": "Detailed Description",
+        "descriptionPlaceholder": "Summary description of the pathogen...",
+        "isAtypicalLabel": "Is atypical bacteria (Atypical)"
+      },
+      "validation": {
+        "nameRequired": "Please enter pathogen name!",
+        "descriptionRequired": "Please enter description!"
+      },
+      "table": {
+        "colName": "Pathogen Name",
+        "colType": "Type",
+        "colDescription": "Description",
+        "filterData": "Filter Data",
+        "allTypes": "All",
+        "typical": "Typical",
+        "atypical": "Atypical",
+        "empty": "No pathogens found."
+      },
+      "toast": {
+        "createSuccess": "Pathogen added successfully!",
+        "createError": "Error adding pathogen.",
+        "updateSuccess": "Pathogen updated successfully!",
+        "updateError": "Error updating pathogen.",
+        "deleteSuccess": "Deleted pathogen \"{name}\"!",
+        "deleteError": "Cannot delete this pathogen."
+      }
+    }
+  }
+}

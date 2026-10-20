@@ -1,26 +1,183 @@
 @import 'tailwindcss';
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-    --background: #ffffff;
-    --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
-    --font-sans: var(--font-geist-sans);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-surface: var(--surface);
+    --color-surface-secondary: var(--surface-secondary);
+    --color-surface-tertiary: var(--surface-tertiary);
+    --color-on-primary: var(--on-primary);
+    --color-text-primary: var(--text-primary);
+    --color-text-secondary: var(--text-secondary);
+    --color-text-tertiary: var(--text-tertiary);
+    --color-border-subtle: var(--border-subtle);
+    --color-border-default: var(--border-default);
+    --color-border-strong: var(--border-strong);
+    
+    --color-icon-default: var(--icon-default);
+    --color-icon-muted: var(--icon-muted);
+    --color-icon-primary: var(--icon-primary);
+    --color-icon-inverse: var(--icon-inverse);
+
+    --color-success: var(--success);
+    --color-warning: var(--warning);
+    --color-error: var(--error);
+    --color-info: var(--info);
+    
+    --color-overlay: var(--overlay);
+    --color-divider-overlay: var(--divider-overlay);
+
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+
+    --font-sans: 'Inter', sans-serif;
     --font-mono: var(--font-geist-mono);
+    --font-heading: var(--font-sans);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
-    }
+:root {
+    --background: #F7F9F9;
+    --foreground: #0F1419;
+    --surface: #FFFFFF;
+    --surface-secondary: #EFF3F4;
+    --surface-tertiary: #E7ECEE;
+    
+    --primary: #1D9BF0;
+    --on-primary: #FFFFFF;
+    
+    --text-primary: #0F1419;
+    --text-secondary: #536471;
+    --text-tertiary: #6E7C87;
+    
+    --border-subtle: #EFF3F4;
+    --border-default: #DCE3E6;
+    --border-strong: #B8C4CA;
+    
+    --icon-default: #0F1419;
+    --icon-muted: #536471;
+    --icon-primary: #1D9BF0;
+    --icon-inverse: #FFFFFF;
+
+    --info: #0EA5E9;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;  
+
+    --overlay: rgba(255, 255, 255, 0.72);
+    --divider-overlay: rgba(0, 0, 0, 0.08);
+
+    --card: var(--surface);
+    --card-foreground: var(--text-primary);
+    --popover: var(--surface);
+    --popover-foreground: var(--text-primary);
+    
+    --primary-foreground: var(--on-primary);
+    
+    --secondary: var(--surface-secondary);
+    --secondary-foreground: var(--text-primary);
+    
+    --muted: var(--surface-secondary);
+    --muted-foreground: var(--text-secondary);
+    
+    --accent: var(--surface-tertiary);
+    --accent-foreground: var(--text-primary);
+    
+    --destructive: var(--error);
+    --destructive-foreground: #FFFFFF;
+    
+    --border: var(--border-default);
+    --input: var(--border-default);
+    --ring: var(--primary);
+
+    --radius: 0.5rem;
+
+    --sidebar: var(--surface-secondary);
+    --sidebar-foreground: var(--text-primary);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--on-primary);
+    --sidebar-accent: var(--surface-tertiary);
+    --sidebar-accent-foreground: var(--text-primary);
+    --sidebar-border: var(--border-subtle);
+    --sidebar-ring: var(--ring);
+
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
 }
 
-body {
-    background: var(--background);
-    color: var(--foreground);
-    font-family: Arial, Helvetica, sans-serif;
+.dark {
+    --background: #000000;
+    --foreground: #FFFFFF;
+    --surface: #1C1C1E;
+    --surface-secondary: #2C2C2E;
+    --surface-tertiary: #38383A;
+    
+    --primary: #1D9BF0;
+    --on-primary: #FFFFFF;
+    
+    --text-primary: #FFFFFF;
+    --text-secondary: #8B98A5;
+    --text-tertiary: #A7B0B7;
+    
+    --border-subtle: #2C2C2E;
+    --border-default: #38383A;
+    --border-strong: #545456;
+    
+    --icon-default: #FFFFFF;
+    --icon-muted: #8B98A5;
+    --icon-primary: #1D9BF0;
+    --icon-inverse: #FFFFFF;
+
+    --overlay: rgba(255, 255, 255, 0.08);
+    --divider-overlay: rgba(255, 255, 255, 0.16);
+
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
