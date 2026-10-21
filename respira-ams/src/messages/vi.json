@@ -34,7 +34,7 @@
       "antibioticGroups": "Nhóm kháng sinh",
       "antibiotics": "Kháng sinh",
       "pathogens": "Tác nhân gây bệnh",
-      "suspectedCauses": "Tác nhân nghi ngờ",
+      "suspectedCauses": "Nguyên nhân nghi ngờ",
       "treatments": "Phác đồ điều trị",
       "clinicalVariables": "Biến số lâm sàng",
       "criteria": "Tiêu chí",
@@ -231,6 +231,58 @@
         "updateError": "Lỗi khi cập nhật tác nhân.",
         "deleteSuccess": "Đã xóa tác nhân \"{name}\"!",
         "deleteError": "Không thể xóa tác nhân này."
+      }
+    },
+    "suspectedCauses": {
+      "title": "Nguyên Nhân Nghi Ngờ",
+      "description": "Quản lý, phân loại tác nhân gây bệnh theo mức độ và nơi điều trị.",
+      "addButton": "Thêm nguyên nhân",
+      "dialog": {
+        "createTitle": "Thêm nguyên nhân mới",
+        "updateTitle": "Cập nhật nguyên nhân"
+      },
+      "alert": {
+        "deleteTitle": "Xác nhận xóa",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa nguyên nhân nghi ngờ do \"{name}\" gây ra không?",
+        "deleting": "Đang xóa..."
+      },
+      "form": {
+        "pathogenLabel": "Tác nhân gây bệnh",
+        "pathogenPlaceholder": "Chọn tác nhân...",
+        "severityLabel": "Mức độ nghiêm trọng (Severity)",
+        "severityPlaceholder": "Chọn mức độ...",
+        "treatmentSiteLabel": "Nơi điều trị (Treatment Site)",
+        "treatmentSitePlaceholder": "Chọn nơi điều trị...",
+        "severityMild": "Nhẹ (Mild)",
+        "severityModerate": "Trung bình (Moderate)",
+        "severitySevere": "Nặng (Severe)",
+        "siteOutpatient": "Ngoại trú (Outpatient)",
+        "siteInpatient": "Nội trú (Inpatient)",
+        "siteICU": "Hồi sức tích cực (ICU)"
+      },
+      "validation": {
+        "pathogenRequired": "Vui lòng chọn tác nhân gây bệnh!",
+        "severityRequired": "Vui lòng chọn mức độ nghiêm trọng!",
+        "treatmentSiteRequired": "Vui lòng chọn nơi điều trị!"
+      },
+      "table": {
+        "colPathogen": "Tác nhân gây bệnh",
+        "colSeverity": "Mức độ nghiêm trọng",
+        "colSite": "Nơi điều trị",
+        "filterData": "Bộ lọc mở rộng",
+        "filterByPathogen": "Theo tác nhân",
+        "filterBySeverity": "Theo mức độ",
+        "filterBySite": "Theo nơi điều trị",
+        "clearFilter": "Xóa tất cả bộ lọc",
+        "empty": "Không tìm thấy dữ liệu nguyên nhân nghi ngờ nào."
+      },
+      "toast": {
+        "createSuccess": "Thêm nguyên nhân nghi ngờ thành công!",
+        "createError": "Có lỗi xảy ra khi thêm nguyên nhân nghi ngờ.",
+        "updateSuccess": "Cập nhật nguyên nhân thành công!",
+        "updateError": "Có lỗi xảy ra khi cập nhật nguyên nhân.",
+        "deleteSuccess": "Đã xóa nguyên nhân nghi ngờ!",
+        "deleteError": "Có lỗi xảy ra khi xóa nguyên nhân."
       }
     }
   }

@@ -78,11 +78,11 @@ export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: Antibiotics
             )}
             <Table className="border-border">
                 <TableHeader>
-                    <TableRow className="border-border hover:bg-transparent">
-                        <TableHead className="text-muted-foreground">{t("table.colName")}</TableHead>
-                        <TableHead className="text-muted-foreground">{t("table.colCategory")}</TableHead>
-                        <TableHead className="text-muted-foreground">{t("table.colGroup")}</TableHead>
-                        <TableHead className="overflow-visible py-3 text-muted-foreground">
+                    <TableRow className="border-border hover:bg-transparent ">
+                        <TableHead className="text-muted-foreground font-semibold">{t("table.colName")}</TableHead>
+                        <TableHead className="text-muted-foreground font-semibold">{t("table.colCategory")}</TableHead>
+                        <TableHead className="text-muted-foreground font-semibold">{t("table.colGroup")}</TableHead>
+                        <TableHead className="overflow-visible text-muted-foreground text-right font-semibold">
                             <div className="flex items-center justify-end gap-2">
                                 {tCommon("actions")}
                                 <DropdownMenu>
@@ -90,7 +90,7 @@ export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: Antibiotics
                                         <Button variant="ghost" size="icon" className="relative hover:bg-accent">
                                             <ListFilter className="h-4 w-4" />
                                             {activeFilterCount > 0 && (
-                                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
                                                     {activeFilterCount}
                                                 </span>
                                             )}

@@ -232,6 +232,58 @@
         "deleteSuccess": "Deleted pathogen \"{name}\"!",
         "deleteError": "Cannot delete this pathogen."
       }
+    },
+    "suspectedCauses": {
+      "title": "Suspected Causes",
+      "description": "Manage and classify pathogens by severity and treatment site.",
+      "addButton": "Add Suspected Cause",
+      "dialog": {
+        "createTitle": "Add New Suspected Cause",
+        "updateTitle": "Update Suspected Cause"
+      },
+      "alert": {
+        "deleteTitle": "Confirm Delete",
+        "deleteConfirmMsg": "Are you sure you want to delete the suspected cause caused by \"{name}\"?",
+        "deleting": "Deleting..."
+      },
+      "form": {
+        "pathogenLabel": "Pathogen",
+        "pathogenPlaceholder": "Select pathogen...",
+        "severityLabel": "Severity",
+        "severityPlaceholder": "Select severity...",
+        "treatmentSiteLabel": "Treatment Site",
+        "treatmentSitePlaceholder": "Select treatment site...",
+        "severityMild": "Mild",
+        "severityModerate": "Moderate",
+        "severitySevere": "Severe",
+        "siteOutpatient": "Outpatient",
+        "siteInpatient": "Inpatient",
+        "siteICU": "Intensive Care Unit (ICU)"
+      },
+      "validation": {
+        "pathogenRequired": "Please select a pathogen!",
+        "severityRequired": "Please select severity!",
+        "treatmentSiteRequired": "Please select a treatment site!"
+      },
+      "table": {
+        "colPathogen": "Pathogen",
+        "colSeverity": "Severity",
+        "colSite": "Treatment Site",
+        "filterData": "Advanced Filters",
+        "filterByPathogen": "By Pathogen",
+        "filterBySeverity": "By Severity",
+        "filterBySite": "By Treatment Site",
+        "clearFilter": "Clear All Filters",
+        "empty": "No suspected cause data found."
+      },
+      "toast": {
+        "createSuccess": "Suspected cause added successfully!",
+        "createError": "An error occurred while adding suspected cause.",
+        "updateSuccess": "Suspected cause updated successfully!",
+        "updateError": "An error occurred while updating suspected cause.",
+        "deleteSuccess": "Suspected cause deleted successfully!",
+        "deleteError": "An error occurred while deleting suspected cause."
+      }
     }
   }
 }
