@@ -52,7 +52,7 @@
         "updateDesc": "Chỉnh sửa thông tin kháng sinh."
       },
       "sheet": {
-        "deleteTitle": "Xóa Kháng sinh",
+        "deleteTitle": "Xác nhận xóa",
         "deleteDesc": "Thao tác này sẽ xóa kháng sinh khỏi hệ thống và không thể hoàn tác.",
         "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa kháng sinh \"{name}\" không?"
       },
@@ -187,7 +187,7 @@
         "updateSuccess": "Cập nhật nhóm kháng sinh thành công!",
         "updateError": "Lỗi khi cập nhật nhóm kháng sinh.",
         "deleteSuccess": "Đã xóa nhóm \"{name}\"!",
-        "deleteError": "Lỗi khi xóa nhóm kháng sinh (có thể do đang được sử dụng)."
+        "deleteError": "Lỗi khi xóa nhóm kháng sinh."
       }
     },
     "pathogens": {

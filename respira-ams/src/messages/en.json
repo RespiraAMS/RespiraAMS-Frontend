@@ -52,7 +52,7 @@
         "updateDesc": "Edit antibiotic details."
       },
       "sheet": {
-        "deleteTitle": "Delete Antibiotic",
+        "deleteTitle": "Confirm Delete",
         "deleteDesc": "This action will delete the antibiotic from the system and cannot be undone.",
         "deleteConfirmMsg": "Are you sure you want to delete the antibiotic \"{name}\"?"
       },
@@ -187,7 +187,7 @@
         "updateSuccess": "Antibiotic group updated successfully!",
         "updateError": "Error updating antibiotic group.",
         "deleteSuccess": "Deleted group \"{name}\"!",
-        "deleteError": "Error deleting antibiotic group (may be in use)."
+        "deleteError": "Error deleting antibiotic group."
       }
     },
     "pathogens": {

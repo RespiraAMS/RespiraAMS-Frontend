@@ -62,7 +62,7 @@ export function DeleteAntibioticSheet({
                         className="gap-2"
                     >
                         {isDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {tCommon("confirmDelete")}
+                        {tCommon("delete")}
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>

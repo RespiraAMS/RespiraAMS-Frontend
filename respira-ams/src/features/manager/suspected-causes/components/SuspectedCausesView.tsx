@@ -62,7 +62,7 @@ export function SuspectedCausesView() {
 					closeModal();
 					toast.success(t("toast.createSuccess"));
 				},
-				onError: (error) => toast.error(t("toast.createError: " + error.message)),
+				onError: (error) => toast.error(t("toast.createError") + " " + error.message),
 			});
 		} else if (modalMode === "update" && selected) {
 			updateMutation.mutate(
@@ -72,7 +72,7 @@ export function SuspectedCausesView() {
 						closeModal();
 						toast.success(t("toast.updateSuccess"));
 					},
-					onError: (error) => toast.error(t("toast.updateError: " + error.message)),
+					onError: (error) => toast.error(t("toast.updateError") + " " + error.message),
 				}
 			);
 		}
@@ -85,7 +85,7 @@ export function SuspectedCausesView() {
 					setIsDeleteOpen(false);
 					toast.success(t("toast.deleteSuccess"));
 				},
-				onError: (error) => toast.error(t("toast.deleteError: " + error.message)),
+				onError: (error) => toast.error(t("toast.deleteError") + " " + error.message),
 			});
 		}
 	};

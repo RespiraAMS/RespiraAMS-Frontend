@@ -56,8 +56,8 @@ export function AntibioticsView() {
 					closeModal();
 					toast.success(t("toast.createSuccess"));
 				},
-				onError: () => {
-					toast.error(t("toast.createError"));
+				onError: (error) => {
+					toast.error(t("toast.createError") + " " + error.message);
 				},
 			});
 		} else if (modalMode === "update" && selected) {
@@ -68,8 +68,8 @@ export function AntibioticsView() {
 						closeModal();
 						toast.success(t("toast.updateSuccess"));
 					},
-					onError: () => {
-						toast.error(t("toast.updateError"));
+					onError: (error) => {
+						toast.error(t("toast.updateError") + " " + error.message);
 					},
 				}
 			);
@@ -83,8 +83,8 @@ export function AntibioticsView() {
 					setIsDeleteOpen(false);
 					toast.success(t("toast.deleteSuccess", { name: selected.name }));
 				},
-				onError: () => {
-					toast.error(t("toast.deleteError"));
+				onError: (error) => {
+					toast.error(t("toast.deleteError") + " " + error.message);
 				},
 			});
 		}
