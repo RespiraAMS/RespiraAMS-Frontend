@@ -6,6 +6,7 @@ import { Download } from "lucide-react";
 const PAGE_TITLES: Record<string, string> = {
 	"/doctor/patients": "Danh sách bệnh nhân",
 	"/doctor/pathogens": "Danh sách tác nhân gây bệnh",
+	"/doctor/antibiotic-groups": "Danh sách nhóm kháng sinh",
 	"/doctor/info": "Danh sách kháng sinh",
 	"/doctor/diagnose": "Chẩn đoán lâm sàng",
 	"/doctor/calculator": "Máy tính y khoa",

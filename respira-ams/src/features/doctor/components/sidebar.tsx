@@ -13,6 +13,7 @@ import {
 	User,
 	Search,
 	Bug,
+	Layers,
 	CheckCircle2,
 	Calculator,
 	BarChart3,
@@ -49,6 +50,11 @@ export const DOCTOR_NAV_ITEMS: NavItem[] = [
 		icon: Bug,
 		label: "Tác nhân gây bệnh",
 		href: "/doctor/pathogens",
+	},
+	{
+		icon: Layers,
+		label: "Nhóm kháng sinh",
+		href: "/doctor/antibiotic-groups",
 	},
 	{
 		icon: CheckCircle2,
