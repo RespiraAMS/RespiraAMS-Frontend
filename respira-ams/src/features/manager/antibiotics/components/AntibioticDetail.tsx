@@ -25,7 +25,7 @@ function formatCrCl(
 ) {
 	if (!crcl) return null;
 	const { min, max, isMinExclusive, isMaxExclusive } = crcl;
-	const isMinInf = min <= -MAX_DECIMAL || min === 0;
+	const isMinInf = min <= -MAX_DECIMAL;
 	const isMaxInf = max >= MAX_DECIMAL;
 	if (isMinInf && isMaxInf) return allLabel;
 	if (isMaxInf) return `${isMinExclusive ? ">" : ">="} ${min}`;
