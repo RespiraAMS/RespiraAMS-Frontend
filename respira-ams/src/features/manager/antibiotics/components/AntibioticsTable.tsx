@@ -145,7 +145,7 @@ export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: Antibiotics
                         </TableRow>
                     ) : (
                         items.map((item) => (
-                            <TableRow key={item.id} className="border-border hover:bg-accent/50">
+                            <TableRow key={item.id} className="border-border hover:bg-accent/50" onClick={() => onViewDetail(item.id)}>
                                 <TableCell className="font-medium align-middle">
                                     <span className="text-primary font-semibold">{item.name}</span>
                                 </TableCell>
