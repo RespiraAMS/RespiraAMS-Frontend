@@ -430,6 +430,61 @@
       "formatter": {
         "noCondition": "Không có điều kiện phụ thuộc."
       }
+    },
+    "criteria": {
+      "title": "Quản lý Tiêu Chí (Criteria)",
+      "description": "Định nghĩa các tiêu chuẩn đánh giá từ biến số lâm sàng.",
+      "addButton": "Thêm tiêu chí mới",
+      "dialog": {
+        "createTitle": "Thêm Tiêu Chí Mới",
+        "updateTitle": "Cập Nhật Tiêu Chí"
+      },
+      "table": {
+        "colName": "Tên Tiêu Chí",
+        "colFormula": "Công thức (Formula)",
+        "empty": "Không tìm thấy dữ liệu tiêu chí nào."
+      },
+      "form": {
+        "nameLabel": "Tên Tiêu Chí (Name)",
+        "namePlaceholder": "Ví dụ: Giới tính nữ, Bệnh nội khoa nặng...",
+        "formulaLabel": "Công thức (Formula)"
+      },
+      "detail": {
+        "notFound": "Không tìm thấy tiêu chí.",
+        "formulaTitle": "Công thức (Formula)",
+        "usageTitle": "Nơi sử dụng Tiêu chí này",
+        "checkingRefs": "Đang kiểm tra liên kết...",
+        "unlinked": "Tiêu chí này hiện chưa được liên kết ở đâu.",
+        "pathogensTitle": "Nguy cơ nhiễm",
+        "noPathogens": "Không có Nguy cơ nhiễm tác nhân nào.",
+        "metricsTitle": "Thang đo lâm sàng",
+        "noMetrics": "Không có thang đo nào.",
+        "dialogUpdateTitle": "Cập nhật Tiêu Chí",
+        "toastUpdateSuccess": "Cập nhật tiêu chí thành công!",
+        "toastUpdateError": "Lỗi cập nhật: {error}"
+      },
+      "deleteAlert": {
+        "title": "Xác nhận xóa tiêu chí",
+        "description": "Bạn muốn xóa tiêu chí <b>\"{name}\"</b>. Hành động này không thể hoàn tác.",
+        "refHeader": "Tiêu chí tham chiếu:",
+        "checkingRefs": "Đang kiểm tra liên kết hệ thống...",
+        "warningHeader": "CẢNH BÁO: Tiêu chí này đang được sử dụng ở các dữ liệu sau:",
+        "pathogensLabel": "Nguy cơ nhiễm:",
+        "metricsLabel": "Thang đo lâm sàng:",
+        "safeToDelete": "Tiêu chí này hiện không liên kết ở đâu. Có thể xóa an toàn.",
+        "toastSuccess": "Đã xóa tiêu chí \"{name}\" thành công!",
+        "toastError": "Không thể xóa: {error}"
+      },
+      "validation": {
+        "nameRequired": "Bắt buộc nhập tên tiêu chí!",
+        "formulaRequired": "Biểu thức công thức không được để trống!"
+      },
+      "toast": {
+        "createSuccess": "Thêm mới tiêu chí thành công!",
+        "createError": "Đã xảy ra lỗi khi thêm tiêu chí.",
+        "updateSuccess": "Cập nhật tiêu chí thành công!",
+        "updateError": "Đã xảy ra lỗi khi cập nhật tiêu chí."
+      }
     }
   }
 }

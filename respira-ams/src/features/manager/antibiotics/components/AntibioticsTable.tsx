@@ -145,7 +145,7 @@ export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: Antibiotics
                         </TableRow>
                     ) : (
                         items.map((item) => (
-                            <TableRow key={item.id} className="border-border hover:bg-accent/50" onClick={() => onViewDetail(item.id)}>
+                            <TableRow key={item.id} className="border-border hover:bg-accent/50 cursor-pointer" onClick={() => onViewDetail(item.id)}>
                                 <TableCell className="font-medium align-middle">
                                     <span className="text-primary font-semibold">{item.name}</span>
                                 </TableCell>
@@ -157,13 +157,37 @@ export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: Antibiotics
                                 </TableCell>
                                 <TableCell className="align-middle whitespace-normal">
                                     <div className="flex gap-1 justify-end">
-                                        <Button variant="ghost" size="icon" onClick={() => onViewDetail(item.id)} className="hover:bg-accent text-foreground">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onViewDetail(item.id);
+                                            }}
+                                            className="hover:bg-accent text-foreground"
+                                        >
                                             <Eye className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => onEdit(item)} className="hover:bg-accent text-foreground">
+									    </Button>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            onClick={(e) => {
+											    e.stopPropagation();
+											    onEdit(item);
+										    }} 
+                                            className="hover:bg-accent text-foreground"
+                                        >
                                             <Edit className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => onDelete(item)} className="hover:bg-destructive/10">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            onClick={(e) => {
+											    e.stopPropagation();
+											    onDelete(item);
+										    }} 
+                                            className="hover:bg-destructive/10"
+                                        >
                                             <Trash className="h-4 w-4 text-destructive" />
                                         </Button>
                                     </div>

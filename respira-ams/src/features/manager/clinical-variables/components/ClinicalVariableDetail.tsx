@@ -55,7 +55,7 @@ export function ClinicalVariableDetail({ id }: { id: string }) {
 					setIsUpdateOpen(false);
 					toast.success(t("toast.updateSuccess"));
 				},
-				onError: () => toast.error(t("toast.updateError")),
+				onError: (error) => toast.error(t("toast.updateError") + " " + error.message),
 			}
 		);
 	};
@@ -66,7 +66,7 @@ export function ClinicalVariableDetail({ id }: { id: string }) {
 				toast.success(t("toast.deleteSuccess"));
 				router.push("/manage/clinical-variables");
 			},
-			onError: () => toast.error(t("toast.deleteError")),
+			onError: (error) => toast.error(t("toast.deleteError") + " " + error.message),
 		});
 	};
 

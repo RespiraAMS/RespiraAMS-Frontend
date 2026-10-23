@@ -49,7 +49,7 @@ export function ClinicalVariablesView() {
 				setIsCreateOpen(false);
 				toast.success(t("toast.createSuccess"));
 			},
-			onError: () => toast.error(t("toast.createError")),
+			onError: (error) => toast.error(t("toast.createError") + " " + error.message),
 		});
 	};
 
@@ -67,8 +67,8 @@ export function ClinicalVariablesView() {
 				setSelectedItem(null);
 				toast.success(t("toast.deleteSuccess"));
 			},
-			onError: () => {
-				toast.error(t("toast.deleteError"));
+			onError: (error) => {
+				toast.error(t("toast.deleteError") + " " + error.message);
 			},
 		});
 	};

@@ -430,6 +430,61 @@
       "formatter": {
         "noCondition": "No prerequisite conditions."
       }
+    },
+    "criteria": {
+      "title": "Criteria Management",
+      "description": "Define evaluation standards based on clinical variables.",
+      "addButton": "Add New Criteria",
+      "dialog": {
+        "createTitle": "Add New Criteria",
+        "updateTitle": "Update Criteria"
+      },
+      "table": {
+        "colName": "Criteria Name",
+        "colFormula": "Formula",
+        "empty": "No criteria data found."
+      },
+      "form": {
+        "nameLabel": "Criteria Name",
+        "namePlaceholder": "e.g., Female gender, Severe medical condition...",
+        "formulaLabel": "Formula"
+      },
+      "detail": {
+        "notFound": "Criteria not found.",
+        "formulaTitle": "Formula",
+        "usageTitle": "Criteria Usage Locations",
+        "checkingRefs": "Checking references...",
+        "unlinked": "This criteria is currently not linked anywhere.",
+        "pathogensTitle": "Risk Factor",
+        "noPathogens": "No risk factors linked.",
+        "metricsTitle": "Clinical Metric",
+        "noMetrics": "No clinical metric scales linked.",
+        "dialogUpdateTitle": "Update Criteria",
+        "toastUpdateSuccess": "Criteria updated successfully!",
+        "toastUpdateError": "Update error: {error}"
+      },
+      "deleteAlert": {
+        "title": "Confirm Criteria Deletion",
+        "description": "You are about to delete criteria <b>\"{name}\"</b>. This action cannot be undone.",
+        "refHeader": "Referenced Criteria:",
+        "checkingRefs": "Checking system linkages...",
+        "warningHeader": "WARNING: This criteria is currently used in the following data:",
+        "pathogensLabel": "Risk Factor:",
+        "metricsLabel": "Clinical Metric:",
+        "safeToDelete": "This criteria is not linked anywhere. It can be safely deleted.",
+        "toastSuccess": "Criteria \"{name}\" deleted successfully!",
+        "toastError": "Could not delete: {error}"
+      },
+      "validation": {
+        "nameRequired": "Criteria name is required!",
+        "formulaRequired": "Formula expression cannot be empty!"
+      },
+      "toast": {
+        "createSuccess": "Criteria added successfully!",
+        "createError": "An error occurred while adding criteria.",
+        "updateSuccess": "Criteria updated successfully!",
+        "updateError": "An error occurred while updating criteria."
+      }
     }
   }
 }

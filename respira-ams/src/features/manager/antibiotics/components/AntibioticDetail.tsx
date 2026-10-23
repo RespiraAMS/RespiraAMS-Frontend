@@ -16,6 +16,7 @@ import { AntibioticForm } from "./AntibioticForm";
 import { DeleteAntibioticSheet } from "./DeleteAntibioticSheet";
 import { DosageFormModal } from "./DosageFormModal";
 import { DeleteDosageDialog } from "./DeleteDosageDialog";
+import { error } from "console";
 
 const MAX_DECIMAL = 79228162514264337593543950335;
 
@@ -152,8 +153,8 @@ export function AntibioticDetail({ id }: AntibioticDetailProps) {
 						setIsDosageModalOpen(false);
 						toast.success(t("toast.updateDosageSuccess"));
 					},
-					onError: () => {
-						toast.error(t("toast.updateDosageError"));
+					onError: (error) => {
+						toast.error(t("toast.updateDosageError") + " " + error.message);
 					},
 				}
 			);
@@ -163,8 +164,8 @@ export function AntibioticDetail({ id }: AntibioticDetailProps) {
 					setIsDosageModalOpen(false);
 					toast.success(t("toast.createDosageSuccess"));
 				},
-				onError: () => {
-					toast.error(t("toast.createDosageError"));
+				onError: (error) => {
+					toast.error(t("toast.createDosageError") + " " + error.message);
 				},
 			});
 		}
