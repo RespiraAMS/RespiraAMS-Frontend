@@ -284,6 +284,152 @@
         "deleteSuccess": "Đã xóa nguyên nhân nghi ngờ!",
         "deleteError": "Có lỗi xảy ra khi xóa nguyên nhân."
       }
+    },
+    "clinicalVariables": {
+      "title": "Biến Số Lâm Sàng",
+      "description": "Danh sách cấu hình các biến số thu thập từ bệnh nhân.",
+      "addButton": "Thêm biến số mới",
+      "notFound": "Không tìm thấy thông tin biến số.",
+      "dialog": {
+        "createTitle": "Thêm biến số lâm sàng mới",
+        "updateTitle": "Cập nhật biến số"
+      },
+      "alert": {
+        "deleteTitle": "Xác nhận xóa",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa biến số \"{name}\" không? Hành động này không thể hoàn tác.",
+        "deleting": "Đang xóa..."
+      },
+      "categories": {
+        "personal": "Thông tin cá nhân",
+        "clinical": "Lâm sàng",
+        "paraclinical": "Cận lâm sàng"
+      },
+      "valueTypes": {
+        "numeric": "Nhập số (Numeric)",
+        "boolean": "Đúng/Sai (Boolean)",
+        "categorical": "Phân loại (Categorical)"
+      },
+      "form": {
+        "nameLabel": "Tên biến số",
+        "namePlaceholder": "Ví dụ: Cân nặng",
+        "codeLabel": "Mã Code",
+        "codePlaceholder": "Ví dụ: WEIGHT",
+        "descriptionLabel": "Mô tả chi tiết",
+        "categoryLabel": "Phân loại nhóm (Category)",
+        "valueTypeLabel": "Kiểu dữ liệu (Type)",
+        "valueTypeImmutableNotice": "Không thể thay đổi kiểu dữ liệu sau khi tạo.",
+        "isRequiredLabel": "Bắt buộc nhập",
+        "rangeConfigTitle": "Cấu hình Ngưỡng (Range)",
+        "unitLabel": "Đơn vị đo lường",
+        "unitPlaceholder": "kg, cm, mmHg...",
+        "acceptedRangeLabel": "Ngưỡng cho phép (Accepted)",
+        "normalRangeLabel": "Ngưỡng bình thường (Normal)",
+        "optionalBadge": "Tùy chọn",
+        "categoricalConfigTitle": "Cấu hình các tùy chọn hợp lệ",
+        "optionPlaceholder": "Giá trị tùy chọn {index} (vd: MALE)",
+        "addOption": "Thêm tùy chọn",
+        "prerequisiteTitle": "Điều kiện tiên quyết (Prerequisite)"
+      },
+      "validation": {
+        "nameRequired": "Bắt buộc nhập tên biến số!",
+        "codeRequired": "Bắt buộc nhập mã code!",
+        "descriptionRequired": "Bắt buộc nhập mô tả!",
+        "atLeastOneOption": "Phải có ít nhất 1 giá trị tùy chọn!",
+        "optionNotEmpty": "Giá trị không được để trống!",
+        "minNotGreaterThanMax": "Min không được lớn hơn Max!",
+        "normalMinLessThanAccepted": "Normal Min không được nhỏ hơn Accepted Min!",
+        "normalMaxGreaterThanAccepted": "Normal Max không được vượt quá Accepted Max!"
+      },
+      "table": {
+        "colName": "Tên biến số",
+        "colCode": "Mã Code",
+        "colCategory": "Phân loại",
+        "colValueType": "Kiểu dữ liệu",
+        "colRequired": "Bắt buộc",
+        "filterData": "Lọc dữ liệu",
+        "filterByRequired": "Theo tính chất (Bắt buộc)",
+        "filterByCategory": "Theo nhóm (Category)",
+        "filterByValueType": "Theo kiểu dữ liệu",
+        "clearFilter": "Xóa tất cả bộ lọc",
+        "requiredTrue": "Bắt buộc điền",
+        "requiredFalse": "Tùy chọn",
+        "yes": "Có",
+        "no": "Không",
+        "empty": "Không tìm thấy biến số nào."
+      },
+      "detail": {
+        "generalInfo": "Thông Tin Chung",
+        "codeLabel": "Code",
+        "descriptionLabel": "Mô tả",
+        "categoryLabel": "Phân loại nhóm",
+        "valueTypeLabel": "Kiểu dữ liệu",
+        "requiredLabel": "Bắt buộc điền",
+        "unitLabel": "Đơn vị (Unit)",
+        "dataRules": "Quy tắc dữ liệu ({type})",
+        "acceptedRange": "Ngưỡng cho phép (Accepted)",
+        "normalRange": "Ngưỡng bình thường (Normal)",
+        "acceptedValues": "Các giá trị hợp lệ",
+        "booleanNotice": "Biến số chỉ nhận giá trị Đúng (True) hoặc Sai (False).",
+        "prerequisiteTitle": "Điều kiện tiên quyết (Prerequisite)"
+      },
+      "toast": {
+        "createSuccess": "Thêm biến số mới thành công!",
+        "createError": "Có lỗi xảy ra khi thêm biến số.",
+        "updateSuccess": "Cập nhật thành công!",
+        "updateError": "Cập nhật thất bại.",
+        "deleteSuccess": "Đã xóa biến số thành công!",
+        "deleteError": "Có lỗi xảy ra khi xóa biến số."
+      }
+    },
+    "prerequisite": {
+      "nodeTypes": {
+        "placeholder": "+ Thêm biểu thức...",
+        "none": "+ Hủy biểu thức",
+        "binary": "Phép tính / So sánh / Logic (Binary)",
+        "unary": "Phủ định (NOT)",
+        "variable": "Chọn Biến số (Variable)",
+        "constant": "Nhập Giá trị (Constant)",
+        "ternary": "If/Else (Ternary)"
+      },
+      "labels": {
+        "root": "Biểu thức gốc (Root)",
+        "left": "Vế trái (Left)",
+        "right": "Vế phải (Right)",
+        "operand": "Biểu thức bị phủ định (Operand)",
+        "condition": "Điều kiện (If)",
+        "then": "Trả về nếu Đúng (Then)",
+        "else": "Trả về nếu Sai (Else)"
+      },
+      "placeholders": {
+        "constant": "Nhập giá trị (true, 25.5, FEMALE)...",
+        "selectVariable": "-- Chọn biến số --"
+      },
+      "groups": {
+        "logic": "Logic",
+        "comparison": "So sánh",
+        "math": "Toán học"
+      },
+      "operators": {
+        "and": "VÀ (AND)",
+        "or": "HOẶC (OR)",
+        "eq": "Bằng (=)",
+        "ne": "Khác (≠)",
+        "gt": "Lớn hơn (>)",
+        "gte": "Lớn hơn/Bằng (≥)",
+        "lt": "Nhỏ hơn (<)",
+        "lte": "Nhỏ hơn/Bằng (≤)",
+        "add": "Cộng (+)",
+        "sub": "Trừ (-)",
+        "mul": "Nhân (×)",
+        "div": "Chia (÷)"
+      },
+      "actions": {
+        "wrapBinary": "Thêm vế phải",
+        "delete": "Xóa"
+      },
+      "formatter": {
+        "noCondition": "Không có điều kiện phụ thuộc."
+      }
     }
   }
 }

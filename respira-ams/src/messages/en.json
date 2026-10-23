@@ -284,6 +284,152 @@
         "deleteSuccess": "Suspected cause deleted successfully!",
         "deleteError": "An error occurred while deleting suspected cause."
       }
+    },
+    "clinicalVariables": {
+      "title": "Clinical Variables",
+      "description": "List of configured clinical variables collected from patients.",
+      "addButton": "Add New Variable",
+      "notFound": "Clinical variable information not found.",
+      "dialog": {
+        "createTitle": "Add New Clinical Variable",
+        "updateTitle": "Update Clinical Variable"
+      },
+      "alert": {
+        "deleteTitle": "Confirm Delete",
+        "deleteConfirmMsg": "Are you sure you want to delete variable \"{name}\"? This action cannot be undone.",
+        "deleting": "Deleting..."
+      },
+      "categories": {
+        "personal": "Personal Information",
+        "clinical": "Clinical",
+        "paraclinical": "Paraclinical"
+      },
+      "valueTypes": {
+        "numeric": "Numeric",
+        "boolean": "Boolean",
+        "categorical": "Categorical"
+      },
+      "form": {
+        "nameLabel": "Variable Name",
+        "namePlaceholder": "e.g., Weight",
+        "codeLabel": "Code",
+        "codePlaceholder": "e.g., WEIGHT",
+        "descriptionLabel": "Detailed Description",
+        "categoryLabel": "Category Group",
+        "valueTypeLabel": "Value Type",
+        "valueTypeImmutableNotice": "Value type cannot be changed after creation.",
+        "isRequiredLabel": "Required Field",
+        "rangeConfigTitle": "Range Configuration",
+        "unitLabel": "Measurement Unit",
+        "unitPlaceholder": "kg, cm, mmHg...",
+        "acceptedRangeLabel": "Accepted Range",
+        "normalRangeLabel": "Normal Range",
+        "optionalBadge": "Optional",
+        "categoricalConfigTitle": "Valid Options Configuration",
+        "optionPlaceholder": "Option value {index} (e.g., MALE)",
+        "addOption": "Add Option",
+        "prerequisiteTitle": "Prerequisite Condition"
+      },
+      "validation": {
+        "nameRequired": "Variable name is required!",
+        "codeRequired": "Code is required!",
+        "descriptionRequired": "Description is required!",
+        "atLeastOneOption": "At least one option is required!",
+        "optionNotEmpty": "Value cannot be empty!",
+        "minNotGreaterThanMax": "Min cannot be greater than Max!",
+        "normalMinLessThanAccepted": "Normal Min cannot be less than Accepted Min!",
+        "normalMaxGreaterThanAccepted": "Normal Max cannot exceed Accepted Max!"
+      },
+      "table": {
+        "colName": "Variable Name",
+        "colCode": "Code",
+        "colCategory": "Category",
+        "colValueType": "Value Type",
+        "colRequired": "Required",
+        "filterData": "Filter Data",
+        "filterByRequired": "By Required Status",
+        "filterByCategory": "By Category",
+        "filterByValueType": "By Value Type",
+        "clearFilter": "Clear All Filters",
+        "requiredTrue": "Required",
+        "requiredFalse": "Optional",
+        "yes": "Yes",
+        "no": "No",
+        "empty": "No clinical variables found."
+      },
+      "detail": {
+        "generalInfo": "General Information",
+        "codeLabel": "Code",
+        "descriptionLabel": "Description",
+        "categoryLabel": "Category Group",
+        "valueTypeLabel": "Value Type",
+        "requiredLabel": "Required Field",
+        "unitLabel": "Unit",
+        "dataRules": "Data Rules ({type})",
+        "acceptedRange": "Accepted Range",
+        "normalRange": "Normal Range",
+        "acceptedValues": "Valid Values",
+        "booleanNotice": "Variable only accepts True or False values.",
+        "prerequisiteTitle": "Prerequisite Condition"
+      },
+      "toast": {
+        "createSuccess": "New clinical variable added successfully!",
+        "createError": "An error occurred while adding variable.",
+        "updateSuccess": "Updated successfully!",
+        "updateError": "Update failed.",
+        "deleteSuccess": "Clinical variable deleted successfully!",
+        "deleteError": "An error occurred while deleting variable."
+      }
+    },
+    "prerequisite": {
+      "nodeTypes": {
+        "placeholder": "+ Add expression...",
+        "none": "+ Cancel expression",
+        "binary": "Operation / Comparison / Logic (Binary)",
+        "unary": "Negation (NOT)",
+        "variable": "Select Variable",
+        "constant": "Enter Value (Constant)",
+        "ternary": "If/Else (Ternary)"
+      },
+      "labels": {
+        "root": "Root Expression",
+        "left": "Left Operand",
+        "right": "Right Operand",
+        "operand": "Negated Expression (Operand)",
+        "condition": "Condition (If)",
+        "then": "Then (If True)",
+        "else": "Else (If False)"
+      },
+      "placeholders": {
+        "constant": "Enter value (true, 25.5, FEMALE)...",
+        "selectVariable": "-- Select variable --"
+      },
+      "groups": {
+        "logic": "Logic",
+        "comparison": "Comparison",
+        "math": "Arithmetic"
+      },
+      "operators": {
+        "and": "AND",
+        "or": "OR",
+        "eq": "Equals (=)",
+        "ne": "Not Equals (≠)",
+        "gt": "Greater than (>)",
+        "gte": "Greater or Equal (≥)",
+        "lt": "Less than (<)",
+        "lte": "Less or Equal (≤)",
+        "add": "Add (+)",
+        "sub": "Subtract (-)",
+        "mul": "Multiply (×)",
+        "div": "Divide (÷)"
+      },
+      "actions": {
+        "wrapBinary": "Add right side",
+        "delete": "Delete"
+      },
+      "formatter": {
+        "noCondition": "No prerequisite conditions."
+      }
     }
   }
 }
