@@ -87,15 +87,14 @@ export function CriteriaDetail({ id }: { id: string }) {
 					<Button
 						variant="outline"
 						onClick={() => setIsUpdateOpen(true)}
-						className="bg-card text-foreground border-border hover:bg-accent"
+						className="text-foreground border-border hover:bg-accent"
 					>
 						<Edit className="h-4 w-4 mr-2 text-primary" /> {tCommon("update")}
 					</Button>
 					<Button
 						variant="destructive"
 						onClick={() => setIsDeleteOpen(true)}
-						className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-					>
+					> 
 						<Trash className="h-4 w-4 mr-2" /> {tCommon("delete")}
 					</Button>
 				</div>

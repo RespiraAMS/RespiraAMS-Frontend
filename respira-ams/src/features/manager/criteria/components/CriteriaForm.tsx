@@ -112,7 +112,7 @@ export function CriteriaForm({ initialData, onSubmit, onCancel, isPending }: Cri
 			</div>
 
 			{/* Sticky Footer */}
-			<div className="flex justify-end gap-2 pt-4 border-t border-border sticky bottom-0 bg-popover/95 backdrop-blur py-4 -mx-2 px-2 z-10 text-popover-foreground">
+			<div className="flex justify-end gap-2 border-t border-border sticky bottom-0 py-4 -mx-2 px-2 bg-popover text-popover-foreground">
 				<Button
 					type="button"
 					variant="outline"
