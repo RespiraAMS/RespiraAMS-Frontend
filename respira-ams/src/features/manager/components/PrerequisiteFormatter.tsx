@@ -97,7 +97,7 @@ export function PrerequisiteFormatter({ formula }: PrerequisiteFormatterProps) {
 							key={index}
 							className="inline-flex items-center bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-md font-semibold text-[13px]"
 						>
-							<span className="mr-1 text-xs">📋</span> {trimmed}
+							{trimmed}
 						</span>
 					);
 				}

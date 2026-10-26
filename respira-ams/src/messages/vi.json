@@ -432,7 +432,7 @@
       }
     },
     "criteria": {
-      "title": "Quản lý Tiêu Chí (Criteria)",
+      "title": "Quản lý Tiêu Chí",
       "description": "Định nghĩa các tiêu chuẩn đánh giá từ biến số lâm sàng.",
       "addButton": "Thêm tiêu chí mới",
       "dialog": {
@@ -441,17 +441,17 @@
       },
       "table": {
         "colName": "Tên Tiêu Chí",
-        "colFormula": "Công thức (Formula)",
+        "colFormula": "Công thức",
         "empty": "Không tìm thấy dữ liệu tiêu chí nào."
       },
       "form": {
-        "nameLabel": "Tên Tiêu Chí (Name)",
+        "nameLabel": "Tên Tiêu Chí",
         "namePlaceholder": "Ví dụ: Giới tính nữ, Bệnh nội khoa nặng...",
-        "formulaLabel": "Công thức (Formula)"
+        "formulaLabel": "Công thức"
       },
       "detail": {
         "notFound": "Không tìm thấy tiêu chí.",
-        "formulaTitle": "Công thức (Formula)",
+        "formulaTitle": "Công thức",
         "usageTitle": "Nơi sử dụng Tiêu chí này",
         "checkingRefs": "Đang kiểm tra liên kết...",
         "unlinked": "Tiêu chí này hiện chưa được liên kết ở đâu.",
@@ -484,6 +484,52 @@
         "createError": "Đã xảy ra lỗi khi thêm tiêu chí.",
         "updateSuccess": "Cập nhật tiêu chí thành công!",
         "updateError": "Đã xảy ra lỗi khi cập nhật tiêu chí."
+      }
+    },
+    "riskFactors": {
+      "title": "Yếu tố nguy cơ",
+      "description": "Các yếu tố nguy cơ nhiễm khuẩn đặc biệt và kháng thuốc.",
+      "addButton": "Thêm yếu tố nguy cơ mới",
+      "dialog": {
+        "createTitle": "Thêm Yếu Tố Nguy Cơ",
+        "updateTitle": "Cập Nhật Yếu Tố Nguy Cơ",
+        "deleteTitle": "Xác nhận xóa",
+        "deleteDescription": "Bạn có chắc muốn xóa yếu tố nguy cơ của tác nhân <b>\"{pathogen}\"</b> và tiêu chí <b>\"{criterion}\"</b>?"
+      },
+      "table": {
+        "colPathogen": "Tác nhân",
+        "colCriterionName": "Tên Tiêu chí",
+        "colFormula": "Công thức Tiêu chí",
+        "filterTitle": "Lọc theo Mầm bệnh",
+        "allPathogens": "Tất cả Mầm bệnh",
+        "empty": "Không tìm thấy yếu tố nguy cơ nào."
+      },
+      "form": {
+        "pathogenLabel": "Tác Nhân",
+        "pathogenPlaceholder": "Chọn tác nhân...",
+        "pathogenSearch": "Tìm kiếm tác nhân...",
+        "pathogenEmpty": "Không tìm thấy tác nhân.",
+        "criterionLabel": "Tiêu chí",
+        "criterionPlaceholder": "Chọn hoặc gõ tìm tiêu chí...",
+        "criterionSearch": "Tìm kiếm tiêu chí...",
+        "criterionEmpty": "Không tìm thấy tiêu chí.",
+        "createNewCriterion": "Tạo tiêu chí mới",
+        "createCriteriaModalTitle": "Tạo Tiêu Chí Mới",
+        "loading": "Đang tải..."
+      },
+      "validation": {
+        "pathogenRequired": "Bắt buộc chọn tác nhân!",
+        "criterionRequired": "Bắt buộc chọn tiêu chí!"
+      },
+      "toast": {
+        "createSuccess": "Đã thêm yếu tố nguy cơ!",
+        "createError": "Lỗi thêm yếu tố nguy cơ: {error}",
+        "updateSuccess": "Cập nhật yếu tố nguy cơ thành công!",
+        "updateError": "Lỗi cập nhật yếu tố nguy cơ: {error}",
+        "deleteSuccess": "Đã xóa yếu tố nguy cơ!",
+        "deleteError": "Lỗi xóa yếu tố nguy cơ: {error}",
+        "createCriteriaSuccess": "Đã tạo tiêu chí mới!",
+        "createCriteriaError": "Lỗi khi tạo tiêu chí: {error}"
       }
     }
   }

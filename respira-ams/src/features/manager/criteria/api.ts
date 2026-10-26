@@ -39,11 +39,12 @@ export async function getCriteriaDetail(id: string): Promise<CriteriaDetail> {
     return result;
 }
 
-export async function createCriteria(data: CreateCriteriaRequest): Promise<void> {
-    await apiFetch(`${API_BASE_SERVER}${API_BASE}/criteria`, {
+export async function createCriteria(data: CreateCriteriaRequest): Promise<unknown> {
+    const result = await apiFetch<unknown>(`${API_BASE_SERVER}${API_BASE}/criteria`, {
         method: "POST",
         body: JSON.stringify(data, (key, value) => (value === null ? undefined : value)),
     });
+    return result;
 }
 
 export async function updateCriteria(id: string, data: UpdateCriteriaRequest): Promise<void> {

@@ -485,6 +485,52 @@
         "updateSuccess": "Criteria updated successfully!",
         "updateError": "An error occurred while updating criteria."
       }
+    },
+    "riskFactors": {
+      "title": "Risk Factors",
+      "description": "Specific infection risk factors and drug resistance indicators.",
+      "addButton": "Add New Risk Factor",
+      "dialog": {
+        "createTitle": "Add Risk Factor",
+        "updateTitle": "Update Risk Factor",
+        "deleteTitle": "Confirm Deletion",
+        "deleteDescription": "Are you sure you want to delete the risk factor for pathogen <b>\"{pathogen}\"</b> and criteria <b>\"{criterion}\"</b>?"
+      },
+      "table": {
+        "colPathogen": "Pathogen",
+        "colCriterionName": "Criterion Name",
+        "colFormula": "Criterion Formula",
+        "filterTitle": "Filter by Pathogen",
+        "allPathogens": "All Pathogens",
+        "empty": "No risk factors found."
+      },
+      "form": {
+        "pathogenLabel": "Pathogen",
+        "pathogenPlaceholder": "Select pathogen...",
+        "pathogenSearch": "Search pathogen...",
+        "pathogenEmpty": "No pathogen found.",
+        "criterionLabel": "Criterion",
+        "criterionPlaceholder": "Select or search criterion...",
+        "criterionSearch": "Search criterion...",
+        "criterionEmpty": "No criterion found.",
+        "createNewCriterion": "Create new criterion",
+        "createCriteriaModalTitle": "Create New Criterion",
+        "loading": "Loading..."
+      },
+      "validation": {
+        "pathogenRequired": "Pathogen selection is required!",
+        "criterionRequired": "Criterion selection is required!"
+      },
+      "toast": {
+        "createSuccess": "Risk factor added successfully!",
+        "createError": "Error adding risk factor: {error}",
+        "updateSuccess": "Risk factor updated successfully!",
+        "updateError": "Error updating risk factor: {error}",
+        "deleteSuccess": "Risk factor deleted successfully!",
+        "deleteError": "Error deleting risk factor: {error}",
+        "createCriteriaSuccess": "New criterion created successfully!",
+        "createCriteriaError": "Error creating criterion: {error}"
+      }
     }
   }
 }
