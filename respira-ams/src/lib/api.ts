@@ -2,10 +2,10 @@ import logger from "./logger";
 import { getAccessToken, refreshSession, clearAuth } from "./auth";
 import { ApiResult } from "./models";
 
-const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION ?? "1";
+const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION ?? "v1";
 
 export const API_BASE = `/api/${API_VERSION}`;
-export const API_BASE_SERVER = `${process.env.GATEWAY_URL || "https://gateway-respira.dev.localhost:7283"}/api/${API_VERSION}`;
+export const API_BASE_SERVER = `${process.env.GATEWAY_URL || "https://gateway-respira.dev.localhost:7283"}`;
 
 function redirectToLogin(): void {
     if (typeof window !== "undefined") {

@@ -1,0 +1,635 @@
+{
+  "common": {
+    "welcome": "Chào mừng trở lại",
+    "dashboard": "Bảng điều khiển",
+    "language": "Ngôn ngữ",
+    "add": "Thêm",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "confirmDelete": "Xác nhận Xóa",
+    "create": "Tạo mới",
+    "update": "Cập nhật",
+    "saving": "Đang lưu...",
+    "all": "Tất cả",
+    "actions": "Thao tác",
+    "pageOf": "Trang {page} / {totalPages}"
+  },
+  "manager": {
+    "account": {
+      "profile": "Quản lý tài khoản",
+      "settings": "Cài đặt",
+      "logout": "Đăng xuất"
+    },
+    "search": {
+      "placeholder": "Tìm kiếm...",
+      "button": "Tìm kiếm",
+      "minLengthError": "Vui lòng nhập ít nhất 2 ký tự để tìm kiếm!"
+    },
+    "nav": {
+      "mainNavigation": "Điều hướng chính",
+      "collapseSidebar": "Thu gọn thanh điều hướng",
+      "expandSidebar": "Mở rộng thanh điều hướng",
+      "dashboard": "Dashboard",
+      "doctors": "Bác sĩ",
+      "antibioticGroups": "Nhóm kháng sinh",
+      "antibiotics": "Kháng sinh",
+      "pathogens": "Tác nhân gây bệnh",
+      "suspectedCauses": "Nguyên nhân nghi ngờ",
+      "treatments": "Phác đồ điều trị",
+      "clinicalVariables": "Biến số lâm sàng",
+      "criteria": "Tiêu chí",
+      "clinicalMetrics": "Thang điểm lâm sàng",
+      "riskFactors": "Yếu tố nguy cơ"
+    },
+    "antibiotics": {
+      "title": "Kháng sinh",
+      "description": "Quản lý danh sách kháng sinh theo nhóm và phân loại AWaRe.",
+      "addButton": "Thêm kháng sinh",
+      "dialog": {
+        "createTitle": "Tạo mới Kháng sinh",
+        "createDesc": "Điền thông tin để tạo kháng sinh mới.",
+        "updateTitle": "Cập nhật Kháng sinh",
+        "updateDesc": "Chỉnh sửa thông tin kháng sinh."
+      },
+      "sheet": {
+        "deleteTitle": "Xác nhận xóa",
+        "deleteDesc": "Thao tác này sẽ xóa kháng sinh khỏi hệ thống và không thể hoàn tác.",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa kháng sinh \"{name}\" không?"
+      },
+      "deleteDosageModal": {
+        "title": "Xác nhận xóa liều dùng",
+        "desc": "Bạn có chắc chắn muốn xóa dòng liều dùng này không? Thao tác này không thể hoàn tác."
+      },
+      "dosageModal": {
+        "createTitle": "Thêm liều dùng mới",
+        "updateTitle": "Cập nhật liều dùng"
+      },
+      "form": {
+        "nameLabel": "Tên kháng sinh",
+        "namePlaceholder": "Nhập tên kháng sinh...",
+        "groupLabel": "Nhóm kháng sinh",
+        "selectGroupPlaceholder": "-- Chọn nhóm kháng sinh --",
+        "categoryLabel": "Phân loại AWaRe",
+        "selectCategoryPlaceholder": "-- Chọn phân loại --",
+        "routesDosagesLabel": "Đường dùng & Liều lượng",
+        "routeLabel": "Đường dùng",
+        "selectRoutePlaceholder": "-- Chọn đường dùng --",
+        "standardDoseLabel": "Liều lượng tiêu chuẩn",
+        "routeIntravenous": "Tiêm tĩnh mạch",
+        "routeOral": "Uống",
+        "dosagePlaceholder": "Ví dụ: 500 mg mỗi 8h",
+        "addDosage": "Thêm liều",
+        "doseLabel": "Liều lượng",
+        "isStandardDoseLabel": "Là liều tiêu chuẩn (Không phụ thuộc CrCl/GFR)",
+        "crclRangeLabel": "Khoảng lọc cầu thận (CrCl)",
+        "minLabel": "Min",
+        "maxLabel": "Max",
+        "isMinExclusiveLabel": "Không bao gồm (>)",
+        "isMaxExclusiveLabel": "Không bao gồm (<)",
+        "unlimitedPlaceholder": "Không giới hạn"
+      },
+      "validation": {
+        "nameRequired": "Vui lòng nhập tên kháng sinh!",
+        "groupRequired": "Vui lòng chọn nhóm kháng sinh!",
+        "categoryRequired": "Vui lòng chọn phân loại AWaRe!",
+        "routesRequired": "Chọn ít nhất một đường dùng!",
+        "dosagesRequired": "Vui lòng nhập ít nhất một liều dùng cho đường này!",
+        "routeRequired": "Vui lòng chọn đường dùng!",
+        "doseRequired": "Vui lòng nhập liều dùng!",
+        "minNumber": "Giá trị Min phải là số!",
+        "minNonNegative": "Giá trị Min phải là số không âm!",
+        "maxNumber": "Giá trị Max phải là số!",
+        "maxNonNegative": "Giá trị Max phải là số không âm!",
+        "minLessThanMax": "Giá trị Min phải nhỏ hơn Max!",
+        "hasStandardDose": "Đường dùng {route} đã có liều tiêu chuẩn!",
+        "crclOverlap": "Mức CrCl [{min} - {max}] bị trùng lặp với mức CrCl đã tồn tại của đường {route}!"
+      },
+      "table": {
+        "colName": "Tên kháng sinh",
+        "colCategory": "Phân loại AWaRe",
+        "colGroup": "Nhóm kháng sinh",
+        "colDosages": "Liều dùng",
+        "filterBy": "Lọc theo",
+        "clearFilter": "Xóa tất cả bộ lọc",
+        "empty": "Không tìm thấy kháng sinh nào."
+      },
+      "detail": {
+        "title": "Chi tiết Kháng sinh",
+        "groupInfo": "Thông tin Nhóm",
+        "parentGroup": "Nhóm cha",
+        "noDescription": "Không có thông tin mô tả.",
+        "dosages": "Liều lượng",
+        "noDosages": "Không có dữ liệu liều lượng.",
+        "route": "Đường dùng",
+        "dose": "Liều dùng",
+        "crcl": "CrCl (mL/phút)",
+        "allCrcl": "Tất cả (Mọi mức)",
+        "standardDose": "Liều tiêu chuẩn",
+        "back": "Quay lại danh sách",
+        "addDosage": "Thêm liều"
+      },
+      "toast": {
+        "createSuccess": "Thêm kháng sinh mới thành công!",
+        "createError": "Có lỗi xảy ra khi thêm kháng sinh.",
+        "updateSuccess": "Cập nhật thông tin kháng sinh thành công!",
+        "updateError": "Có lỗi xảy ra khi cập nhật kháng sinh.",
+        "deleteSuccess": "Đã xóa kháng sinh \"{name}\"!",
+        "deleteError": "Không thể xóa kháng sinh này.",
+        "createDosageSuccess": "Thêm mới liều lượng thành công!",
+        "createDosageError": "Có lỗi xảy ra khi thêm mới liều lượng.",
+        "updateDosageSuccess": "Cập nhật liều lượng thành công!",
+        "updateDosageError": "Có lỗi xảy ra khi cập nhật liều lượng.",
+        "deleteDosageSuccess": "Đã xóa liều lượng!",
+        "deleteDosageError": "Không thể xóa liều lượng này.",
+        "cannotDeleteTitle": "Không thể xóa",
+        "cannotDeleteHasCrcl": "Đường dùng {route} đang có các liều chỉnh theo thận. Bạn phải xóa các liều CrCl trước khi xóa liều tiêu chuẩn này.",
+        "cannotDeleteMinStandard": "Bắt buộc một kháng sinh phải có ít nhất 1 liều tiêu chuẩn."
+      }
+    },
+    "antibioticGroups": {
+      "title": "Nhóm Kháng Sinh",
+      "description": "Quản lý danh sách các nhóm và họ kháng sinh.",
+      "addButton": "Thêm nhóm mới",
+      "dialog": {
+        "createTitle": "Thêm nhóm kháng sinh",
+        "updateTitle": "Cập nhật nhóm kháng sinh"
+      },
+      "alert": {
+        "deleteTitle": "Xác nhận xóa",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa nhóm kháng sinh \"{name}\" không?",
+        "deleting": "Đang xóa..."
+      },
+      "form": {
+        "nameLabel": "Tên nhóm",
+        "namePlaceholder": "Nhập tên nhóm kháng sinh...",
+        "parentLabel": "Nhóm cha (Tùy chọn)",
+        "noParentOption": "-- Không có nhóm cha --",
+        "descriptionLabel": "Mô tả chi tiết",
+        "descriptionPlaceholder": "Nhập mô tả về phổ kháng khuẩn, ADR,..."
+      },
+      "validation": {
+        "nameRequired": "Vui lòng nhập tên nhóm kháng sinh!",
+        "descriptionRequired": "Vui lòng nhập mô tả nhóm kháng sinh!"
+      },
+      "table": {
+        "colName": "Tên nhóm",
+        "colParent": "Nhóm cha",
+        "colDescription": "Mô tả",
+        "filterData": "Lọc dữ liệu",
+        "filterByParent": "Theo nhóm cha",
+        "clearFilter": "Xóa bộ lọc",
+        "noDescription": "Chưa có mô tả.",
+        "empty": "Không tìm thấy nhóm kháng sinh nào."
+      },
+      "toast": {
+        "createSuccess": "Thêm nhóm kháng sinh thành công!",
+        "createError": "Lỗi khi thêm nhóm kháng sinh.",
+        "updateSuccess": "Cập nhật nhóm kháng sinh thành công!",
+        "updateError": "Lỗi khi cập nhật nhóm kháng sinh.",
+        "deleteSuccess": "Đã xóa nhóm \"{name}\"!",
+        "deleteError": "Lỗi khi xóa nhóm kháng sinh."
+      }
+    },
+    "pathogens": {
+      "title": "Tác Nhân Gây Bệnh",
+      "description": "Quản lý danh sách các vi khuẩn, virus (Pathogens).",
+      "addButton": "Thêm tác nhân",
+      "dialog": {
+        "createTitle": "Thêm tác nhân mới",
+        "updateTitle": "Cập nhật tác nhân"
+      },
+      "alert": {
+        "deleteTitle": "Xác nhận xóa",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa tác nhân \"{name}\" không?",
+        "deleting": "Đang xóa..."
+      },
+      "form": {
+        "nameLabel": "Tên tác nhân (Vi khuẩn/Virus)",
+        "namePlaceholder": "Ví dụ: SARS-CoV-2",
+        "descriptionLabel": "Mô tả chi tiết",
+        "descriptionPlaceholder": "Mô tả tóm tắt về tác nhân gây bệnh...",
+        "isAtypicalLabel": "Là vi khuẩn không điển hình (Atypical)"
+      },
+      "validation": {
+        "nameRequired": "Vui lòng nhập tên tác nhân!",
+        "descriptionRequired": "Vui lòng nhập mô tả!"
+      },
+      "table": {
+        "colName": "Tên tác nhân",
+        "colType": "Loại",
+        "colDescription": "Mô tả",
+        "filterData": "Lọc dữ liệu",
+        "allTypes": "Tất cả",
+        "typical": "Tác nhân điển hình (Typical)",
+        "atypical": "Không điển hình (Atypical)",
+        "empty": "Không tìm thấy tác nhân gây bệnh nào."
+      },
+      "toast": {
+        "createSuccess": "Thêm tác nhân gây bệnh thành công!",
+        "createError": "Lỗi khi thêm tác nhân.",
+        "updateSuccess": "Cập nhật tác nhân thành công!",
+        "updateError": "Lỗi khi cập nhật tác nhân.",
+        "deleteSuccess": "Đã xóa tác nhân \"{name}\"!",
+        "deleteError": "Không thể xóa tác nhân này."
+      }
+    },
+    "suspectedCauses": {
+      "title": "Nguyên Nhân Nghi Ngờ",
+      "description": "Quản lý, phân loại tác nhân gây bệnh theo mức độ và nơi điều trị.",
+      "addButton": "Thêm nguyên nhân",
+      "dialog": {
+        "createTitle": "Thêm nguyên nhân mới",
+        "updateTitle": "Cập nhật nguyên nhân"
+      },
+      "alert": {
+        "deleteTitle": "Xác nhận xóa",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa nguyên nhân nghi ngờ do \"{name}\" gây ra không?",
+        "deleting": "Đang xóa..."
+      },
+      "form": {
+        "pathogenLabel": "Tác nhân gây bệnh",
+        "pathogenPlaceholder": "Chọn tác nhân...",
+        "severityLabel": "Mức độ nghiêm trọng (Severity)",
+        "severityPlaceholder": "Chọn mức độ...",
+        "treatmentSiteLabel": "Nơi điều trị (Treatment Site)",
+        "treatmentSitePlaceholder": "Chọn nơi điều trị...",
+        "severityMild": "Nhẹ (Mild)",
+        "severityModerate": "Trung bình (Moderate)",
+        "severitySevere": "Nặng (Severe)",
+        "siteOutpatient": "Ngoại trú (Outpatient)",
+        "siteInpatient": "Nội trú (Inpatient)",
+        "siteICU": "Hồi sức tích cực (ICU)"
+      },
+      "validation": {
+        "pathogenRequired": "Vui lòng chọn tác nhân gây bệnh!",
+        "severityRequired": "Vui lòng chọn mức độ nghiêm trọng!",
+        "treatmentSiteRequired": "Vui lòng chọn nơi điều trị!"
+      },
+      "table": {
+        "colPathogen": "Tác nhân gây bệnh",
+        "colSeverity": "Mức độ nghiêm trọng",
+        "colSite": "Nơi điều trị",
+        "filterData": "Bộ lọc mở rộng",
+        "filterByPathogen": "Theo tác nhân",
+        "filterBySeverity": "Theo mức độ",
+        "filterBySite": "Theo nơi điều trị",
+        "clearFilter": "Xóa tất cả bộ lọc",
+        "empty": "Không tìm thấy dữ liệu nguyên nhân nghi ngờ nào."
+      },
+      "toast": {
+        "createSuccess": "Thêm nguyên nhân nghi ngờ thành công!",
+        "createError": "Có lỗi xảy ra khi thêm nguyên nhân nghi ngờ.",
+        "updateSuccess": "Cập nhật nguyên nhân thành công!",
+        "updateError": "Có lỗi xảy ra khi cập nhật nguyên nhân.",
+        "deleteSuccess": "Đã xóa nguyên nhân nghi ngờ!",
+        "deleteError": "Có lỗi xảy ra khi xóa nguyên nhân."
+      }
+    },
+    "clinicalVariables": {
+      "title": "Biến Số Lâm Sàng",
+      "description": "Danh sách cấu hình các biến số thu thập từ bệnh nhân.",
+      "addButton": "Thêm biến số mới",
+      "notFound": "Không tìm thấy thông tin biến số.",
+      "dialog": {
+        "createTitle": "Thêm biến số lâm sàng mới",
+        "updateTitle": "Cập nhật biến số"
+      },
+      "alert": {
+        "deleteTitle": "Xác nhận xóa",
+        "deleteConfirmMsg": "Bạn có chắc chắn muốn xóa biến số \"{name}\" không? Hành động này không thể hoàn tác.",
+        "deleting": "Đang xóa..."
+      },
+      "categories": {
+        "personal": "Thông tin cá nhân",
+        "clinical": "Lâm sàng",
+        "paraclinical": "Cận lâm sàng"
+      },
+      "valueTypes": {
+        "numeric": "Nhập số (Numeric)",
+        "boolean": "Đúng/Sai (Boolean)",
+        "categorical": "Phân loại (Categorical)"
+      },
+      "form": {
+        "nameLabel": "Tên biến số",
+        "namePlaceholder": "Ví dụ: Cân nặng",
+        "codeLabel": "Mã Code",
+        "codePlaceholder": "Ví dụ: WEIGHT",
+        "descriptionLabel": "Mô tả chi tiết",
+        "categoryLabel": "Phân loại nhóm (Category)",
+        "valueTypeLabel": "Kiểu dữ liệu (Type)",
+        "valueTypeImmutableNotice": "Không thể thay đổi kiểu dữ liệu sau khi tạo.",
+        "isRequiredLabel": "Bắt buộc nhập",
+        "rangeConfigTitle": "Cấu hình Ngưỡng (Range)",
+        "unitLabel": "Đơn vị đo lường",
+        "unitPlaceholder": "kg, cm, mmHg...",
+        "acceptedRangeLabel": "Ngưỡng cho phép (Accepted)",
+        "normalRangeLabel": "Ngưỡng bình thường (Normal)",
+        "optionalBadge": "Tùy chọn",
+        "categoricalConfigTitle": "Cấu hình các tùy chọn hợp lệ",
+        "optionPlaceholder": "Giá trị tùy chọn {index} (vd: MALE)",
+        "addOption": "Thêm tùy chọn",
+        "prerequisiteTitle": "Điều kiện tiên quyết (Prerequisite)"
+      },
+      "validation": {
+        "nameRequired": "Bắt buộc nhập tên biến số!",
+        "codeRequired": "Bắt buộc nhập mã code!",
+        "descriptionRequired": "Bắt buộc nhập mô tả!",
+        "atLeastOneOption": "Phải có ít nhất 1 giá trị tùy chọn!",
+        "optionNotEmpty": "Giá trị không được để trống!",
+        "minNotGreaterThanMax": "Min không được lớn hơn Max!",
+        "normalMinLessThanAccepted": "Normal Min không được nhỏ hơn Accepted Min!",
+        "normalMaxGreaterThanAccepted": "Normal Max không được vượt quá Accepted Max!"
+      },
+      "table": {
+        "colName": "Tên biến số",
+        "colCode": "Mã Code",
+        "colCategory": "Phân loại",
+        "colValueType": "Kiểu dữ liệu",
+        "colRequired": "Bắt buộc",
+        "filterData": "Lọc dữ liệu",
+        "filterByRequired": "Theo tính chất (Bắt buộc)",
+        "filterByCategory": "Theo nhóm (Category)",
+        "filterByValueType": "Theo kiểu dữ liệu",
+        "clearFilter": "Xóa tất cả bộ lọc",
+        "requiredTrue": "Bắt buộc điền",
+        "requiredFalse": "Tùy chọn",
+        "yes": "Có",
+        "no": "Không",
+        "empty": "Không tìm thấy biến số nào."
+      },
+      "detail": {
+        "generalInfo": "Thông Tin Chung",
+        "codeLabel": "Code",
+        "descriptionLabel": "Mô tả",
+        "categoryLabel": "Phân loại nhóm",
+        "valueTypeLabel": "Kiểu dữ liệu",
+        "requiredLabel": "Bắt buộc điền",
+        "unitLabel": "Đơn vị (Unit)",
+        "dataRules": "Quy tắc dữ liệu ({type})",
+        "acceptedRange": "Ngưỡng cho phép (Accepted)",
+        "normalRange": "Ngưỡng bình thường (Normal)",
+        "acceptedValues": "Các giá trị hợp lệ",
+        "booleanNotice": "Biến số chỉ nhận giá trị Đúng (True) hoặc Sai (False).",
+        "prerequisiteTitle": "Điều kiện tiên quyết (Prerequisite)"
+      },
+      "toast": {
+        "createSuccess": "Thêm biến số mới thành công!",
+        "createError": "Có lỗi xảy ra khi thêm biến số.",
+        "updateSuccess": "Cập nhật thành công!",
+        "updateError": "Cập nhật thất bại.",
+        "deleteSuccess": "Đã xóa biến số thành công!",
+        "deleteError": "Có lỗi xảy ra khi xóa biến số."
+      }
+    },
+    "prerequisite": {
+      "nodeTypes": {
+        "placeholder": "+ Thêm biểu thức...",
+        "none": "+ Hủy biểu thức",
+        "binary": "Phép tính / So sánh / Logic (Binary)",
+        "unary": "Phủ định (NOT)",
+        "variable": "Chọn Biến số (Variable)",
+        "constant": "Nhập Giá trị (Constant)",
+        "ternary": "If/Else (Ternary)"
+      },
+      "labels": {
+        "root": "Biểu thức gốc (Root)",
+        "left": "Vế trái (Left)",
+        "right": "Vế phải (Right)",
+        "operand": "Biểu thức bị phủ định (Operand)",
+        "condition": "Điều kiện (If)",
+        "then": "Trả về nếu Đúng (Then)",
+        "else": "Trả về nếu Sai (Else)"
+      },
+      "placeholders": {
+        "constant": "Nhập giá trị (true, 25.5, FEMALE)...",
+        "selectVariable": "-- Chọn biến số --"
+      },
+      "groups": {
+        "logic": "Logic",
+        "comparison": "So sánh",
+        "math": "Toán học"
+      },
+      "operators": {
+        "and": "VÀ (AND)",
+        "or": "HOẶC (OR)",
+        "eq": "Bằng (=)",
+        "ne": "Khác (≠)",
+        "gt": "Lớn hơn (>)",
+        "gte": "Lớn hơn/Bằng (≥)",
+        "lt": "Nhỏ hơn (<)",
+        "lte": "Nhỏ hơn/Bằng (≤)",
+        "add": "Cộng (+)",
+        "sub": "Trừ (-)",
+        "mul": "Nhân (×)",
+        "div": "Chia (÷)"
+      },
+      "actions": {
+        "wrapBinary": "Thêm vế phải",
+        "delete": "Xóa"
+      },
+      "formatter": {
+        "noCondition": "Không có điều kiện phụ thuộc."
+      }
+    },
+    "criteria": {
+      "title": "Quản lý Tiêu Chí",
+      "description": "Định nghĩa các tiêu chuẩn đánh giá từ biến số lâm sàng.",
+      "addButton": "Thêm tiêu chí mới",
+      "dialog": {
+        "createTitle": "Thêm Tiêu Chí Mới",
+        "updateTitle": "Cập Nhật Tiêu Chí"
+      },
+      "table": {
+        "colName": "Tên Tiêu Chí",
+        "colFormula": "Công thức",
+        "empty": "Không tìm thấy dữ liệu tiêu chí nào."
+      },
+      "form": {
+        "nameLabel": "Tên Tiêu Chí",
+        "namePlaceholder": "Ví dụ: Giới tính nữ, Bệnh nội khoa nặng...",
+        "formulaLabel": "Công thức"
+      },
+      "detail": {
+        "notFound": "Không tìm thấy tiêu chí.",
+        "formulaTitle": "Công thức",
+        "usageTitle": "Nơi sử dụng Tiêu chí này",
+        "checkingRefs": "Đang kiểm tra liên kết...",
+        "unlinked": "Tiêu chí này hiện chưa được liên kết ở đâu.",
+        "pathogensTitle": "Nguy cơ nhiễm",
+        "noPathogens": "Không có Nguy cơ nhiễm tác nhân nào.",
+        "metricsTitle": "Thang đo lâm sàng",
+        "noMetrics": "Không có thang đo nào.",
+        "dialogUpdateTitle": "Cập nhật Tiêu Chí",
+        "toastUpdateSuccess": "Cập nhật tiêu chí thành công!",
+        "toastUpdateError": "Lỗi cập nhật: {error}"
+      },
+      "deleteAlert": {
+        "title": "Xác nhận xóa tiêu chí",
+        "description": "Bạn muốn xóa tiêu chí <b>\"{name}\"</b>. Hành động này không thể hoàn tác.",
+        "refHeader": "Tiêu chí tham chiếu:",
+        "checkingRefs": "Đang kiểm tra liên kết hệ thống...",
+        "warningHeader": "CẢNH BÁO: Tiêu chí này đang được sử dụng ở các dữ liệu sau:",
+        "pathogensLabel": "Nguy cơ nhiễm:",
+        "metricsLabel": "Thang đo lâm sàng:",
+        "safeToDelete": "Tiêu chí này hiện không liên kết ở đâu. Có thể xóa an toàn.",
+        "toastSuccess": "Đã xóa tiêu chí \"{name}\" thành công!",
+        "toastError": "Không thể xóa: {error}"
+      },
+      "validation": {
+        "nameRequired": "Bắt buộc nhập tên tiêu chí!",
+        "formulaRequired": "Biểu thức công thức không được để trống!"
+      },
+      "toast": {
+        "createSuccess": "Thêm mới tiêu chí thành công!",
+        "createError": "Đã xảy ra lỗi khi thêm tiêu chí.",
+        "updateSuccess": "Cập nhật tiêu chí thành công!",
+        "updateError": "Đã xảy ra lỗi khi cập nhật tiêu chí."
+      }
+    },
+    "riskFactors": {
+      "title": "Yếu tố nguy cơ",
+      "description": "Các yếu tố nguy cơ nhiễm khuẩn đặc biệt và kháng thuốc.",
+      "addButton": "Thêm yếu tố nguy cơ mới",
+      "dialog": {
+        "createTitle": "Thêm Yếu Tố Nguy Cơ",
+        "updateTitle": "Cập Nhật Yếu Tố Nguy Cơ",
+        "deleteTitle": "Xác nhận xóa",
+        "deleteDescription": "Bạn có chắc muốn xóa yếu tố nguy cơ của tác nhân <b>\"{pathogen}\"</b> và tiêu chí <b>\"{criterion}\"</b>?"
+      },
+      "table": {
+        "colPathogen": "Tác nhân",
+        "colCriterionName": "Tên Tiêu chí",
+        "colFormula": "Công thức Tiêu chí",
+        "filterTitle": "Lọc theo Mầm bệnh",
+        "allPathogens": "Tất cả Mầm bệnh",
+        "empty": "Không tìm thấy yếu tố nguy cơ nào."
+      },
+      "form": {
+        "pathogenLabel": "Tác Nhân",
+        "pathogenPlaceholder": "Chọn tác nhân...",
+        "pathogenSearch": "Tìm kiếm tác nhân...",
+        "pathogenEmpty": "Không tìm thấy tác nhân.",
+        "criterionLabel": "Tiêu chí",
+        "criterionPlaceholder": "Chọn hoặc gõ tìm tiêu chí...",
+        "criterionSearch": "Tìm kiếm tiêu chí...",
+        "criterionEmpty": "Không tìm thấy tiêu chí.",
+        "createNewCriterion": "Tạo tiêu chí mới",
+        "createCriteriaModalTitle": "Tạo Tiêu Chí Mới",
+        "loading": "Đang tải..."
+      },
+      "validation": {
+        "pathogenRequired": "Bắt buộc chọn tác nhân!",
+        "criterionRequired": "Bắt buộc chọn tiêu chí!"
+      },
+      "toast": {
+        "createSuccess": "Đã thêm yếu tố nguy cơ!",
+        "createError": "Lỗi thêm yếu tố nguy cơ: {error}",
+        "updateSuccess": "Cập nhật yếu tố nguy cơ thành công!",
+        "updateError": "Lỗi cập nhật yếu tố nguy cơ: {error}",
+        "deleteSuccess": "Đã xóa yếu tố nguy cơ!",
+        "deleteError": "Lỗi xóa yếu tố nguy cơ: {error}",
+        "createCriteriaSuccess": "Đã tạo tiêu chí mới!",
+        "createCriteriaError": "Lỗi khi tạo tiêu chí: {error}"
+      }
+    },
+    "clinicalMetrics": {
+      "title": "Thang điểm Lâm sàng",
+      "description": "Quản lý các bộ thang điểm đánh giá y khoa (CURB-65, PSI...).",
+      "addButton": "Thêm thang điểm",
+      "dialog": {
+        "createTitle": "Thêm Thang điểm Lâm sàng",
+        "updateTitle": "Cập nhật Thang điểm",
+        "deleteTitle": "Xác nhận xóa",
+        "deleteDescription": "Bạn có chắc chắn muốn xóa Thang điểm <b>\"{name}\"</b> không?"
+      },
+      "table": {
+        "colName": "Tên Thang điểm",
+        "colCodeVersion": "Mã Code / Phiên bản",
+        "colPublisher": "Tổ chức",
+        "colStatus": "Trạng thái",
+        "statusActive": "Đang áp dụng",
+        "statusInactive": "Ngừng áp dụng",
+        "filterTitle": "Lọc Trạng thái",
+        "filterAll": "Tất cả",
+        "filterActive": "Đang áp dụng",
+        "filterInactive": "Ngừng áp dụng",
+        "empty": "Không tìm thấy dữ liệu thang điểm nào.",
+        "viewDetailTooltip": "Xem chi tiết & Cấu hình Luật"
+      },
+      "form": {
+        "nameLabel": "Tên Thang điểm",
+        "namePlaceholder": "Ví dụ: CURB-65",
+        "codeLabel": "Mã Code",
+        "codePlaceholder": "Ví dụ: CURB-65",
+        "codeImmutableNotice": "Không thể sửa mã sau khi tạo",
+        "descriptionLabel": "Mô tả",
+        "versionLabel": "Phiên bản",
+        "versionPlaceholder": "Ví dụ: 2002-2003",
+        "publisherLabel": "Tổ chức xuất bản",
+        "publisherPlaceholder": "Ví dụ: BTS, IDSA...",
+        "isAppliedLabel": "Đang áp dụng (Active)"
+      },
+      "validation": {
+        "nameRequired": "Bắt buộc nhập tên thang điểm!",
+        "codeRequired": "Bắt buộc nhập mã code!",
+        "descriptionRequired": "Bắt buộc nhập mô tả!",
+        "versionRequired": "Bắt buộc nhập phiên bản!",
+        "publisherRequired": "Bắt buộc nhập tổ chức xuất bản!"
+      },
+      "toast": {
+        "createSuccess": "Thêm mới thang điểm lâm sàng thành công!",
+        "createError": "Lỗi khi tạo thang điểm: {error}",
+        "updateSuccess": "Cập nhật thang điểm thành công!",
+        "updateError": "Lỗi cập nhật thang điểm: {error}",
+        "deleteSuccess": "Đã xóa thang điểm \"{name}\" thành công!",
+        "deleteError": "Không thể xóa thang điểm: {error}"
+      },
+      "detail": {
+        "notFound": "Không tìm thấy Thang điểm lâm sàng.",
+        "statusActive": "Đang áp dụng",
+        "statusInactive": "Ngừng áp dụng",
+        "versionLabel": "Phiên bản",
+        "publisherLabel": "Tổ chức xuất bản",
+        "descriptionLabel": "Mô tả",
+        "rulesTitle": "Các tiêu chí đánh giá",
+        "totalRulesCount": "Tổng số: {count} tiêu chí",
+        "addRuleButton": "Thêm Tiêu chí",
+        "emptyRules": "Chưa có tiêu chí đánh giá nào được thiết lập.",
+        "colCriterionName": "Tên Tiêu chí",
+        "colFormula": "Điều kiện (Formula)",
+        "colTypeScore": "Phân loại / Điểm",
+        "majorRule": "Tiêu chí chính",
+        "minorRule": "Tiêu chí phụ",
+        "dialogCreateTitle": "Thêm tiêu chí",
+        "dialogUpdateTitle": "Cập nhật tiêu chí",
+        "dialogDeleteTitle": "Xác nhận xóa",
+        "dialogDeleteDescription": "Bạn có chắc muốn xóa tiêu chí <b>\"{name}\"</b> khỏi Thang điểm này không?",
+        "toastCreateSuccess": "Thêm mới tiêu chí thành công!",
+        "toastCreateError": "Lỗi thêm tiêu chí: {error}",
+        "toastUpdateSuccess": "Cập nhật tiêu chí thành công!",
+        "toastUpdateError": "Lỗi cập nhật tiêu chí: {error}",
+        "toastDeleteSuccess": "Xóa tiêu chí thành công!",
+        "toastDeleteError": "Lỗi xóa tiêu chí: {error}"
+      },
+      "ruleForm": {
+        "criterionLabel": "Tiêu chí Đánh giá",
+        "criterionPlaceholder": "Chọn hoặc gõ tìm tiêu chí...",
+        "criterionSearch": "Tìm kiếm tiêu chí...",
+        "criterionEmpty": "Không tìm thấy tiêu chí khả dụng.",
+        "createNewCriterion": "Tạo tiêu chí mới",
+        "createCriteriaModalTitle": "Tạo Tiêu Chí Mới",
+        "ruleTypeLabel": "Phân loại",
+        "ruleTypeMajor": "Tiêu chí CHÍNH",
+        "ruleTypeMinor": "Tiêu chí PHỤ",
+        "ruleTypeScore": "Nhập điểm",
+        "scoreFormulaLabel": "Công thức tính điểm (Score Function)",
+        "scoreFormulaHelp": "Sử dụng Builder để thiết lập điểm số hoặc công thức (ví dụ: +10, AGE - 10,...)",
+        "loading": "Đang tải...",
+        "validationCriterionRequired": "Bắt buộc chọn tiêu chí!",
+        "scoreFormulaRequired": "Vui lòng thiết lập công thức tính điểm (Score Function)!",
+        "toastCreateCriteriaSuccess": "Đã tạo tiêu chí mới!",
+        "toastCreateCriteriaError": "Lỗi tạo tiêu chí: {error}"
+      }
+    }
+  }
+}

@@ -1,0 +1,635 @@
+{
+  "common": {
+    "welcome": "Welcome back",
+    "dashboard": "Dashboard",
+    "language": "Language",
+    "add": "Add",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirmDelete": "Confirm Delete",
+    "create": "Create",
+    "update": "Update",
+    "saving": "Saving...",
+    "all": "All",
+    "actions": "Actions",
+    "pageOf": "Page {page} of {totalPages}"
+  },
+  "manager": {
+    "account": {
+      "profile": "Account Profile",
+      "settings": "Settings",
+      "logout": "Sign Out"
+    },
+    "search": {
+      "placeholder": "Search...",
+      "button": "Search",
+      "minLengthError": "Please enter at least 2 characters to search!"
+    },
+    "nav": {
+      "mainNavigation": "Main Navigation",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar",
+      "dashboard": "Dashboard",
+      "doctors": "Doctor",
+      "antibioticGroups": "Antibiotic Groups",
+      "antibiotics": "Antibiotics",
+      "pathogens": "Pathogen",
+      "suspectedCauses": "Suspected Cause",
+      "treatments": "Treatments",
+      "clinicalVariables": "Clinical Variables",
+      "criteria": "Criteria",
+      "clinicalMetrics": "Clinical Metrics",
+      "riskFactors": "Risk Factors"
+    },
+    "antibiotics": {
+      "title": "Antibiotics",
+      "description": "Manage antibiotics list by group and AWaRe classification.",
+      "addButton": "Add Antibiotic",
+      "dialog": {
+        "createTitle": "Create New Antibiotic",
+        "createDesc": "Fill in the details to create a new antibiotic.",
+        "updateTitle": "Update Antibiotic",
+        "updateDesc": "Edit antibiotic details."
+      },
+      "sheet": {
+        "deleteTitle": "Confirm Delete",
+        "deleteDesc": "This action will delete the antibiotic from the system and cannot be undone.",
+        "deleteConfirmMsg": "Are you sure you want to delete the antibiotic \"{name}\"?"
+      },
+      "deleteDosageModal": {
+        "title": "Confirm Delete Dosage",
+        "desc": "Are you sure you want to delete this dosage row? This action cannot be undone."
+      },
+      "dosageModal": {
+        "createTitle": "Add New Dosage",
+        "updateTitle": "Update Dosage"
+      },
+      "form": {
+        "nameLabel": "Antibiotic Name",
+        "namePlaceholder": "Enter antibiotic name...",
+        "groupLabel": "Antibiotic Group",
+        "selectGroupPlaceholder": "-- Select group --",
+        "categoryLabel": "AWaRe Classification",
+        "selectCategoryPlaceholder": "-- Select classification --",
+        "routesDosagesLabel": "Administration Routes & Dosages",
+        "routeLabel": "Administration Route",
+        "selectRoutePlaceholder": "-- Select administration route --",
+        "standardDoseLabel": "Standard Dose",
+        "routeIntravenous": "Intravenous",
+        "routeOral": "Oral",
+        "dosagePlaceholder": "E.g., 500 mg every 8h",
+        "addDosage": "Add Dosage",
+        "doseLabel": "Dosage",
+        "isStandardDoseLabel": "Standard dose (CrCl/GFR independent)",
+        "crclRangeLabel": "Creatinine Clearance Range (CrCl)",
+        "minLabel": "Min",
+        "maxLabel": "Max",
+        "isMinExclusiveLabel": "Exclusive (>)",
+        "isMaxExclusiveLabel": "Exclusive (<)",
+        "unlimitedPlaceholder": "Unlimited"
+      },
+      "validation": {
+        "nameRequired": "Please enter an antibiotic name!",
+        "groupRequired": "Please select an antibiotic group!",
+        "categoryRequired": "Please select an AWaRe classification!",
+        "routesRequired": "Select at least one administration route!",
+        "dosagesRequired": "Please enter at least one dosage for this route!",
+        "routeRequired": "Please select a route of administration!",
+        "doseRequired": "Please enter a dosage!",
+        "minNumber": "Min value must be a number!",
+        "minNonNegative": "Min value must be a non-negative number!",
+        "maxNumber": "Max value must be a number!",
+        "maxNonNegative": "Max value must be a non-negative number!",
+        "minLessThanMax": "Min value must be less than Max!",
+        "hasStandardDose": "Route {route} already has a standard dose!",
+        "crclOverlap": "CrCl range [{min} - {max}] overlaps with an existing CrCl range for route {route}!"
+      },
+      "table": {
+        "colName": "Antibiotic Name",
+        "colCategory": "AWaRe Classification",
+        "colGroup": "Group",
+        "colDosages": "Dosage",
+        "filterBy": "Filter by",
+        "clearFilter": "Clear all filters",
+        "empty": "No antibiotics found."
+      },
+      "detail": {
+        "title": "Antibiotic Details",
+        "groupInfo": "Group Information",
+        "parentGroup": "Parent Group",
+        "noDescription": "No description available.",
+        "dosages": "Dosages",
+        "noDosages": "No dosage data available.",
+        "route": "Route",
+        "dose": "Dose",
+        "crcl": "CrCl (mL/min)",
+        "allCrcl": "All levels",
+        "standardDose": "Standard Dose",
+        "back": "Back to List",
+        "addDosage": "Add Dosage"
+      },
+      "toast": {
+        "createSuccess": "New antibiotic added successfully!",
+        "createError": "An error occurred while adding the antibiotic.",
+        "updateSuccess": "Antibiotic updated successfully!",
+        "updateError": "An error occurred while updating the antibiotic.",
+        "deleteSuccess": "Deleted antibiotic \"{name}\"!",
+        "deleteError": "Failed to delete this antibiotic.",
+        "createDosageSuccess": "Dosage added successfully!",
+        "createDosageError": "An error occurred while adding dosage.",
+        "updateDosageSuccess": "Dosage updated successfully!",
+        "updateDosageError": "An error occurred while updating dosage.",
+        "deleteDosageSuccess": "Dosage deleted successfully!",
+        "deleteDosageError": "Failed to delete this dosage.",
+        "cannotDeleteTitle": "Cannot Delete",
+        "cannotDeleteHasCrcl": "Route {route} contains CrCl-adjusted doses. You must delete all CrCl doses before deleting this standard dose.",
+        "cannotDeleteMinStandard": "An antibiotic must have at least 1 standard dose."
+      }
+    },
+    "antibioticGroups": {
+      "title": "Antibiotic Groups",
+      "description": "Manage list of antibiotic groups and families.",
+      "addButton": "Add New Group",
+      "dialog": {
+        "createTitle": "Add Antibiotic Group",
+        "updateTitle": "Update Antibiotic Group"
+      },
+      "alert": {
+        "deleteTitle": "Confirm Delete",
+        "deleteConfirmMsg": "Are you sure you want to delete antibiotic group \"{name}\"?",
+        "deleting": "Deleting..."
+      },
+      "form": {
+        "nameLabel": "Group Name",
+        "namePlaceholder": "Enter group name...",
+        "parentLabel": "Parent Group (Optional)",
+        "noParentOption": "-- No parent group --",
+        "descriptionLabel": "Detailed Description",
+        "descriptionPlaceholder": "Enter description about antibacterial spectrum, ADR,..."
+      },
+      "validation": {
+        "nameRequired": "Please enter group name!",
+        "descriptionRequired": "Please enter group description!"
+      },
+      "table": {
+        "colName": "Group Name",
+        "colParent": "Parent Group",
+        "colDescription": "Description",
+        "filterData": "Filter Data",
+        "filterByParent": "By parent group",
+        "clearFilter": "Clear Filter",
+        "noDescription": "No description provided.",
+        "empty": "No antibiotic groups found."
+      },
+      "toast": {
+        "createSuccess": "Antibiotic group added successfully!",
+        "createError": "Error adding antibiotic group.",
+        "updateSuccess": "Antibiotic group updated successfully!",
+        "updateError": "Error updating antibiotic group.",
+        "deleteSuccess": "Deleted group \"{name}\"!",
+        "deleteError": "Error deleting antibiotic group."
+      }
+    },
+    "pathogens": {
+      "title": "Pathogens",
+      "description": "Manage pathogens list (bacteria, viruses, etc.).",
+      "addButton": "Add Pathogen",
+      "dialog": {
+        "createTitle": "Add New Pathogen",
+        "updateTitle": "Update Pathogen"
+      },
+      "alert": {
+        "deleteTitle": "Confirm Delete",
+        "deleteConfirmMsg": "Are you sure you want to delete pathogen \"{name}\"?",
+        "deleting": "Deleting..."
+      },
+      "form": {
+        "nameLabel": "Pathogen Name (Bacteria/Virus)",
+        "namePlaceholder": "e.g. SARS-CoV-2",
+        "descriptionLabel": "Detailed Description",
+        "descriptionPlaceholder": "Summary description of the pathogen...",
+        "isAtypicalLabel": "Is atypical bacteria (Atypical)"
+      },
+      "validation": {
+        "nameRequired": "Please enter pathogen name!",
+        "descriptionRequired": "Please enter description!"
+      },
+      "table": {
+        "colName": "Pathogen Name",
+        "colType": "Type",
+        "colDescription": "Description",
+        "filterData": "Filter Data",
+        "allTypes": "All",
+        "typical": "Typical",
+        "atypical": "Atypical",
+        "empty": "No pathogens found."
+      },
+      "toast": {
+        "createSuccess": "Pathogen added successfully!",
+        "createError": "Error adding pathogen.",
+        "updateSuccess": "Pathogen updated successfully!",
+        "updateError": "Error updating pathogen.",
+        "deleteSuccess": "Deleted pathogen \"{name}\"!",
+        "deleteError": "Cannot delete this pathogen."
+      }
+    },
+    "suspectedCauses": {
+      "title": "Suspected Causes",
+      "description": "Manage and classify pathogens by severity and treatment site.",
+      "addButton": "Add Suspected Cause",
+      "dialog": {
+        "createTitle": "Add New Suspected Cause",
+        "updateTitle": "Update Suspected Cause"
+      },
+      "alert": {
+        "deleteTitle": "Confirm Delete",
+        "deleteConfirmMsg": "Are you sure you want to delete the suspected cause caused by \"{name}\"?",
+        "deleting": "Deleting..."
+      },
+      "form": {
+        "pathogenLabel": "Pathogen",
+        "pathogenPlaceholder": "Select pathogen...",
+        "severityLabel": "Severity",
+        "severityPlaceholder": "Select severity...",
+        "treatmentSiteLabel": "Treatment Site",
+        "treatmentSitePlaceholder": "Select treatment site...",
+        "severityMild": "Mild",
+        "severityModerate": "Moderate",
+        "severitySevere": "Severe",
+        "siteOutpatient": "Outpatient",
+        "siteInpatient": "Inpatient",
+        "siteICU": "Intensive Care Unit (ICU)"
+      },
+      "validation": {
+        "pathogenRequired": "Please select a pathogen!",
+        "severityRequired": "Please select severity!",
+        "treatmentSiteRequired": "Please select a treatment site!"
+      },
+      "table": {
+        "colPathogen": "Pathogen",
+        "colSeverity": "Severity",
+        "colSite": "Treatment Site",
+        "filterData": "Advanced Filters",
+        "filterByPathogen": "By Pathogen",
+        "filterBySeverity": "By Severity",
+        "filterBySite": "By Treatment Site",
+        "clearFilter": "Clear All Filters",
+        "empty": "No suspected cause data found."
+      },
+      "toast": {
+        "createSuccess": "Suspected cause added successfully!",
+        "createError": "An error occurred while adding suspected cause.",
+        "updateSuccess": "Suspected cause updated successfully!",
+        "updateError": "An error occurred while updating suspected cause.",
+        "deleteSuccess": "Suspected cause deleted successfully!",
+        "deleteError": "An error occurred while deleting suspected cause."
+      }
+    },
+    "clinicalVariables": {
+      "title": "Clinical Variables",
+      "description": "List of configured clinical variables collected from patients.",
+      "addButton": "Add New Variable",
+      "notFound": "Clinical variable information not found.",
+      "dialog": {
+        "createTitle": "Add New Clinical Variable",
+        "updateTitle": "Update Clinical Variable"
+      },
+      "alert": {
+        "deleteTitle": "Confirm Delete",
+        "deleteConfirmMsg": "Are you sure you want to delete variable \"{name}\"? This action cannot be undone.",
+        "deleting": "Deleting..."
+      },
+      "categories": {
+        "personal": "Personal Information",
+        "clinical": "Clinical",
+        "paraclinical": "Paraclinical"
+      },
+      "valueTypes": {
+        "numeric": "Numeric",
+        "boolean": "Boolean",
+        "categorical": "Categorical"
+      },
+      "form": {
+        "nameLabel": "Variable Name",
+        "namePlaceholder": "e.g., Weight",
+        "codeLabel": "Code",
+        "codePlaceholder": "e.g., WEIGHT",
+        "descriptionLabel": "Detailed Description",
+        "categoryLabel": "Category Group",
+        "valueTypeLabel": "Value Type",
+        "valueTypeImmutableNotice": "Value type cannot be changed after creation.",
+        "isRequiredLabel": "Required Field",
+        "rangeConfigTitle": "Range Configuration",
+        "unitLabel": "Measurement Unit",
+        "unitPlaceholder": "kg, cm, mmHg...",
+        "acceptedRangeLabel": "Accepted Range",
+        "normalRangeLabel": "Normal Range",
+        "optionalBadge": "Optional",
+        "categoricalConfigTitle": "Valid Options Configuration",
+        "optionPlaceholder": "Option value {index} (e.g., MALE)",
+        "addOption": "Add Option",
+        "prerequisiteTitle": "Prerequisite Condition"
+      },
+      "validation": {
+        "nameRequired": "Variable name is required!",
+        "codeRequired": "Code is required!",
+        "descriptionRequired": "Description is required!",
+        "atLeastOneOption": "At least one option is required!",
+        "optionNotEmpty": "Value cannot be empty!",
+        "minNotGreaterThanMax": "Min cannot be greater than Max!",
+        "normalMinLessThanAccepted": "Normal Min cannot be less than Accepted Min!",
+        "normalMaxGreaterThanAccepted": "Normal Max cannot exceed Accepted Max!"
+      },
+      "table": {
+        "colName": "Variable Name",
+        "colCode": "Code",
+        "colCategory": "Category",
+        "colValueType": "Value Type",
+        "colRequired": "Required",
+        "filterData": "Filter Data",
+        "filterByRequired": "By Required Status",
+        "filterByCategory": "By Category",
+        "filterByValueType": "By Value Type",
+        "clearFilter": "Clear All Filters",
+        "requiredTrue": "Required",
+        "requiredFalse": "Optional",
+        "yes": "Yes",
+        "no": "No",
+        "empty": "No clinical variables found."
+      },
+      "detail": {
+        "generalInfo": "General Information",
+        "codeLabel": "Code",
+        "descriptionLabel": "Description",
+        "categoryLabel": "Category Group",
+        "valueTypeLabel": "Value Type",
+        "requiredLabel": "Required Field",
+        "unitLabel": "Unit",
+        "dataRules": "Data Rules ({type})",
+        "acceptedRange": "Accepted Range",
+        "normalRange": "Normal Range",
+        "acceptedValues": "Valid Values",
+        "booleanNotice": "Variable only accepts True or False values.",
+        "prerequisiteTitle": "Prerequisite Condition"
+      },
+      "toast": {
+        "createSuccess": "New clinical variable added successfully!",
+        "createError": "An error occurred while adding variable.",
+        "updateSuccess": "Updated successfully!",
+        "updateError": "Update failed.",
+        "deleteSuccess": "Clinical variable deleted successfully!",
+        "deleteError": "An error occurred while deleting variable."
+      }
+    },
+    "prerequisite": {
+      "nodeTypes": {
+        "placeholder": "+ Add expression...",
+        "none": "+ Cancel expression",
+        "binary": "Operation / Comparison / Logic (Binary)",
+        "unary": "Negation (NOT)",
+        "variable": "Select Variable",
+        "constant": "Enter Value (Constant)",
+        "ternary": "If/Else (Ternary)"
+      },
+      "labels": {
+        "root": "Root Expression",
+        "left": "Left Operand",
+        "right": "Right Operand",
+        "operand": "Negated Expression (Operand)",
+        "condition": "Condition (If)",
+        "then": "Then (If True)",
+        "else": "Else (If False)"
+      },
+      "placeholders": {
+        "constant": "Enter value (true, 25.5, FEMALE)...",
+        "selectVariable": "-- Select variable --"
+      },
+      "groups": {
+        "logic": "Logic",
+        "comparison": "Comparison",
+        "math": "Arithmetic"
+      },
+      "operators": {
+        "and": "AND",
+        "or": "OR",
+        "eq": "Equals (=)",
+        "ne": "Not Equals (≠)",
+        "gt": "Greater than (>)",
+        "gte": "Greater or Equal (≥)",
+        "lt": "Less than (<)",
+        "lte": "Less or Equal (≤)",
+        "add": "Add (+)",
+        "sub": "Subtract (-)",
+        "mul": "Multiply (×)",
+        "div": "Divide (÷)"
+      },
+      "actions": {
+        "wrapBinary": "Add right side",
+        "delete": "Delete"
+      },
+      "formatter": {
+        "noCondition": "No prerequisite conditions."
+      }
+    },
+    "criteria": {
+      "title": "Criteria Management",
+      "description": "Define evaluation standards based on clinical variables.",
+      "addButton": "Add New Criteria",
+      "dialog": {
+        "createTitle": "Add New Criteria",
+        "updateTitle": "Update Criteria"
+      },
+      "table": {
+        "colName": "Criteria Name",
+        "colFormula": "Formula",
+        "empty": "No criteria data found."
+      },
+      "form": {
+        "nameLabel": "Criteria Name",
+        "namePlaceholder": "e.g., Female gender, Severe medical condition...",
+        "formulaLabel": "Formula"
+      },
+      "detail": {
+        "notFound": "Criteria not found.",
+        "formulaTitle": "Formula",
+        "usageTitle": "Criteria Usage Locations",
+        "checkingRefs": "Checking references...",
+        "unlinked": "This criteria is currently not linked anywhere.",
+        "pathogensTitle": "Risk Factor",
+        "noPathogens": "No risk factors linked.",
+        "metricsTitle": "Clinical Metric",
+        "noMetrics": "No clinical metric scales linked.",
+        "dialogUpdateTitle": "Update Criteria",
+        "toastUpdateSuccess": "Criteria updated successfully!",
+        "toastUpdateError": "Update error: {error}"
+      },
+      "deleteAlert": {
+        "title": "Confirm Criteria Deletion",
+        "description": "You are about to delete criteria <b>\"{name}\"</b>. This action cannot be undone.",
+        "refHeader": "Referenced Criteria:",
+        "checkingRefs": "Checking system linkages...",
+        "warningHeader": "WARNING: This criteria is currently used in the following data:",
+        "pathogensLabel": "Risk Factor:",
+        "metricsLabel": "Clinical Metric:",
+        "safeToDelete": "This criteria is not linked anywhere. It can be safely deleted.",
+        "toastSuccess": "Criteria \"{name}\" deleted successfully!",
+        "toastError": "Could not delete: {error}"
+      },
+      "validation": {
+        "nameRequired": "Criteria name is required!",
+        "formulaRequired": "Formula expression cannot be empty!"
+      },
+      "toast": {
+        "createSuccess": "Criteria added successfully!",
+        "createError": "An error occurred while adding criteria.",
+        "updateSuccess": "Criteria updated successfully!",
+        "updateError": "An error occurred while updating criteria."
+      }
+    },
+    "riskFactors": {
+      "title": "Risk Factors",
+      "description": "Specific infection risk factors and drug resistance indicators.",
+      "addButton": "Add New Risk Factor",
+      "dialog": {
+        "createTitle": "Add Risk Factor",
+        "updateTitle": "Update Risk Factor",
+        "deleteTitle": "Confirm Deletion",
+        "deleteDescription": "Are you sure you want to delete the risk factor for pathogen <b>\"{pathogen}\"</b> and criteria <b>\"{criterion}\"</b>?"
+      },
+      "table": {
+        "colPathogen": "Pathogen",
+        "colCriterionName": "Criterion Name",
+        "colFormula": "Criterion Formula",
+        "filterTitle": "Filter by Pathogen",
+        "allPathogens": "All Pathogens",
+        "empty": "No risk factors found."
+      },
+      "form": {
+        "pathogenLabel": "Pathogen",
+        "pathogenPlaceholder": "Select pathogen...",
+        "pathogenSearch": "Search pathogen...",
+        "pathogenEmpty": "No pathogen found.",
+        "criterionLabel": "Criterion",
+        "criterionPlaceholder": "Select or search criterion...",
+        "criterionSearch": "Search criterion...",
+        "criterionEmpty": "No criterion found.",
+        "createNewCriterion": "Create new criterion",
+        "createCriteriaModalTitle": "Create New Criterion",
+        "loading": "Loading..."
+      },
+      "validation": {
+        "pathogenRequired": "Pathogen selection is required!",
+        "criterionRequired": "Criterion selection is required!"
+      },
+      "toast": {
+        "createSuccess": "Risk factor added successfully!",
+        "createError": "Error adding risk factor: {error}",
+        "updateSuccess": "Risk factor updated successfully!",
+        "updateError": "Error updating risk factor: {error}",
+        "deleteSuccess": "Risk factor deleted successfully!",
+        "deleteError": "Error deleting risk factor: {error}",
+        "createCriteriaSuccess": "New criterion created successfully!",
+        "createCriteriaError": "Error creating criterion: {error}"
+      }
+    },
+    "clinicalMetrics": {
+      "title": "Clinical Metrics",
+      "description": "Manage medical scoring systems (CURB-65, PSI...).",
+      "addButton": "Add Clinical Metric",
+      "dialog": {
+        "createTitle": "Add Clinical Metric",
+        "updateTitle": "Update Clinical Metric",
+        "deleteTitle": "Confirm Deletion",
+        "deleteDescription": "Are you sure you want to delete Clinical Metric <b>\"{name}\"</b>?"
+      },
+      "table": {
+        "colName": "Metric Name",
+        "colCodeVersion": "Code / Version",
+        "colPublisher": "Publisher",
+        "colStatus": "Status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "filterTitle": "Filter Status",
+        "filterAll": "All",
+        "filterActive": "Active",
+        "filterInactive": "Inactive",
+        "empty": "No clinical metrics data found.",
+        "viewDetailTooltip": "View details & configure rules"
+      },
+      "form": {
+        "nameLabel": "Metric Name",
+        "namePlaceholder": "e.g., CURB-65",
+        "codeLabel": "Code",
+        "codePlaceholder": "e.g., CURB-65",
+        "codeImmutableNotice": "Code cannot be modified after creation",
+        "descriptionLabel": "Description",
+        "versionLabel": "Version",
+        "versionPlaceholder": "e.g., 2002-2003",
+        "publisherLabel": "Publishing Organization",
+        "publisherPlaceholder": "e.g., BTS, IDSA...",
+        "isAppliedLabel": "Currently Active"
+      },
+      "validation": {
+        "nameRequired": "Metric name is required!",
+        "codeRequired": "Code is required!",
+        "descriptionRequired": "Description is required!",
+        "versionRequired": "Version is required!",
+        "publisherRequired": "Publisher is required!"
+      },
+      "toast": {
+        "createSuccess": "Clinical metric added successfully!",
+        "createError": "Error creating clinical metric: {error}",
+        "updateSuccess": "Clinical metric updated successfully!",
+        "updateError": "Error updating clinical metric: {error}",
+        "deleteSuccess": "Clinical metric \"{name}\" deleted successfully!",
+        "deleteError": "Could not delete clinical metric: {error}"
+      },
+      "detail": {
+        "notFound": "Clinical Metric not found.",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "versionLabel": "Version",
+        "publisherLabel": "Publishing Organization",
+        "descriptionLabel": "Description",
+        "rulesTitle": "Evaluation Criteria Rules",
+        "totalRulesCount": "Total: {count} criteria",
+        "addRuleButton": "Add Criteria Rule",
+        "emptyRules": "No evaluation criteria rules configured yet.",
+        "colCriterionName": "Criterion Name",
+        "colFormula": "Condition (Formula)",
+        "colTypeScore": "Type / Score",
+        "majorRule": "Major Rule",
+        "minorRule": "Minor Rule",
+        "dialogCreateTitle": "Add Criteria Rule",
+        "dialogUpdateTitle": "Update Criteria Rule",
+        "dialogDeleteTitle": "Confirm Deletion",
+        "dialogDeleteDescription": "Are you sure you want to remove criterion <b>\"{name}\"</b> from this Clinical Metric?",
+        "toastCreateSuccess": "Criteria rule added successfully!",
+        "toastCreateError": "Error adding rule: {error}",
+        "toastUpdateSuccess": "Criteria rule updated successfully!",
+        "toastUpdateError": "Error updating rule: {error}",
+        "toastDeleteSuccess": "Criteria rule deleted successfully!",
+        "toastDeleteError": "Error deleting rule: {error}"
+      },
+      "ruleForm": {
+        "criterionLabel": "Evaluation Criterion",
+        "criterionPlaceholder": "Select or search criterion...",
+        "criterionSearch": "Search criterion...",
+        "criterionEmpty": "No available criteria found.",
+        "createNewCriterion": "Create new criterion",
+        "createCriteriaModalTitle": "Create New Criterion",
+        "ruleTypeLabel": "Classification",
+        "ruleTypeMajor": "MAJOR Rule",
+        "ruleTypeMinor": "MINOR Rule",
+        "ruleTypeScore": "Score Function",
+        "scoreFormulaLabel": "Score Function Formula",
+        "scoreFormulaHelp": "Use the Builder to configure scores or formulas (e.g., +10, AGE - 10,...)",
+        "loading": "Loading...",
+        "validationCriterionRequired": "Criterion selection is required!",
+        "scoreFormulaRequired": "Please configure the Score Function formula!",
+        "toastCreateCriteriaSuccess": "New criterion created successfully!",
+        "toastCreateCriteriaError": "Error creating criterion: {error}"
+      }
+    }
+  }
+}
