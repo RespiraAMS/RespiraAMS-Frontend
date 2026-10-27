@@ -531,6 +531,105 @@
         "createCriteriaSuccess": "New criterion created successfully!",
         "createCriteriaError": "Error creating criterion: {error}"
       }
+    },
+    "clinicalMetrics": {
+      "title": "Clinical Metrics",
+      "description": "Manage medical scoring systems (CURB-65, PSI...).",
+      "addButton": "Add Clinical Metric",
+      "dialog": {
+        "createTitle": "Add Clinical Metric",
+        "updateTitle": "Update Clinical Metric",
+        "deleteTitle": "Confirm Deletion",
+        "deleteDescription": "Are you sure you want to delete Clinical Metric <b>\"{name}\"</b>?"
+      },
+      "table": {
+        "colName": "Metric Name",
+        "colCodeVersion": "Code / Version",
+        "colPublisher": "Publisher",
+        "colStatus": "Status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "filterTitle": "Filter Status",
+        "filterAll": "All",
+        "filterActive": "Active",
+        "filterInactive": "Inactive",
+        "empty": "No clinical metrics data found.",
+        "viewDetailTooltip": "View details & configure rules"
+      },
+      "form": {
+        "nameLabel": "Metric Name",
+        "namePlaceholder": "e.g., CURB-65",
+        "codeLabel": "Code",
+        "codePlaceholder": "e.g., CURB-65",
+        "codeImmutableNotice": "Code cannot be modified after creation",
+        "descriptionLabel": "Description",
+        "versionLabel": "Version",
+        "versionPlaceholder": "e.g., 2002-2003",
+        "publisherLabel": "Publishing Organization",
+        "publisherPlaceholder": "e.g., BTS, IDSA...",
+        "isAppliedLabel": "Currently Active"
+      },
+      "validation": {
+        "nameRequired": "Metric name is required!",
+        "codeRequired": "Code is required!",
+        "descriptionRequired": "Description is required!",
+        "versionRequired": "Version is required!",
+        "publisherRequired": "Publisher is required!"
+      },
+      "toast": {
+        "createSuccess": "Clinical metric added successfully!",
+        "createError": "Error creating clinical metric: {error}",
+        "updateSuccess": "Clinical metric updated successfully!",
+        "updateError": "Error updating clinical metric: {error}",
+        "deleteSuccess": "Clinical metric \"{name}\" deleted successfully!",
+        "deleteError": "Could not delete clinical metric: {error}"
+      },
+      "detail": {
+        "notFound": "Clinical Metric not found.",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "versionLabel": "Version",
+        "publisherLabel": "Publishing Organization",
+        "descriptionLabel": "Description",
+        "rulesTitle": "Evaluation Criteria Rules",
+        "totalRulesCount": "Total: {count} criteria",
+        "addRuleButton": "Add Criteria Rule",
+        "emptyRules": "No evaluation criteria rules configured yet.",
+        "colCriterionName": "Criterion Name",
+        "colFormula": "Condition (Formula)",
+        "colTypeScore": "Type / Score",
+        "majorRule": "Major Rule",
+        "minorRule": "Minor Rule",
+        "dialogCreateTitle": "Add Criteria Rule",
+        "dialogUpdateTitle": "Update Criteria Rule",
+        "dialogDeleteTitle": "Confirm Deletion",
+        "dialogDeleteDescription": "Are you sure you want to remove criterion <b>\"{name}\"</b> from this Clinical Metric?",
+        "toastCreateSuccess": "Criteria rule added successfully!",
+        "toastCreateError": "Error adding rule: {error}",
+        "toastUpdateSuccess": "Criteria rule updated successfully!",
+        "toastUpdateError": "Error updating rule: {error}",
+        "toastDeleteSuccess": "Criteria rule deleted successfully!",
+        "toastDeleteError": "Error deleting rule: {error}"
+      },
+      "ruleForm": {
+        "criterionLabel": "Evaluation Criterion",
+        "criterionPlaceholder": "Select or search criterion...",
+        "criterionSearch": "Search criterion...",
+        "criterionEmpty": "No available criteria found.",
+        "createNewCriterion": "Create new criterion",
+        "createCriteriaModalTitle": "Create New Criterion",
+        "ruleTypeLabel": "Classification",
+        "ruleTypeMajor": "MAJOR Rule",
+        "ruleTypeMinor": "MINOR Rule",
+        "ruleTypeScore": "Score Function",
+        "scoreFormulaLabel": "Score Function Formula",
+        "scoreFormulaHelp": "Use the Builder to configure scores or formulas (e.g., +10, AGE - 10,...)",
+        "loading": "Loading...",
+        "validationCriterionRequired": "Criterion selection is required!",
+        "scoreFormulaRequired": "Please configure the Score Function formula!",
+        "toastCreateCriteriaSuccess": "New criterion created successfully!",
+        "toastCreateCriteriaError": "Error creating criterion: {error}"
+      }
     }
   }
 }
