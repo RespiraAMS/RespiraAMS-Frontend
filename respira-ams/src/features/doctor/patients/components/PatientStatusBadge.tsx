@@ -51,5 +51,19 @@ export function PatientStatusBadge({ status, className }: PatientStatusBadgeProp
 		);
 	}
 
+	if (status === "outOfScope") {
+		return (
+			<span
+				className={cn(
+					"inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#E2E8F0] text-[#475569]",
+					className
+				)}
+			>
+				<span className="h-1.5 w-1.5 rounded-full bg-[#64748B] shrink-0" />
+				<span>Ngoài phạm vi</span>
+			</span>
+		);
+	}
+
 	return null;
 }

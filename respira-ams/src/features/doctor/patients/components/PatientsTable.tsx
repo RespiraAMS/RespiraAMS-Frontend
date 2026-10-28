@@ -7,6 +7,9 @@ import { PatientStatusBadge } from "./PatientStatusBadge";
 interface PatientsTableProps {
 	patients: Patient[];
 	totalCount: number;
+	pageSize: number;
+	isLoading?: boolean;
+	errorMessage?: string | null;
 	currentPage: number;
 	totalPages: number;
 	onPageChange: (page: number) => void;
@@ -18,6 +21,9 @@ interface PatientsTableProps {
 export function PatientsTable({
 	patients,
 	totalCount,
+	pageSize,
+	isLoading = false,
+	errorMessage = null,
 	currentPage,
 	totalPages,
 	onPageChange,
@@ -25,6 +31,14 @@ export function PatientsTable({
 	onEditPatient,
 	onDeletePatient,
 }: PatientsTableProps) {
+	// Show a sliding window of at most 5 page buttons
+	const windowStart = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+	const windowEnd = Math.min(totalPages, windowStart + 4);
+	const pageNumbers = Array.from(
+		{ length: windowEnd - windowStart + 1 },
+		(_, i) => windowStart + i
+	);
+
 	return (
 		<div className="bg-white rounded-[14px] border border-slate-100/90 shadow-2xs overflow-hidden mt-4">
 			{/* Table Container */}
@@ -50,7 +64,9 @@ export function PatientsTable({
 						{patients.length === 0 ? (
 							<tr>
 								<td colSpan={4} className="px-6 py-10 text-center text-slate-400 text-sm">
-									Không tìm thấy bệnh nhân nào phù hợp.
+									{isLoading
+										? "Đang tải dữ liệu..."
+										: (errorMessage ?? "Không tìm thấy bệnh nhân nào phù hợp.")}
 								</td>
 							</tr>
 						) : (
@@ -123,7 +139,7 @@ export function PatientsTable({
 			{/* Footer Pagination Row */}
 			<div className="px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 text-[12.5px] text-slate-500">
 				<div>
-					Hiển thị <span className="font-bold text-slate-800">1 - {patients.length}</span> trong
+					Hiển thị <span className="font-bold text-slate-800">{patients.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} - {(currentPage - 1) * pageSize + patients.length}</span> trong
 					tổng số <span className="font-bold text-slate-800">{totalCount}</span>
 				</div>
 
@@ -137,7 +153,7 @@ export function PatientsTable({
 						Trước
 					</button>
 
-					{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+					{pageNumbers.map((page) => (
 						<button
 							key={page}
 							type="button"
