@@ -1,289 +1,237 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DiagnoseResponse } from "@/features/doctor/diagnose/types";
-import { PatientInfoSection } from "@/features/doctor/diagnose/components/patient-info-section";
-import { DiseaseSelectSection } from "@/features/doctor/diagnose/components/disease-select-section";
-import { IcuCriteriaSection } from "@/features/doctor/diagnose/components/icu-criteria-section";
-import { Curb65Section } from "@/features/doctor/diagnose/components/curb65-section";
-import { ResistanceRiskSection } from "@/features/doctor/diagnose/components/resistance-risk-section";
-import { OtherCriteriaSection } from "@/features/doctor/diagnose/components/other-criteria-section";
-import { RecommendationView } from "@/features/doctor/diagnose/components/recommendation-view";
+import { Input } from "@/components/ui/input";
 import { SeverityBadge } from "@/features/doctor/components/badges";
-import { treatmentSiteLabels } from "@/features/doctor/lib/mappers";
+import { labelOf, treatmentSiteLabels } from "@/features/doctor/lib/mappers";
+import {
+	diagnose,
+	fetchAntibioticList,
+	fetchDiagnosisForm,
+} from "@/features/doctor/diagnose/api";
+import {
+	AntibioticItem,
+	ClinicalVariable,
+	ClinicalVariableCategory,
+	DiagnoseResponse,
+	ValueRange,
+} from "@/features/doctor/diagnose/types";
 
-// Mock disease detail for when a disease is selected
-const MOCK_DISEASE_DETAIL = {
-	id: "cap",
-	name: "Viêm phổi mắc phải cộng đồng (CAP)",
-	description: "",
-	requiredIcuMainCriteria: 1,
-	requiredIcuSecondaryCriteria: 3,
-	icuHospitalizeCriteria: [
-		{
-			id: "icu-1",
-			criterion: {
-				id: "soc",
-				name: "Sốc nhiễm khuẩn cần dùng thuốc vận mạch",
-				type: "Boolean",
-				min: null,
-				max: null,
-				unit: null,
-				isExclusive: false,
-			},
-			isMainCriteria: true,
-		},
-		{
-			id: "icu-2",
-			criterion: {
-				id: "resp-fail",
-				name: "Suy hô hấp cần đặt nội khí quản",
-				type: "Boolean",
-				min: null,
-				max: null,
-				unit: null,
-				isExclusive: false,
-			},
-			isMainCriteria: true,
-		},
-		{
-			id: "icu-3",
-			criterion: {
-				id: "rr",
-				name: "Nhịp thở",
-				type: "Numeric",
-				min: 30,
-				max: null,
-				unit: "lần/phút",
-				isExclusive: null,
-			},
-			isMainCriteria: false,
-		},
-		{
-			id: "icu-4",
-			criterion: {
-				id: "pao2",
-				name: "PaO2/FiO2",
-				type: "Numeric",
-				min: null,
-				max: 250,
-				unit: "mmHg",
-				isExclusive: null,
-			},
-			isMainCriteria: false,
-		},
-	],
-	resistanceRisks: [
-		{
-			id: "risk-1",
-			pathogen: "MRSA",
-			criterion: {
-				id: "mrsa-prev",
-				name: "Tiền sử nhiễm MRSA",
-				type: "Boolean",
-				min: null,
-				max: null,
-				unit: null,
-				isExclusive: null,
-			},
-			name: "MRSA",
-		},
-		{
-			id: "risk-2",
-			pathogen: "MRSA",
-			criterion: {
-				id: "hosp-prev",
-				name: "Nằm viện trong 90 ngày qua",
-				type: "Boolean",
-				min: null,
-				max: null,
-				unit: null,
-				isExclusive: null,
-			},
-			name: "MRSA",
-		},
-	],
-	diseasePathogens: [],
-	treatmentProtocols: [],
+const CATEGORY_ORDER: ClinicalVariableCategory[] = [
+	"PersonalInformation",
+	"Clinical",
+	"Paraclinical",
+];
+
+const CATEGORY_LABELS: Record<ClinicalVariableCategory, string> = {
+	PersonalInformation: "Thông tin cá nhân",
+	Clinical: "Triệu chứng lâm sàng",
+	Paraclinical: "Cận lâm sàng",
 };
 
-// Mock diagnose result for demonstration
-const MOCK_DIAGNOSE_RESULT: DiagnoseResponse = {
-	severity: "moderate",
-	treatmentSite: "inpatient",
-	infectionProbabilities: [
-		{ pathogenId: "1", pathogenName: "Streptococcus pneumoniae", probability: "0.65" },
-		{ pathogenId: "2", pathogenName: "Haemophilus influenzae", probability: "0.25" },
-		{ pathogenId: "3", pathogenName: "Mycoplasma pneumoniae", probability: "0.10" },
-	],
-	recommend: [
-		{
-			id: "proto-1",
-			name: "Amoxicillin + Clavulanate",
-			issuer: "BYT",
-			issueDate: "2023-01-15",
-			version: 2,
-			medicines: [
-				{
-					id: "med-1",
-					name: "Amoxicillin/Clavulanate",
-					antibioticSpectrum: { id: "spec-1", name: "Phổ rộng", description: "" },
-					category: "access",
-					routeOfAdministrations: ["Uống"],
-					dosages: { Uống: ["875mg/125mg mỗi 12 giờ x 5-7 ngày"] },
-				},
-			],
-		},
-		{
-			id: "proto-2",
-			name: "Azithromycin",
-			issuer: "BYT",
-			issueDate: "2023-01-15",
-			version: 1,
-			medicines: [
-				{
-					id: "med-2",
-					name: "Azithromycin",
-					antibioticSpectrum: { id: "spec-2", name: "Macrolide", description: "" },
-					category: "watch",
-					routeOfAdministrations: ["Uống"],
-					dosages: { Uống: ["500mg ngày 1, sau đó 250mg/ngày x 4 ngày"] },
-				},
-			],
-		},
-	],
-};
+const SELECT_CLASS =
+	"w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
-function calculateAge(dob: Date | undefined): string {
-	if (!dob) return "0";
-	const today = new Date();
-	let age = today.getFullYear() - dob.getFullYear();
-	const monthDiff = today.getMonth() - dob.getMonth();
-	if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-		age--;
-	}
-	return String(age);
+function formatRange(range?: ValueRange | null): string | null {
+	if (!range) return null;
+	const left = range.isMinExclusive ? "(" : "[";
+	const right = range.isMaxExclusive ? ")" : "]";
+	return `${left}${range.min} – ${range.max}${right}${range.unit ? ` ${range.unit}` : ""}`;
 }
 
-interface FormValues {
-	patientName: string;
-	dateOfBirth: Date | undefined;
-	gender: string;
-	confusion: boolean;
-	age65: boolean;
-	urea: string;
-	respiratory: string;
-	systolic: string;
-	diastolic: string;
-	icuCriteria: Record<string, boolean>;
-	icuNumericValues: Record<string, string>;
-	resistanceRisks: Record<string, boolean>;
-	resistanceNumericValues: Record<string, string>;
-	otherCriteriaChecked: Record<string, boolean>;
-	otherCriteriaNumericValues: Record<string, string>;
+function isInRange(value: number, range: ValueRange): boolean {
+	const aboveMin = range.isMinExclusive ? value > range.min : value >= range.min;
+	const belowMax = range.isMaxExclusive ? value < range.max : value <= range.max;
+	return aboveMin && belowMax;
 }
 
-const defaultFormValues: FormValues = {
-	patientName: "",
-	dateOfBirth: undefined,
-	gender: "",
-	confusion: false,
-	age65: false,
-	urea: "",
-	respiratory: "",
-	systolic: "",
-	diastolic: "",
-	icuCriteria: {},
-	icuNumericValues: {},
-	resistanceRisks: {},
-	resistanceNumericValues: {},
-	otherCriteriaChecked: {},
-	otherCriteriaNumericValues: {},
-};
+function formatEvaluated(value: unknown): string {
+	if (value === null || value === undefined) return "—";
+	if (typeof value === "boolean") return value ? "Đúng" : "Sai";
+	return String(value);
+}
+
+function VariableField({
+	variable,
+	value,
+	onChange,
+}: {
+	variable: ClinicalVariable;
+	value: string;
+	onChange: (value: string) => void;
+}) {
+	const unit = variable.canonicalUnit ?? variable.normalRange?.unit ?? null;
+	const normal = formatRange(variable.normalRange);
+	const inputId = `var-${variable.code}`;
+
+	return (
+		<div className="space-y-1.5">
+			<label htmlFor={inputId} className="text-sm font-medium block">
+				{variable.name}
+				{variable.isRequired && <span className="text-red-500 ml-0.5">*</span>}
+				{unit && variable.valueType === "Numeric" && (
+					<span className="text-muted-foreground font-normal"> ({unit})</span>
+				)}
+			</label>
+
+			{variable.valueType === "Numeric" && (
+				<Input
+					id={inputId}
+					type="number"
+					step="any"
+					value={value}
+					onChange={(e) => onChange(e.target.value)}
+					placeholder={normal ? `Bình thường: ${normal}` : undefined}
+				/>
+			)}
+
+			{variable.valueType === "Boolean" && (
+				<select
+					id={inputId}
+					value={value}
+					onChange={(e) => onChange(e.target.value)}
+					className={SELECT_CLASS}
+				>
+					<option value="">Chưa rõ</option>
+					<option value="true">Có</option>
+					<option value="false">Không</option>
+				</select>
+			)}
+
+			{variable.valueType === "Categorical" && (
+				<select
+					id={inputId}
+					value={value}
+					onChange={(e) => onChange(e.target.value)}
+					className={SELECT_CLASS}
+				>
+					<option value="">Chọn giá trị</option>
+					{(variable.acceptedValues ?? []).map((option) => (
+						<option key={option} value={option}>
+							{option}
+						</option>
+					))}
+				</select>
+			)}
+
+			{variable.description && (
+				<p className="text-xs text-muted-foreground">{variable.description}</p>
+			)}
+		</div>
+	);
+}
 
 export default function ClinicalFormPage() {
-	const [selectedDiseaseId, setSelectedDiseaseId] = useState("");
-	const [formValues, setFormValues] = useState<FormValues>(defaultFormValues);
-	const [diagnoseResult, setDiagnoseResult] = useState<DiagnoseResponse | null>(null);
-	const [showRecommendation, setShowRecommendation] = useState(false);
+	const [variables, setVariables] = useState<ClinicalVariable[]>([]);
+	const [antibiotics, setAntibiotics] = useState<AntibioticItem[]>([]);
+	const [isLoadingForm, setIsLoadingForm] = useState(true);
+	const [formError, setFormError] = useState<string | null>(null);
+
+	const [values, setValues] = useState<Record<string, string>>({});
+	const [allergies, setAllergies] = useState<string[]>([]);
+	const [allergyFilter, setAllergyFilter] = useState("");
+
+	const [result, setResult] = useState<DiagnoseResponse | null>(null);
 	const [isDiagnosing, setIsDiagnosing] = useState(false);
-	const [isSending, setIsSending] = useState(false);
+	const [submitErrors, setSubmitErrors] = useState<string[]>([]);
 
-	// Use mock disease data when a disease is selected
-	const disease = selectedDiseaseId ? MOCK_DISEASE_DETAIL : null;
-	const otherCriteria: never[] = [];
+	useEffect(() => {
+		let cancelled = false;
+		Promise.all([fetchDiagnosisForm(), fetchAntibioticList()])
+			.then(([form, list]) => {
+				if (cancelled) return;
+				setVariables(form?.variables ?? []);
+				setAntibiotics(list);
+			})
+			.catch((err) => {
+				if (cancelled) return;
+				setFormError(
+					err instanceof Error ? err.message : "Không thể tải biểu mẫu chẩn đoán."
+				);
+			})
+			.finally(() => {
+				if (!cancelled) setIsLoadingForm(false);
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, []);
 
-	const updateField = <K extends keyof FormValues>(field: K, value: FormValues[K]) => {
-		setFormValues((prev) => ({ ...prev, [field]: value }));
-	};
+	const grouped = useMemo(
+		() =>
+			CATEGORY_ORDER.map((category) => ({
+				category,
+				items: variables.filter((v) => v.category === category),
+			})).filter((group) => group.items.length > 0),
+		[variables]
+	);
 
-	const handleDateOfBirthChange = (v: Date | undefined) => {
-		updateField("dateOfBirth", v);
-		if (v) {
-			const age = parseInt(calculateAge(v), 10);
-			if (age >= 65) {
-				updateField("age65", true);
-			}
-		}
-	};
+	const filteredAntibiotics = useMemo(() => {
+		const q = allergyFilter.trim().toLowerCase();
+		return q
+			? antibiotics.filter((a) => a.name.toLowerCase().includes(q))
+			: antibiotics;
+	}, [antibiotics, allergyFilter]);
 
-	const handleDiagnose = () => {
-		if (!selectedDiseaseId) return;
-		setIsDiagnosing(true);
-		// Simulate async analysis
-		setTimeout(() => {
-			setDiagnoseResult(MOCK_DIAGNOSE_RESULT);
-			setIsDiagnosing(false);
-		}, 600);
-	};
+	const setValue = (id: string, value: string) =>
+		setValues((prev) => ({ ...prev, [id]: value }));
 
-	const handleDiagnoseAndRecommend = () => {
-		if (!selectedDiseaseId) return;
-		setIsSending(true);
-		setTimeout(() => {
-			setDiagnoseResult(MOCK_DIAGNOSE_RESULT);
-			setShowRecommendation(true);
-			setIsSending(false);
-		}, 600);
-	};
+	const toggleAllergy = (id: string) =>
+		setAllergies((prev) =>
+			prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+		);
 
 	const handleReset = () => {
-		setFormValues(defaultFormValues);
-		setSelectedDiseaseId("");
-		setDiagnoseResult(null);
+		setValues({});
+		setAllergies([]);
+		setAllergyFilter("");
+		setResult(null);
+		setSubmitErrors([]);
 	};
 
-	const handleDiseaseChange = (id: string) => {
-		setSelectedDiseaseId(id);
-		setFormValues((prev) => ({
-			...prev,
-			icuCriteria: {},
-			icuNumericValues: {},
-			resistanceRisks: {},
-			resistanceNumericValues: {},
-		}));
-	};
+	const handleDiagnose = async () => {
+		const errors: string[] = [];
+		const observations: { variableId: string; value: string }[] = [];
 
-	const handleSave = (selectedProtocolId: string, reason: string | undefined) => {
-		// Mock save
-		console.log("Saved decision:", { selectedProtocolId, reason });
-	};
+		for (const variable of variables) {
+			const raw = (values[variable.id] ?? "").trim();
+			if (!raw) {
+				if (variable.isRequired) errors.push(`Vui lòng nhập "${variable.name}".`);
+				continue;
+			}
+			if (variable.valueType === "Numeric") {
+				const num = Number(raw);
+				if (Number.isNaN(num)) {
+					errors.push(`"${variable.name}" phải là một số.`);
+					continue;
+				}
+				if (variable.acceptedRange && !isInRange(num, variable.acceptedRange)) {
+					errors.push(
+						`"${variable.name}" nằm ngoài khoảng chấp nhận ${formatRange(variable.acceptedRange)}.`
+					);
+					continue;
+				}
+			}
+			observations.push({ variableId: variable.id, value: raw });
+		}
 
-	if (showRecommendation && diagnoseResult) {
-		return (
-			<div className="container mx-auto px-6 py-8">
-				<RecommendationView
-					diagnoseResult={diagnoseResult}
-					patientName={formValues.patientName}
-					diseaseName={disease?.name ?? ""}
-					onBack={() => setShowRecommendation(false)}
-					onSave={handleSave}
-				/>
-			</div>
-		);
-	}
+		setSubmitErrors(errors);
+		if (errors.length > 0) return;
+
+		setIsDiagnosing(true);
+		try {
+			setResult(await diagnose({ observations, allergies }));
+		} catch (err) {
+			setResult(null);
+			setSubmitErrors([
+				err instanceof Error ? err.message : "Không thể thực hiện chẩn đoán.",
+			]);
+		} finally {
+			setIsDiagnosing(false);
+		}
+	};
 
 	return (
 		<div>
@@ -293,174 +241,261 @@ export default function ClinicalFormPage() {
 						Đánh giá ban đầu
 					</p>
 					<h1 className="text-3xl font-bold mt-2 text-foreground">
-						Mẫu Thông tin Bệnh nhân & Chẩn đoán
+						Mẫu Thông tin Bệnh nhân &amp; Chẩn đoán
 					</h1>
 					<p className="text-muted-foreground mt-2">
-						Vui lòng hoàn thành tất cả các trường thông tin cần thiết để hệ thống đánh giá lâm sàng.
+						Vui lòng hoàn thành các trường thông tin cần thiết (đánh dấu *) để
+						hệ thống đánh giá lâm sàng.
 					</p>
 				</header>
 
-				<form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-					<PatientInfoSection
-						patientName={formValues.patientName}
-						dateOfBirth={formValues.dateOfBirth}
-						gender={formValues.gender}
-						onPatientNameChange={(v: string) => updateField("patientName", v)}
-						onDateOfBirthChange={handleDateOfBirthChange}
-						onGenderChange={(v: string) => updateField("gender", v)}
-					/>
+				{isLoadingForm && (
+					<p className="text-sm text-muted-foreground">Đang tải biểu mẫu...</p>
+				)}
+				{formError && (
+					<p className="text-sm font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-3">
+						{formError}
+					</p>
+				)}
 
-					<DiseaseSelectSection
-						value={selectedDiseaseId}
-						onValueChange={handleDiseaseChange}
-					/>
+				{!isLoadingForm && !formError && (
+					<form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+						{grouped.map((group) => (
+							<Card key={group.category}>
+								<CardHeader>
+									<CardTitle>{CATEGORY_LABELS[group.category]}</CardTitle>
+								</CardHeader>
+								<CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									{group.items.map((variable) => (
+										<VariableField
+											key={variable.id}
+											variable={variable}
+											value={values[variable.id] ?? ""}
+											onChange={(v) => setValue(variable.id, v)}
+										/>
+									))}
+								</CardContent>
+							</Card>
+						))}
 
-					<Curb65Section
-						confusion={formValues.confusion}
-						age65={formValues.age65}
-						urea={formValues.urea}
-						respiratory={formValues.respiratory}
-						systolic={formValues.systolic}
-						diastolic={formValues.diastolic}
-						onConfusionChange={(v: boolean) => updateField("confusion", v)}
-						onAge65Change={(v: boolean) => updateField("age65", v)}
-						onUreaChange={(v: string) => updateField("urea", v)}
-						onRespiratoryChange={(v: string) => updateField("respiratory", v)}
-						onSystolicChange={(v: string) => updateField("systolic", v)}
-						onDiastolicChange={(v: string) => updateField("diastolic", v)}
-					/>
-
-					{selectedDiseaseId && disease && (
-						<>
-							<IcuCriteriaSection
-								disease={disease}
-								loading={false}
-								criteriaChecked={formValues.icuCriteria}
-								numericValues={formValues.icuNumericValues}
-								onCriteriaCheckChange={(id, checked) =>
-									updateField("icuCriteria", {
-										...formValues.icuCriteria,
-										[id]: checked,
-									})
-								}
-								onNumericValueChange={(id, value) =>
-									updateField("icuNumericValues", {
-										...formValues.icuNumericValues,
-										[id]: value,
-									})
-								}
-							/>
-							<ResistanceRiskSection
-								disease={disease}
-								loading={false}
-								risksChecked={formValues.resistanceRisks}
-								numericValues={formValues.resistanceNumericValues}
-								onRiskCheckChange={(id, checked) =>
-									updateField("resistanceRisks", {
-										...formValues.resistanceRisks,
-										[id]: checked,
-									})
-								}
-								onNumericValueChange={(id, value) =>
-									updateField("resistanceNumericValues", {
-										...formValues.resistanceNumericValues,
-										[id]: value,
-									})
-								}
-							/>
-							<OtherCriteriaSection
-								criteria={otherCriteria}
-								loading={false}
-								checked={formValues.otherCriteriaChecked}
-								numericValues={formValues.otherCriteriaNumericValues}
-								onCheckChange={(id, checked) =>
-									updateField("otherCriteriaChecked", {
-										...formValues.otherCriteriaChecked,
-										[id]: checked,
-									})
-								}
-								onNumericValueChange={(id, value) =>
-									updateField("otherCriteriaNumericValues", {
-										...formValues.otherCriteriaNumericValues,
-										[id]: value,
-									})
-								}
-							/>
-						</>
-					)}
-
-					{diagnoseResult && (
 						<Card>
 							<CardHeader>
-								<CardTitle>Kết quả chẩn đoán</CardTitle>
+								<CardTitle>Tiền sử dị ứng kháng sinh</CardTitle>
 							</CardHeader>
-							<CardContent className="space-y-4">
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-									<div className="border rounded-lg p-4 bg-muted/20">
-										<p className="text-sm text-muted-foreground">Mức độ nghiêm trọng</p>
-										<div className="mt-2">
-											<SeverityBadge severity={diagnoseResult.severity} />
-										</div>
+							<CardContent className="space-y-3">
+								<Input
+									value={allergyFilter}
+									onChange={(e) => setAllergyFilter(e.target.value)}
+									placeholder="Tìm kháng sinh..."
+								/>
+								{antibiotics.length === 0 ? (
+									<p className="text-sm text-muted-foreground">
+										Chưa có dữ liệu kháng sinh.
+									</p>
+								) : (
+									<div className="grid grid-cols-1 sm:grid-cols-3 gap-2 max-h-56 overflow-y-auto">
+										{filteredAntibiotics.map((antibiotic) => (
+											<label
+												key={antibiotic.id}
+												className="flex items-center gap-2 text-sm cursor-pointer rounded-md border px-3 py-2 hover:bg-muted/30"
+											>
+												<input
+													type="checkbox"
+													checked={allergies.includes(antibiotic.id)}
+													onChange={() => toggleAllergy(antibiotic.id)}
+													className="h-4 w-4 accent-primary"
+												/>
+												<span>{antibiotic.name}</span>
+											</label>
+										))}
 									</div>
-									<div className="border rounded-lg p-4 bg-muted/20">
-										<p className="text-sm text-muted-foreground">Nơi điều trị</p>
-										<p className="text-lg font-semibold mt-1 text-foreground">
-											{treatmentSiteLabels[diagnoseResult.treatmentSite] ??
-												diagnoseResult.treatmentSite}
-										</p>
-									</div>
-								</div>
-								{diagnoseResult.infectionProbabilities.length > 0 && (
-									<div>
-										<h3 className="font-semibold mb-3">Xác suất tác nhân gây bệnh</h3>
-										<div className="space-y-2">
-											{diagnoseResult.infectionProbabilities.map((item) => (
-												<div
-													key={item.pathogenId}
-													className="flex items-center justify-between border rounded-lg p-3 hover:bg-muted/30 transition-colors"
-												>
-													<div>
-														<p className="font-medium text-sm italic">{item.pathogenName}</p>
-													</div>
-													<span className="text-sm font-semibold text-primary">
-														{(Number(item.probability) * 100).toFixed(1)}%
-													</span>
-												</div>
-											))}
-										</div>
-									</div>
+								)}
+								{allergies.length > 0 && (
+									<p className="text-xs text-muted-foreground">
+										Đã chọn {allergies.length} kháng sinh.
+									</p>
 								)}
 							</CardContent>
 						</Card>
-					)}
 
-					<footer className="flex items-center justify-between border-t pt-6">
-						<Button variant="outline" size="lg" onClick={handleReset} id="diagnose-reset-btn">
-							Đặt lại
-						</Button>
+						{submitErrors.length > 0 && (
+							<ul className="text-sm font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-3 list-disc pl-8 space-y-1">
+								{submitErrors.map((error) => (
+									<li key={error}>{error}</li>
+								))}
+							</ul>
+						)}
 
-						<div className="flex gap-3">
+						{result && <DiagnosisResult result={result} />}
+
+						<footer className="flex items-center justify-between border-t pt-6">
 							<Button
-								variant="secondary"
+								type="button"
+								variant="outline"
+								size="lg"
+								onClick={handleReset}
+								id="diagnose-reset-btn"
+							>
+								Đặt lại
+							</Button>
+							<Button
+								type="button"
 								size="lg"
 								onClick={handleDiagnose}
-								disabled={isDiagnosing || !selectedDiseaseId}
+								disabled={isDiagnosing}
 								id="diagnose-evaluate-btn"
 							>
 								{isDiagnosing ? "Đang xử lý..." : "Chẩn đoán"}
 							</Button>
-							<Button
-								size="lg"
-								onClick={handleDiagnoseAndRecommend}
-								disabled={isSending || !selectedDiseaseId}
-								id="diagnose-submit-btn"
-							>
-								{isSending ? "Đang xử lý..." : "Gửi thông tin"}
-							</Button>
-						</div>
-					</footer>
-				</form>
+						</footer>
+					</form>
+				)}
 			</div>
 		</div>
+	);
+}
+
+function PathogenList({
+	title,
+	items,
+}: {
+	title: string;
+	items: { id: string; name: string }[];
+}) {
+	return (
+		<div>
+			<h3 className="font-semibold mb-3">{title}</h3>
+			{items.length === 0 ? (
+				<p className="text-sm text-muted-foreground">Không có.</p>
+			) : (
+				<div className="space-y-2">
+					{items.map((item) => (
+						<div
+							key={item.id}
+							className="border rounded-lg p-3 hover:bg-muted/30 transition-colors"
+						>
+							<p className="font-medium text-sm italic">{item.name}</p>
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
+function DiagnosisResult({ result }: { result: DiagnoseResponse }) {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Kết quả chẩn đoán</CardTitle>
+			</CardHeader>
+			<CardContent className="space-y-6">
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+					<div className="border rounded-lg p-4 bg-muted/20">
+						<p className="text-sm text-muted-foreground">Mức độ nghiêm trọng</p>
+						<div className="mt-2">
+							<SeverityBadge severity={result.severity} />
+						</div>
+					</div>
+					<div className="border rounded-lg p-4 bg-muted/20">
+						<p className="text-sm text-muted-foreground">Nơi điều trị</p>
+						<p className="text-lg font-semibold mt-1 text-foreground">
+							{labelOf(treatmentSiteLabels, result.treatmentSite)}
+						</p>
+					</div>
+				</div>
+
+				{result.isPatientPregnantOrInLactationPhase && (
+					<p className="text-sm font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+						Bệnh nhân đang mang thai hoặc cho con bú — cân nhắc khi chọn kháng sinh.
+					</p>
+				)}
+
+				{result.missingVariables.length > 0 && (
+					<div className="text-sm bg-muted/30 border rounded-lg px-4 py-3">
+						<p className="font-medium">Thông tin còn thiếu (có thể ảnh hưởng độ chính xác):</p>
+						<p className="text-muted-foreground mt-1">
+							{result.missingVariables.map((v) => v.name).join(", ")}
+						</p>
+					</div>
+				)}
+
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+					<PathogenList
+						title="Tác nhân cần lưu ý"
+						items={result.worthSuspected}
+					/>
+					<PathogenList
+						title="Tác nhân kháng thuốc nguy cơ cao"
+						items={result.heavySuspected}
+					/>
+				</div>
+
+				{result.allergies.length > 0 && (
+					<div>
+						<h3 className="font-semibold mb-2">Dị ứng đã ghi nhận</h3>
+						<p className="text-sm text-muted-foreground">
+							{result.allergies.map((a) => a.name).join(", ")}
+						</p>
+					</div>
+				)}
+
+				{result.metricsSeverityDiagnosis.length > 0 && (
+					<div>
+						<h3 className="font-semibold mb-3">Đánh giá theo thang điểm</h3>
+						<div className="space-y-2">
+							{result.metricsSeverityDiagnosis.map((metric) => (
+								<div
+									key={metric.code}
+									className="flex items-center justify-between gap-3 border rounded-lg p-3"
+								>
+									<div>
+										<p className="font-medium text-sm">{metric.code}</p>
+										<p className="text-xs text-muted-foreground mt-0.5">
+											{metric.score != null
+												? `Điểm: ${metric.score}`
+												: `Tiêu chí chính: ${metric.majorMatched ?? 0} · phụ: ${metric.minorMatched ?? 0}`}
+											{" · "}
+											{labelOf(treatmentSiteLabels, metric.treatmentSite)}
+										</p>
+									</div>
+									<SeverityBadge severity={metric.severity} />
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+
+				{result.evidences.length > 0 && (
+					<details className="border rounded-lg">
+						<summary className="cursor-pointer px-4 py-3 font-semibold text-sm">
+							Căn cứ chẩn đoán ({result.evidences.length})
+						</summary>
+						<div className="divide-y border-t">
+							{result.evidences.map((evidence, index) => (
+								<div key={`${evidence.source}-${index}`} className="px-4 py-3 text-sm">
+									<p className="font-medium">{evidence.source}</p>
+									<p className="text-xs text-muted-foreground font-mono mt-1 break-all">
+										{evidence.formula}
+									</p>
+									<p className="text-xs mt-1">
+										Giá trị: <strong>{formatEvaluated(evidence.evaluatedValue)}</strong>
+										{evidence.score != null && <> · Điểm: {evidence.score}</>}
+										{evidence.isMajor != null && (
+											<> · {evidence.isMajor ? "Tiêu chí chính" : "Tiêu chí phụ"}</>
+										)}
+									</p>
+									{evidence.missingVariables.length > 0 && (
+										<p className="text-xs text-amber-700 mt-1">
+											Thiếu: {evidence.missingVariables.map((v) => v.code).join(", ")}
+										</p>
+									)}
+								</div>
+							))}
+						</div>
+					</details>
+				)}
+			</CardContent>
+		</Card>
 	);
 }

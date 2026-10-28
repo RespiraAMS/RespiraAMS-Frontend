@@ -8,5 +8,10 @@ export const severityLabels: Record<string, string> = {
 export const treatmentSiteLabels: Record<string, string> = {
 	outpatient: "Ngoại trú",
 	inpatient: "Nội trú",
-	intensiveCareUnit: "Khoa ICU",
+	intensivecareunit: "Khoa ICU",
 };
+
+/** Case-insensitive lookup (backend returns PascalCase enum names). */
+export function labelOf(map: Record<string, string>, value: string): string {
+	return map[value?.toLowerCase() ?? ""] ?? value;
+}
