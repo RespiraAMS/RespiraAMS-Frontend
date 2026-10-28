@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { MOCK_ANTIBIOTIC_GROUPS } from "../mockData";
 import { AntibioticGroupItem } from "../types";
+import { fetchPagedAntibioticGroups, searchAntibioticGroups } from "../api";
 import { AntibioticGroupSearchBar } from "./AntibioticGroupSearchBar";
 import { AntibioticGroupsTable } from "./AntibioticGroupsTable";
 import { AntibioticGroupDetailDialog } from "./AntibioticGroupDetailDialog";
@@ -13,26 +13,78 @@ const PAGE_SIZE = 8;
 
 export function AntibioticGroupsView() {
 	const [query, setQuery] = useState("");
+	const [debouncedQuery, setDebouncedQuery] = useState("");
 	const [page, setPage] = useState(1);
+	const [groups, setGroups] = useState<AntibioticGroupItem[]>([]);
+	const [totalCount, setTotalCount] = useState(0);
+	const [totalPages, setTotalPages] = useState(1);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
 	const [selected, setSelected] = useState<AntibioticGroupItem | null>(null);
 	const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-	const filtered = useMemo(() => {
-		const q = query.toLowerCase().trim();
-		if (!q) return MOCK_ANTIBIOTIC_GROUPS;
-		return MOCK_ANTIBIOTIC_GROUPS.filter(
-			(g) =>
-				g.name.toLowerCase().includes(q) ||
-				g.description.toLowerCase().includes(q) ||
-				g.antibiotics.some((a) => a.toLowerCase().includes(q))
-		);
+	// Debounce search query
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedQuery(query.trim());
+			setPage(1);
+		}, 350);
+		return () => clearTimeout(timer);
 	}, [query]);
 
-	const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-	const paginated = useMemo(() => {
-		const start = (page - 1) * PAGE_SIZE;
-		return filtered.slice(start, start + PAGE_SIZE);
-	}, [filtered, page]);
+	// Fetch data from backend
+	useEffect(() => {
+		let isMounted = true;
+		setIsLoading(true);
+		setError(null);
+
+		const request = debouncedQuery
+			? searchAntibioticGroups({
+					page,
+					size: PAGE_SIZE,
+					searchTerm: debouncedQuery,
+				})
+			: fetchPagedAntibioticGroups({
+					page,
+					size: PAGE_SIZE,
+				});
+
+		request
+			.then((res) => {
+				if (isMounted) {
+					setGroups(res.items);
+					setTotalCount(res.totalCount);
+					setTotalPages(res.totalPages);
+				}
+			})
+			.catch((err) => {
+				if (isMounted) {
+					setGroups([]);
+					setTotalCount(0);
+					setTotalPages(1);
+					setError(
+						err instanceof Error
+							? err.message
+							: "Không thể tải danh sách nhóm kháng sinh."
+					);
+				}
+			})
+			.finally(() => {
+				if (isMounted) {
+					setIsLoading(false);
+				}
+			});
+
+		return () => {
+			isMounted = false;
+		};
+	}, [page, debouncedQuery]);
+
+	const handleSelectGroup = (item: AntibioticGroupItem) => {
+		setSelected(item);
+		setIsDetailOpen(true);
+	};
 
 	return (
 		<div className="min-h-full bg-[#F8FAFC] p-6 lg:p-8 space-y-5">
@@ -48,20 +100,25 @@ export function AntibioticGroupsView() {
 				searchQuery={query}
 				onSearchChange={(v) => {
 					setQuery(v);
-					setPage(1);
 				}}
 			/>
 
+			{error && (
+				<p className="text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-[10px] px-3.5 py-2.5">
+					{error}
+				</p>
+			)}
+
 			<AntibioticGroupsTable
-				groups={paginated}
-				totalCount={filtered.length}
+				groups={groups}
+				totalCount={totalCount}
 				currentPage={page}
+				pageSize={PAGE_SIZE}
 				totalPages={totalPages}
+				isLoading={isLoading}
+				errorMessage={error}
 				onPageChange={setPage}
-				onSelectGroup={(g) => {
-					setSelected(g);
-					setIsDetailOpen(true);
-				}}
+				onSelectGroup={handleSelectGroup}
 			/>
 
 			<AntibioticGroupDetailDialog
@@ -72,5 +129,3 @@ export function AntibioticGroupsView() {
 		</div>
 	);
 }
-
-export default AntibioticGroupsView;

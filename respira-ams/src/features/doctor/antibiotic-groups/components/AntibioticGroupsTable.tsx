@@ -7,7 +7,10 @@ interface AntibioticGroupsTableProps {
 	groups: AntibioticGroupItem[];
 	totalCount: number;
 	currentPage: number;
+	pageSize: number;
 	totalPages: number;
+	isLoading?: boolean;
+	errorMessage?: string | null;
 	onPageChange: (page: number) => void;
 	onSelectGroup: (item: AntibioticGroupItem) => void;
 }
@@ -16,10 +19,21 @@ export function AntibioticGroupsTable({
 	groups,
 	totalCount,
 	currentPage,
+	pageSize,
 	totalPages,
+	isLoading = false,
+	errorMessage = null,
 	onPageChange,
 	onSelectGroup,
 }: AntibioticGroupsTableProps) {
+	// Show a sliding window of at most 5 page buttons
+	const windowStart = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+	const windowEnd = Math.min(totalPages, windowStart + 4);
+	const pageNumbers = Array.from(
+		{ length: windowEnd - windowStart + 1 },
+		(_, i) => windowStart + i
+	);
+
 	return (
 		<div
 			style={{ borderRadius: "14px" }}
@@ -32,11 +46,11 @@ export function AntibioticGroupsTable({
 							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-1/4">
 								Tên nhóm
 							</th>
+							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-1/4">
+								Nhóm cha
+							</th>
 							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
 								Mô tả
-							</th>
-							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center w-36">
-								Số kháng sinh
 							</th>
 							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right w-24">
 								Thao tác
@@ -50,7 +64,9 @@ export function AntibioticGroupsTable({
 									colSpan={4}
 									className="px-6 py-10 text-center text-slate-400 text-sm"
 								>
-									Không tìm thấy nhóm kháng sinh phù hợp.
+									{isLoading
+										? "Đang tải dữ liệu..."
+										: errorMessage ?? "Không tìm thấy nhóm kháng sinh nào phù hợp."}
 								</td>
 							</tr>
 						) : (
@@ -68,13 +84,17 @@ export function AntibioticGroupsTable({
 											{item.name}
 										</button>
 									</td>
-									<td className="px-6 py-4 align-top text-[13px] text-slate-600 leading-relaxed">
-										{item.description}
+									<td className="px-6 py-4 align-top text-[13px] text-slate-700 font-medium">
+										{item.parentName ? (
+											<span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
+												{item.parentName}
+											</span>
+										) : (
+											<span className="text-slate-400 text-xs italic">—</span>
+										)}
 									</td>
-									<td className="px-6 py-4 align-top text-center whitespace-nowrap">
-										<span className="inline-flex items-center px-3 py-1 rounded-full bg-[#E0F2FE] text-[#0EA5E9] text-xs font-semibold select-none">
-											{item.antibiotics.length} thuốc
-										</span>
+									<td className="px-6 py-4 align-top text-[13px] text-slate-600 leading-relaxed">
+										{item.description || "—"}
 									</td>
 									<td className="px-6 py-4 align-top text-right">
 										<button
@@ -97,7 +117,10 @@ export function AntibioticGroupsTable({
 			<div className="px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 text-[12.5px] text-slate-500">
 				<div>
 					Hiển thị{" "}
-					<span className="font-bold text-slate-800">{groups.length}</span>{" "}
+					<span className="font-bold text-slate-800">
+						{groups.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} -{" "}
+						{(currentPage - 1) * pageSize + groups.length}
+					</span>{" "}
 					trong tổng số{" "}
 					<span className="font-bold text-slate-800">{totalCount}</span>
 				</div>
@@ -111,7 +134,7 @@ export function AntibioticGroupsTable({
 					>
 						Trước
 					</button>
-					{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+					{pageNumbers.map((page) => (
 						<button
 							key={page}
 							type="button"
