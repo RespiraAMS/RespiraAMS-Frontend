@@ -5,7 +5,7 @@ import { SearchInput } from "./SearchInput";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-const HIDE_SEARCH_PATHS = ["/manage/dashboard", "/manage/suspected-causes/", "/manage/criteria/", "/manage/risk-factors/"];
+const HIDE_SEARCH_PATHS = ["/manage/dashboard", "/manage/suspected-causes", "/manage/criteria", "/manage/risk-factors", "/manage/treatments"];
 
 export function ManagerHeader() {
 	const pathname = usePathname();
