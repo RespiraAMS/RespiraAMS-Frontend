@@ -314,6 +314,7 @@
         "namePlaceholder": "Ví dụ: Cân nặng",
         "codeLabel": "Mã Code",
         "codePlaceholder": "Ví dụ: WEIGHT",
+        "codeImmutableNotice": "Không thể sửa mã sau khi tạo",
         "descriptionLabel": "Mô tả chi tiết",
         "categoryLabel": "Phân loại nhóm (Category)",
         "valueTypeLabel": "Kiểu dữ liệu (Type)",
