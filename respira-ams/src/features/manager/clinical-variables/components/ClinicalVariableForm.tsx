@@ -323,12 +323,18 @@ export function ClinicalVariableForm({
 					<Label className="text-foreground">
 						{tForm("codeLabel")} <span className="text-destructive">*</span>
 					</Label>
-					<Input
+					<Input 
 						{...register("code")}
 						placeholder={tForm("codePlaceholder")}
-						className="bg-background text-foreground border-input placeholder:text-muted-foreground font-mono"
+						disabled={isPending || isEdit}
+						className={
+							isEdit
+								? "bg-muted cursor-not-allowed border-input text-muted-foreground font-mono"
+								: "bg-background text-foreground border-input placeholder:text-muted-foreground font-mono"
+						}
 					/>
 					{errors.code && <p className="text-xs text-destructive font-medium">{errors.code.message}</p>}
+					{isEdit && <p className="text-xs text-muted-foreground">{tForm("codeImmutableNotice")}</p>}
 				</div>
 			</div>
 

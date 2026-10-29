@@ -314,6 +314,7 @@
         "namePlaceholder": "e.g., Weight",
         "codeLabel": "Code",
         "codePlaceholder": "e.g., WEIGHT",
+        "codeImmutableNotice": "Code cannot be modified after creation",
         "descriptionLabel": "Detailed Description",
         "categoryLabel": "Category Group",
         "valueTypeLabel": "Value Type",
