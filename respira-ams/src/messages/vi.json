@@ -148,7 +148,7 @@
     },
     "antibioticGroups": {
       "title": "Nhóm Kháng Sinh",
-      "description": "Quản lý danh sách các nhóm và họ kháng sinh.",
+      "description": "Quản lý danh sách các nhóm kháng sinh.",
       "addButton": "Thêm nhóm mới",
       "dialog": {
         "createTitle": "Thêm nhóm kháng sinh",
@@ -192,7 +192,7 @@
     },
     "pathogens": {
       "title": "Tác Nhân Gây Bệnh",
-      "description": "Quản lý danh sách các vi khuẩn, virus (Pathogens).",
+      "description": "Quản lý danh sách các tác nhân gây bệnh.",
       "addButton": "Thêm tác nhân",
       "dialog": {
         "createTitle": "Thêm tác nhân mới",
@@ -204,11 +204,11 @@
         "deleting": "Đang xóa..."
       },
       "form": {
-        "nameLabel": "Tên tác nhân (Vi khuẩn/Virus)",
+        "nameLabel": "Tên tác nhân",
         "namePlaceholder": "Ví dụ: SARS-CoV-2",
         "descriptionLabel": "Mô tả chi tiết",
         "descriptionPlaceholder": "Mô tả tóm tắt về tác nhân gây bệnh...",
-        "isAtypicalLabel": "Là vi khuẩn không điển hình (Atypical)"
+        "isAtypicalLabel": "Vi khuẩn không điển hình"
       },
       "validation": {
         "nameRequired": "Vui lòng nhập tên tác nhân!",
@@ -316,20 +316,20 @@
         "codePlaceholder": "Ví dụ: WEIGHT",
         "codeImmutableNotice": "Không thể sửa mã sau khi tạo",
         "descriptionLabel": "Mô tả chi tiết",
-        "categoryLabel": "Phân loại nhóm (Category)",
-        "valueTypeLabel": "Kiểu dữ liệu (Type)",
+        "categoryLabel": "Phân loại nhóm",
+        "valueTypeLabel": "Kiểu dữ liệu",
         "valueTypeImmutableNotice": "Không thể thay đổi kiểu dữ liệu sau khi tạo.",
         "isRequiredLabel": "Bắt buộc nhập",
-        "rangeConfigTitle": "Cấu hình Ngưỡng (Range)",
+        "rangeConfigTitle": "Cấu hình Ngưỡng",
         "unitLabel": "Đơn vị đo lường",
         "unitPlaceholder": "kg, cm, mmHg...",
-        "acceptedRangeLabel": "Ngưỡng cho phép (Accepted)",
-        "normalRangeLabel": "Ngưỡng bình thường (Normal)",
+        "acceptedRangeLabel": "Ngưỡng cho phép",
+        "normalRangeLabel": "Ngưỡng bình thường",
         "optionalBadge": "Tùy chọn",
         "categoricalConfigTitle": "Cấu hình các tùy chọn hợp lệ",
         "optionPlaceholder": "Giá trị tùy chọn {index} (vd: MALE)",
         "addOption": "Thêm tùy chọn",
-        "prerequisiteTitle": "Điều kiện tiên quyết (Prerequisite)"
+        "prerequisiteTitle": "Điều kiện tiên quyết"
       },
       "validation": {
         "nameRequired": "Bắt buộc nhập tên biến số!",
@@ -349,7 +349,7 @@
         "colRequired": "Bắt buộc",
         "filterData": "Lọc dữ liệu",
         "filterByRequired": "Theo tính chất (Bắt buộc)",
-        "filterByCategory": "Theo nhóm (Category)",
+        "filterByCategory": "Theo nhóm",
         "filterByValueType": "Theo kiểu dữ liệu",
         "clearFilter": "Xóa tất cả bộ lọc",
         "requiredTrue": "Bắt buộc điền",
@@ -365,13 +365,13 @@
         "categoryLabel": "Phân loại nhóm",
         "valueTypeLabel": "Kiểu dữ liệu",
         "requiredLabel": "Bắt buộc điền",
-        "unitLabel": "Đơn vị (Unit)",
+        "unitLabel": "Đơn vị",
         "dataRules": "Quy tắc dữ liệu ({type})",
-        "acceptedRange": "Ngưỡng cho phép (Accepted)",
-        "normalRange": "Ngưỡng bình thường (Normal)",
+        "acceptedRange": "Ngưỡng cho phép",
+        "normalRange": "Ngưỡng bình thường",
         "acceptedValues": "Các giá trị hợp lệ",
         "booleanNotice": "Biến số chỉ nhận giá trị Đúng (True) hoặc Sai (False).",
-        "prerequisiteTitle": "Điều kiện tiên quyết (Prerequisite)"
+        "prerequisiteTitle": "Điều kiện tiên quyết"
       },
       "toast": {
         "createSuccess": "Thêm biến số mới thành công!",
@@ -597,7 +597,7 @@
         "addRuleButton": "Thêm Tiêu chí",
         "emptyRules": "Chưa có tiêu chí đánh giá nào được thiết lập.",
         "colCriterionName": "Tên Tiêu chí",
-        "colFormula": "Điều kiện (Formula)",
+        "colFormula": "Công thức",
         "colTypeScore": "Phân loại / Điểm",
         "majorRule": "Tiêu chí chính",
         "minorRule": "Tiêu chí phụ",
