@@ -8,7 +8,10 @@ interface PathogensTableProps {
 	pathogens: DoctorPathogenItem[];
 	totalCount: number;
 	currentPage: number;
+	pageSize: number;
 	totalPages: number;
+	isLoading?: boolean;
+	errorMessage?: string | null;
 	onPageChange: (page: number) => void;
 	onSelectPathogen: (item: DoctorPathogenItem) => void;
 }
@@ -17,10 +20,21 @@ export function PathogensTable({
 	pathogens,
 	totalCount,
 	currentPage,
+	pageSize,
 	totalPages,
+	isLoading = false,
+	errorMessage = null,
 	onPageChange,
 	onSelectPathogen,
 }: PathogensTableProps) {
+	// Show a sliding window of at most 5 page buttons
+	const windowStart = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+	const windowEnd = Math.min(totalPages, windowStart + 4);
+	const pageNumbers = Array.from(
+		{ length: windowEnd - windowStart + 1 },
+		(_, i) => windowStart + i
+	);
+
 	return (
 		<div
 			style={{ borderRadius: "14px" }}
@@ -52,7 +66,9 @@ export function PathogensTable({
 									colSpan={4}
 									className="px-6 py-10 text-center text-slate-400 text-sm"
 								>
-									Không tìm thấy tác nhân gây bệnh nào phù hợp.
+									{isLoading
+										? "Đang tải dữ liệu..."
+										: errorMessage ?? "Không tìm thấy tác nhân gây bệnh nào phù hợp."}
 								</td>
 							</tr>
 						) : (
@@ -66,7 +82,7 @@ export function PathogensTable({
 										<button
 											type="button"
 											onClick={() => onSelectPathogen(item)}
-											className="font-bold text-slate-800 text-[13.5px] hover:text-[#0EA5E9] transition-colors text-left cursor-pointer"
+											className="font-bold text-slate-800 text-[13.5px] hover:text-[#0EA5E9] transition-colors text-left cursor-pointer italic"
 										>
 											{item.name}
 										</button>
@@ -74,7 +90,7 @@ export function PathogensTable({
 
 									{/* Description */}
 									<td className="px-6 py-4 align-top text-[13px] text-slate-600 leading-relaxed">
-										{item.description}
+										{item.description || "—"}
 									</td>
 
 									{/* Classification */}
@@ -107,7 +123,10 @@ export function PathogensTable({
 			<div className="px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 text-[12.5px] text-slate-500">
 				<div>
 					Hiển thị{" "}
-					<span className="font-bold text-slate-800">{pathogens.length}</span>{" "}
+					<span className="font-bold text-slate-800">
+						{pathogens.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} -{" "}
+						{(currentPage - 1) * pageSize + pathogens.length}
+					</span>{" "}
 					trong tổng số{" "}
 					<span className="font-bold text-slate-800">{totalCount}</span>
 				</div>
@@ -122,7 +141,7 @@ export function PathogensTable({
 						Trước
 					</button>
 
-					{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+					{pageNumbers.map((page) => (
 						<button
 							key={page}
 							type="button"

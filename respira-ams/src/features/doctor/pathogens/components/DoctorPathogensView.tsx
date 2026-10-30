@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { MOCK_DOCTOR_PATHOGENS } from "../mockData";
 import { DoctorPathogenItem } from "../types";
+import { fetchPagedPathogens, searchPathogens } from "../api";
 import { PathogenSearchBar } from "./PathogenSearchBar";
 import { PathogensTable } from "./PathogensTable";
 import { PathogenDetailDialog } from "./PathogenDetailDialog";
@@ -13,30 +13,77 @@ const PAGE_SIZE = 8;
 
 export function DoctorPathogensView() {
 	const [query, setQuery] = useState("");
+	const [debouncedQuery, setDebouncedQuery] = useState("");
 	const [page, setPage] = useState(1);
-	const [selectedPathogen, setSelectedPathogen] = useState<DoctorPathogenItem | null>(null);
+	const [pathogens, setPathogens] = useState<DoctorPathogenItem[]>([]);
+	const [totalCount, setTotalCount] = useState(0);
+	const [totalPages, setTotalPages] = useState(1);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	const [selectedPathogen, setSelectedPathogen] =
+		useState<DoctorPathogenItem | null>(null);
 	const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-	const filtered = useMemo(() => {
-		const q = query.toLowerCase().trim();
-		if (!q) return MOCK_DOCTOR_PATHOGENS;
-		return MOCK_DOCTOR_PATHOGENS.filter(
-			(p) =>
-				p.name.toLowerCase().includes(q) ||
-				p.description.toLowerCase().includes(q) ||
-				(p.classification === "typical" ? "điển hình" : "không điển hình").includes(q)
-		);
+	// Debounce search input
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedQuery(query.trim());
+			setPage(1);
+		}, 350);
+		return () => clearTimeout(timer);
 	}, [query]);
 
-	const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-	const paginated = useMemo(() => {
-		const start = (page - 1) * PAGE_SIZE;
-		return filtered.slice(start, start + PAGE_SIZE);
-	}, [filtered, page]);
+	// Fetch data from backend API
+	useEffect(() => {
+		let isMounted = true;
+		setIsLoading(true);
+		setError(null);
+
+		const request = debouncedQuery
+			? searchPathogens({
+					page,
+					size: PAGE_SIZE,
+					searchTerm: debouncedQuery,
+				})
+			: fetchPagedPathogens({
+					page,
+					size: PAGE_SIZE,
+				});
+
+		request
+			.then((res) => {
+				if (isMounted) {
+					setPathogens(res.items);
+					setTotalCount(res.totalCount);
+					setTotalPages(res.totalPages);
+				}
+			})
+			.catch((err) => {
+				if (isMounted) {
+					setPathogens([]);
+					setTotalCount(0);
+					setTotalPages(1);
+					setError(
+						err instanceof Error
+							? err.message
+							: "Không thể tải danh sách tác nhân gây bệnh."
+					);
+				}
+			})
+			.finally(() => {
+				if (isMounted) {
+					setIsLoading(false);
+				}
+			});
+
+		return () => {
+			isMounted = false;
+		};
+	}, [page, debouncedQuery]);
 
 	const handleSearchChange = (val: string) => {
 		setQuery(val);
-		setPage(1);
 	};
 
 	const handleSelectPathogen = (item: DoctorPathogenItem) => {
@@ -55,18 +102,28 @@ export function DoctorPathogensView() {
 				<span>Danh sách danh mục</span>
 			</Link>
 
-			{/* Search */}
+			{/* Search Bar */}
 			<PathogenSearchBar
 				searchQuery={query}
 				onSearchChange={handleSearchChange}
 			/>
 
+			{/* Error Alert */}
+			{error && (
+				<p className="text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-[10px] px-3.5 py-2.5">
+					{error}
+				</p>
+			)}
+
 			{/* Table */}
 			<PathogensTable
-				pathogens={paginated}
-				totalCount={filtered.length}
+				pathogens={pathogens}
+				totalCount={totalCount}
 				currentPage={page}
+				pageSize={PAGE_SIZE}
 				totalPages={totalPages}
+				isLoading={isLoading}
+				errorMessage={error}
 				onPageChange={setPage}
 				onSelectPathogen={handleSelectPathogen}
 			/>
@@ -80,5 +137,3 @@ export function DoctorPathogensView() {
 		</div>
 	);
 }
-
-export default DoctorPathogensView;
