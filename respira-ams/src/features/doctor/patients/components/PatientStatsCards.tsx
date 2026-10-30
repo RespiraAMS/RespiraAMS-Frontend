@@ -5,16 +5,16 @@ import { cn } from "@/lib/utils";
 
 interface PatientStatsCardsProps {
 	total: number;
-	attention: number;
-	highRisk: number;
+	male: number;
+	female: number;
 	activeFilter: StatFilter;
 	onFilterChange: (filter: StatFilter) => void;
 }
 
 export function PatientStatsCards({
 	total,
-	attention,
-	highRisk,
+	male,
+	female,
 	activeFilter,
 	onFilterChange,
 }: PatientStatsCardsProps) {
@@ -37,49 +37,49 @@ export function PatientStatsCards({
 					Tất cả ca bệnh
 				</p>
 				<p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">
-					{total}
+					{formatCount(total)}
 				</p>
 				<div className="h-1 w-32 bg-[#0EA5E9] rounded-full mt-2.5" />
 			</button>
 
-			{/* Card 2: Cần chú ý */}
+			{/* Card 2: Nam */}
 			<button
 				type="button"
-				onClick={() => onFilterChange("attention")}
+				onClick={() => onFilterChange("Male")}
 				className={cn(
 					"bg-white rounded-[12px] px-5 py-4 text-left transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs",
-					activeFilter === "attention"
-						? "border-2 border-amber-400 ring-1 ring-amber-200/50"
+					activeFilter === "Male"
+						? "border-2 border-blue-500 ring-1 ring-blue-200/50"
 						: "border border-slate-100 hover:border-slate-200"
 				)}
 			>
 				<p className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wider">
-					Cần chú ý
+					Bệnh nhân nam
 				</p>
-				<p className="text-2xl font-bold text-[#F59E0B] mt-1.5 tracking-tight">
-					{formatCount(attention)}
+				<p className="text-2xl font-bold text-[#2563EB] mt-1.5 tracking-tight">
+					{formatCount(male)}
 				</p>
-				<div className="h-1 w-8 bg-[#F59E0B] rounded-full mt-2.5" />
+				<div className="h-1 w-8 bg-[#2563EB] rounded-full mt-2.5" />
 			</button>
 
-			{/* Card 3: Nguy cơ cao */}
+			{/* Card 3: Nữ */}
 			<button
 				type="button"
-				onClick={() => onFilterChange("high")}
+				onClick={() => onFilterChange("Female")}
 				className={cn(
 					"bg-white rounded-[12px] px-5 py-4 text-left transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs",
-					activeFilter === "high"
-						? "border-2 border-red-500 ring-1 ring-red-200/50"
+					activeFilter === "Female"
+						? "border-2 border-pink-400 ring-1 ring-pink-200/50"
 						: "border border-slate-100 hover:border-slate-200"
 				)}
 			>
-				<p className="text-[10.5px] font-bold text-[#DC2626] uppercase tracking-wider">
-					Nguy cơ cao
+				<p className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wider">
+					Bệnh nhân nữ
 				</p>
-				<p className="text-2xl font-bold text-[#DC2626] mt-1.5 tracking-tight">
-					{formatCount(highRisk)}
+				<p className="text-2xl font-bold text-[#DB2777] mt-1.5 tracking-tight">
+					{formatCount(female)}
 				</p>
-				<div className="h-1 w-3 bg-[#DC2626] rounded-full mt-2.5" />
+				<div className="h-1 w-3 bg-[#DB2777] rounded-full mt-2.5" />
 			</button>
 		</div>
 	);

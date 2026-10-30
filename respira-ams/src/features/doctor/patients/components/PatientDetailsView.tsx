@@ -1,16 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import {
-	ArrowLeft,
-	RefreshCw,
-	PlusCircle,
-	TrendingUp,
-	Check,
-} from "lucide-react";
-import { Patient, TreatmentMilestone } from "../types";
-import { DEFAULT_TREATMENT_TIMELINE, INITIAL_PATIENTS } from "../mockData";
+import { ArrowLeft, RefreshCw, TrendingUp, Check, Users } from "lucide-react";
+import { Patient, PatientStatus } from "../types";
+import { dischargePatient, fetchPatientById, STATUS_TO_OUTCOME } from "../api";
+import { PatientStatusBadge } from "./PatientStatusBadge";
 import {
 	Dialog,
 	DialogContent,
@@ -19,110 +14,167 @@ import {
 } from "@/components/ui/dialog";
 
 interface PatientDetailsViewProps {
-	patientId?: string;
-	initialPatient?: Patient;
+	patientId: string;
 }
 
-export function PatientDetailsView({
-	patientId = "1",
-	initialPatient,
-}: PatientDetailsViewProps) {
-	// Look up patient or fallback to first patient (Nguyen Minh Khoi)
-	const basePatient =
-		initialPatient ??
-		INITIAL_PATIENTS.find((p) => p.id === patientId) ??
-		INITIAL_PATIENTS[0];
+type DischargeStatus = Exclude<PatientStatus, "treating">;
 
-	const [patient, setPatient] = useState<Patient>(basePatient);
-	const [timeline, setTimeline] = useState<TreatmentMilestone[]>(
-		basePatient.timeline ?? DEFAULT_TREATMENT_TIMELINE
+const STATUS_LABEL: Record<PatientStatus, string> = {
+	treating: "Đang điều trị",
+	recovered: "Hồi phục",
+	deceased: "Tử vong",
+	outOfScope: "Ngoài phạm vi điều trị kháng sinh",
+};
+
+function formatDateTime(iso?: string | null): string {
+	if (!iso) return "—";
+	const date = new Date(iso);
+	if (isNaN(date.getTime())) return "—";
+	return date.toLocaleString("vi-VN", {
+		day: "2-digit",
+		month: "2-digit",
+		year: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+}
+
+interface Milestone {
+	id: string;
+	title: string;
+	time: string;
+	kind: "admitted" | "treating" | "completed";
+	label: string;
+}
+
+function buildTimeline(patient: Patient): Milestone[] {
+	const items: Milestone[] = [];
+	if (patient.discharge) {
+		items.push({
+			id: "discharge",
+			title: `Xuất viện · ${STATUS_LABEL[patient.status]}`,
+			time: formatDateTime(patient.discharge),
+			kind: "completed",
+			label: "Đã hoàn thành",
+		});
+	} else {
+		items.push({
+			id: "treating",
+			title: "Đang điều trị",
+			time: `Số đợt điều trị đã ghi nhận: ${patient.treatmentCount ?? 0}`,
+			kind: "treating",
+			label: "Đang điều trị",
+		});
+	}
+	items.push({
+		id: "admission",
+		title: "Tiếp nhận bệnh nhân",
+		time: formatDateTime(patient.admission),
+		kind: "admitted",
+		label: "Tiếp nhận",
+	});
+	return items;
+}
+
+export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
+	const [patient, setPatient] = useState<Patient | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [loadError, setLoadError] = useState<string | null>(null);
+
+	// Quick modal for "Cập nhật trạng thái" (discharge)
+	const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+	const [statusValue, setStatusValue] = useState<DischargeStatus>("recovered");
+	const [statusError, setStatusError] = useState<string | null>(null);
+	const [isSavingStatus, setIsSavingStatus] = useState(false);
+
+	const load = useCallback(async () => {
+		setIsLoading(true);
+		setLoadError(null);
+		try {
+			setPatient(await fetchPatientById(patientId));
+		} catch (err) {
+			setLoadError(
+				err instanceof Error ? err.message : "Không thể tải hồ sơ bệnh nhân."
+			);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [patientId]);
+
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
+		void load();
+	}, [load]);
+
+	const handleUpdateStatus = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setStatusError(null);
+		setIsSavingStatus(true);
+		try {
+			await dischargePatient(patientId, STATUS_TO_OUTCOME[statusValue]);
+			setIsStatusDialogOpen(false);
+			await load();
+		} catch (err) {
+			setStatusError(
+				err instanceof Error ? err.message : "Không thể cập nhật trạng thái."
+			);
+		} finally {
+			setIsSavingStatus(false);
+		}
+	};
+
+	const backLink = (
+		<Link
+			href="/doctor/patients"
+			className="inline-flex items-center gap-2 text-[13.5px] font-semibold text-[#0EA5E9] hover:text-[#38BDF8] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer group py-1"
+			id="back-to-patients-list"
+		>
+			<ArrowLeft className="h-4.5 w-4.5 transition-transform group-hover:-translate-x-1" />
+			<span>Danh sách bệnh nhân</span>
+		</Link>
 	);
 
-	// Quick modal for "Cập nhật trạng thái"
-	const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
-	const [statusValue, setStatusValue] = useState(patient.status);
+	if (!patient) {
+		return (
+			<div className="p-6 max-w-[1300px] mx-auto space-y-6">
+				{backLink}
+				<div className="bg-white rounded-[16px] p-10 border border-slate-100/90 shadow-2xs text-center text-sm text-slate-400">
+					{isLoading ? "Đang tải hồ sơ bệnh nhân..." : loadError}
+				</div>
+			</div>
+		);
+	}
 
-	// Quick modal for "Thêm điều trị"
-	const [isAddTreatmentOpen, setIsAddTreatmentOpen] = useState(false);
-	const [newTreatmentTitle, setNewTreatmentTitle] = useState("");
-	const [newTreatmentType, setNewTreatmentType] = useState<
-		"treating" | "completed" | "admitted"
-	>("treating");
-
-	const handleUpdateStatus = (e: React.FormEvent) => {
-		e.preventDefault();
-		setPatient((prev) => ({ ...prev, status: statusValue }));
-		setIsStatusDialogOpen(false);
-	};
-
-	const handleAddTreatment = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!newTreatmentTitle.trim()) return;
-
-		const labels = {
-			treating: "Đang điều trị",
-			completed: "Đã hoàn thành",
-			admitted: "Tiếp nhận",
-		};
-
-		const newMilestone: TreatmentMilestone = {
-			id: `tl-${Date.now()}`,
-			title: newTreatmentTitle.trim(),
-			time: `Bắt đầu: Hôm nay · ${new Date().toLocaleTimeString("vi-VN", {
-				hour: "2-digit",
-				minute: "2-digit",
-			})}`,
-			status: newTreatmentType,
-			statusLabel: labels[newTreatmentType],
-			type:
-				newTreatmentType === "treating"
-					? "active"
-					: newTreatmentType === "completed"
-						? "completed"
-						: "admitted",
-		};
-
-		setTimeline((prev) => [newMilestone, ...prev]);
-		setNewTreatmentTitle("");
-		setIsAddTreatmentOpen(false);
-	};
+	const timeline = buildTimeline(patient);
+	const canUpdateStatus = patient.status === "treating";
 
 	return (
 		<div className="p-6 max-w-[1300px] mx-auto space-y-6">
 			{/* Top Bar: Back navigation & Action Buttons */}
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-				<Link
-					href="/doctor/patients"
-					className="inline-flex items-center gap-2 text-[13.5px] font-semibold text-[#0EA5E9] hover:text-[#38BDF8] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer group py-1"
-					id="back-to-patients-list"
-				>
-					<ArrowLeft className="h-4.5 w-4.5 transition-transform group-hover:-translate-x-1" />
-					<span>Danh sách bệnh nhân</span>
-				</Link>
+				{backLink}
 
 				<div className="flex items-center gap-3">
 					{/* Button Cap nhat trang thai */}
 					<button
 						type="button"
-						onClick={() => setIsStatusDialogOpen(true)}
+						onClick={() => {
+							setStatusValue("recovered");
+							setStatusError(null);
+							setIsStatusDialogOpen(true);
+						}}
+						disabled={!canUpdateStatus}
+						title={
+							canUpdateStatus
+								? undefined
+								: "Bệnh nhân đã xuất viện, không thể cập nhật trạng thái"
+						}
 						style={{ borderRadius: "12px" }}
-						className="inline-flex items-center gap-2.5 bg-white border border-slate-200/90 hover:border-sky-300 hover:bg-sky-50/70 text-[#0EA5E9] px-5 py-2.5 rounded-[12px] text-[13px] font-semibold shadow-2xs hover:shadow-xs transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer h-[42px]"
+						className="inline-flex items-center gap-2.5 bg-white border border-slate-200/90 hover:border-sky-300 hover:bg-sky-50/70 text-[#0EA5E9] px-5 py-2.5 rounded-[12px] text-[13px] font-semibold shadow-2xs hover:shadow-xs transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer h-[42px] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-white disabled:hover:border-slate-200/90"
 						id="btn-update-status"
 					>
 						<RefreshCw className="h-4 w-4 stroke-[2.2]" />
 						<span>Cập nhật trạng thái</span>
-					</button>
-
-					{/* Button Them dieu tri */}
-					<button
-						type="button"
-						onClick={() => setIsAddTreatmentOpen(true)}
-						style={{ borderRadius: "12px" }}
-						className="inline-flex items-center gap-2.5 bg-[#0EA5E9] hover:bg-[#25B4F8] text-white px-5 py-2.5 rounded-[12px] text-[13px] font-semibold shadow-xs hover:shadow-md hover:shadow-sky-500/15 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer h-[42px]"
-						id="btn-add-treatment"
-					>
-						<PlusCircle className="h-4 w-4 stroke-[2.2]" />
-						<span>Thêm điều trị</span>
 					</button>
 				</div>
 			</div>
@@ -149,45 +201,60 @@ export function PatientDetailsView({
 
 					{/* Demographics Table */}
 					<div className="space-y-4.5 text-xs">
-						<div className="flex items-center justify-between">
-							<span className="text-slate-400 font-normal">Ngày sinh</span>
-							<span className="font-bold text-slate-800">
-								{patient.birthDate ?? "12/08/1970"}
-							</span>
-						</div>
-
-						<div className="flex items-center justify-between">
-							<span className="text-slate-400 font-normal">Số thẻ BHYT</span>
-							<span className="font-bold text-slate-900 tracking-wider font-mono">
-								{patient.bhyt ?? "DN  4  01  0012345678"}
-							</span>
-						</div>
-
-						<div className="flex items-center justify-between">
-							<span className="text-slate-400 font-normal">Địa chỉ</span>
-							<span className="font-medium text-slate-800">
-								{patient.address ?? "Ninh Kiều, Cần Thơ"}
-							</span>
-						</div>
-
-						<div className="flex items-center justify-between">
-							<span className="text-slate-400 font-normal">Thể trạng</span>
-							<span className="font-medium text-slate-800">
-								{patient.weightHeight ?? "62kg - 182cm"}
-							</span>
-						</div>
-
+						<DetailRow label="Ngày sinh" value={patient.birthDate} bold />
+						<DetailRow label="Số điện thoại" value={patient.phone} />
+						<DetailRow
+							label="Số thẻ BHYT"
+							value={patient.bhyt}
+							bold
+							mono
+						/>
+						<DetailRow
+							label="Địa chỉ"
+							value={[patient.address, patient.city].filter(Boolean).join(", ")}
+						/>
+						<DetailRow
+							label="Thể trạng"
+							value={`${patient.weight ?? "—"}kg - ${patient.height ?? "—"}cm`}
+						/>
+						<DetailRow
+							label="Ngày nhập viện"
+							value={formatDateTime(patient.admission)}
+						/>
 						<div className="flex items-center justify-between">
 							<span className="text-slate-400 font-normal">Trạng thái</span>
-							<span className="font-medium text-slate-800">
-								{patient.status === "treating"
-									? "Đang điều trị"
-									: patient.status === "recovered"
-										? "Hồi phục"
-										: "Tử vong"}
-							</span>
+							<PatientStatusBadge status={patient.status} />
 						</div>
 					</div>
+
+					{/* Next of kin */}
+					<div className="h-px bg-slate-100 my-5" />
+					<div className="flex items-center gap-2 mb-3">
+						<Users className="h-4 w-4 text-slate-400" />
+						<h3 className="text-xs font-bold text-slate-900">Người thân</h3>
+					</div>
+					{patient.nextOfKins && patient.nextOfKins.length > 0 ? (
+						<div className="space-y-3 text-xs">
+							{patient.nextOfKins.map((kin) => (
+								<div
+									key={kin.id}
+									className="flex items-center justify-between gap-3"
+								>
+									<div>
+										<p className="font-semibold text-slate-800">{kin.fullName}</p>
+										<p className="text-[11px] text-slate-400 mt-0.5">
+											{kin.relationship}
+										</p>
+									</div>
+									<span className="font-mono text-slate-600">
+										{kin.phoneNumber}
+									</span>
+								</div>
+							))}
+						</div>
+					) : (
+						<p className="text-xs text-slate-400">Chưa có thông tin người thân.</p>
+					)}
 				</div>
 
 				{/* Right Card: Treatment Timeline */}
@@ -203,7 +270,7 @@ export function PatientDetailsView({
 									Tiến trình điều trị
 								</h3>
 								<p className="text-[11.5px] text-slate-400 mt-0.5">
-									Danh sách mốc thời gian, loại điều trị và trạng thái
+									Danh sách mốc thời gian và trạng thái
 								</p>
 							</div>
 						</div>
@@ -216,9 +283,8 @@ export function PatientDetailsView({
 					{/* Timeline Items */}
 					<div className="mt-5 divide-y divide-slate-100">
 						{timeline.map((item) => {
-							const isGreen = item.status === "treating";
-							const isBlue = item.status === "completed";
-							const isAdmitted = item.status === "admitted";
+							const isGreen = item.kind === "treating";
+							const isBlue = item.kind === "completed";
 
 							return (
 								<div
@@ -254,23 +320,17 @@ export function PatientDetailsView({
 									</div>
 
 									{/* Right: Badge */}
-									<div>
-										{isGreen && (
-											<span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-[#DCFCE7] text-[#16A34A]">
-												Đang điều trị
-											</span>
-										)}
-										{isBlue && (
-											<span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-[#E2E8F0] text-[#475569]">
-												Đã hoàn thành
-											</span>
-										)}
-										{isAdmitted && (
-											<span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-[#E0F2FE] text-[#0284C7]">
-												Tiếp nhận
-											</span>
-										)}
-									</div>
+									<span
+										className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold ${
+											isGreen
+												? "bg-[#DCFCE7] text-[#16A34A]"
+												: isBlue
+													? "bg-[#E2E8F0] text-[#475569]"
+													: "bg-[#E0F2FE] text-[#0284C7]"
+										}`}
+									>
+										{item.label}
+									</span>
 								</div>
 							);
 						})}
@@ -293,106 +353,74 @@ export function PatientDetailsView({
 					<form onSubmit={handleUpdateStatus} className="space-y-4 pt-2">
 						<div className="space-y-1.5">
 							<label className="text-xs font-semibold text-slate-700 block">
-								Trạng thái điều trị
+								Kết quả điều trị (xuất viện)
 							</label>
 							<select
 								value={statusValue}
-								onChange={(e) =>
-									setStatusValue(e.target.value as Patient["status"])
-								}
+								onChange={(e) => setStatusValue(e.target.value as DischargeStatus)}
 								className="w-full h-10 px-3 bg-[#F6F8FA] border border-transparent focus:border-[#0EA5E9] rounded-[10px] text-xs font-medium text-slate-800 outline-none"
 							>
-								<option value="treating">Đang điều trị</option>
 								<option value="recovered">Hồi phục</option>
 								<option value="deceased">Tử vong</option>
+								<option value="outOfScope">Ngoài phạm vi điều trị kháng sinh</option>
 							</select>
+							<p className="text-[11px] text-slate-400">
+								Thao tác này sẽ ghi nhận xuất viện và không thể thay đổi sau đó.
+							</p>
 						</div>
+
+						{statusError && (
+							<p className="text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-[10px] px-3.5 py-2.5">
+								{statusError}
+							</p>
+						)}
 
 						<div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
 							<button
 								type="button"
 								onClick={() => setIsStatusDialogOpen(false)}
-								className="px-3.5 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 cursor-pointer"
+								disabled={isSavingStatus}
+								className="px-3.5 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 cursor-pointer disabled:opacity-50"
 							>
 								Hủy bỏ
 							</button>
 							<button
 								type="submit"
-								className="inline-flex items-center gap-1.5 bg-[#0EA5E9] hover:bg-[#25B4F8] text-white text-xs font-semibold px-4 py-2 rounded-[10px] shadow-xs hover:shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+								disabled={isSavingStatus}
+								className="inline-flex items-center gap-1.5 bg-[#0EA5E9] hover:bg-[#25B4F8] text-white text-xs font-semibold px-4 py-2 rounded-[10px] shadow-xs hover:shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:hover:scale-100"
 							>
 								<Check className="h-4 w-4" />
-								<span>Lưu thay đổi</span>
+								<span>{isSavingStatus ? "Đang lưu..." : "Lưu thay đổi"}</span>
 							</button>
 						</div>
 					</form>
 				</DialogContent>
 			</Dialog>
+		</div>
+	);
+}
 
-			{/* Add Treatment Dialog */}
-			<Dialog open={isAddTreatmentOpen} onOpenChange={setIsAddTreatmentOpen}>
-				<DialogContent className="sm:max-w-[460px] rounded-[18px] bg-white p-6 shadow-2xl border-none">
-					<DialogHeader className="pb-3 border-b border-slate-100">
-						<DialogTitle className="text-base font-bold text-slate-900">
-							Thêm mốc điều trị mới
-						</DialogTitle>
-						<p className="text-xs text-slate-400 mt-0.5">
-							Ghi nhận chỉ định hoặc phác đồ điều trị mới cho bệnh nhân
-						</p>
-					</DialogHeader>
-
-					<form onSubmit={handleAddTreatment} className="space-y-4 pt-2">
-						<div className="space-y-1.5">
-							<label className="text-xs font-semibold text-slate-700 block">
-								Tên mốc / Phác đồ điều trị <span className="text-red-500">*</span>
-							</label>
-							<input
-								type="text"
-								value={newTreatmentTitle}
-								onChange={(e) => setNewTreatmentTitle(e.target.value)}
-								placeholder="VD: Kháng sinh xuống thang (Vancomycin)"
-								required
-								className="w-full h-10 px-3.5 bg-[#F6F8FA] border border-transparent focus:border-[#0EA5E9] focus:bg-white rounded-[10px] text-xs font-medium text-slate-800 outline-none"
-							/>
-						</div>
-
-						<div className="space-y-1.5">
-							<label className="text-xs font-semibold text-slate-700 block">
-								Trạng thái ghi nhận
-							</label>
-							<select
-								value={newTreatmentType}
-								onChange={(e) =>
-									setNewTreatmentType(
-										e.target.value as "treating" | "completed" | "admitted"
-									)
-								}
-								className="w-full h-10 px-3 bg-[#F6F8FA] border border-transparent focus:border-[#0EA5E9] rounded-[10px] text-xs font-medium text-slate-800 outline-none"
-							>
-								<option value="treating">Đang điều trị</option>
-								<option value="completed">Đã hoàn thành</option>
-								<option value="admitted">Tiếp nhận</option>
-							</select>
-						</div>
-
-						<div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
-							<button
-								type="button"
-								onClick={() => setIsAddTreatmentOpen(false)}
-								className="px-3.5 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 cursor-pointer"
-							>
-								Hủy bỏ
-							</button>
-							<button
-								type="submit"
-								className="inline-flex items-center gap-1.5 bg-[#0EA5E9] hover:bg-[#25B4F8] text-white text-xs font-semibold px-4 py-2 rounded-[10px] shadow-xs hover:shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-							>
-								<Check className="h-4 w-4" />
-								<span>Ghi nhận</span>
-							</button>
-						</div>
-					</form>
-				</DialogContent>
-			</Dialog>
+function DetailRow({
+	label,
+	value,
+	bold = false,
+	mono = false,
+}: {
+	label: string;
+	value?: string | null;
+	bold?: boolean;
+	mono?: boolean;
+}) {
+	return (
+		<div className="flex items-center justify-between gap-4">
+			<span className="text-slate-400 font-normal shrink-0">{label}</span>
+			<span
+				className={`text-right text-slate-800 ${bold ? "font-bold" : "font-medium"} ${
+					mono ? "tracking-wider font-mono" : ""
+				}`}
+			>
+				{value || "—"}
+			</span>
 		</div>
 	);
 }
