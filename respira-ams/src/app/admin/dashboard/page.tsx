@@ -1,8 +1,5 @@
-export default function AdminDashboardPage() {
-	return (
-		<div className="p-6">
-			{/* Trang trắng để làm sau */}
-		</div>
-	);
-}
+import { AdminDashboardView } from "@/features/admin/dashboard/components/AdminDashboardView";
 
+export default function AdminDashboardPage() {
+	return <AdminDashboardView />;
+}
