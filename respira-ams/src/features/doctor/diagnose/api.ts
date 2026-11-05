@@ -11,10 +11,11 @@ export function fetchDiagnosisForm(): Promise<DiagnosisFormResponse> {
 }
 
 export async function fetchAntibioticList(): Promise<AntibioticItem[]> {
-	const result = await apiRequest<{ antibiotics: AntibioticItem[] }>(
-		"/antibiotics/list"
-	);
-	return result?.antibiotics ?? [];
+	const result = await apiRequest<{
+		antibiotics?: AntibioticItem[];
+		Antibiotics?: AntibioticItem[];
+	}>("/antibiotics/list");
+	return result?.antibiotics ?? result?.Antibiotics ?? [];
 }
 
 export function diagnose(request: DiagnoseRequest): Promise<DiagnoseResponse> {
@@ -23,4 +24,3 @@ export function diagnose(request: DiagnoseRequest): Promise<DiagnoseResponse> {
 		body: request,
 	});
 }
-
