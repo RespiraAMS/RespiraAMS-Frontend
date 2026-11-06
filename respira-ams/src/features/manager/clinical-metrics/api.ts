@@ -26,9 +26,12 @@ export async function getClinicalMetricsList(
 
     let endpoint = `${API_BASE_SERVER}${API_BASE}/clinical-metrics`;
     
-    if (searchTerm) {
+    // BE validator requires SearchTerm to have at least 2 characters on /clinical-metrics/search.
+    // If searchTerm is provided but shorter than 2 chars, fallback to normal list to avoid 400 Bad Request.
+    const trimmed = searchTerm?.trim();
+    if (trimmed && trimmed.length >= 2) {
         endpoint = `${API_BASE_SERVER}${API_BASE}/clinical-metrics/search`;
-        params.append("SearchTerm", searchTerm);
+        params.append("SearchTerm", trimmed);
     }
 
     const result = await apiFetch<PaginatedClinicalMetrics>(`${endpoint}?${params.toString()}`);

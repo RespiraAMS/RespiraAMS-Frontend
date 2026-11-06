@@ -1,8 +1,5 @@
-export default function AdminProtocolsPage() {
-	return (
-		<div className="p-6">
-			{/* Trang trắng để làm sau */}
-		</div>
-	);
-}
+import { AdminProtocolsView } from "@/features/admin/protocols/components/AdminProtocolsView";
 
+export default function AdminProtocolsPage() {
+	return <AdminProtocolsView />;
+}
