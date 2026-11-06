@@ -28,9 +28,9 @@ export async function getClinicalVariables(
 
     let endpoint = `${API_BASE_SERVER}${API_BASE}/clinical-variables`;
 
-    if (searchTerm) {
+    if (searchTerm && searchTerm.trim().length >= 2) {
         endpoint = `${API_BASE_SERVER}${API_BASE}/clinical-variables/search`;
-        params.append("SearchTerm", searchTerm);
+        params.append("SearchTerm", searchTerm.trim());
     }
 
     const result = await apiFetch<PaginatedClinicalVariables>(`${endpoint}?${params.toString()}`);

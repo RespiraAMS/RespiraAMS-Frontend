@@ -120,6 +120,31 @@ export async function searchAntibiotics(params: {
 
 	const page = params.page ?? 1;
 	const size = params.size ?? 8;
+
+	// Backend validator requires searchTerm >= 2 characters on /antibiotics/search.
+	// For 1 character search, fetch standard list and filter locally to avoid 400 Bad Request.
+	if (trimmed.length < 2) {
+		const all = await fetchAntibiotics({ page: 1, size: 50 });
+		const lower = trimmed.toLowerCase();
+		const matched = (all.items || []).filter(
+			(item) =>
+				item.name?.toLowerCase().includes(lower) ||
+				item.antibioticGroup?.name?.toLowerCase().includes(lower) ||
+				item.classification?.toLowerCase().includes(lower)
+		);
+		return {
+			items: matched,
+			metadata: {
+				currentPage: 1,
+				pageSize: size,
+				totalItemCount: matched.length,
+				pageCount: Math.max(1, Math.ceil(matched.length / size)),
+				hasPreviousPage: false,
+				hasNextPage: false,
+			},
+		};
+	}
+
 	const query = new URLSearchParams({
 		SearchTerm: trimmed,
 		Page: page.toString(),

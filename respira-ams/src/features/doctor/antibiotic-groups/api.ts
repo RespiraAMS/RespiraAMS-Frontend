@@ -39,11 +39,33 @@ export async function searchAntibioticGroups(params: {
 	size: number;
 	searchTerm: string;
 }): Promise<PagedAntibioticGroupsResult> {
+	const trimmed = params.searchTerm.trim();
+	if (!trimmed) {
+		return fetchPagedAntibioticGroups({ page: params.page, size: params.size });
+	}
+
+	// Backend validator requires searchTerm >= 2 characters on /antibiotic-groups/search.
+	// For 1 character search, fetch standard list and filter locally to avoid 400 Bad Request.
+	if (trimmed.length < 2) {
+		const list = await fetchPagedAntibioticGroups({ page: 1, size: 50 });
+		const lower = trimmed.toLowerCase();
+		const matched = list.items.filter(
+			(g) =>
+				g.name?.toLowerCase().includes(lower) ||
+				g.description?.toLowerCase().includes(lower)
+		);
+		return {
+			items: matched,
+			totalCount: matched.length,
+			totalPages: 1,
+		};
+	}
+
 	const data = await apiRequest<Pagination<SearchAntibioticGroupItemDto>>(
 		`/antibiotic-groups/search${buildQuery({
 			page: params.page,
 			size: params.size,
-			searchTerm: params.searchTerm,
+			searchTerm: trimmed,
 		})}`
 	);
 

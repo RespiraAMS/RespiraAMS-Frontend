@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, X } from "lucide-react";
 
 interface PatientSearchBarProps {
 	searchQuery: string;
@@ -41,6 +41,19 @@ export function PatientSearchBar({
 					className="w-full bg-transparent border-none outline-hidden text-xs text-slate-800 placeholder:text-slate-400"
 					id="patient-search-input"
 				/>
+				{searchQuery && (
+					<button
+						type="button"
+						onClick={() => {
+							onSearchChange("");
+							inputRef.current?.focus();
+						}}
+						className="text-slate-400 hover:text-slate-600 p-1 mr-1 transition-colors cursor-pointer"
+						title="Xóa tìm kiếm"
+					>
+						<X className="h-3.5 w-3.5" />
+					</button>
+				)}
 				<span className="shrink-0 text-[9.5px] font-semibold text-slate-400 bg-white border border-slate-200 px-1.5 py-0.5 rounded-[4px] select-none ml-2 shadow-2xs">
 					Ctrl + K
 				</span>

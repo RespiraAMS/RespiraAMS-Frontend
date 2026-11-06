@@ -133,8 +133,32 @@ export async function searchPatients(params: {
 	size: number;
 	searchTerm: string;
 }): Promise<PagedPatients> {
+	const trimmed = params.searchTerm.trim();
+	if (!trimmed) {
+		return fetchPatients({ page: params.page, size: params.size });
+	}
+
+	// Backend validator requires searchTerm >= 2 characters on /patients/search.
+	// For 1 character search, fetch standard list and filter locally to avoid 400 Bad Request.
+	if (trimmed.length < 2) {
+		const list = await fetchPatients({ page: 1, size: 50 });
+		const lower = trimmed.toLowerCase();
+		const matched = list.items.filter(
+			(p) =>
+				p.name?.toLowerCase().includes(lower) ||
+				p.code?.toLowerCase().includes(lower) ||
+				p.phone?.toLowerCase().includes(lower) ||
+				p.bhyt?.toLowerCase().includes(lower)
+		);
+		return {
+			items: matched,
+			totalCount: matched.length,
+			totalPages: 1,
+		};
+	}
+
 	const data = await apiRequest<Pagination<PatientListItemDto>>(
-		`/patients/search${buildQuery({ page: params.page, size: params.size, searchTerm: params.searchTerm })}`
+		`/patients/search${buildQuery({ page: params.page, size: params.size, searchTerm: trimmed })}`
 	);
 	return mapPage(data);
 }
