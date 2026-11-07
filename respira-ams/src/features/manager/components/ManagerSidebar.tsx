@@ -23,6 +23,7 @@ import {
     Activity,
     HelpCircle,
     FolderTree,
+    FlaskConical,
 } from 'lucide-react';
 import { AccountSection } from './AccountSection';
 import { useSidebarStore } from '../stores/sidebarStore';
@@ -40,6 +41,7 @@ export const NAV_CONFIGS: NavItemConfig[] = [
     { key: 'antibioticGroups', icon: FolderTree, href: '/manage/antibiotic-groups' },
     { key: 'antibiotics', icon: Pill, href: '/manage/antibiotics' },
     { key: 'pathogens', icon: Atom, href: '/manage/pathogens' },
+    { key: 'antibiograms', icon: FlaskConical, href: '/manage/antibiograms' },
     { key: 'suspectedCauses', icon: HelpCircle, href: '/manage/suspected-causes' },
     { key: 'treatments', icon: Activity, href: '/manage/treatments' },
     { key: 'clinicalVariables', icon: Sliders, href: '/manage/clinical-variables' },
