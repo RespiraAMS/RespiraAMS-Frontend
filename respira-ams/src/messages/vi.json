@@ -166,7 +166,9 @@
         "parentLabel": "Nhóm cha (Tùy chọn)",
         "noParentOption": "-- Không có nhóm cha --",
         "descriptionLabel": "Mô tả chi tiết",
-        "descriptionPlaceholder": "Nhập mô tả về phổ kháng khuẩn, ADR,..."
+        "descriptionPlaceholder": "Nhập mô tả về phổ kháng khuẩn, ADR,...",
+        "searchParentPlaceholder": "Tìm kiếm nhóm cha...",
+        "noParentFound": "Không tìm thấy nhóm cha."
       },
       "validation": {
         "nameRequired": "Vui lòng nhập tên nhóm kháng sinh!",

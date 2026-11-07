@@ -166,7 +166,9 @@
         "parentLabel": "Parent Group (Optional)",
         "noParentOption": "-- No parent group --",
         "descriptionLabel": "Detailed Description",
-        "descriptionPlaceholder": "Enter description about antibacterial spectrum, ADR,..."
+        "descriptionPlaceholder": "Enter description about antibacterial spectrum, ADR,...",
+        "searchParentPlaceholder": "Search parent group...",
+        "noParentFound": "No parent group found."
       },
       "validation": {
         "nameRequired": "Please enter group name!",
