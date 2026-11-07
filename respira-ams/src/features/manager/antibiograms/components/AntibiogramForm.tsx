@@ -113,7 +113,7 @@ export function AntibiogramForm({ initialData, onSubmit, onCancel, isPending }: 
                                 const isSelected = field.value === category;
                                 return (
                                     <div key={category} className="flex-1 relative">
-                                        <RadioGroupItem value={category} id={`mic-${category}`} className="peer sr-only" />
+                                        <RadioGroupItem value={category} id={`mic-${category}`} className="peer sr-only hidden" />
                                         <Label
                                             htmlFor={`mic-${category}`}
                                             className={cn(
