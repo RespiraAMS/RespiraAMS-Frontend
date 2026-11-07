@@ -48,9 +48,9 @@ export function PatientsView() {
 
 	const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 
-	// Debounce search input
+	// Debounce search input nhanh (180ms)
 	useEffect(() => {
-		const timer = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 350);
+		const timer = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 180);
 		return () => clearTimeout(timer);
 	}, [searchQuery]);
 

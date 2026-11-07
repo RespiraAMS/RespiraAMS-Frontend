@@ -56,7 +56,8 @@ export function UsersTable({
 	onDeleteUser,
 	onToggleStatus,
 }: UsersTableProps) {
-	if (isLoading) {
+	// Chỉ hiện spinner toàn màn hình khi chưa có dữ liệu nào
+	if (isLoading && users.length === 0) {
 		return (
 			<div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-12 text-center">
 				<div className="inline-block w-8 h-8 border-2 border-slate-200 border-t-[#0EA5E9] rounded-full animate-spin mb-3" />
@@ -65,7 +66,7 @@ export function UsersTable({
 		);
 	}
 
-	if (users.length === 0) {
+	if (users.length === 0 && !isLoading) {
 		return (
 			<div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-12 text-center">
 				<div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
@@ -82,8 +83,14 @@ export function UsersTable({
 	}
 
 	return (
-		<div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-			<Table>
+		<div className="relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+			{/* Loading bar mảnh chạy ngầm khi tìm kiếm */}
+			{isLoading && (
+				<div className="absolute top-0 left-0 right-0 h-0.5 bg-sky-100 overflow-hidden z-10">
+					<div className="w-full h-full bg-[#0EA5E9] animate-pulse" />
+				</div>
+			)}
+			<Table className={`transition-opacity duration-150 ${isLoading ? "opacity-60" : "opacity-100"}`}>
 				<TableHeader className="bg-slate-50/80 dark:bg-slate-950/60">
 					<TableRow className="border-b border-slate-200 dark:border-slate-800 hover:bg-transparent">
 						<TableHead className="w-[280px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">

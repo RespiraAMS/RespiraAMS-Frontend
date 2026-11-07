@@ -41,7 +41,8 @@ export function ProtocolsTable({
 	onDelete,
 	onToggleApplied,
 }: ProtocolsTableProps) {
-	if (isLoading) {
+	// Chỉ hiện spinner toàn màn hình khi chưa có dữ liệu nào
+	if (isLoading && items.length === 0) {
 		return (
 			<div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
 				<div className="inline-block w-8 h-8 border-2 border-slate-200 border-t-[#0EA5E9] rounded-full animate-spin mb-3" />
@@ -50,7 +51,7 @@ export function ProtocolsTable({
 		);
 	}
 
-	if (items.length === 0) {
+	if (items.length === 0 && !isLoading) {
 		return (
 			<div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
 				<h3 className="text-sm font-bold text-slate-800">Không tìm thấy phác đồ nào</h3>
@@ -62,8 +63,14 @@ export function ProtocolsTable({
 	}
 
 	return (
-		<div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-			<Table>
+		<div className="relative bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+			{/* Loading bar mảnh chạy ngầm khi tìm kiếm, không làm giật bảng */}
+			{isLoading && (
+				<div className="absolute top-0 left-0 right-0 h-0.5 bg-sky-100 overflow-hidden z-10">
+					<div className="w-full h-full bg-[#0EA5E9] animate-pulse" />
+				</div>
+			)}
+			<Table className={`transition-opacity duration-150 ${isLoading ? "opacity-60" : "opacity-100"}`}>
 				<TableHeader className="bg-slate-50/80">
 					<TableRow className="border-b border-slate-200 hover:bg-transparent">
 						<TableHead className={`w-[260px] ${HEAD}`}>Phác đồ</TableHead>

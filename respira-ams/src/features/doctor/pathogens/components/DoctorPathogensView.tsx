@@ -25,12 +25,12 @@ export function DoctorPathogensView() {
 		useState<DoctorPathogenItem | null>(null);
 	const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-	// Debounce search input
+	// Debounce search input nhanh (180ms)
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setDebouncedQuery(query.trim());
 			setPage(1);
-		}, 350);
+		}, 180);
 		return () => clearTimeout(timer);
 	}, [query]);
 

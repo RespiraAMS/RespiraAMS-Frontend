@@ -24,12 +24,12 @@ export function AntibioticGroupsView() {
 	const [selected, setSelected] = useState<AntibioticGroupItem | null>(null);
 	const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-	// Debounce search query
+	// Debounce search query nhanh (180ms)
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setDebouncedQuery(query.trim());
 			setPage(1);
-		}, 350);
+		}, 180);
 		return () => clearTimeout(timer);
 	}, [query]);
 

@@ -32,12 +32,12 @@ export function AdminProtocolsView() {
 	const [deleteItem, setDeleteItem] = useState<ClinicalMetricItem | null>(null);
 	const [togglingId, setTogglingId] = useState<string | null>(null);
 
-	// Debounce ô tìm kiếm để không gọi API mỗi lần gõ phím
+	// Debounce ô tìm kiếm nhanh gọn (180ms) phản hồi tức thì
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setDebouncedSearch(search.trim());
 			setPage(1);
-		}, 400);
+		}, 180);
 		return () => clearTimeout(timer);
 	}, [search]);
 

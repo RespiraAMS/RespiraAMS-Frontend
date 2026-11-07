@@ -41,6 +41,15 @@ export function AdminUsersView() {
 		role: "ALL",
 		status: "ALL",
 	});
+	const [debouncedSearch, setDebouncedSearch] = useState("");
+
+	// Debounce tìm kiếm 180ms phản hồi mượt mà không chớp giật
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedSearch(filters.search.trim());
+		}, 180);
+		return () => clearTimeout(timer);
+	}, [filters.search]);
 
 	// Dialog states
 	const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
@@ -65,9 +74,15 @@ export function AdminUsersView() {
 	};
 
 	const loadData = useCallback(async () => {
-		setIsLoading(true);
+		if (users.length === 0) {
+			setIsLoading(true);
+		}
 		try {
-			const res = await fetchUsers(filters);
+			const activeFilters: UserFilters = {
+				...filters,
+				search: debouncedSearch,
+			};
+			const res = await fetchUsers(activeFilters);
 			setUsers(res.items);
 			setTotal(res.total);
 			setStats(res.stats);
@@ -77,7 +92,7 @@ export function AdminUsersView() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [filters]);
+	}, [debouncedSearch, filters, users.length]);
 
 	useEffect(() => {
 		loadData();

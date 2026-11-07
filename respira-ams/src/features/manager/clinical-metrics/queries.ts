@@ -24,6 +24,7 @@ export function useClinicalMetricsList(page: number, pageSize: number, searchTer
     return useQuery({
         queryKey: clinicalMetricKeys.list({ page, pageSize, searchTerm, isApplied }),
         queryFn: () => getClinicalMetricsList(page, pageSize, searchTerm, isApplied),
+        placeholderData: (previousData) => previousData,
     });
 }
 

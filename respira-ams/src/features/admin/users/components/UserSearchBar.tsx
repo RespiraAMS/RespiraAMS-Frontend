@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search, UserPlus, RotateCw } from "lucide-react";
+import { Search, UserPlus, RotateCw, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,8 +38,18 @@ export function UserSearchBar({
 					placeholder="Tìm kiếm theo tên, email, SĐT, CCCD..."
 					value={filters.search}
 					onChange={(e) => onFiltersChange({ ...filters, search: e.target.value })}
-					className="pl-9 h-9.5 text-sm rounded-lg bg-slate-50/70 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
+					className="pl-9 pr-8 h-9.5 text-sm rounded-lg bg-slate-50/70 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
 				/>
+				{filters.search && (
+					<button
+						type="button"
+						onClick={() => onFiltersChange({ ...filters, search: "" })}
+						className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded cursor-pointer"
+						title="Xoá tìm kiếm"
+					>
+						<X className="w-3.5 h-3.5" />
+					</button>
+				)}
 			</div>
 
 			{/* Filter dropdowns & Actions */}
