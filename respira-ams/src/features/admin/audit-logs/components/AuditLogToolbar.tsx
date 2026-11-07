@@ -51,41 +51,40 @@ export function AuditLogToolbar({
 	}, []);
 
 	return (
-		<div className="flex flex-col gap-3 bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
-			<div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-				{/* Search Bar matching UserSearchBar style - không bao giờ nhảy form */}
-				<div className="relative flex-1 min-w-[240px]">
-					<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-					<Input
-						ref={searchInputRef}
-						type="text"
-						value={filters.search}
-						onChange={(e) =>
-							onFiltersChange((prev) => ({
-								...prev,
-								search: e.target.value,
-							}))
-						}
-						placeholder="Tìm theo tác nhân, hành động, đối tượng, IP, correlation ID..."
-						className="pl-9 pr-9 h-9.5 text-xs sm:text-sm rounded-lg bg-slate-50/70 border-slate-200 placeholder:text-slate-400 focus-visible:ring-sky-100"
-					/>
-					{filters.search && (
-						<button
-							type="button"
-							onClick={() => {
-								onFiltersChange((prev) => ({ ...prev, search: "" }));
-								searchInputRef.current?.focus();
-							}}
-							className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded transition-colors cursor-pointer"
-							title="Xoá tìm kiếm"
-						>
-							<X className="w-3.5 h-3.5" />
-						</button>
-					)}
-				</div>
+		<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+			{/* Search Bar matching UserSearchBar style - không bao giờ nhảy form */}
+			<div className="relative flex-1 min-w-[200px]">
+				<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+				<Input
+					ref={searchInputRef}
+					type="text"
+					value={filters.search}
+					onChange={(e) =>
+						onFiltersChange((prev) => ({
+							...prev,
+							search: e.target.value,
+						}))
+					}
+					placeholder="Tìm theo tác nhân, hành động, đối tượng, IP, correlation ID..."
+					className="pl-9 pr-9 h-9.5 text-xs sm:text-sm rounded-lg bg-slate-50/70 border-slate-200 placeholder:text-slate-400 focus-visible:ring-sky-100"
+				/>
+				{filters.search && (
+					<button
+						type="button"
+						onClick={() => {
+							onFiltersChange((prev) => ({ ...prev, search: "" }));
+							searchInputRef.current?.focus();
+						}}
+						className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded transition-colors cursor-pointer"
+						title="Xoá tìm kiếm"
+					>
+						<X className="w-3.5 h-3.5" />
+					</button>
+				)}
+			</div>
 
-				{/* Filters & Actions Group - Form luôn cố định, không thêm bớt nút khi tìm kiếm */}
-				<div className="flex items-center gap-2 flex-wrap">
+			{/* Filters & Actions Group - Form luôn cố định, không thêm bớt nút khi tìm kiếm */}
+			<div className="flex items-center gap-2 flex-wrap">
 					{/* Service Select */}
 					<Select
 						value={filters.service}
@@ -177,7 +176,6 @@ export function AuditLogToolbar({
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
-			</div>
 		</div>
 	);
 }

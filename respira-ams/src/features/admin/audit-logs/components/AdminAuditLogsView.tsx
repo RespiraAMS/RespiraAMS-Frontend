@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { ShieldCheck, History } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { AuditLogFilters, AuditLogItem, AuditLogStats } from "../types";
 import {
@@ -113,20 +113,20 @@ export function AdminAuditLogsView() {
 	const pageCount = Math.ceil(total / PAGE_SIZE);
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 			{/* Page Header */}
-			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-				<div>
-					<h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-						<div className="p-2 rounded-xl bg-sky-50 text-[#0EA5E9] border border-sky-100">
-							<History className="w-5 h-5" />
-						</div>
-						<span>Nhật ký Kiểm toán & Bảo mật</span>
+			<div>
+				<div className="flex items-center gap-2">
+					<div className="p-2 rounded-xl bg-sky-50 text-[#0EA5E9]">
+						<ShieldCheck className="w-5 h-5" />
+					</div>
+					<h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+						Nhật ký kiểm toán &amp; Bảo mật
 					</h1>
-					<p className="text-xs sm:text-sm text-slate-500 mt-1">
-						Theo dõi toàn diện các giao dịch phân tán, hoạt động đăng nhập, chỉnh sửa phác đồ và truy cập dữ liệu y tế.
-					</p>
 				</div>
+				<p className="text-xs sm:text-sm text-slate-500 mt-1">
+					Theo dõi toàn diện các giao dịch phân tán, hoạt động đăng nhập, chỉnh sửa phác đồ và truy cập dữ liệu y tế trong hệ thống Respira
+				</p>
 			</div>
 
 			{/* Stats Cards */}
