@@ -106,7 +106,7 @@ export function AntibioticGroupForm({ initialData, onSubmit, onCancel, isPending
                 {errors.name && <p className="text-sm text-destructive font-medium">{errors.name.message}</p>}
             </div>
 
-            {/* Parent Group (Combobox) */}
+            {/* Parent Group*/}
             <div className="space-y-2 flex flex-col">
                 <label className="text-sm font-medium text-foreground">{t("form.parentLabel")}</label>
                 <Controller
@@ -131,7 +131,6 @@ export function AntibioticGroupForm({ initialData, onSubmit, onCancel, isPending
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
                             </PopoverTrigger>
-                            {/* Dùng width của trigger để popover content rộng bằng input */}
                             <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
                                 <Command>
                                     <CommandInput placeholder={t("form.searchParentPlaceholder") || "Tìm kiếm nhóm cha..."} />
