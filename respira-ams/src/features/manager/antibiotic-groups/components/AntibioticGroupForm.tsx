@@ -113,7 +113,7 @@ export function AntibioticGroupForm({ initialData, onSubmit, onCancel, isPending
                     name="parentId"
                     control={control}
                     render={({ field }) => (
-                        <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                        <Popover open={openCombobox} onOpenChange={setOpenCombobox} modal={true}>
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="outline"
