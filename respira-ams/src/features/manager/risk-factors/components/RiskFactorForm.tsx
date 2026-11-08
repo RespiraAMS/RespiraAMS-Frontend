@@ -107,7 +107,7 @@ export function RiskFactorForm({ initialData, onSubmit, onCancel, isPending }: R
 						control={control}
 						name="pathogenId"
 						render={({ field }) => (
-							<Popover open={openPathogenCombo} onOpenChange={setOpenPathogenCombo}>
+							<Popover open={openPathogenCombo} onOpenChange={setOpenPathogenCombo} modal={true}>
 								<PopoverTrigger asChild>
 									<Button
 										variant="outline"
@@ -184,7 +184,7 @@ export function RiskFactorForm({ initialData, onSubmit, onCancel, isPending }: R
 						control={control}
 						name="criterionId"
 						render={({ field }) => (
-							<Popover open={openCriteriaCombo} onOpenChange={setOpenCriteriaCombo}>
+							<Popover open={openCriteriaCombo} onOpenChange={setOpenCriteriaCombo} modal={true}>
 								<PopoverTrigger asChild>
 									<Button
 										variant="outline"

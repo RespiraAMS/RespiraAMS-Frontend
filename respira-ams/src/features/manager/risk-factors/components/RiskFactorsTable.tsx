@@ -117,7 +117,7 @@ export function RiskFactorsTable({ onEdit, onDelete }: RiskFactorsTableProps) {
 								</TableCell>
 								<TableCell className="align-top">
 									<div className="bg-muted/40 p-2 rounded border border-border">
-										<PrerequisiteFormatter formula={item.criterion.formula} />
+										{item.criterion.formula}
 									</div>
 								</TableCell>
 								<TableCell className="align-top">
