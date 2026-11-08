@@ -263,7 +263,9 @@
         "severitySevere": "Severe",
         "siteOutpatient": "Outpatient",
         "siteInpatient": "Inpatient",
-        "siteICU": "Intensive Care Unit (ICU)"
+        "siteICU": "Intensive Care Unit (ICU)",
+        "searchPathogenPlaceholder": "Search pathogen...",
+        "noPathogenFound": "No pathogen found."
       },
       "validation": {
         "pathogenRequired": "Please select a pathogen!",

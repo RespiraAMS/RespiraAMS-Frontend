@@ -225,8 +225,8 @@
         "colDescription": "Mô tả",
         "filterData": "Lọc dữ liệu",
         "allTypes": "Tất cả",
-        "typical": "Tác nhân điển hình (Typical)",
-        "atypical": "Không điển hình (Atypical)",
+        "typical": "Tác nhân điển hình",
+        "atypical": "Không điển hình",
         "empty": "Không tìm thấy tác nhân gây bệnh nào."
       },
       "toast": {
@@ -254,16 +254,18 @@
       "form": {
         "pathogenLabel": "Tác nhân gây bệnh",
         "pathogenPlaceholder": "Chọn tác nhân...",
-        "severityLabel": "Mức độ nghiêm trọng (Severity)",
+        "severityLabel": "Mức độ nghiêm trọng",
         "severityPlaceholder": "Chọn mức độ...",
-        "treatmentSiteLabel": "Nơi điều trị (Treatment Site)",
+        "treatmentSiteLabel": "Nơi điều trị",
         "treatmentSitePlaceholder": "Chọn nơi điều trị...",
-        "severityMild": "Nhẹ (Mild)",
-        "severityModerate": "Trung bình (Moderate)",
-        "severitySevere": "Nặng (Severe)",
-        "siteOutpatient": "Ngoại trú (Outpatient)",
-        "siteInpatient": "Nội trú (Inpatient)",
-        "siteICU": "Hồi sức tích cực (ICU)"
+        "severityMild": "Nhẹ",
+        "severityModerate": "Trung bình",
+        "severitySevere": "Nặng",
+        "siteOutpatient": "Ngoại trú",
+        "siteInpatient": "Nội trú",
+        "siteICU": "Hồi sức tích cực (ICU)",
+        "searchPathogenPlaceholder": "Tìm kiếm tác nhân...",
+        "noPathogenFound": "Không tìm thấy tác nhân."
       },
       "validation": {
         "pathogenRequired": "Vui lòng chọn tác nhân gây bệnh!",
