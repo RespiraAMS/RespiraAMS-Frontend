@@ -87,7 +87,9 @@
         "maxLabel": "Max",
         "isMinExclusiveLabel": "Exclusive (>)",
         "isMaxExclusiveLabel": "Exclusive (<)",
-        "unlimitedPlaceholder": "Unlimited"
+        "unlimitedPlaceholder": "Unlimited",
+        "searchGroupPlaceholder": "Search group...",
+        "noGroupFound": "No group found."
       },
       "validation": {
         "nameRequired": "Please enter an antibiotic name!",

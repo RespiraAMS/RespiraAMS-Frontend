@@ -87,7 +87,9 @@
         "maxLabel": "Max",
         "isMinExclusiveLabel": "Không bao gồm (>)",
         "isMaxExclusiveLabel": "Không bao gồm (<)",
-        "unlimitedPlaceholder": "Không giới hạn"
+        "unlimitedPlaceholder": "Không giới hạn",
+        "searchGroupPlaceholder": "Tìm kiếm nhóm...",
+        "noGroupFound": "Không tìm thấy nhóm nào."
       },
       "validation": {
         "nameRequired": "Vui lòng nhập tên kháng sinh!",
