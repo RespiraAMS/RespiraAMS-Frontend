@@ -375,7 +375,7 @@ export function ClinicalMetricDetail({ id }: { id: string }) {
 
             {/* Form Dialog */}
             <Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
-                <DialogContent className="sm:max-w-[600px] border-border bg-popover text-popover-foreground max-h-[90vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-foreground">
                             {modalMode === 'create'
