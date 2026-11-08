@@ -309,7 +309,8 @@
       "categories": {
         "personal": "Thông tin cá nhân",
         "clinical": "Lâm sàng",
-        "paraclinical": "Cận lâm sàng"
+        "paraclinical": "Cận lâm sàng",
+        "medicalHistory": "Tiền sử bệnh"
       },
       "valueTypes": {
         "numeric": "Nhập số (Numeric)",
@@ -410,7 +411,9 @@
       },
       "placeholders": {
         "constant": "Nhập giá trị (true, 25.5, FEMALE)...",
-        "selectVariable": "-- Chọn biến số --"
+        "selectVariable": "-- Chọn biến số --",
+        "searchVariable": "Tìm kiếm biến số...",
+        "noVariableFound": "Không tìm thấy biến số nào."
       },
       "groups": {
         "logic": "Logic",

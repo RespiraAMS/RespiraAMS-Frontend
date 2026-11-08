@@ -78,6 +78,8 @@ export function ClinicalVariableDetail({ id }: { id: string }) {
 				return t("categories.paraclinical");
 			case "PersonalInformation":
 				return t("categories.personal");
+			case "MedicalHistory":
+				return t("categories.medicalHistory");
 			default:
 				return category;
 		}
@@ -208,13 +210,13 @@ export function ClinicalVariableDetail({ id }: { id: string }) {
 			<div className="rounded-xl border border-border bg-card p-6 shadow-sm text-card-foreground">
 				<h3 className="font-semibold text-lg mb-4 text-foreground">{t("detail.prerequisiteTitle")}</h3>
 				<div className="bg-muted/50 p-4 rounded-lg border border-border text-foreground">
-					<PrerequisiteFormatter formula={data.prerequisite} />
+					{data.prerequisite}
 				</div>
 			</div>
 
 			{/* UPDATE DIALOG */}
 			<Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
-				<DialogContent className="w-[95vw] sm:max-w-6xl border-border bg-popover text-popover-foreground">
+				<DialogContent className="sm:max-w-[600px] border-border bg-popover text-popover-foreground">
 					<DialogHeader>
 						<DialogTitle className="text-xl text-foreground">{t("dialog.updateTitle")}</DialogTitle>
 					</DialogHeader>

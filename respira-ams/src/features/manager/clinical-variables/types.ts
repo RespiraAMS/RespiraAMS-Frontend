@@ -1,5 +1,5 @@
 export type VariableValueType = "Numeric" | "Boolean" | "Categorical";
-export type VariableCategory = "PersonalInformation" | "Paraclinical" | "Clinical";
+export type VariableCategory = "PersonalInformation" | "Paraclinical" | "Clinical" | "MedicalHistory";
 
 export interface ClinicalVariableItem {
     id: string;

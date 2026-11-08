@@ -309,7 +309,8 @@
       "categories": {
         "personal": "Personal Information",
         "clinical": "Clinical",
-        "paraclinical": "Paraclinical"
+        "paraclinical": "Paraclinical",
+        "medicalHistory": "Medical History"
       },
       "valueTypes": {
         "numeric": "Numeric",
@@ -410,7 +411,9 @@
       },
       "placeholders": {
         "constant": "Enter value (true, 25.5, FEMALE)...",
-        "selectVariable": "-- Select variable --"
+        "selectVariable": "-- Select variable --",
+        "searchVariable": "Search variable...",
+        "noVariableFound": "No variable found."
       },
       "groups": {
         "logic": "Logic",
