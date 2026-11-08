@@ -75,7 +75,7 @@ export function CriteriaTable({ onViewDetail, onEdit, onDelete }: CriteriaTableP
 								</TableCell>
 								<TableCell className="align-top">
 									<div className="bg-muted/40 p-2 rounded-lg border border-border">
-										<PrerequisiteFormatter formula={item.formula} />
+										{item.formula}
 									</div>
 								</TableCell>
 								<TableCell className="align-top">
