@@ -96,7 +96,7 @@ export function CriteriaView() {
 
 			{/* Form Dialog */}
 			<Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
-				<DialogContent className="sm:max-w-[600px] border-border bg-popover text-popover-foreground">
+				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
 					<DialogHeader>
 						<DialogTitle className="text-xl text-foreground">
 							{modalMode === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}

@@ -215,7 +215,7 @@ export function DosageFormModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-[500px] border-border bg-card text-card-foreground">
+            <DialogContent className="sm:max-w-xl border-border bg-card text-card-foreground">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-foreground">
                         {isEdit ? t("dosageModal.updateTitle") : t("dosageModal.createTitle")}

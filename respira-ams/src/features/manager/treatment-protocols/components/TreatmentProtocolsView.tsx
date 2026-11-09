@@ -264,7 +264,7 @@ export function TreatmentProtocolsView() {
 
             {/* Modal Form */}
             <Dialog open={modalMode !== null} onOpenChange={(open) => !open && setModalMode(null)}>
-                <DialogContent className="sm:max-w-4xl border-border bg-card max-h-[95vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-xl border-border bg-card max-h-[95vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>{modalMode === "create" ? "Thêm Phác đồ Điều trị" : "Cập nhật Phác đồ"}</DialogTitle>
                     </DialogHeader>

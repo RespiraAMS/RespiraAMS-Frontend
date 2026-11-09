@@ -216,7 +216,7 @@ export function ClinicalVariableDetail({ id }: { id: string }) {
 
 			{/* UPDATE DIALOG */}
 			<Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
-				<DialogContent className="sm:max-w-[600px] border-border bg-popover text-popover-foreground">
+				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
 					<DialogHeader>
 						<DialogTitle className="text-xl text-foreground">{t("dialog.updateTitle")}</DialogTitle>
 					</DialogHeader>

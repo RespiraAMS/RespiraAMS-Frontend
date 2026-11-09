@@ -125,7 +125,7 @@ export function AntibiogramForm({ initialData, onSubmit, onCancel, isPending }: 
                                         >
                                             {category === "Susceptible" && "Nhạy cảm (S)"}
                                             {category === "Intermediate" && "Trung gian (I)"}
-                                            {category === "Resistant" && "Đề kháng (R)"}
+                                            {category === "Resistant" && "Kháng thuốc (R)"}
                                         </Label>
                                     </div>
                                 );

@@ -90,7 +90,7 @@ export function AntibiogramsView() {
             case "Intermediate":
                 return <span className="inline-flex items-center rounded bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide">Trung gian (I)</span>;
             case "Resistant":
-                return <span className="inline-flex items-center rounded bg-rose-500/15 border border-rose-500/30 px-2.5 py-0.5 text-xs font-semibold text-rose-700 dark:text-rose-400 uppercase tracking-wide">Đề kháng (R)</span>;
+                return <span className="inline-flex items-center rounded bg-rose-500/15 border border-rose-500/30 px-2.5 py-0.5 text-xs font-semibold text-rose-700 dark:text-rose-400 uppercase tracking-wide">Kháng thuốc (R)</span>;
             default:
                 return null;
         }
