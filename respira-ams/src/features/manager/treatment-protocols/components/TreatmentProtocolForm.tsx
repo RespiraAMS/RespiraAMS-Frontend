@@ -188,7 +188,7 @@ export function TreatmentProtocolForm({ initialData, onSubmit, onCancel, isPendi
                     {/* Pathogens Multi-Select */}
                     <div className="space-y-2 flex flex-col">
                         <Label className="text-xs">Mầm bệnh đích (Pathogens)</Label>
-                        <Popover open={openPathogenCombo} onOpenChange={setOpenPathogenCombo}>
+                        <Popover open={openPathogenCombo} onOpenChange={setOpenPathogenCombo} modal={true}>
                             <PopoverTrigger asChild>
                                 <Button variant="outline" className="justify-between font-normal text-muted-foreground" disabled={isLoadingDropdowns || isPending}>
                                     {isLoadingDropdowns ? "Đang tải..." : "Thêm mầm bệnh..."}
@@ -231,7 +231,7 @@ export function TreatmentProtocolForm({ initialData, onSubmit, onCancel, isPendi
                     {/* Criteria Multi-Select */}
                     <div className="space-y-2 flex flex-col">
                         <Label className="text-xs">Tiêu chí lâm sàng (Criteria)</Label>
-                        <Popover open={openCriteriaCombo} onOpenChange={setOpenCriteriaCombo}>
+                        <Popover open={openCriteriaCombo} onOpenChange={setOpenCriteriaCombo} modal={true}>
                             <PopoverTrigger asChild>
                                 <Button variant="outline" className="justify-between font-normal text-muted-foreground" disabled={isLoadingDropdowns || isPending}>
                                     {isLoadingDropdowns ? "Đang tải..." : "Thêm tiêu chí..."}

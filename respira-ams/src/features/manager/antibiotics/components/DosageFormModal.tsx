@@ -234,7 +234,7 @@ export function DosageFormModal({
                                 disabled={isPending}
                                 className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-all duration-200 ${
                                     currentRoute === "Oral"
-                                        ? "bg-background shadow-sm text-foreground"
+                                        ? "bg-primary text-primary-foreground shadow-sm"
                                         : "text-muted-foreground hover:text-foreground"
                                 }`}
                             >
@@ -246,7 +246,7 @@ export function DosageFormModal({
                                 disabled={isPending}
                                 className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-all duration-200 ${
                                     currentRoute === "Intravenous"
-                                        ? "bg-background shadow-sm text-foreground"
+                                        ? "bg-primary text-primary-foreground shadow-sm"
                                         : "text-muted-foreground hover:text-foreground"
                                 }`}
                             >
