@@ -195,11 +195,11 @@ export function AntibioticForm({ initialData, onSubmit, onCancel, isPending = fa
                                 const label = cat === "AccessWatch" ? "Access-Watch" : cat;
                                 
                                 const selectedBgColor = cn(
-                                    cat === "Access" && "bg-info text-white",
-                                    cat === "Watch" && "bg-warning text-white",
-                                    cat === "Reserve" && "bg-error text-white",
-                                    cat === "AccessWatch" && "bg-purple-500 text-white",
-                                    cat === "Others" && "bg-emerald-500 text-white",
+                                    cat === "Access" && "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 shadow-sm",
+                                    cat === "Watch" && "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 shadow-sm",
+                                    cat === "Reserve" && "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 shadow-sm",
+                                    cat === "AccessWatch" && "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400 shadow-sm",
+                                    cat === "Others" && "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 shadow-sm",
                                     !["Access", "Watch", "Reserve", "AccessWatch", "Others"].includes(cat) && "bg-background text-foreground"
                                 );
 
