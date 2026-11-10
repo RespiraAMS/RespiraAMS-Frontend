@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Edit, Trash, Loader2, ListFilter } from "lucide-react";
+import { Edit, Trash, Loader2, ListFilter, AlertCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,7 @@ export function RiskFactorsTable({ onEdit, onDelete }: RiskFactorsTableProps) {
 				<TableHeader>
 					<TableRow className="border-border hover:bg-transparent">
 						<TableHead className="text-muted-foreground font-semibold w-1/6">{tTable("colPathogen")}</TableHead>
+						<TableHead className="text-muted-foreground font-semibold">{tTable("colSeverity")}</TableHead>
 						<TableHead className="text-muted-foreground font-semibold w-1/6">{tTable("colCriterionName")}</TableHead>
 						<TableHead className="text-muted-foreground font-semibold">{tTable("colFormula")}</TableHead>
 						<TableHead className="text-muted-foreground text-right font-semibold w-[120px]">
@@ -112,12 +113,23 @@ export function RiskFactorsTable({ onEdit, onDelete }: RiskFactorsTableProps) {
 								<TableCell className="font-semibold text-primary align-top whitespace-normal break-words">
 									{item.pathogen.name}
 								</TableCell>
+								<TableCell className="align-top">
+                                    {item.isCriticalFactor ? (
+                                        <span className="inline-flex items-center gap-1 rounded-md bg-destructive/15 border border-destructive/30 px-2 py-0.5 text-xs font-semibold text-destructive">
+                                            <AlertCircle className="w-3 h-3" /> {tTable("critical")}
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center rounded-md bg-muted border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                                            {tTable("normal")}
+                                        </span>
+                                    )}
+                                </TableCell>
 								<TableCell className="font-medium text-foreground align-top whitespace-normal break-words">
 									{item.criterion.name}
 								</TableCell>
 								<TableCell className="align-top">
 									<div className="bg-muted/40 p-2 rounded border border-border">
-										<PrerequisiteFormatter formula={item.criterion.formula} />
+										{item.criterion.formula}
 									</div>
 								</TableCell>
 								<TableCell className="align-top">

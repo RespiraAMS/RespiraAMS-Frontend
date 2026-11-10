@@ -9,6 +9,7 @@ export interface RiskFactorItem {
         name: string;
         formula: string;
     };
+    isCriticalFactor: boolean;
 }
 
 export interface PaginatedRiskFactors {
@@ -26,11 +27,13 @@ export interface PaginatedRiskFactors {
 export interface CreateRiskFactorRequest {
     pathogenId: string;
     criterionId: string;
+    isCriticalFactor: boolean;
 }
 
 export interface UpdateRiskFactorRequest {
     pathogenId: string;
     criterionId: string;
+    isCriticalFactor: boolean;
 }
 
 export interface SimpleDropdownItem {

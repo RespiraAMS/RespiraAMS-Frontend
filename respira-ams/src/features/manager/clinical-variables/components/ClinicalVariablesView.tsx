@@ -97,7 +97,7 @@ export function ClinicalVariablesView() {
 
 			{/* Create Modal */}
 			<Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-				<DialogContent className="w-[95vw] sm:max-w-6xl border-border bg-popover text-popover-foreground">
+				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
 					<DialogHeader>
 						<DialogTitle className="text-xl text-foreground">{t("dialog.createTitle")}</DialogTitle>
 					</DialogHeader>

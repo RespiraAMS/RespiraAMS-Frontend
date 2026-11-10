@@ -34,12 +34,61 @@
       "antibioticGroups": "Antibiotic Groups",
       "antibiotics": "Antibiotics",
       "pathogens": "Pathogen",
+      "antibiograms": "Antibiograms",
       "suspectedCauses": "Suspected Cause",
       "treatments": "Treatments",
       "clinicalVariables": "Clinical Variables",
       "criteria": "Criteria",
       "clinicalMetrics": "Clinical Metrics",
       "riskFactors": "Risk Factors"
+    },
+    "dashboard": {
+      "title": "Manager Dashboard",
+      "subtitle": "Executive center and medical data management for Community-Acquired Pneumonia (CAP)",
+      "badge": "RespiraAMS v1.0",
+      "manageButton": "Manage",
+      "modules": {
+        "antibioticGroups": {
+          "title": "Antibiotic Groups",
+          "description": "Manage list of antibiotic group classifications."
+        },
+        "antibiotics": {
+          "title": "Antibiotics",
+          "description": "Manage antibiotic directory and AWaRe categorization (Access, Watch, Reserve)."
+        },
+        "pathogens": {
+          "title": "Pathogens",
+          "description": "Directory of pathogenic bacteria and microorganisms (e.g., Haemophilus influenzae, Acinetobacter baumannii)."
+        },
+        "antibiograms": {
+          "title": "Antibiograms",
+          "description": "Manage susceptibility profiles (Susceptible, Intermediate, Resistant) per pathogen."
+        },
+        "suspectedCauses": {
+          "title": "Suspected Causes",
+          "description": "Manage list of suspected disease underlying causes."
+        },
+        "treatmentProtocols": {
+          "title": "Treatment Protocols",
+          "description": "Manage antibiotic combination regimens by severity level and treatment site (Outpatient, Inpatient, ICU)."
+        },
+        "clinicalVariables": {
+          "title": "Clinical Variables",
+          "description": "Define clinical input variables (Age, SpO2, Blood Pressure...) used in criteria and risk factors."
+        },
+        "criteria": {
+          "title": "Evaluation Criteria",
+          "description": "Build logic criteria based on clinical expression formulas from clinical variables."
+        },
+        "clinicalMetrics": {
+          "title": "Clinical Metrics",
+          "description": "Configure medical risk score metrics (CURB-65, PSI...) and criteria rule sets."
+        },
+        "riskFactors": {
+          "title": "Risk Factors",
+          "description": "Manage catalog of medical risk factors and criteria conditions."
+        }
+      }
     },
     "antibiotics": {
       "title": "Antibiotics",
@@ -86,7 +135,9 @@
         "maxLabel": "Max",
         "isMinExclusiveLabel": "Exclusive (>)",
         "isMaxExclusiveLabel": "Exclusive (<)",
-        "unlimitedPlaceholder": "Unlimited"
+        "unlimitedPlaceholder": "Unlimited",
+        "searchGroupPlaceholder": "Search group...",
+        "noGroupFound": "No group found."
       },
       "validation": {
         "nameRequired": "Please enter an antibiotic name!",
@@ -165,7 +216,9 @@
         "parentLabel": "Parent Group (Optional)",
         "noParentOption": "-- No parent group --",
         "descriptionLabel": "Detailed Description",
-        "descriptionPlaceholder": "Enter description about antibacterial spectrum, ADR,..."
+        "descriptionPlaceholder": "Enter description about antibacterial spectrum, ADR,...",
+        "searchParentPlaceholder": "Search parent group...",
+        "noParentFound": "No parent group found."
       },
       "validation": {
         "nameRequired": "Please enter group name!",
@@ -258,7 +311,9 @@
         "severitySevere": "Severe",
         "siteOutpatient": "Outpatient",
         "siteInpatient": "Inpatient",
-        "siteICU": "Intensive Care Unit (ICU)"
+        "siteICU": "Intensive Care Unit (ICU)",
+        "searchPathogenPlaceholder": "Search pathogen...",
+        "noPathogenFound": "No pathogen found."
       },
       "validation": {
         "pathogenRequired": "Please select a pathogen!",
@@ -302,7 +357,8 @@
       "categories": {
         "personal": "Personal Information",
         "clinical": "Clinical",
-        "paraclinical": "Paraclinical"
+        "paraclinical": "Paraclinical",
+        "medicalHistory": "Medical History"
       },
       "valueTypes": {
         "numeric": "Numeric",
@@ -403,7 +459,9 @@
       },
       "placeholders": {
         "constant": "Enter value (true, 25.5, FEMALE)...",
-        "selectVariable": "-- Select variable --"
+        "selectVariable": "-- Select variable --",
+        "searchVariable": "Search variable...",
+        "noVariableFound": "No variable found."
       },
       "groups": {
         "logic": "Logic",
@@ -433,7 +491,7 @@
       }
     },
     "criteria": {
-      "title": "Criteria Management",
+      "title": "Criteria",
       "description": "Define evaluation standards based on clinical variables.",
       "addButton": "Add New Criteria",
       "dialog": {
@@ -503,13 +561,17 @@
         "colFormula": "Criterion Formula",
         "filterTitle": "Filter by Pathogen",
         "allPathogens": "All Pathogens",
-        "empty": "No risk factors found."
+        "empty": "No risk factors found.",
+        "colSeverity": "Criticality",
+        "critical": "Critical",
+        "normal": "Normal"
       },
       "form": {
         "pathogenLabel": "Pathogen",
         "pathogenPlaceholder": "Select pathogen...",
         "pathogenSearch": "Search pathogen...",
         "pathogenEmpty": "No pathogen found.",
+        "criticalLablel": "Critical Risk Factors",
         "criterionLabel": "Criterion",
         "criterionPlaceholder": "Select or search criterion...",
         "criterionSearch": "Search criterion...",
@@ -630,6 +692,136 @@
         "scoreFormulaRequired": "Please configure the Score Function formula!",
         "toastCreateCriteriaSuccess": "New criterion created successfully!",
         "toastCreateCriteriaError": "Error creating criterion: {error}"
+      }
+    },
+    "antibiograms": {
+      "title": "Antibiogram",
+      "description": "Manage antibiotic susceptibility for microbiological pathogens.",
+      "addButton": "Add Antibiogram",
+      "dialog": {
+        "createTitle": "Add Antibiogram",
+        "updateTitle": "Update Antibiogram",
+        "deleteTitle": "Confirm Deletion",
+        "deleteDescription": "Are you sure you want to delete the antibiogram for pathogen <b>\"{pathogen}\"</b>?"
+      },
+      "table": {
+        "colPathogen": "Pathogen",
+        "colMic": "MIC Category",
+        "colAntibiotics": "Applied Antibiotics",
+        "filterTitle": "Filter by",
+        "filterByPathogen": "By Pathogen",
+        "filterByMic": "By MIC",
+        "clearFilters": "Clear filters",
+        "empty": "No antibiogram profiles found matching the filter criteria."
+      },
+      "form": {
+        "micCategoryLabel": "MIC Category",
+        "susceptible": "Susceptible (S)",
+        "intermediate": "Intermediate (I)",
+        "resistant": "Resistant (R)",
+        "pathogenLabel": "Pathogen",
+        "pathogenPlaceholder": "Select pathogen...",
+        "pathogenSearch": "Search pathogen...",
+        "pathogenEmpty": "No pathogen found.",
+        "antibioticLabel": "Antibiotic",
+        "antibioticPlaceholder": "Add antibiotic...",
+        "antibioticSearch": "Search antibiotic...",
+        "antibioticEmpty": "No antibiotic found.",
+        "loading": "Loading..."
+      },
+      "validation": {
+        "pathogenRequired": "Pathogen selection is required!",
+        "antibioticRequired": "At least one antibiotic must be selected!"
+      },
+      "toast": {
+        "createSuccess": "Antibiogram added successfully!",
+        "createError": "Error adding antibiogram: {error}",
+        "updateSuccess": "Antibiogram updated successfully!",
+        "updateError": "Error updating antibiogram: {error}",
+        "deleteSuccess": "Antibiogram deleted successfully!",
+        "deleteError": "Could not delete antibiogram: {error}"
+      }
+    },
+    "treatmentProtocols": {
+      "title": "Treatment Protocols",
+      "description": "Manage antibiotic treatment protocols by severity level and treatment site.",
+      "addButton": "Add Treatment Protocol",
+      "dialog": {
+        "createTitle": "Add Treatment Protocol",
+        "updateTitle": "Update Protocol",
+        "deleteTitle": "Confirm Deletion",
+        "deleteDescription": "Are you sure you want to delete this treatment protocol? This action cannot be undone."
+      },
+      "table": {
+        "colClassification": "Classification",
+        "colIndications": "Specific Indications",
+        "colRegimens": "Regimen Options",
+        "colStatus": "Status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "filterTitle": "Protocol Filters",
+        "clearFilters": "Clear filters",
+        "filterSeverityLabel": "Severity Level",
+        "filterSiteLabel": "Treatment Site",
+        "filterPathogenLabel": "Target Risk Factor",
+        "filterCriteriaLabel": "Clinical Criteria",
+        "allSeverities": "All Severities",
+        "allSites": "All Treatment Sites",
+        "searchPathogenPlaceholder": "Search Risk Factor...",
+        "searchCriteriaPlaceholder": "Search criteria...",
+        "empty": "No matching treatment protocols found.",
+        "noFactors": "No specific factors",
+        "riskFactorsHeading": "Risk Factors",
+        "criteriaHeading": "Criteria",
+        "showMoreRegimens": "+ Show {count} more options ({remaining} left)"
+      },
+      "form": {
+        "severityLabel": "Severity Level",
+        "severityPlaceholder": "Select severity",
+        "severityMild": "Mild",
+        "severityModerate": "Moderate",
+        "severitySevere": "Severe",
+        "treatmentSiteLabel": "Treatment Site",
+        "treatmentSitePlaceholder": "Select treatment site",
+        "treatmentSiteOutpatient": "Outpatient",
+        "treatmentSiteInpatient": "Inpatient",
+        "treatmentSiteICU": "Intensive Care Unit (ICU)",
+        "versionLabel": "Version",
+        "versionPlaceholder": "e.g., 2024",
+        "publisherLabel": "Publisher",
+        "publisherPlaceholder": "e.g., MOH, IDSA",
+        "optionalIndicationsTitle": "Specific Indications (Optional)",
+        "targetPathogensLabel": "Target Pathogens",
+        "addPathogenPlaceholder": "Add pathogen...",
+        "searchPathogenPlaceholder": "Search pathogen...",
+        "emptyPathogen": "No pathogen found.",
+        "criteriaLabel": "Criteria",
+        "addCriteriaPlaceholder": "Add criteria...",
+        "searchCriteriaPlaceholder": "Search criteria...",
+        "emptyCriteria": "No criteria found.",
+        "antibioticProtocolsTitle": "Antibiotic Regimens",
+        "addCombinationButton": "Add Option",
+        "combinationGroupTitle": "Combination Option {index}",
+        "addDrugToRegimen": "Add drug to regimen",
+        "searchAntibioticPlaceholder": "Search antibiotic...",
+        "emptyAntibiotic": "No drug found.",
+        "isAppliedLabel": "Currently active",
+        "saveProtocolButton": "Create",
+        "loading": "Loading..."
+      },
+      "validation": {
+        "versionRequired": "Version cannot be empty!",
+        "publisherRequired": "Publisher cannot be empty!",
+        "groupMinAntibiotics": "Each group must contain at least 1 drug!",
+        "minMedicinesGroup": "Must configure at least 1 treatment regimen group!"
+      },
+      "toast": {
+        "createSuccess": "Treatment protocol created successfully!",
+        "createError": "Error creating protocol: {error}",
+        "updateSuccess": "Treatment protocol updated successfully!",
+        "updateError": "Error updating protocol: {error}",
+        "deleteSuccess": "Treatment protocol deleted successfully!",
+        "deleteError": "Could not delete protocol: {error}"
       }
     }
   }

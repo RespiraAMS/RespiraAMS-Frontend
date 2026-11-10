@@ -271,9 +271,7 @@ export function ClinicalMetricDetail({ id }: { id: string }) {
                                         </td>
                                         <td className="px-4 py-3 align-top">
                                             <div className="bg-muted/40 p-2 rounded border border-border">
-                                                <PrerequisiteFormatter
-                                                    formula={rule.criterion.formula}
-                                                />
+                                                {rule.criterion.formula}
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-center align-top font-mono font-bold">
@@ -377,7 +375,7 @@ export function ClinicalMetricDetail({ id }: { id: string }) {
 
             {/* Form Dialog */}
             <Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
-                <DialogContent className="sm:max-w-2xl border-border bg-popover text-popover-foreground max-h-[90vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-foreground">
                             {modalMode === 'create'

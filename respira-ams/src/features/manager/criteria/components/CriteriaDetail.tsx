@@ -89,7 +89,7 @@ export function CriteriaDetail({ id }: { id: string }) {
 						onClick={() => setIsUpdateOpen(true)}
 						className="text-foreground border-border hover:bg-accent"
 					>
-						<Edit className="h-4 w-4 mr-2 text-primary" /> {tCommon("update")}
+						<Edit className="h-4 w-4 mr-2" /> {tCommon("update")}
 					</Button>
 					<Button
 						variant="destructive"
@@ -106,7 +106,7 @@ export function CriteriaDetail({ id }: { id: string }) {
 					{tDetail("formulaTitle")}
 				</h3>
 				<div className="bg-muted/40 p-4 rounded-lg border border-border">
-					<PrerequisiteFormatter formula={criteriaData.formulaString} />
+					{criteriaData.formulaString}
 				</div>
 			</div>
 
@@ -161,7 +161,7 @@ export function CriteriaDetail({ id }: { id: string }) {
 
 			{/* Update Dialog */}
 			<Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
-				<DialogContent className="w-[95vw] sm:max-w-5xl border-border bg-popover text-popover-foreground">
+				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
 					<DialogHeader>
 						<DialogTitle className="text-xl text-foreground">{tDetail("dialogUpdateTitle")}</DialogTitle>
 					</DialogHeader>

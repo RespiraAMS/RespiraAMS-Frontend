@@ -112,7 +112,7 @@ export function AntibioticGroupsTable({ onEdit, onDelete }: AntibioticGroupsTabl
 								<TableCell className="font-semibold text-primary align-top">{item.name}</TableCell>
 								<TableCell className="text-muted-foreground align-top">
 									{item.parentName ? (
-										<span className="inline-flex items-center rounded-md bg-secondary border border-border px-2 py-1 text-xs font-medium text-secondary-foreground">
+										<span>
 											{item.parentName}
 										</span>
 									) : (

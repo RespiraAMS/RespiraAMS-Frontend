@@ -364,7 +364,7 @@ export function AntibioticDetail({ id }: AntibioticDetailProps) {
 
 			{/* Modals & Dialogs */}
 			<Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-				<DialogContent className="sm:max-w-[600px] border-border bg-popover text-popover-foreground">
+				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
 					<DialogHeader>
 						<DialogTitle className="text-xl text-foreground">{t("dialog.updateTitle")}</DialogTitle>
 					</DialogHeader>

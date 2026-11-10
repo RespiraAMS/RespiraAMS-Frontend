@@ -139,6 +139,9 @@ export function DosageFormModal({
     }, [isOpen, defaultValues, reset]);
 
     const isStandardDose = watch("isStandardDose");
+    const currentRoute = watch("routeOfAdministration");
+    const isMinExclusive = watch("isMinExclusive");
+    const isMaxExclusive = watch("isMaxExclusive");
 
     const onValidSubmit = (data: FormOutput) => {
         clearErrors();
@@ -212,7 +215,7 @@ export function DosageFormModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-[500px] border-border bg-card text-card-foreground">
+            <DialogContent className="sm:max-w-xl border-border bg-card text-card-foreground">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-foreground">
                         {isEdit ? t("dosageModal.updateTitle") : t("dosageModal.createTitle")}
@@ -220,19 +223,36 @@ export function DosageFormModal({
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit(onValidSubmit)} className="space-y-4 pt-2">
-                    {/* Route selection */}
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-foreground">
                             {t("form.routeLabel")} <span className="text-destructive">*</span>
                         </label>
-                        <select
-                            {...register("routeOfAdministration")}
-                            disabled={isPending}
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                            <option value="Oral">Oral ({t("form.routeOral")})</option>
-                            <option value="Intravenous">Intravenous ({t("form.routeIntravenous")})</option>
-                        </select>
+                        <div className="flex p-1 bg-muted rounded-md gap-1">
+                            <button
+                                type="button"
+                                onClick={() => setValue("routeOfAdministration", "Oral", { shouldValidate: true })}
+                                disabled={isPending}
+                                className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-all duration-200 ${
+                                    currentRoute === "Oral"
+                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                        : "text-muted-foreground hover:text-foreground"
+                                }`}
+                            >
+                                {t("form.routeOral")}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setValue("routeOfAdministration", "Intravenous", { shouldValidate: true })}
+                                disabled={isPending}
+                                className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-all duration-200 ${
+                                    currentRoute === "Intravenous"
+                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                        : "text-muted-foreground hover:text-foreground"
+                                }`}
+                            >
+                                {t("form.routeIntravenous")}
+                            </button>
+                        </div>
                         {errors.routeOfAdministration && (
                             <p className="text-sm text-destructive font-medium">
                                 {errors.routeOfAdministration.message}
@@ -240,7 +260,6 @@ export function DosageFormModal({
                         )}
                     </div>
 
-                    {/* Dose Input */}
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-foreground">
                             {t("form.doseLabel")} <span className="text-destructive">*</span>
@@ -256,7 +275,6 @@ export function DosageFormModal({
                         )}
                     </div>
 
-                    {/* Standard Dose Checkbox */}
                     <div className="flex items-center gap-2 pt-2">
                         <Checkbox
                             id="isStandardDose"
@@ -272,56 +290,57 @@ export function DosageFormModal({
                         <p className="text-sm text-destructive font-medium">{errors.isStandardDose.message}</p>
                     )}
 
-                    {/* CrCl Range Panel */}
                     {!isStandardDose && (
                         <div className="rounded-lg border border-border p-4 space-y-4 bg-muted/30">
                             <h4 className="text-sm font-semibold text-foreground">{t("form.crclRangeLabel")}</h4>
 
                             <div className="grid grid-cols-2 gap-4">
-                                {/* Min */}
                                 <div className="space-y-2">
                                     <label className="text-xs font-medium text-foreground">{t("form.minLabel")}</label>
-                                    <Input
-                                        type="number"
-                                        step="any"
-                                        {...register("min")}
-                                        disabled={isPending}
-                                        placeholder="0"
-                                        className="bg-background text-foreground border-input"
-                                    />
-                                    <div className="flex items-center gap-2">
-                                        <Checkbox
-                                            id="isMinExclusive"
-                                            checked={watch("isMinExclusive")}
-                                            onCheckedChange={(val) => setValue("isMinExclusive", !!val)}
+                                    <div className="flex">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            disabled={isPending}
+                                            onClick={() => setValue("isMinExclusive", !isMinExclusive, { shouldValidate: true })}
+                                            className="rounded-r-none px-3 font-mono border-r-0 bg-muted/50 hover:bg-muted text-muted-foreground"
+                                            title="Toggle Inclusive/Exclusive"
+                                        >
+                                            {isMinExclusive ? ">" : "≥"}
+                                        </Button>
+                                        <Input
+                                            type="number"
+                                            step="any"
+                                            {...register("min")}
+                                            disabled={isPending}
+                                            placeholder="0"
+                                            className="rounded-l-none bg-background text-foreground border-input focus-visible:z-10"
                                         />
-                                        <label htmlFor="isMinExclusive" className="text-xs text-muted-foreground cursor-pointer">
-                                            {t("form.isMinExclusiveLabel")}
-                                        </label>
                                     </div>
                                     {errors.min && <p className="text-sm text-destructive font-medium">{errors.min.message}</p>}
                                 </div>
 
-                                {/* Max */}
                                 <div className="space-y-2">
                                     <label className="text-xs font-medium text-foreground">{t("form.maxLabel")}</label>
-                                    <Input
-                                        type="number"
-                                        step="any"
-                                        {...register("max")}
-                                        disabled={isPending}
-                                        placeholder={t("form.unlimitedPlaceholder")}
-                                        className="bg-background text-foreground border-input placeholder:text-muted-foreground"
-                                    />
-                                    <div className="flex items-center gap-2">
-                                        <Checkbox
-                                            id="isMaxExclusive"
-                                            checked={watch("isMaxExclusive")}
-                                            onCheckedChange={(val) => setValue("isMaxExclusive", !!val)}
+                                    <div className="flex">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            disabled={isPending}
+                                            onClick={() => setValue("isMaxExclusive", !isMaxExclusive, { shouldValidate: true })}
+                                            className="rounded-r-none px-3 font-mono border-r-0 bg-muted/50 hover:bg-muted text-muted-foreground"
+                                            title="Toggle Inclusive/Exclusive"
+                                        >
+                                            {isMaxExclusive ? "<" : "≤"}
+                                        </Button>
+                                        <Input
+                                            type="number"
+                                            step="any"
+                                            {...register("max")}
+                                            disabled={isPending}
+                                            placeholder={t("form.unlimitedPlaceholder")}
+                                            className="rounded-l-none bg-background text-foreground border-input placeholder:text-muted-foreground focus-visible:z-10"
                                         />
-                                        <label htmlFor="isMaxExclusive" className="text-xs text-muted-foreground cursor-pointer">
-                                            {t("form.isMaxExclusiveLabel")}
-                                        </label>
                                     </div>
                                     {errors.max && <p className="text-sm text-destructive font-medium">{errors.max.message}</p>}
                                 </div>
@@ -329,7 +348,6 @@ export function DosageFormModal({
                         </div>
                     )}
 
-                    {/* Form Actions */}
                     <div className="flex gap-2 justify-end pt-4 border-t border-border">
                         <Button
                             type="button"

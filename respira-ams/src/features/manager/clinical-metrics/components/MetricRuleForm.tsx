@@ -185,7 +185,7 @@ export function MetricRuleForm({
 						control={control}
 						name="criterionId"
 						render={({ field }) => (
-							<Popover open={openCriteriaCombo} onOpenChange={setOpenCriteriaCombo}>
+							<Popover open={openCriteriaCombo} onOpenChange={setOpenCriteriaCombo} modal={true}>
 								<PopoverTrigger asChild>
 									<Button
 										variant="outline"

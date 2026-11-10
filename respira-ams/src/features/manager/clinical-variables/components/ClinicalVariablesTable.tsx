@@ -89,6 +89,8 @@ export function ClinicalVariablesTable({ onViewDetail, onDelete }: ClinicalVaria
 				return t("categories.paraclinical");
 			case "PersonalInformation":
 				return t("categories.personal");
+			case "MedicalHistory":
+				return t("categories.medicalHistory");
 			default:
 				return category;
 		}
@@ -143,9 +145,10 @@ export function ClinicalVariablesTable({ onViewDetail, onDelete }: ClinicalVaria
 											<DropdownMenuSubTrigger>{tTable("filterByCategory")}</DropdownMenuSubTrigger>
 											<DropdownMenuSubContent className="bg-popover text-popover-foreground border-border">
 												<DropdownMenuItem onClick={() => setFilterCategory("")}>{tCommon("all")}</DropdownMenuItem>
-												<DropdownMenuItem onClick={() => setFilterCategory("PersonalInformation")}>{t("categories.personal")}</DropdownMenuItem>
 												<DropdownMenuItem onClick={() => setFilterCategory("Clinical")}>{t("categories.clinical")}</DropdownMenuItem>
 												<DropdownMenuItem onClick={() => setFilterCategory("Paraclinical")}>{t("categories.paraclinical")}</DropdownMenuItem>
+												<DropdownMenuItem onClick={() => setFilterCategory("PersonalInformation")}>{t("categories.personal")}</DropdownMenuItem>
+												<DropdownMenuItem onClick={() => setFilterCategory("MedicalHistory")}>{t("categories.medicalHistory")}</DropdownMenuItem>
 											</DropdownMenuSubContent>
 										</DropdownMenuSub>
 
@@ -203,7 +206,9 @@ export function ClinicalVariablesTable({ onViewDetail, onDelete }: ClinicalVaria
 												? "bg-blue-500/15 border-blue-500/30 text-blue-600 dark:text-blue-400"
 												: item.category === "Paraclinical"
 												? "bg-purple-500/15 border-purple-500/30 text-purple-600 dark:text-purple-400"
-												: "bg-orange-500/15 border-orange-500/30 text-orange-600 dark:text-orange-400"
+												: item.category === "PersonalInformation"
+												? "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+												: "bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400"
 										}`}
 									>
 										{formatCategory(item.category)}

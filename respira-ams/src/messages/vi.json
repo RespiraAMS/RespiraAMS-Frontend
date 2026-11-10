@@ -34,12 +34,61 @@
       "antibioticGroups": "Nhóm kháng sinh",
       "antibiotics": "Kháng sinh",
       "pathogens": "Tác nhân gây bệnh",
+      "antibiograms": "Kháng sinh đồ",
       "suspectedCauses": "Nguyên nhân nghi ngờ",
       "treatments": "Phác đồ điều trị",
       "clinicalVariables": "Biến số lâm sàng",
       "criteria": "Tiêu chí",
       "clinicalMetrics": "Thang điểm lâm sàng",
       "riskFactors": "Yếu tố nguy cơ"
+    },
+    "dashboard": {
+      "title": "Bảng Điều Khiển Quản Lý",
+      "subtitle": "Trung tâm điều hành và quản lý dữ liệu lâm sàng y khoa Viêm phổi Cộng đồng (CAP)",
+      "badge": "RespiraAMS v1.0",
+      "manageButton": "Quản lý",
+      "modules": {
+        "antibioticGroups": {
+          "title": "Nhóm Kháng sinh",
+          "description": "Quản lý danh sách nhóm kháng sinh."
+        },
+        "antibiotics": {
+          "title": "Kháng sinh",
+          "description": "Quản lý danh sách kháng sinh và phân loại mức độ sử dụng (Access, Watch, Reserve)."
+        },
+        "pathogens": {
+          "title": "Tác nhân gây bệnh",
+          "description": "Danh mục các vi khuẩn, vi sinh vật gây bệnh (Haemophilus influenzae, Acinetobacter baumannii...)."
+        },
+        "antibiograms": {
+          "title": "Kháng sinh đồ",
+          "description": "Quản lý mức độ nhạy cảm (Susceptible, Intermediate, Resistant) của kháng sinh trên từng loại tác nhân."
+        },
+        "suspectedCauses": {
+          "title": "Nguyên nhân nghi ngờ",
+          "description": "Quản lý danh sách các nguyên nhân nghi ngờ gây bệnh."
+        },
+        "treatmentProtocols": {
+          "title": "Phác đồ Điều trị",
+          "description": "Quản lý phác đồ phối hợp kháng sinh theo mức độ nghiêm trọng và cơ sở điều trị (Ngoại trú, Nội trú, ICU)."
+        },
+        "clinicalVariables": {
+          "title": "Biến số Lâm sàng",
+          "description": "Định nghĩa các biến số đầu vào (Tuổi, SpO2, Huyết áp...) dùng trong tiêu chí và yếu tố nguy cơ."
+        },
+        "criteria": {
+          "title": "Tiêu chí Đánh giá",
+          "description": "Xây dựng các tiêu chí logic dựa trên công thức biểu thức lâm sàng từ biến số lâm sàng."
+        },
+        "clinicalMetrics": {
+          "title": "Chỉ số Lâm sàng",
+          "description": "Cấu hình các thang điểm đánh giá nguy cơ y khoa (CURB-65, PSI...) và tập hợp các tiêu chí."
+        },
+        "riskFactors": {
+          "title": "Yếu tố Nguy cơ",
+          "description": "Quản lý danh mục các yếu tố nguy cơ và điều kiện tiêu chí."
+        }
+      }
     },
     "antibiotics": {
       "title": "Kháng sinh",
@@ -86,7 +135,9 @@
         "maxLabel": "Max",
         "isMinExclusiveLabel": "Không bao gồm (>)",
         "isMaxExclusiveLabel": "Không bao gồm (<)",
-        "unlimitedPlaceholder": "Không giới hạn"
+        "unlimitedPlaceholder": "Không giới hạn",
+        "searchGroupPlaceholder": "Tìm kiếm nhóm...",
+        "noGroupFound": "Không tìm thấy nhóm nào."
       },
       "validation": {
         "nameRequired": "Vui lòng nhập tên kháng sinh!",
@@ -165,7 +216,9 @@
         "parentLabel": "Nhóm cha (Tùy chọn)",
         "noParentOption": "-- Không có nhóm cha --",
         "descriptionLabel": "Mô tả chi tiết",
-        "descriptionPlaceholder": "Nhập mô tả về phổ kháng khuẩn, ADR,..."
+        "descriptionPlaceholder": "Nhập mô tả về phổ kháng khuẩn, ADR,...",
+        "searchParentPlaceholder": "Tìm kiếm nhóm cha...",
+        "noParentFound": "Không tìm thấy nhóm cha."
       },
       "validation": {
         "nameRequired": "Vui lòng nhập tên nhóm kháng sinh!",
@@ -220,8 +273,8 @@
         "colDescription": "Mô tả",
         "filterData": "Lọc dữ liệu",
         "allTypes": "Tất cả",
-        "typical": "Tác nhân điển hình (Typical)",
-        "atypical": "Không điển hình (Atypical)",
+        "typical": "Tác nhân điển hình",
+        "atypical": "Không điển hình",
         "empty": "Không tìm thấy tác nhân gây bệnh nào."
       },
       "toast": {
@@ -249,16 +302,18 @@
       "form": {
         "pathogenLabel": "Tác nhân gây bệnh",
         "pathogenPlaceholder": "Chọn tác nhân...",
-        "severityLabel": "Mức độ nghiêm trọng (Severity)",
+        "severityLabel": "Mức độ nghiêm trọng",
         "severityPlaceholder": "Chọn mức độ...",
-        "treatmentSiteLabel": "Nơi điều trị (Treatment Site)",
+        "treatmentSiteLabel": "Nơi điều trị",
         "treatmentSitePlaceholder": "Chọn nơi điều trị...",
-        "severityMild": "Nhẹ (Mild)",
-        "severityModerate": "Trung bình (Moderate)",
-        "severitySevere": "Nặng (Severe)",
-        "siteOutpatient": "Ngoại trú (Outpatient)",
-        "siteInpatient": "Nội trú (Inpatient)",
-        "siteICU": "Hồi sức tích cực (ICU)"
+        "severityMild": "Nhẹ",
+        "severityModerate": "Trung bình",
+        "severitySevere": "Nặng",
+        "siteOutpatient": "Ngoại trú",
+        "siteInpatient": "Nội trú",
+        "siteICU": "Hồi sức tích cực (ICU)",
+        "searchPathogenPlaceholder": "Tìm kiếm tác nhân...",
+        "noPathogenFound": "Không tìm thấy tác nhân."
       },
       "validation": {
         "pathogenRequired": "Vui lòng chọn tác nhân gây bệnh!",
@@ -302,7 +357,8 @@
       "categories": {
         "personal": "Thông tin cá nhân",
         "clinical": "Lâm sàng",
-        "paraclinical": "Cận lâm sàng"
+        "paraclinical": "Cận lâm sàng",
+        "medicalHistory": "Tiền sử bệnh"
       },
       "valueTypes": {
         "numeric": "Nhập số (Numeric)",
@@ -403,7 +459,9 @@
       },
       "placeholders": {
         "constant": "Nhập giá trị (true, 25.5, FEMALE)...",
-        "selectVariable": "-- Chọn biến số --"
+        "selectVariable": "-- Chọn biến số --",
+        "searchVariable": "Tìm kiếm biến số...",
+        "noVariableFound": "Không tìm thấy biến số nào."
       },
       "groups": {
         "logic": "Logic",
@@ -503,13 +561,17 @@
         "colFormula": "Công thức Tiêu chí",
         "filterTitle": "Lọc theo Mầm bệnh",
         "allPathogens": "Tất cả Mầm bệnh",
-        "empty": "Không tìm thấy yếu tố nguy cơ nào."
+        "empty": "Không tìm thấy yếu tố nguy cơ nào.",
+        "colSeverity": "Mức độ",
+        "critical": "Chính",
+        "normal": "Bình thường"
       },
       "form": {
         "pathogenLabel": "Tác Nhân",
         "pathogenPlaceholder": "Chọn tác nhân...",
         "pathogenSearch": "Tìm kiếm tác nhân...",
         "pathogenEmpty": "Không tìm thấy tác nhân.",
+        "criticalLablel": "Yếu tố nguy cơ chính",
         "criterionLabel": "Tiêu chí",
         "criterionPlaceholder": "Chọn hoặc gõ tìm tiêu chí...",
         "criterionSearch": "Tìm kiếm tiêu chí...",
@@ -630,6 +692,136 @@
         "scoreFormulaRequired": "Vui lòng thiết lập công thức tính điểm (Score Function)!",
         "toastCreateCriteriaSuccess": "Đã tạo tiêu chí mới!",
         "toastCreateCriteriaError": "Lỗi tạo tiêu chí: {error}"
+      }
+    },
+    "antibiograms": {
+      "title": "Kháng ính đồ",
+      "description": "Quản lý mức độ nhạy cảm kháng sinh của các tác nhân vi sinh.",
+      "addButton": "Thêm kháng sinh đồ",
+      "dialog": {
+        "createTitle": "Thêm kháng sinh đồ",
+        "updateTitle": "Cập Nhật kháng sinh đồ",
+        "deleteTitle": "Xác nhận xóa",
+        "deleteDescription": "Bạn có chắc muốn xóa kháng sinh đồ của tác nhân <b>\"{pathogen}\"</b> không?"
+      },
+      "table": {
+        "colPathogen": "Tác nhân",
+        "colMic": "Phân loại MIC",
+        "colAntibiotics": "Kháng sinh áp dụng",
+        "filterTitle": "Lọc theo",
+        "filterByPathogen": "Theo Tác Nhân",
+        "filterByMic": "Theo MIC",
+        "clearFilters": "Xóa bộ lọc",
+        "empty": "Không tìm thấy dữ liệu kháng sinh đồ phù hợp với điều kiện lọc."
+      },
+      "form": {
+        "micCategoryLabel": "Phân loại MIC",
+        "susceptible": "Nhạy cảm (S)",
+        "intermediate": "Trung gian (I)",
+        "resistant": "Kháng thuốc (R)",
+        "pathogenLabel": "Tác nhân",
+        "pathogenPlaceholder": "Chọn tác nhân...",
+        "pathogenSearch": "Tìm kiếm tác nhân...",
+        "pathogenEmpty": "Không tìm thấy tác nhân.",
+        "antibioticLabel": "Kháng sinh",
+        "antibioticPlaceholder": "Thêm kháng sinh...",
+        "antibioticSearch": "Tìm kiếm kháng sinh...",
+        "antibioticEmpty": "Không tìm thấy kháng sinh.",
+        "loading": "Đang tải..."
+      },
+      "validation": {
+        "pathogenRequired": "Bắt buộc chọn tác nhân!",
+        "antibioticRequired": "Bắt buộc chọn ít nhất một kháng sinh!"
+      },
+      "toast": {
+        "createSuccess": "Thêm kháng sinh đồ thành công!",
+        "createError": "Lỗi thêm kháng sinh đồ: {error}",
+        "updateSuccess": "Cập nhật kháng sinh đồ thành công!",
+        "updateError": "Lỗi cập nhật kháng sinh đồ: {error}",
+        "deleteSuccess": "Đã xóa kháng sinh đồ thành công!",
+        "deleteError": "Không thể xóa kháng sinh đồ: {error}"
+      }
+    },
+    "treatmentProtocols": {
+      "title": "Phác đồ Điều trị",
+      "description": "Quản lý các phác đồ kháng sinh theo mức độ và cơ sở điều trị.",
+      "addButton": "Thêm Phác đồ Điều trị",
+      "dialog": {
+        "createTitle": "Thêm Phác đồ Điều trị",
+        "updateTitle": "Cập nhật Phác đồ",
+        "deleteTitle": "Xác nhận xóa",
+        "deleteDescription": "Bạn có chắc chắn muốn xóa phác đồ điều trị này không? Hành động này không thể hoàn tác."
+      },
+      "table": {
+        "colClassification": "Phân loại",
+        "colIndications": "Chỉ định cụ thể",
+        "colRegimens": "Các lựa chọn Phác đồ",
+        "colStatus": "Trạng thái",
+        "statusActive": "Đang áp dụng",
+        "statusInactive": "Ngừng áp dụng",
+        "filterTitle": "Bộ lọc phác đồ",
+        "clearFilters": "Xóa bộ lọc",
+        "filterSeverityLabel": "Mức độ nghiêm trọng",
+        "filterSiteLabel": "Nơi điều trị",
+        "filterPathogenLabel": "Yếu tố nguy cơ đích",
+        "filterCriteriaLabel": "Tiêu chí lâm sàng",
+        "allSeverities": "Tất cả mức độ",
+        "allSites": "Tất cả nơi điều trị",
+        "searchPathogenPlaceholder": "Tìm Yếu tố nguy cơ...",
+        "searchCriteriaPlaceholder": "Tìm tiêu chí...",
+        "empty": "Không tìm thấy phác đồ điều trị phù hợp.",
+        "noFactors": "Không có yếu tố nào",
+        "riskFactorsHeading": "Yếu tố nguy cơ",
+        "criteriaHeading": "Tiêu chí",
+        "showMoreRegimens": "+ Xem thêm {count} lựa chọn (Còn {remaining})"
+      },
+      "form": {
+        "severityLabel": "Mức độ nghiêm trọng",
+        "severityPlaceholder": "Chọn mức độ",
+        "severityMild": "Nhẹ",
+        "severityModerate": "Trung bình",
+        "severitySevere": "Nặng",
+        "treatmentSiteLabel": "Nơi điều trị",
+        "treatmentSitePlaceholder": "Chọn nơi điều trị",
+        "treatmentSiteOutpatient": "Ngoại trú",
+        "treatmentSiteInpatient": "Nội trú",
+        "treatmentSiteICU": "Hồi sức tích cực (ICU)",
+        "versionLabel": "Phiên bản",
+        "versionPlaceholder": "Ví dụ: 2024",
+        "publisherLabel": "Tổ chức xuất bản",
+        "publisherPlaceholder": "Ví dụ: BYT, IDSA",
+        "optionalIndicationsTitle": "Chỉ định cụ thể (Tùy chọn)",
+        "targetPathogensLabel": "Tác nhân đích",
+        "addPathogenPlaceholder": "Thêm mầm bệnh...",
+        "searchPathogenPlaceholder": "Tìm mầm bệnh...",
+        "emptyPathogen": "Không tìm thấy mầm bệnh.",
+        "criteriaLabel": "Tiêu chí",
+        "addCriteriaPlaceholder": "Thêm tiêu chí...",
+        "searchCriteriaPlaceholder": "Tìm tiêu chí...",
+        "emptyCriteria": "Không tìm thấy tiêu chí.",
+        "antibioticProtocolsTitle": "Phác đồ Kháng sinh",
+        "addCombinationButton": "Thêm lựa chọn",
+        "combinationGroupTitle": "Lựa chọn phối hợp {index}",
+        "addDrugToRegimen": "Thêm thuốc vào phác đồ",
+        "searchAntibioticPlaceholder": "Tìm kháng sinh...",
+        "emptyAntibiotic": "Không tìm thấy thuốc.",
+        "isAppliedLabel": "Đang áp dụng",
+        "saveProtocolButton": "Tạo mới",
+        "loading": "Đang tải..."
+      },
+      "validation": {
+        "versionRequired": "Phiên bản không được để trống!",
+        "publisherRequired": "Tổ chức xuất bản không được để trống!",
+        "groupMinAntibiotics": "Nhóm phải có ít nhất 1 thuốc!",
+        "minMedicinesGroup": "Phải cấu hình ít nhất 1 phác đồ (nhóm) điều trị!"
+      },
+      "toast": {
+        "createSuccess": "Tạo phác đồ điều trị thành công!",
+        "createError": "Lỗi tạo mới: {error}",
+        "updateSuccess": "Cập nhật phác đồ thành công!",
+        "updateError": "Lỗi cập nhật: {error}",
+        "deleteSuccess": "Đã xóa phác đồ thành công!",
+        "deleteError": "Không thể xóa: {error}"
       }
     }
   }

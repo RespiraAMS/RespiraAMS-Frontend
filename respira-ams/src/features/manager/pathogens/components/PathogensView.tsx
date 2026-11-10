@@ -107,7 +107,7 @@ export function PathogensView() {
 
 			{/* Form Modal */}
 			<Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
-				<DialogContent className="sm:max-w-[500px] border-border bg-popover text-popover-foreground">
+				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
 					<DialogHeader>
 						<DialogTitle className="text-xl text-foreground">
 							{modalMode === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}
