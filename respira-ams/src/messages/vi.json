@@ -643,14 +643,14 @@
       }
     },
     "antibiograms": {
-      "title": "Bản đồ kháng sinh (Antibiogram)",
+      "title": "Kháng ính đồ",
       "description": "Quản lý mức độ nhạy cảm kháng sinh của các tác nhân vi sinh.",
-      "addButton": "Thêm bản đồ kháng sinh",
+      "addButton": "Thêm kháng sinh đồ",
       "dialog": {
-        "createTitle": "Thêm Bản Đồ Kháng Sinh",
-        "updateTitle": "Cập Nhật Bản Đồ Kháng Sinh",
+        "createTitle": "Thêm kháng sinh đồ",
+        "updateTitle": "Cập Nhật kháng sinh đồ",
         "deleteTitle": "Xác nhận xóa",
-        "deleteDescription": "Bạn có chắc muốn xóa bản đồ kháng sinh của tác nhân <b>\"{pathogen}\"</b> không?"
+        "deleteDescription": "Bạn có chắc muốn xóa kháng sinh đồ của tác nhân <b>\"{pathogen}\"</b> không?"
       },
       "table": {
         "colPathogen": "Tác nhân",
@@ -682,12 +682,94 @@
         "antibioticRequired": "Bắt buộc chọn ít nhất một kháng sinh!"
       },
       "toast": {
-        "createSuccess": "Thêm bản đồ kháng sinh thành công!",
-        "createError": "Lỗi thêm bản đồ kháng sinh: {error}",
-        "updateSuccess": "Cập nhật bản đồ kháng sinh thành công!",
-        "updateError": "Lỗi cập nhật bản đồ kháng sinh: {error}",
-        "deleteSuccess": "Đã xóa bản đồ kháng sinh thành công!",
-        "deleteError": "Không thể xóa bản đồ kháng sinh: {error}"
+        "createSuccess": "Thêm kháng sinh đồ thành công!",
+        "createError": "Lỗi thêm kháng sinh đồ: {error}",
+        "updateSuccess": "Cập nhật kháng sinh đồ thành công!",
+        "updateError": "Lỗi cập nhật kháng sinh đồ: {error}",
+        "deleteSuccess": "Đã xóa kháng sinh đồ thành công!",
+        "deleteError": "Không thể xóa kháng sinh đồ: {error}"
+      }
+    },
+    "treatmentProtocols": {
+      "title": "Phác đồ Điều trị",
+      "description": "Quản lý các phác đồ kháng sinh theo mức độ và cơ sở điều trị.",
+      "addButton": "Thêm Phác đồ Điều trị",
+      "dialog": {
+        "createTitle": "Thêm Phác đồ Điều trị",
+        "updateTitle": "Cập nhật Phác đồ",
+        "deleteTitle": "Xác nhận xóa",
+        "deleteDescription": "Bạn có chắc chắn muốn xóa phác đồ điều trị này không? Hành động này không thể hoàn tác."
+      },
+      "table": {
+        "colClassification": "Phân loại",
+        "colIndications": "Chỉ định cụ thể",
+        "colRegimens": "Các lựa chọn Phác đồ",
+        "colStatus": "Trạng thái",
+        "statusActive": "Đang áp dụng",
+        "statusInactive": "Ngừng áp dụng",
+        "filterTitle": "Bộ lọc phác đồ",
+        "clearFilters": "Xóa bộ lọc",
+        "filterSeverityLabel": "Mức độ nghiêm trọng",
+        "filterSiteLabel": "Nơi điều trị",
+        "filterPathogenLabel": "Yếu tố nguy cơ đích",
+        "filterCriteriaLabel": "Tiêu chí lâm sàng",
+        "allSeverities": "Tất cả mức độ",
+        "allSites": "Tất cả nơi điều trị",
+        "searchPathogenPlaceholder": "Tìm Yếu tố nguy cơ...",
+        "searchCriteriaPlaceholder": "Tìm tiêu chí...",
+        "empty": "Không tìm thấy phác đồ điều trị phù hợp.",
+        "noFactors": "Không có yếu tố nào",
+        "riskFactorsHeading": "Yếu tố nguy cơ",
+        "criteriaHeading": "Tiêu chí",
+        "showMoreRegimens": "+ Xem thêm {count} lựa chọn (Còn {remaining})"
+      },
+      "form": {
+        "severityLabel": "Mức độ nghiêm trọng",
+        "severityPlaceholder": "Chọn mức độ",
+        "severityMild": "Nhẹ",
+        "severityModerate": "Trung bình",
+        "severitySevere": "Nặng",
+        "treatmentSiteLabel": "Nơi điều trị",
+        "treatmentSitePlaceholder": "Chọn nơi điều trị",
+        "treatmentSiteOutpatient": "Ngoại trú",
+        "treatmentSiteInpatient": "Nội trú",
+        "treatmentSiteICU": "Hồi sức tích cực (ICU)",
+        "versionLabel": "Phiên bản",
+        "versionPlaceholder": "Ví dụ: 2024",
+        "publisherLabel": "Tổ chức xuất bản",
+        "publisherPlaceholder": "Ví dụ: BYT, IDSA",
+        "optionalIndicationsTitle": "Chỉ định cụ thể (Tùy chọn)",
+        "targetPathogensLabel": "Tác nhân đích",
+        "addPathogenPlaceholder": "Thêm mầm bệnh...",
+        "searchPathogenPlaceholder": "Tìm mầm bệnh...",
+        "emptyPathogen": "Không tìm thấy mầm bệnh.",
+        "criteriaLabel": "Tiêu chí",
+        "addCriteriaPlaceholder": "Thêm tiêu chí...",
+        "searchCriteriaPlaceholder": "Tìm tiêu chí...",
+        "emptyCriteria": "Không tìm thấy tiêu chí.",
+        "antibioticProtocolsTitle": "Phác đồ Kháng sinh",
+        "addCombinationButton": "Thêm lựa chọn",
+        "combinationGroupTitle": "Lựa chọn phối hợp {index}",
+        "addDrugToRegimen": "Thêm thuốc vào phác đồ",
+        "searchAntibioticPlaceholder": "Tìm kháng sinh...",
+        "emptyAntibiotic": "Không tìm thấy thuốc.",
+        "isAppliedLabel": "Đang áp dụng",
+        "saveProtocolButton": "Tạo mới",
+        "loading": "Đang tải..."
+      },
+      "validation": {
+        "versionRequired": "Phiên bản không được để trống!",
+        "publisherRequired": "Tổ chức xuất bản không được để trống!",
+        "groupMinAntibiotics": "Nhóm phải có ít nhất 1 thuốc!",
+        "minMedicinesGroup": "Phải cấu hình ít nhất 1 phác đồ (nhóm) điều trị!"
+      },
+      "toast": {
+        "createSuccess": "Tạo phác đồ điều trị thành công!",
+        "createError": "Lỗi tạo mới: {error}",
+        "updateSuccess": "Cập nhật phác đồ thành công!",
+        "updateError": "Lỗi cập nhật: {error}",
+        "deleteSuccess": "Đã xóa phác đồ thành công!",
+        "deleteError": "Không thể xóa: {error}"
       }
     }
   }
