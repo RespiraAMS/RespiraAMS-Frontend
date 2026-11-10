@@ -22,6 +22,7 @@ import { usePathogensDropdown, useCriteriaDropdown, riskFactorKeys } from "../qu
 import { CriteriaForm } from "@/features/manager/criteria/components/CriteriaForm";
 import { useCriteriaMutations } from "@/features/manager/criteria/queries";
 import { type CreateCriteriaRequest } from "@/features/manager/criteria/types";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface RiskFactorFormProps {
 	initialData?: RiskFactorItem | null;
@@ -54,16 +55,18 @@ export function RiskFactorForm({ initialData, onSubmit, onCancel, isPending }: R
 		return z.object({
 			pathogenId: z.string().min(1, tVal("pathogenRequired")),
 			criterionId: z.string().min(1, tVal("criterionRequired")),
+			isCriticalFactor: z.boolean(),
 		});
 	}, [tVal]);
 
 	type FormValues = z.infer<typeof formSchema>;
 
 	const defaultValues: FormValues = useMemo(() => {
-		if (!initialData) return { pathogenId: "", criterionId: "" };
+		if (!initialData) return { pathogenId: "", criterionId: "", isCriticalFactor: false };
 		return {
 			pathogenId: initialData.pathogen.id,
 			criterionId: initialData.criterion.id,
+			isCriticalFactor: initialData.isCriticalFactor,
 		};
 	}, [initialData]);
 
@@ -164,6 +167,26 @@ export function RiskFactorForm({ initialData, onSubmit, onCancel, isPending }: R
 					/>
 					{errors.pathogenId && <p className="text-xs text-destructive font-medium">{errors.pathogenId.message}</p>}
 				</div>
+
+				<div className="flex items-center space-x-2 pt-2 border-t border-border">
+                    <Controller
+                        control={control}
+                        name="isCriticalFactor"
+                        render={({ field }) => (
+                            <Checkbox 
+                                id="isCriticalFactor"
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                disabled={isPending}
+                            />
+                        )}
+                    />
+                    <div className="grid gap-1.5 leading-none">
+                        <Label htmlFor="isCriticalFactor" className="cursor-pointer font-medium">
+                            {tForm("criticalLablel")}
+                        </Label>
+                    </div>
+                </div>
 
 				{/* Criterion Selection */}
 				<div className="space-y-2 flex flex-col">

@@ -561,13 +561,17 @@
         "colFormula": "Criterion Formula",
         "filterTitle": "Filter by Pathogen",
         "allPathogens": "All Pathogens",
-        "empty": "No risk factors found."
+        "empty": "No risk factors found.",
+        "colSeverity": "Criticality",
+        "critical": "Critical",
+        "normal": "Normal"
       },
       "form": {
         "pathogenLabel": "Pathogen",
         "pathogenPlaceholder": "Select pathogen...",
         "pathogenSearch": "Search pathogen...",
         "pathogenEmpty": "No pathogen found.",
+        "criticalLablel": "Critical Risk Factors",
         "criterionLabel": "Criterion",
         "criterionPlaceholder": "Select or search criterion...",
         "criterionSearch": "Search criterion...",
