@@ -641,6 +641,54 @@
         "toastCreateCriteriaSuccess": "New criterion created successfully!",
         "toastCreateCriteriaError": "Error creating criterion: {error}"
       }
+    },
+    "antibiograms": {
+      "title": "Antibiogram Management",
+      "description": "Manage antibiotic susceptibility profiles for microbiological pathogens.",
+      "addButton": "Add Antibiogram Profile",
+      "dialog": {
+        "createTitle": "Add Antibiogram Profile",
+        "updateTitle": "Update Antibiogram Profile",
+        "deleteTitle": "Confirm Deletion",
+        "deleteDescription": "Are you sure you want to delete the antibiogram profile for pathogen <b>\"{pathogen}\"</b>?"
+      },
+      "table": {
+        "colPathogen": "Pathogen",
+        "colMic": "MIC Category",
+        "colAntibiotics": "Applied Antibiotics",
+        "filterTitle": "Filter by",
+        "filterByPathogen": "By Pathogen",
+        "filterByMic": "By MIC",
+        "clearFilters": "Clear filters",
+        "empty": "No antibiogram profiles found matching the filter criteria."
+      },
+      "form": {
+        "micCategoryLabel": "MIC Category",
+        "susceptible": "Susceptible (S)",
+        "intermediate": "Intermediate (I)",
+        "resistant": "Resistant (R)",
+        "pathogenLabel": "Pathogen",
+        "pathogenPlaceholder": "Select pathogen...",
+        "pathogenSearch": "Search pathogen...",
+        "pathogenEmpty": "No pathogen found.",
+        "antibioticLabel": "Antibiotic",
+        "antibioticPlaceholder": "Add antibiotic...",
+        "antibioticSearch": "Search antibiotic...",
+        "antibioticEmpty": "No antibiotic found.",
+        "loading": "Loading..."
+      },
+      "validation": {
+        "pathogenRequired": "Pathogen selection is required!",
+        "antibioticRequired": "At least one antibiotic must be selected!"
+      },
+      "toast": {
+        "createSuccess": "Antibiogram profile added successfully!",
+        "createError": "Error adding antibiogram profile: {error}",
+        "updateSuccess": "Antibiogram profile updated successfully!",
+        "updateError": "Error updating antibiogram profile: {error}",
+        "deleteSuccess": "Antibiogram profile deleted successfully!",
+        "deleteError": "Could not delete antibiogram profile: {error}"
+      }
     }
   }
 }

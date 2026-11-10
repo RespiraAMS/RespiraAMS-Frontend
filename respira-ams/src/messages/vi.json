@@ -641,6 +641,54 @@
         "toastCreateCriteriaSuccess": "Đã tạo tiêu chí mới!",
         "toastCreateCriteriaError": "Lỗi tạo tiêu chí: {error}"
       }
+    },
+    "antibiograms": {
+      "title": "Bản đồ kháng sinh (Antibiogram)",
+      "description": "Quản lý mức độ nhạy cảm kháng sinh của các tác nhân vi sinh.",
+      "addButton": "Thêm bản đồ kháng sinh",
+      "dialog": {
+        "createTitle": "Thêm Bản Đồ Kháng Sinh",
+        "updateTitle": "Cập Nhật Bản Đồ Kháng Sinh",
+        "deleteTitle": "Xác nhận xóa",
+        "deleteDescription": "Bạn có chắc muốn xóa bản đồ kháng sinh của tác nhân <b>\"{pathogen}\"</b> không?"
+      },
+      "table": {
+        "colPathogen": "Tác nhân",
+        "colMic": "Phân loại MIC",
+        "colAntibiotics": "Kháng sinh áp dụng",
+        "filterTitle": "Lọc theo",
+        "filterByPathogen": "Theo Tác Nhân",
+        "filterByMic": "Theo MIC",
+        "clearFilters": "Xóa bộ lọc",
+        "empty": "Không tìm thấy dữ liệu kháng sinh đồ phù hợp với điều kiện lọc."
+      },
+      "form": {
+        "micCategoryLabel": "Phân loại MIC",
+        "susceptible": "Nhạy cảm (S)",
+        "intermediate": "Trung gian (I)",
+        "resistant": "Kháng thuốc (R)",
+        "pathogenLabel": "Tác nhân",
+        "pathogenPlaceholder": "Chọn tác nhân...",
+        "pathogenSearch": "Tìm kiếm tác nhân...",
+        "pathogenEmpty": "Không tìm thấy tác nhân.",
+        "antibioticLabel": "Kháng sinh",
+        "antibioticPlaceholder": "Thêm kháng sinh...",
+        "antibioticSearch": "Tìm kiếm kháng sinh...",
+        "antibioticEmpty": "Không tìm thấy kháng sinh.",
+        "loading": "Đang tải..."
+      },
+      "validation": {
+        "pathogenRequired": "Bắt buộc chọn tác nhân!",
+        "antibioticRequired": "Bắt buộc chọn ít nhất một kháng sinh!"
+      },
+      "toast": {
+        "createSuccess": "Thêm bản đồ kháng sinh thành công!",
+        "createError": "Lỗi thêm bản đồ kháng sinh: {error}",
+        "updateSuccess": "Cập nhật bản đồ kháng sinh thành công!",
+        "updateError": "Lỗi cập nhật bản đồ kháng sinh: {error}",
+        "deleteSuccess": "Đã xóa bản đồ kháng sinh thành công!",
+        "deleteError": "Không thể xóa bản đồ kháng sinh: {error}"
+      }
     }
   }
 }
