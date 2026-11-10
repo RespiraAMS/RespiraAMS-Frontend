@@ -42,6 +42,54 @@
       "clinicalMetrics": "Thang điểm lâm sàng",
       "riskFactors": "Yếu tố nguy cơ"
     },
+    "dashboard": {
+      "title": "Bảng Điều Khiển Quản Lý",
+      "subtitle": "Trung tâm điều hành và quản lý dữ liệu lâm sàng y khoa Viêm phổi Cộng đồng (CAP)",
+      "badge": "RespiraAMS v1.0",
+      "manageButton": "Quản lý",
+      "modules": {
+        "antibioticGroups": {
+          "title": "Nhóm Kháng sinh",
+          "description": "Quản lý danh sách nhóm kháng sinh."
+        },
+        "antibiotics": {
+          "title": "Kháng sinh",
+          "description": "Quản lý danh sách kháng sinh và phân loại mức độ sử dụng (Access, Watch, Reserve)."
+        },
+        "pathogens": {
+          "title": "Tác nhân gây bệnh",
+          "description": "Danh mục các vi khuẩn, vi sinh vật gây bệnh (Haemophilus influenzae, Acinetobacter baumannii...)."
+        },
+        "antibiograms": {
+          "title": "Kháng sinh đồ",
+          "description": "Quản lý mức độ nhạy cảm (Susceptible, Intermediate, Resistant) của kháng sinh trên từng loại tác nhân."
+        },
+        "suspectedCauses": {
+          "title": "Nguyên nhân nghi ngờ",
+          "description": "Quản lý danh sách các nguyên nhân nghi ngờ gây bệnh."
+        },
+        "treatmentProtocols": {
+          "title": "Phác đồ Điều trị",
+          "description": "Quản lý phác đồ phối hợp kháng sinh theo mức độ nghiêm trọng và cơ sở điều trị (Ngoại trú, Nội trú, ICU)."
+        },
+        "clinicalVariables": {
+          "title": "Biến số Lâm sàng",
+          "description": "Định nghĩa các biến số đầu vào (Tuổi, SpO2, Huyết áp...) dùng trong tiêu chí và yếu tố nguy cơ."
+        },
+        "criteria": {
+          "title": "Tiêu chí Đánh giá",
+          "description": "Xây dựng các tiêu chí logic dựa trên công thức biểu thức lâm sàng từ biến số lâm sàng."
+        },
+        "clinicalMetrics": {
+          "title": "Chỉ số Lâm sàng",
+          "description": "Cấu hình các thang điểm đánh giá nguy cơ y khoa (CURB-65, PSI...) và tập hợp các tiêu chí."
+        },
+        "riskFactors": {
+          "title": "Yếu tố Nguy cơ",
+          "description": "Quản lý danh mục các yếu tố nguy cơ và điều kiện tiêu chí."
+        }
+      }
+    },
     "antibiotics": {
       "title": "Kháng sinh",
       "description": "Quản lý danh sách kháng sinh theo nhóm và phân loại AWaRe.",

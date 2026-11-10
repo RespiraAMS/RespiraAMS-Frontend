@@ -42,6 +42,54 @@
       "clinicalMetrics": "Clinical Metrics",
       "riskFactors": "Risk Factors"
     },
+    "dashboard": {
+      "title": "Manager Dashboard",
+      "subtitle": "Executive center and medical data management for Community-Acquired Pneumonia (CAP)",
+      "badge": "RespiraAMS v1.0",
+      "manageButton": "Manage",
+      "modules": {
+        "antibioticGroups": {
+          "title": "Antibiotic Groups",
+          "description": "Manage list of antibiotic group classifications."
+        },
+        "antibiotics": {
+          "title": "Antibiotics",
+          "description": "Manage antibiotic directory and AWaRe categorization (Access, Watch, Reserve)."
+        },
+        "pathogens": {
+          "title": "Pathogens",
+          "description": "Directory of pathogenic bacteria and microorganisms (e.g., Haemophilus influenzae, Acinetobacter baumannii)."
+        },
+        "antibiograms": {
+          "title": "Antibiograms",
+          "description": "Manage susceptibility profiles (Susceptible, Intermediate, Resistant) per pathogen."
+        },
+        "suspectedCauses": {
+          "title": "Suspected Causes",
+          "description": "Manage list of suspected disease underlying causes."
+        },
+        "treatmentProtocols": {
+          "title": "Treatment Protocols",
+          "description": "Manage antibiotic combination regimens by severity level and treatment site (Outpatient, Inpatient, ICU)."
+        },
+        "clinicalVariables": {
+          "title": "Clinical Variables",
+          "description": "Define clinical input variables (Age, SpO2, Blood Pressure...) used in criteria and risk factors."
+        },
+        "criteria": {
+          "title": "Evaluation Criteria",
+          "description": "Build logic criteria based on clinical expression formulas from clinical variables."
+        },
+        "clinicalMetrics": {
+          "title": "Clinical Metrics",
+          "description": "Configure medical risk score metrics (CURB-65, PSI...) and criteria rule sets."
+        },
+        "riskFactors": {
+          "title": "Risk Factors",
+          "description": "Manage catalog of medical risk factors and criteria conditions."
+        }
+      }
+    },
     "antibiotics": {
       "title": "Antibiotics",
       "description": "Manage antibiotics list by group and AWaRe classification.",
