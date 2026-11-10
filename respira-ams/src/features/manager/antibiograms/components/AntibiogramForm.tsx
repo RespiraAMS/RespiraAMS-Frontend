@@ -96,9 +96,8 @@ export function AntibiogramForm({ initialData, onSubmit, onCancel, isPending }: 
     return (
         <form onSubmit={handleSubmit(handleValidSubmit)} className="space-y-6">
             
-            {/* 1. MIC Category - Segmented Control */}
             <div className="space-y-2">
-                <Label>Mức độ nhạy cảm (MIC Category) <span className="text-destructive">*</span></Label>
+                <Label>Mức độ nhạy cảm <span className="text-destructive">*</span></Label>
                 <Controller
                     control={control}
                     name="micCategory"
@@ -135,14 +134,13 @@ export function AntibiogramForm({ initialData, onSubmit, onCancel, isPending }: 
                 />
             </div>
 
-            {/* 2. Pathogen Combobox */}
             <div className="space-y-2 flex flex-col">
-                <Label>Mầm bệnh (Pathogen) <span className="text-destructive">*</span></Label>
+                <Label>Tác nhân <span className="text-destructive">*</span></Label>
                 <Controller
                     control={control}
                     name="pathogenId"
                     render={({ field }) => (
-                        <Popover open={openPathogenCombo} onOpenChange={setOpenPathogenCombo}>
+                        <Popover open={openPathogenCombo} onOpenChange={setOpenPathogenCombo} modal={true}>
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="outline"
@@ -188,11 +186,10 @@ export function AntibiogramForm({ initialData, onSubmit, onCancel, isPending }: 
                 {errors.pathogenId && <p className="text-xs text-destructive">{errors.pathogenId.message}</p>}
             </div>
 
-            {/* 3. Antibiotics Multi-select Combobox */}
             <div className="space-y-2 flex flex-col">
-                <Label>Kháng sinh (Antibiotics) <span className="text-destructive">*</span></Label>
+                <Label>Kháng sinh <span className="text-destructive">*</span></Label>
                 
-                <Popover open={openAntibioticCombo} onOpenChange={setOpenAntibioticCombo}>
+                <Popover open={openAntibioticCombo} onOpenChange={setOpenAntibioticCombo} modal={true}>
                     <PopoverTrigger asChild>
                         <Button
                             variant="outline"
@@ -219,7 +216,6 @@ export function AntibiogramForm({ initialData, onSubmit, onCancel, isPending }: 
                                             value={a.name}
                                             onSelect={() => {
                                                 toggleAntibiotic(a.id);
-                                                // Không đóng Popover để cho phép chọn nhiều
                                             }}
                                         >
                                             <Check className={cn("mr-2 h-4 w-4", selectedAntibioticIds?.includes(a.id) ? "opacity-100" : "opacity-0")} />
@@ -232,7 +228,6 @@ export function AntibiogramForm({ initialData, onSubmit, onCancel, isPending }: 
                     </PopoverContent>
                 </Popover>
 
-                {/* Display selected antibiotics as Badges */}
                 {selectedAntibioticIds && selectedAntibioticIds.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2 p-3 border rounded-md bg-muted/30">
                         {selectedAntibioticIds.map((id) => {
@@ -261,7 +256,7 @@ export function AntibiogramForm({ initialData, onSubmit, onCancel, isPending }: 
                 <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>Hủy</Button>
                 <Button type="submit" disabled={isPending} className="gap-2 bg-primary">
                     {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {isEdit ? "Cập nhật" : "Lưu Kháng sinh đồ"}
+                    {isEdit ? "Cập nhật" : "Tạo mới"}
                 </Button>
             </div>
         </form>

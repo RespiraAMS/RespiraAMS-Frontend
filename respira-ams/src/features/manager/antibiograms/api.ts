@@ -4,14 +4,24 @@ import {
     CreateAntibiogramRequest, 
     UpdateAntibiogramRequest,
     AntibioticItem,
-    PathogenItem
+    PathogenItem,
+    MicCategory
 } from "./types";
 
-export async function getAntibiogramsList(page: number, pageSize: number): Promise<PaginatedAntibiograms> {
+export async function getAntibiogramsList(
+    page: number, 
+    pageSize: number,
+    pathogenId?: string | null,
+    micCategory?: MicCategory | null
+): Promise<PaginatedAntibiograms> {
     const params = new URLSearchParams({
         Page: page.toString(),
         Size: pageSize.toString(),
     });
+
+    if (pathogenId) params.append("PathogenId", pathogenId);
+    if (micCategory) params.append("MicCategory", micCategory);
+
     const result = await apiFetch<PaginatedAntibiograms>(`${API_BASE_SERVER}${API_BASE}/antibiograms?${params.toString()}`);
     if (!result) throw new Error("Failed to fetch antibiograms list");
     return result;

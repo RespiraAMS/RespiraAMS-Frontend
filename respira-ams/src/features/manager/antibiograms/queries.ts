@@ -7,21 +7,22 @@ import {
     getAntibioticsList,
     getPathogensList
 } from "./api";
-import { CreateAntibiogramRequest, UpdateAntibiogramRequest } from "./types";
+import { CreateAntibiogramRequest, MicCategory, UpdateAntibiogramRequest } from "./types";
 
 export const antibiogramKeys = {
     all: ["antibiograms"] as const,
     lists: () => [...antibiogramKeys.all, "list"] as const,
-    list: (page: number, pageSize: number) => [...antibiogramKeys.lists(), { page, pageSize }] as const,
+    list: (page: number, pageSize: number, pathogenId?: string | null, micCategory?: MicCategory | null) => 
+        [...antibiogramKeys.lists(), { page, pageSize, pathogenId, micCategory }] as const,
     dropdowns: () => [...antibiogramKeys.all, "dropdowns"] as const,
     antibiotics: () => [...antibiogramKeys.dropdowns(), "antibiotics"] as const,
     pathogens: () => [...antibiogramKeys.dropdowns(), "pathogens"] as const,
 };
 
-export function useAntibiogramsList(page: number, pageSize: number) {
+export function useAntibiogramsList(page: number, pageSize: number, pathogenId?: string | null, micCategory?: MicCategory | null) {
     return useQuery({
-        queryKey: antibiogramKeys.list(page, pageSize),
-        queryFn: () => getAntibiogramsList(page, pageSize),
+        queryKey: antibiogramKeys.list(page, pageSize, pathogenId, micCategory),
+        queryFn: () => getAntibiogramsList(page, pageSize, pathogenId, micCategory),
     });
 }
 
