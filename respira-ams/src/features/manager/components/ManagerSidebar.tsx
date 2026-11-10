@@ -37,7 +37,6 @@ export interface NavItemConfig {
 
 export const NAV_CONFIGS: NavItemConfig[] = [
     { key: 'dashboard', icon: LayoutDashboard, href: '/manage/dashboard' },
-    { key: 'doctors', icon: Contact, href: '/manage/doctors' },
     { key: 'antibioticGroups', icon: FolderTree, href: '/manage/antibiotic-groups' },
     { key: 'antibiotics', icon: Pill, href: '/manage/antibiotics' },
     { key: 'pathogens', icon: Atom, href: '/manage/pathogens' },
