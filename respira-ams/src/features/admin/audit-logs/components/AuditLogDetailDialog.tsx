@@ -9,41 +9,35 @@ import {
 	CheckCircle2,
 	AlertTriangle,
 	AlertCircle,
-	Copy,
 	Check,
 	Clock,
 	Layers,
 	Globe,
 	Server,
 	User,
-	Terminal,
 	Activity,
+	RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AuditLogItem } from "../types";
+import { AuditLogRollbackDialog } from "./AuditLogRollbackDialog";
 
 interface AuditLogDetailDialogProps {
 	item: AuditLogItem | null;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	onRollbackSuccess?: () => void;
 }
 
-export function AuditLogDetailDialog({ item, open, onOpenChange }: AuditLogDetailDialogProps) {
-	const [copied, setCopied] = useState(false);
+export function AuditLogDetailDialog({
+	item,
+	open,
+	onOpenChange,
+	onRollbackSuccess,
+}: AuditLogDetailDialogProps) {
+	const [isRollbackOpen, setIsRollbackOpen] = useState(false);
 
 	if (!item) return null;
-
-	const handleCopyJson = () => {
-		const payloadString =
-			typeof item.requestPayload === "object"
-				? JSON.stringify(item.requestPayload, null, 2)
-				: String(item.requestPayload ?? "{}");
-
-		navigator.clipboard.writeText(payloadString);
-		setCopied(true);
-		toast.success("Đã sao chép payload JSON vào bộ nhớ tạm");
-		setTimeout(() => setCopied(false), 2000);
-	};
 
 	const formatFullTimestamp = (iso: string) => {
 		try {
@@ -229,42 +223,6 @@ export function AuditLogDetailDialog({ item, open, onOpenChange }: AuditLogDetai
 						</div>
 					</div>
 
-					{/* Payload Data Viewer */}
-					{item.requestPayload && (
-						<div className="rounded-xl border border-slate-200 bg-slate-900 overflow-hidden shadow-xs">
-							<div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-800/90 border-b border-slate-700">
-								<div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-200">
-									<Terminal className="w-3.5 h-3.5 text-sky-400" />
-									<span>Payload / Request Context</span>
-								</div>
-								<Button
-									type="button"
-									variant="ghost"
-									size="sm"
-									onClick={handleCopyJson}
-									className="h-7 px-2 text-[11px] font-mono text-slate-300 hover:text-white hover:bg-slate-700 gap-1 cursor-pointer"
-								>
-									{copied ? (
-										<>
-											<Check className="w-3 h-3 text-emerald-400" />
-											<span className="text-emerald-400">Đã sao chép</span>
-										</>
-									) : (
-										<>
-											<Copy className="w-3 h-3" />
-											<span>Sao chép JSON</span>
-										</>
-									)}
-								</Button>
-							</div>
-							<pre className="p-3.5 text-[11.5px] font-mono text-sky-200 overflow-x-auto max-h-56 select-text whitespace-pre-wrap leading-relaxed">
-								{typeof item.requestPayload === "object"
-									? JSON.stringify(item.requestPayload, null, 2)
-									: item.requestPayload}
-							</pre>
-						</div>
-					)}
-
 					{/* Error or Response Box */}
 					{item.errorMessage ? (
 						<div className="p-3.5 rounded-xl bg-red-50/90 border border-red-200 text-xs">
@@ -284,16 +242,38 @@ export function AuditLogDetailDialog({ item, open, onOpenChange }: AuditLogDetai
 				</div>
 
 				{/* Footer */}
-				<div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end">
+				<div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-3 flex-wrap">
+					{/* Nút Xem trước & Hoàn tác (Rollback) */}
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => setIsRollbackOpen(true)}
+						className="h-9 px-3.5 rounded-xl border-amber-200 bg-amber-50/70 hover:bg-amber-100 text-amber-900 font-semibold text-xs cursor-pointer gap-2 transition-all shadow-2xs hover:shadow-xs active:scale-[0.98]"
+						title="Xem trước sự thay đổi và hoàn tác dữ liệu lâm sàng về phiên bản trước"
+					>
+						<RotateCcw className="w-3.5 h-3.5 text-amber-600" />
+						<span>Xem trước &amp; Hoàn tác (Rollback)</span>
+					</Button>
+
 					<Button
 						type="button"
 						onClick={() => onOpenChange(false)}
-						className="h-10 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs cursor-pointer shadow-sm"
+						className="h-9 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs cursor-pointer shadow-xs"
 					>
 						Đóng
 					</Button>
 				</div>
 			</AdminDialogContent>
+
+			{/* Modal Xem trước & Hoàn tác (Rollback) */}
+			<AuditLogRollbackDialog
+				item={item}
+				open={isRollbackOpen}
+				onOpenChange={setIsRollbackOpen}
+				onSuccess={() => {
+					onRollbackSuccess?.();
+				}}
+			/>
 		</Dialog.Root>
 	);
 }

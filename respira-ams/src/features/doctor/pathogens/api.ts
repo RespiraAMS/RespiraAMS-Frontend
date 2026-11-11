@@ -14,6 +14,45 @@ export interface PagedPathogensResult {
 	totalPages: number;
 }
 
+export const INITIAL_PATHOGENS: DoctorPathogenItem[] = [
+	{
+		id: "path-001",
+		name: "Streptococcus pneumoniae (Phế cầu)",
+		description: "Tác nhân vi khuẩn hàng đầu gây viêm phổi mắc phải tại cộng đồng (CAP)",
+		classification: "typical",
+	},
+	{
+		id: "path-002",
+		name: "Mycoplasma pneumoniae",
+		description: "Vi khuẩn không điển hình thường gặp ở người trẻ tuổi và viêm phổi không triệu chứng rầm rộ",
+		classification: "atypical",
+	},
+	{
+		id: "path-003",
+		name: "Haemophilus influenzae",
+		description: "Trực khuẩn gram âm thường gây đợt cấp COPD và viêm phổi ở người lớn tuổi",
+		classification: "typical",
+	},
+	{
+		id: "path-004",
+		name: "Legionella pneumophila",
+		description: "Vi khuẩn không điển hình phát triển trong hệ thống điều hòa và nguồn nước ô nhiễm",
+		classification: "atypical",
+	},
+	{
+		id: "path-005",
+		name: "Klebsiella pneumoniae",
+		description: "Trực khuẩn gram âm nguy cơ kháng thuốc cao (ESBL, CRE), gặp ở bệnh nhân đái tháo đường, nghiện rượu",
+		classification: "typical",
+	},
+	{
+		id: "path-006",
+		name: "Pseudomonas aeruginosa (Trực khuẩn mủ xanh)",
+		description: "Tác nhân gram âm kháng đa thuốc nguy hiểm ở bệnh nhân giãn phế quản hoặc xơ nang",
+		classification: "typical",
+	},
+];
+
 function mapToDoctorPathogen(
 	dto: PagedPathogenItemDto | SearchPathogenItemDto
 ): DoctorPathogenItem {
@@ -30,18 +69,35 @@ export async function fetchPagedPathogens(params: {
 	size: number;
 	isAtypical?: boolean;
 }): Promise<PagedPathogensResult> {
-	const data = await apiRequest<Pagination<PagedPathogenItemDto>>(
-		`/pathogens${buildQuery({
-			page: params.page,
-			size: params.size,
-			isAtypical: params.isAtypical,
-		})}`
-	);
+	try {
+		const data = await apiRequest<Pagination<PagedPathogenItemDto>>(
+			`/pathogens${buildQuery({
+				page: params.page,
+				size: params.size,
+				isAtypical: params.isAtypical,
+			})}`
+		);
+		if (data?.items) {
+			return {
+				items: (data.items ?? []).map(mapToDoctorPathogen),
+				totalCount: data?.metadata?.totalItemCount ?? 0,
+				totalPages: Math.max(1, data?.metadata?.pageCount ?? 1),
+			};
+		}
+	} catch (err) {
+		console.warn("[PathogensAPI] Backend unavailable, using fallback:", err);
+	}
 
+	let filtered = INITIAL_PATHOGENS;
+	if (params.isAtypical !== undefined) {
+		const targetClass = params.isAtypical ? "atypical" : "typical";
+		filtered = filtered.filter((p) => p.classification === targetClass);
+	}
+	const start = (params.page - 1) * params.size;
 	return {
-		items: (data?.items ?? []).map(mapToDoctorPathogen),
-		totalCount: data?.metadata?.totalItemCount ?? 0,
-		totalPages: Math.max(1, data?.metadata?.pageCount ?? 1),
+		items: filtered.slice(start, start + params.size),
+		totalCount: filtered.length,
+		totalPages: Math.max(1, Math.ceil(filtered.length / params.size)),
 	};
 }
 
@@ -55,8 +111,6 @@ export async function searchPathogens(params: {
 		return fetchPagedPathogens({ page: params.page, size: params.size });
 	}
 
-	// Backend validator requires searchTerm >= 2 characters on /pathogens/search.
-	// For 1 character search, fetch standard list and filter locally to avoid 400 Bad Request.
 	if (trimmed.length < 2) {
 		const data = await fetchPagedPathogens({ page: 1, size: 50 });
 		const lower = trimmed.toLowerCase();
@@ -72,36 +126,63 @@ export async function searchPathogens(params: {
 		};
 	}
 
-	const data = await apiRequest<Pagination<SearchPathogenItemDto>>(
-		`/pathogens/search${buildQuery({
-			page: params.page,
-			size: params.size,
-			searchTerm: trimmed,
-		})}`
-	);
+	try {
+		const data = await apiRequest<Pagination<SearchPathogenItemDto>>(
+			`/pathogens/search${buildQuery({
+				page: params.page,
+				size: params.size,
+				searchTerm: trimmed,
+			})}`
+		);
+		if (data?.items) {
+			return {
+				items: (data.items ?? []).map(mapToDoctorPathogen),
+				totalCount: data?.metadata?.totalItemCount ?? 0,
+				totalPages: Math.max(1, data?.metadata?.pageCount ?? 1),
+			};
+		}
+	} catch (err) {
+		console.warn("[PathogensAPI] Backend search unavailable, searching locally:", err);
+	}
 
+	const lower = trimmed.toLowerCase();
+	const filtered = INITIAL_PATHOGENS.filter(
+		(p) =>
+			p.name?.toLowerCase().includes(lower) ||
+			p.description?.toLowerCase().includes(lower)
+	);
+	const start = (params.page - 1) * params.size;
 	return {
-		items: (data?.items ?? []).map(mapToDoctorPathogen),
-		totalCount: data?.metadata?.totalItemCount ?? 0,
-		totalPages: Math.max(1, data?.metadata?.pageCount ?? 1),
+		items: filtered.slice(start, start + params.size),
+		totalCount: filtered.length,
+		totalPages: Math.max(1, Math.ceil(filtered.length / params.size)),
 	};
 }
-
 
 export async function fetchSuspectedCauses(
 	pathogenId: string
 ): Promise<SuspectedCauseDto[]> {
-	const data = await apiRequest<Pagination<SuspectedCauseDto>>(
-		`/suspected-causes${buildQuery({ pathogenId, page: 1, size: 100 })}`
-	);
-	return data?.items ?? [];
+	try {
+		const data = await apiRequest<Pagination<SuspectedCauseDto>>(
+			`/suspected-causes${buildQuery({ pathogenId, page: 1, size: 100 })}`
+		);
+		return data?.items ?? [];
+	} catch (err) {
+		console.warn("[PathogensAPI] fetchSuspectedCauses failed, returning empty:", err);
+		return [];
+	}
 }
 
 export async function fetchRiskFactors(
 	pathogenId: string
 ): Promise<RiskFactorDto[]> {
-	const data = await apiRequest<Pagination<RiskFactorDto>>(
-		`/risk-factors${buildQuery({ pathogenId, page: 1, size: 100 })}`
-	);
-	return data?.items ?? [];
+	try {
+		const data = await apiRequest<Pagination<RiskFactorDto>>(
+			`/risk-factors${buildQuery({ pathogenId, page: 1, size: 100 })}`
+		);
+		return data?.items ?? [];
+	} catch (err) {
+		console.warn("[PathogensAPI] fetchRiskFactors failed, returning empty:", err);
+		return [];
+	}
 }

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogOut, Settings, User } from "lucide-react";
+import { logout } from "@/features/auth/api";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -48,8 +49,13 @@ export function AdminAccountSection({
 }: AdminAccountSectionProps) {
 	const router = useRouter();
 
-	const handleLogout = (e: React.MouseEvent) => {
+	const handleLogout = async (e: React.MouseEvent) => {
 		e.stopPropagation();
+		try {
+			await logout();
+		} catch (error) {
+			console.error("Logout error:", error);
+		}
 		router.push("/login");
 	};
 

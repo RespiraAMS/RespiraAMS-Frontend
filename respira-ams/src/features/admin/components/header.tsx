@@ -18,9 +18,11 @@ export function AdminHeader() {
 	const toggleSidebar = useAdminSidebarStore((state) => state.toggle);
 
 	const title =
-		Object.entries(PAGE_TITLES).find(
-			([href]) => pathname === href || pathname.startsWith(href + "/")
-		)?.[1] ?? "Quản trị hệ thống";
+		PAGE_TITLES[pathname] ??
+		Object.entries(PAGE_TITLES)
+			.filter(([href]) => href !== "/admin")
+			.find(([href]) => pathname.startsWith(href + "/"))?.[1] ??
+		(pathname === "/admin" ? PAGE_TITLES["/admin"] : "Quản trị hệ thống");
 
 	return (
 		<header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-100 bg-white px-6">

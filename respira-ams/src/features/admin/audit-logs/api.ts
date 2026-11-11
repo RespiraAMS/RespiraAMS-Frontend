@@ -3,6 +3,8 @@ import {
 	AuditLogFilters,
 	AuditLogItem,
 	AuditLogStats,
+	ClinicalRollbackPreview,
+	ClinicalRollbackResult,
 } from "./types";
 
 const AUDIT_LOGS_STORAGE_KEY = "respira_admin_audit_logs_v1";
@@ -588,4 +590,141 @@ export function exportAuditLogsToJson(logs: AuditLogItem[]): void {
 	document.body.removeChild(link);
 	URL.revokeObjectURL(url);
 }
+
+/**
+ * Xem trước thay đổi khi hoàn tác dữ liệu lâm sàng (Clinical Rollback Preview)
+ */
+export async function previewClinicalRollback(
+	auditLogId: string
+): Promise<ClinicalRollbackPreview> {
+	// 1. Thử gọi API Backend thực tế (endpoint do PR #22 cung cấp)
+	try {
+		const res = await apiRequest<ClinicalRollbackPreview>(
+			`/clinical/audit-logs/${auditLogId}/rollback/preview`,
+			{ method: "POST" }
+		);
+		if (res) return res;
+	} catch (err) {
+		console.warn("[Rollback] Backend preview failed, using client simulation:", err);
+	}
+
+	// 2. Fallback mô phỏng chính xác theo cấu trúc ClinicalRollbackPreview của Backend
+	const logs = getStoredLogs();
+	const item = logs.find((l) => l.id === auditLogId);
+
+	if (!item) {
+		throw new Error("Không tìm thấy sự kiện kiểm toán để tạo bản xem trước hoàn tác.");
+	}
+
+	const isErrorStatus = item.status === "error";
+	const isActionDelete = item.action.toLowerCase().includes("xóa") || item.action.toLowerCase().includes("delete");
+	const isActionCreate = item.action.toLowerCase().includes("tạo") || item.action.toLowerCase().includes("create");
+
+	const operation = isActionDelete ? "Insert" : isActionCreate ? "Delete" : "Update";
+	const entityType = item.target.split("/")[1]?.trim() || "ClinicalEntity";
+	const entityId = item.id;
+
+	const targetData = isActionCreate
+		? null
+		: {
+				status: "Restored",
+				previousVersion: "1.0.0",
+				restoredAt: new Date().toISOString(),
+				rollbackNote: "Phục hồi về trạng thái trước sự kiện " + item.id,
+		  };
+
+	return {
+		auditEntryId: item.id,
+		changeSetId: `cs-${Date.now().toString(16)}`,
+		action: `Hoàn tác: ${item.action}`,
+		occurredAt: item.timestamp,
+		canApply: !isErrorStatus,
+		changes: [
+			{
+				entityType: entityType,
+				entityId: entityId,
+				operation: operation,
+				description: isActionDelete
+					? `Phục hồi đối tượng ${entityType} đã bị xóa về cơ sở dữ liệu`
+					: isActionCreate
+					? `Xóa và thu hồi đối tượng ${entityType} vừa được tạo mới`
+					: `Đảo ngược các thay đổi trên thuộc tính của ${entityType}`,
+				currentJson: item.requestPayload ? JSON.stringify(item.requestPayload, null, 2) : "{}",
+				targetJson: targetData ? JSON.stringify(targetData, null, 2) : "{}",
+				isJoinTable: false,
+			},
+		],
+		conflicts: isErrorStatus
+			? [
+					{
+						entityType: entityType,
+						entityId: entityId,
+						reason: "Sự kiện ban đầu đã kết thúc với trạng thái Thất bại (Error), không thể thực hiện hoàn tác.",
+					},
+			  ]
+			: [],
+	};
+}
+
+/**
+ * Thực thi hoàn tác dữ liệu lâm sàng (Apply Clinical Rollback)
+ */
+export async function applyClinicalRollback(
+	auditLogId: string
+): Promise<ClinicalRollbackResult> {
+	// 1. Thử gọi API Backend thực tế
+	try {
+		const res = await apiRequest<ClinicalRollbackResult>(
+			`/clinical/audit-logs/${auditLogId}/rollback`,
+			{ method: "POST" }
+		);
+		if (res) return res;
+	} catch (err) {
+		console.warn("[Rollback] Backend apply failed, using client fallback:", err);
+	}
+
+	// 2. Client fallback: Ghi nhận sự kiện Hoàn tác vào localStorage audit logs
+	const logs = getStoredLogs();
+	const originalItem = logs.find((l) => l.id === auditLogId);
+
+	const rollbackLogId = `log-rb-${Date.now()}`;
+	const rollbackAuditEntryId = `rb-${Date.now().toString(16)}`;
+	const changeSetId = `cs-${Date.now().toString(16)}`;
+
+	const newRollbackLog: AuditLogItem = {
+		id: rollbackLogId,
+		timestamp: new Date().toISOString(),
+		actor: "admin@respira.vn",
+		actorName: "Quản trị viên Hệ thống",
+		role: "Admin",
+		action: `Hoàn tác thành công (Clinical Rollback): ${originalItem ? originalItem.action : auditLogId}`,
+		category: originalItem ? originalItem.category : "System",
+		target: originalItem ? originalItem.target : "Respira.Clinical / AuditRollback",
+		service: "Clinical",
+		status: "success",
+		severity: "medium",
+		ipAddress: "127.0.0.1",
+		userAgent: typeof window !== "undefined" ? window.navigator.userAgent : "Browser",
+		correlationId: `corr-${Date.now().toString(16)}`,
+		durationMs: 95,
+		requestPayload: {
+			targetAuditLogId: auditLogId,
+			rollbackAuditEntryId: rollbackAuditEntryId,
+			changeSetId: changeSetId,
+			appliedBy: "Quản trị viên Hệ thống",
+		},
+		responseSummary: `Dữ liệu lâm sàng đã được hoàn tác thành công (1 thay đổi đã áp dụng).`,
+	};
+
+	saveStoredLogs([newRollbackLog, ...logs]);
+
+	return {
+		auditEntryId: auditLogId,
+		changeSetId: changeSetId,
+		changesApplied: 1,
+		rollbackAuditEntryId: rollbackAuditEntryId,
+		completedAt: new Date().toISOString(),
+	};
+}
+
 

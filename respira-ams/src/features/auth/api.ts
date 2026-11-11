@@ -226,6 +226,7 @@ export async function login(credentials: LoginRequest): Promise<AuthSession> {
 	try {
 		response = await fetch(`${API_BASE_URL}/auth/login`, {
 			method: "POST",
+			signal: AbortSignal.timeout(2500),
 			headers: {
 				"Content-Type": "application/json",
 				Accept: "application/json",
@@ -294,6 +295,7 @@ export async function logout(): Promise<void> {
 			const body: LogoutRequest = { accessToken, refreshToken };
 			await fetch(`${API_BASE_URL}/auth/logout`, {
 				method: "POST",
+				signal: AbortSignal.timeout(2000),
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${accessToken}`,

@@ -15,7 +15,6 @@ import {
 	Bug,
 	Layers,
 	CheckCircle2,
-	Calculator,
 	BarChart3,
 	type LucideIcon,
 } from "lucide-react";
@@ -60,11 +59,6 @@ export const DOCTOR_NAV_ITEMS: NavItem[] = [
 		icon: CheckCircle2,
 		label: "Chẩn đoán lâm sàng",
 		href: "/doctor/diagnose",
-	},
-	{
-		icon: Calculator,
-		label: "Máy tính y khoa",
-		href: "/doctor/calculator",
 	},
 	{
 		icon: BarChart3,

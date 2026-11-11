@@ -63,16 +63,16 @@ export function PrerequisiteNode({ value, onChange, label, variables }: Prerequi
         let newState: FormulaNode = {};
         if (type === "Constant") newState = { constant: "" };
         else if (type === "Variable") newState = { variable: "" };
-        else if (type === "Binary") newState = { operator: "Eq", left: null, right: null };
-        else if (type === "Unary") newState = { operand: null };
-        else if (type === "Ternary") newState = { condition: null, ifTrue: null, ifFalse: null };
+        else if (type === "Binary") newState = { operator: "Eq", left: undefined, right: undefined };
+        else if (type === "Unary") newState = { operand: undefined };
+        else if (type === "Ternary") newState = { condition: undefined, ifTrue: undefined, ifFalse: undefined };
 
         onChange(newState);
     };
 
     const handleWrapInBinary = () => {
         if (!value) return;
-        onChange({ operator: "And", left: value, right: null });
+        onChange({ operator: "And", left: value, right: undefined });
     };
 
     const typeColorMap: Record<string, string> = {

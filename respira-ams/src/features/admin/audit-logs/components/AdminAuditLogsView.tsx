@@ -166,6 +166,7 @@ export function AdminAuditLogsView() {
 				item={selectedLog}
 				open={isDetailOpen}
 				onOpenChange={setIsDetailOpen}
+				onRollbackSuccess={loadData}
 			/>
 		</div>
 	);

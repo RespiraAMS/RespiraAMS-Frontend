@@ -59,3 +59,38 @@ export interface AuditLogStats {
 	successRatePercent: number;
 }
 
+export interface ClinicalRollbackChange {
+	entityType: string;
+	entityId?: string | null;
+	operation: "Insert" | "Update" | "Delete" | string;
+	description: string;
+	currentJson?: string | null;
+	targetJson?: string | null;
+	isJoinTable: boolean;
+}
+
+export interface ClinicalRollbackConflict {
+	entityType: string;
+	entityId?: string | null;
+	reason: string;
+}
+
+export interface ClinicalRollbackPreview {
+	auditEntryId: string;
+	changeSetId: string;
+	action: string;
+	occurredAt: string;
+	changes: ClinicalRollbackChange[];
+	conflicts: ClinicalRollbackConflict[];
+	canApply: boolean;
+}
+
+export interface ClinicalRollbackResult {
+	auditEntryId: string;
+	changeSetId: string;
+	changesApplied: number;
+	rollbackAuditEntryId: string;
+	completedAt: string;
+}
+
+

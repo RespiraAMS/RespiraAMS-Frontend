@@ -9,7 +9,6 @@ const PAGE_TITLES: Record<string, string> = {
 	"/doctor/antibiotic-groups": "Danh sách nhóm kháng sinh",
 	"/doctor/info": "Danh sách kháng sinh",
 	"/doctor/diagnose": "Chẩn đoán lâm sàng",
-	"/doctor/calculator": "Máy tính y khoa",
 	"/doctor/statistics": "Thống kê & Giám sát Vi sinh Lâm sàng",
 	"/doctor/history": "Lịch sử điều trị",
 };

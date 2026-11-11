@@ -5,7 +5,14 @@ import { ApiResult } from "./models";
 const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION ?? "v1";
 
 export const API_BASE = `/api/${API_VERSION}`;
-export const API_BASE_SERVER = `${process.env.GATEWAY_URL || "https://gateway-respira.dev.localhost:7283"}`;
+export const API_BASE_SERVER = `${
+	process.env.NEXT_PUBLIC_GATEWAY_URL ||
+	(process.env.NEXT_PUBLIC_API_URL
+		? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, "")
+		: "") ||
+	process.env.GATEWAY_URL ||
+	"http://localhost:5016"
+}`;
 
 function redirectToLogin(): void {
     if (typeof window !== "undefined") {
@@ -44,6 +51,7 @@ export async function apiFetch<T>(
 
     const resp = await fetch(url, {
         headers,
+        signal: opts?.signal || AbortSignal.timeout(3500),
         ...opts,
     });
 
@@ -146,6 +154,7 @@ export async function apiRequest<T = void>(
 	let response: Response;
 	try {
 		response = await fetch(`${DOCTOR_API_URL}${path}`, {
+			signal: rest.signal || AbortSignal.timeout(3500),
 			...rest,
 			headers: {
 				Accept: "application/json",

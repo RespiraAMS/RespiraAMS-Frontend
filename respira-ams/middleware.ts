@@ -36,6 +36,25 @@ export function middleware(request: NextRequest) {
 		pathname.startsWith("/manage") ||
 		pathname.startsWith("/profile");
 
+	// 0. Truy cập trang gốc "/" -> Điều hướng hợp lý dựa theo trạng thái đăng nhập
+	if (pathname === "/") {
+		if (!accessToken) {
+			const loginUrl = new URL("/login", request.url);
+			const response = NextResponse.redirect(loginUrl);
+			applyLocaleCookie(request, response);
+			return response;
+		}
+		let target = "/doctor/patients";
+		if (userRole === "admin") {
+			target = "/admin/dashboard";
+		} else if (userRole === "manager") {
+			target = "/manage/dashboard";
+		}
+		const response = NextResponse.redirect(new URL(target, request.url));
+		applyLocaleCookie(request, response);
+		return response;
+	}
+
 	// 1. Chưa đăng nhập mà truy cập trang bảo vệ -> Chuyển hướng về /login
 	if (!accessToken && isProtectedRoute) {
 		const loginUrl = new URL("/login", request.url);
