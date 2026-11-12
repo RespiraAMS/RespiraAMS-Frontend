@@ -21,20 +21,21 @@ import {
 	fetchUsers,
 	toggleUserStatus,
 	updateUser,
+	INITIAL_USERS,
 } from "../api";
 
 export function AdminUsersView() {
-	const [users, setUsers] = useState<UserItem[]>([]);
-	const [total, setTotal] = useState(0);
-	const [stats, setStats] = useState<UserStats>({
-		total: 0,
-		doctors: 0,
-		managers: 0,
-		admins: 0,
-		active: 0,
-		inactive: 0,
-	});
-	const [isLoading, setIsLoading] = useState(true);
+	const [users, setUsers] = useState<UserItem[]>(() => INITIAL_USERS.slice(0, 10));
+	const [total, setTotal] = useState(() => INITIAL_USERS.length);
+	const [stats, setStats] = useState<UserStats>(() => ({
+		total: INITIAL_USERS.length,
+		doctors: INITIAL_USERS.filter((u) => u.role === "Doctor").length,
+		managers: INITIAL_USERS.filter((u) => u.role === "Manager").length,
+		admins: INITIAL_USERS.filter((u) => u.role === "Admin").length,
+		active: INITIAL_USERS.filter((u) => u.status === "Active").length,
+		inactive: INITIAL_USERS.filter((u) => u.status === "Inactive").length,
+	}));
+	const [isLoading, setIsLoading] = useState(false);
 
 	const [filters, setFilters] = useState<UserFilters>({
 		search: "",

@@ -10,6 +10,7 @@ import {
 	fetchPatients,
 	searchPatients,
 	updatePatient,
+	getStoredPatients,
 } from "../api";
 import { PatientStatsCards } from "./PatientStatsCards";
 import { PatientSearchBar } from "./PatientSearchBar";
@@ -25,14 +26,34 @@ function errorText(err: unknown): string {
 
 export function PatientsView() {
 	const router = useRouter();
-	const [patients, setPatients] = useState<Patient[]>([]);
-	const [totalCount, setTotalCount] = useState(0);
-	const [totalPages, setTotalPages] = useState(1);
-	const [isLoading, setIsLoading] = useState(true);
+	const [patients, setPatients] = useState<Patient[]>(() => {
+		if (typeof window === "undefined") return [];
+		return getStoredPatients().slice(0, PAGE_SIZE);
+	});
+	const [totalCount, setTotalCount] = useState(() => {
+		if (typeof window === "undefined") return 0;
+		return getStoredPatients().length;
+	});
+	const [totalPages, setTotalPages] = useState(() => {
+		if (typeof window === "undefined") return 1;
+		return Math.max(1, Math.ceil(getStoredPatients().length / PAGE_SIZE));
+	});
+	const [isLoading, setIsLoading] = useState(() => {
+		if (typeof window === "undefined") return true;
+		return getStoredPatients().length === 0;
+	});
 	const [loadError, setLoadError] = useState<string | null>(null);
 	const [actionError, setActionError] = useState<string | null>(null);
 
-	const [stats, setStats] = useState({ total: 0, male: 0, female: 0 });
+	const [stats, setStats] = useState(() => {
+		if (typeof window === "undefined") return { total: 0, male: 0, female: 0 };
+		const all = getStoredPatients();
+		return {
+			total: all.length,
+			male: all.filter((p) => p.gender === "Nam").length,
+			female: all.filter((p) => p.gender === "Nữ").length,
+		};
+	});
 	const [searchQuery, setSearchQuery] = useState("");
 	const [debouncedQuery, setDebouncedQuery] = useState("");
 	const [activeFilter, setActiveFilter] = useState<StatFilter>("all");
@@ -81,7 +102,9 @@ export function PatientsView() {
 	// Patients list (server-side pagination, filter & search)
 	useEffect(() => {
 		let cancelled = false;
-		setIsLoading(true);
+		if (patients.length === 0) {
+			setIsLoading(true);
+		}
 		setLoadError(null);
 
 		const request = debouncedQuery
@@ -105,9 +128,6 @@ export function PatientsView() {
 			})
 			.catch((err) => {
 				if (cancelled) return;
-				setPatients([]);
-				setTotalCount(0);
-				setTotalPages(1);
 				setLoadError(errorText(err));
 			})
 			.finally(() => {

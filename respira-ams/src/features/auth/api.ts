@@ -226,7 +226,7 @@ export async function login(credentials: LoginRequest): Promise<AuthSession> {
 	try {
 		response = await fetch(`${API_BASE_URL}/auth/login`, {
 			method: "POST",
-			signal: AbortSignal.timeout(2500),
+			signal: AbortSignal.timeout(1500),
 			headers: {
 				"Content-Type": "application/json",
 				Accept: "application/json",
@@ -322,6 +322,7 @@ export async function refreshAuthToken(): Promise<string | null> {
 		const body: RefreshRequest = { refreshToken: currentRefreshToken };
 		const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
 			method: "POST",
+			signal: AbortSignal.timeout(1500),
 			headers: {
 				"Content-Type": "application/json",
 				Accept: "application/json",
@@ -364,6 +365,7 @@ export async function sendEmailVerification(email: string, sagaId?: string): Pro
 
 		const response = await fetch(`${API_BASE_URL}/auth/email-verification`, {
 			method: "POST",
+			signal: AbortSignal.timeout(1500),
 			headers: {
 				"Content-Type": "application/json",
 				Accept: "application/json",
@@ -390,6 +392,7 @@ export async function confirmEmailVerification(token: string): Promise<boolean> 
 		const body: VerifyEmailRequest = { token };
 		const response = await fetch(`${API_BASE_URL}/auth/email-verification/confirm`, {
 			method: "POST",
+			signal: AbortSignal.timeout(1500),
 			headers: {
 				"Content-Type": "application/json",
 				Accept: "application/json",

@@ -80,7 +80,7 @@ export async function fetchAntibiotics(params?: {
 	try {
 		const res = await fetch(url, {
 			method: "GET",
-			signal: AbortSignal.timeout(2500),
+			signal: AbortSignal.timeout(1500),
 			headers: {
 				Accept: "application/json",
 			},
@@ -157,7 +157,7 @@ export async function searchAntibiotics(params: {
 	try {
 		const res = await fetch(url, {
 			method: "GET",
-			signal: AbortSignal.timeout(2500),
+			signal: AbortSignal.timeout(1500),
 			headers: {
 				Accept: "application/json",
 			},
@@ -218,7 +218,7 @@ export async function fetchAntibioticById(
 	try {
 		const res = await fetch(url, {
 			method: "GET",
-			signal: AbortSignal.timeout(2500),
+			signal: AbortSignal.timeout(1500),
 			headers: {
 				Accept: "application/json",
 			},

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { DoctorPathogenItem } from "../types";
-import { fetchPagedPathogens, searchPathogens } from "../api";
+import { fetchPagedPathogens, searchPathogens, INITIAL_PATHOGENS } from "../api";
 import { PathogenSearchBar } from "./PathogenSearchBar";
 import { PathogensTable } from "./PathogensTable";
 import { PathogenDetailDialog } from "./PathogenDetailDialog";
@@ -15,10 +15,14 @@ export function DoctorPathogensView() {
 	const [query, setQuery] = useState("");
 	const [debouncedQuery, setDebouncedQuery] = useState("");
 	const [page, setPage] = useState(1);
-	const [pathogens, setPathogens] = useState<DoctorPathogenItem[]>([]);
-	const [totalCount, setTotalCount] = useState(0);
-	const [totalPages, setTotalPages] = useState(1);
-	const [isLoading, setIsLoading] = useState(true);
+	const [pathogens, setPathogens] = useState<DoctorPathogenItem[]>(() =>
+		INITIAL_PATHOGENS.slice(0, PAGE_SIZE)
+	);
+	const [totalCount, setTotalCount] = useState(() => INITIAL_PATHOGENS.length);
+	const [totalPages, setTotalPages] = useState(() =>
+		Math.max(1, Math.ceil(INITIAL_PATHOGENS.length / PAGE_SIZE))
+	);
+	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const [selectedPathogen, setSelectedPathogen] =
@@ -37,7 +41,9 @@ export function DoctorPathogensView() {
 	// Fetch data from backend API
 	useEffect(() => {
 		let isMounted = true;
-		setIsLoading(true);
+		if (pathogens.length === 0) {
+			setIsLoading(true);
+		}
 		setError(null);
 
 		const request = debouncedQuery

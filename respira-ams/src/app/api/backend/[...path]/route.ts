@@ -20,6 +20,7 @@ export async function GET(
 
 	try {
 		const res = await fetch(targetUrl, {
+			signal: AbortSignal.timeout(1500),
 			headers: {
 				Accept: "application/json",
 				...(request.headers.get("authorization")

@@ -193,7 +193,7 @@ export const INITIAL_PATIENTS: Patient[] = [
 	},
 ];
 
-function getStoredPatients(): Patient[] {
+export function getStoredPatients(): Patient[] {
 	if (typeof window === "undefined") return INITIAL_PATIENTS;
 	try {
 		const raw = localStorage.getItem(PATIENTS_STORAGE_KEY);

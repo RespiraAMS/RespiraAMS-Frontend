@@ -42,7 +42,7 @@ export const INITIAL_CLINICAL_METRICS: ClinicalMetricItem[] = [
 	},
 ];
 
-function getStoredProtocols(): ClinicalMetricItem[] {
+export function getStoredProtocols(): ClinicalMetricItem[] {
 	if (typeof window === "undefined") return INITIAL_CLINICAL_METRICS;
 	try {
 		const raw = localStorage.getItem(PROTOCOLS_STORAGE_KEY);
@@ -57,7 +57,52 @@ function getStoredProtocols(): ClinicalMetricItem[] {
 	}
 }
 
-function saveStoredProtocols(items: ClinicalMetricItem[]): void {
+export function getStoredClinicalMetrics(
+	page: number = 1,
+	pageSize: number = 10,
+	searchTerm?: string,
+	isApplied?: boolean | null
+): PaginatedClinicalMetrics {
+	let all = getStoredProtocols();
+	if (isApplied !== null && isApplied !== undefined) {
+		all = all.filter((i) => i.isApplied === isApplied);
+	}
+	const trimmed = searchTerm?.trim();
+	if (trimmed) {
+		const lower = trimmed.toLowerCase();
+		all = all.filter(
+			(i) =>
+				i.name?.toLowerCase().includes(lower) ||
+				i.code?.toLowerCase().includes(lower) ||
+				i.description?.toLowerCase().includes(lower) ||
+				i.publisher?.toLowerCase().includes(lower)
+		);
+	}
+	const total = all.length;
+	const pageCount = Math.max(1, Math.ceil(total / pageSize));
+	const start = (page - 1) * pageSize;
+	const items = all.slice(start, start + pageSize);
+
+	return {
+		metadata: {
+			currentPage: page,
+			pageSize,
+			totalItemCount: total,
+			pageCount,
+			hasNextPage: page < pageCount,
+			hasPreviousPage: page > 1,
+		},
+		items,
+	};
+}
+
+export function getStoredProtocolCount(isApplied: boolean | null): number {
+	const all = getStoredProtocols();
+	if (isApplied === null || isApplied === undefined) return all.length;
+	return all.filter((i) => i.isApplied === isApplied).length;
+}
+
+export function saveStoredProtocols(items: ClinicalMetricItem[]): void {
 	if (typeof window === "undefined") return;
 	try {
 		localStorage.setItem(PROTOCOLS_STORAGE_KEY, JSON.stringify(items));

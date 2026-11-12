@@ -8,6 +8,9 @@ import {
 	fetchAdminDashboardMetrics,
 	fetchMicroservicesStatus,
 	fetchRecentAuditLogs,
+	INITIAL_DASHBOARD_METRICS,
+	DEFAULT_MICROSERVICES,
+	MOCK_AUDIT_LOGS,
 } from "../api";
 import { DashboardStatsCards } from "./DashboardStatsCards";
 import { MicroservicesHealthCard } from "./MicroservicesHealthCard";
@@ -15,18 +18,16 @@ import { RecentAuditLogsCard } from "./RecentAuditLogsCard";
 import { QuickActionsCard } from "./QuickActionsCard";
 
 export function AdminDashboardView() {
-	const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-	const [services, setServices] = useState<MicroserviceStatus[]>([]);
-	const [logs, setLogs] = useState<AuditLogItem[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const [metrics, setMetrics] = useState<DashboardMetrics | null>(() => INITIAL_DASHBOARD_METRICS);
+	const [services, setServices] = useState<MicroserviceStatus[]>(() => DEFAULT_MICROSERVICES);
+	const [logs, setLogs] = useState<AuditLogItem[]>(() => MOCK_AUDIT_LOGS);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [lastUpdated, setLastUpdated] = useState<string>("");
 
 	const loadData = useCallback(async (isRefresh = false) => {
 		if (isRefresh) {
 			setIsRefreshing(true);
-		} else {
-			setIsLoading(true);
 		}
 
 		try {

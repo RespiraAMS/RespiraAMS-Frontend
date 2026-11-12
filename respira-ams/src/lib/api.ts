@@ -51,7 +51,7 @@ export async function apiFetch<T>(
 
     const resp = await fetch(url, {
         headers,
-        signal: opts?.signal || AbortSignal.timeout(3500),
+        signal: opts?.signal || AbortSignal.timeout(1500),
         ...opts,
     });
 
@@ -60,7 +60,12 @@ export async function apiFetch<T>(
         return null;
     }
 
-    const result = (await resp.json()) as ApiResult<T>;
+    let result: ApiResult<T> | null = null;
+    try {
+        result = (await resp.json()) as ApiResult<T>;
+    } catch {
+        throw new Error(`Máy chủ phản hồi trạng thái ${resp.status} ${resp.statusText}`);
+    }
 
     // Check both HTTP status and the API's custom error object
     if (!resp.ok || result.error) {
@@ -154,7 +159,7 @@ export async function apiRequest<T = void>(
 	let response: Response;
 	try {
 		response = await fetch(`${DOCTOR_API_URL}${path}`, {
-			signal: rest.signal || AbortSignal.timeout(3500),
+			signal: rest.signal || AbortSignal.timeout(1500),
 			...rest,
 			headers: {
 				Accept: "application/json",

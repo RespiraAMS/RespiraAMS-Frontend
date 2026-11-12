@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { AntibioticGroupItem } from "../types";
-import { fetchPagedAntibioticGroups, searchAntibioticGroups } from "../api";
+import { fetchPagedAntibioticGroups, searchAntibioticGroups, INITIAL_ANTIBIOTIC_GROUPS } from "../api";
 import { AntibioticGroupSearchBar } from "./AntibioticGroupSearchBar";
 import { AntibioticGroupsTable } from "./AntibioticGroupsTable";
 import { AntibioticGroupDetailDialog } from "./AntibioticGroupDetailDialog";
@@ -15,10 +15,14 @@ export function AntibioticGroupsView() {
 	const [query, setQuery] = useState("");
 	const [debouncedQuery, setDebouncedQuery] = useState("");
 	const [page, setPage] = useState(1);
-	const [groups, setGroups] = useState<AntibioticGroupItem[]>([]);
-	const [totalCount, setTotalCount] = useState(0);
-	const [totalPages, setTotalPages] = useState(1);
-	const [isLoading, setIsLoading] = useState(true);
+	const [groups, setGroups] = useState<AntibioticGroupItem[]>(() =>
+		INITIAL_ANTIBIOTIC_GROUPS.slice(0, PAGE_SIZE)
+	);
+	const [totalCount, setTotalCount] = useState(() => INITIAL_ANTIBIOTIC_GROUPS.length);
+	const [totalPages, setTotalPages] = useState(() =>
+		Math.max(1, Math.ceil(INITIAL_ANTIBIOTIC_GROUPS.length / PAGE_SIZE))
+	);
+	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const [selected, setSelected] = useState<AntibioticGroupItem | null>(null);
@@ -36,7 +40,9 @@ export function AntibioticGroupsView() {
 	// Fetch data from backend
 	useEffect(() => {
 		let isMounted = true;
-		setIsLoading(true);
+		if (groups.length === 0) {
+			setIsLoading(true);
+		}
 		setError(null);
 
 		const request = debouncedQuery

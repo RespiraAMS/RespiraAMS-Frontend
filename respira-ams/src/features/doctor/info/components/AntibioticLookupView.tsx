@@ -8,6 +8,7 @@ import {
 	fetchAntibiotics,
 	searchAntibiotics,
 } from "../services/antibioticApi";
+import { FALLBACK_ANTIBIOTICS } from "../mockData";
 import { AwareBadge } from "./AwareBadge";
 
 const PAGE_SIZE = 8;
@@ -15,9 +16,23 @@ const PAGE_SIZE = 8;
 export function AntibioticLookupView() {
 	const [query, setQuery] = useState("");
 	const [page, setPage] = useState(1);
-	const [items, setItems] = useState<PagedAntibioticItem[]>([]);
-	const [metadata, setMetadata] = useState<PaginationMetadata | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [items, setItems] = useState<PagedAntibioticItem[]>(() =>
+		FALLBACK_ANTIBIOTICS.slice(0, PAGE_SIZE).map((a) => ({
+			id: a.id,
+			name: a.name,
+			classification: a.classification,
+			antibioticGroup: a.antibioticGroup,
+		}))
+	);
+	const [metadata, setMetadata] = useState<PaginationMetadata | null>(() => ({
+		totalItemCount: FALLBACK_ANTIBIOTICS.length,
+		pageCount: Math.ceil(FALLBACK_ANTIBIOTICS.length / PAGE_SIZE),
+		currentPage: 1,
+		pageSize: PAGE_SIZE,
+		hasNextPage: FALLBACK_ANTIBIOTICS.length > PAGE_SIZE,
+		hasPreviousPage: false,
+	}));
+	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const inputRef = useRef<HTMLInputElement>(null);

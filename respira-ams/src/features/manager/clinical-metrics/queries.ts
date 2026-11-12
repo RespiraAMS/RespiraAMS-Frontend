@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
     getClinicalMetricsList, 
+    getStoredClinicalMetrics,
     getClinicalMetricDetail, 
     createClinicalMetric, 
     updateClinicalMetric, 
@@ -24,6 +25,7 @@ export function useClinicalMetricsList(page: number, pageSize: number, searchTer
     return useQuery({
         queryKey: clinicalMetricKeys.list({ page, pageSize, searchTerm, isApplied }),
         queryFn: () => getClinicalMetricsList(page, pageSize, searchTerm, isApplied),
+        initialData: () => getStoredClinicalMetrics(page, pageSize, searchTerm, isApplied),
         placeholderData: (previousData) => previousData,
     });
 }

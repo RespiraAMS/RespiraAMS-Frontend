@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { fetchDiagnosisForm, fetchAntibioticList, diagnose } from "../api";
+import {
+	fetchDiagnosisForm,
+	fetchAntibioticList,
+	diagnose,
+	DEFAULT_DIAGNOSIS_VARIABLES,
+	DEFAULT_ANTIBIOTICS,
+} from "../api";
 import { AntibioticItem, ClinicalVariable, DiagnoseResponse } from "../types";
 import {
 	FieldMeta,
@@ -21,13 +27,15 @@ import { DiagnoseErrorModal, ErrorModalState } from "./DiagnoseErrorModal";
 const CLOSED_MODAL: ErrorModalState = { isOpen: false, title: "Error", message: "", details: [] };
 
 export function DoctorDiagnoseView() {
-	const [variables, setVariables] = useState<ClinicalVariable[]>([]);
-	const [antibiotics, setAntibiotics] = useState<AntibioticItem[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const [variables, setVariables] = useState<ClinicalVariable[]>(() => DEFAULT_DIAGNOSIS_VARIABLES);
+	const [antibiotics, setAntibiotics] = useState<AntibioticItem[]>(() => DEFAULT_ANTIBIOTICS);
+	const [isLoading, setIsLoading] = useState(false);
 	const [loadError, setLoadError] = useState<string | null>(null);
 
 	const [currentStep, setCurrentStep] = useState<1 | 2>(1);
-	const [values, setValues] = useState<Record<string, string>>({});
+	const [values, setValues] = useState<Record<string, string>>(() =>
+		buildInitialValues(DEFAULT_DIAGNOSIS_VARIABLES)
+	);
 	const [selectedAllergies, setSelectedAllergies] = useState<Map<string, string>>(new Map());
 	const [allergySearch, setAllergySearch] = useState("");
 	const [fieldStatuses, setFieldStatuses] = useState<Record<string, FieldStatus>>({});
@@ -40,7 +48,9 @@ export function DoctorDiagnoseView() {
 
 	useEffect(() => {
 		let isMounted = true;
-		setIsLoading(true);
+		if (variables.length === 0) {
+			setIsLoading(true);
+		}
 		setLoadError(null);
 
 		Promise.all([fetchDiagnosisForm(), fetchAntibioticList()])

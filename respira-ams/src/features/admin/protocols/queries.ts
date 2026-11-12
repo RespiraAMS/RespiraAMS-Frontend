@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getClinicalMetricsList } from "@/features/manager/clinical-metrics/api";
+import { getClinicalMetricsList, getStoredProtocolCount } from "@/features/manager/clinical-metrics/api";
 import { clinicalMetricKeys } from "@/features/manager/clinical-metrics/queries";
 
 export {
@@ -19,6 +19,7 @@ export function useProtocolCount(isApplied: boolean | null) {
 			const res = await getClinicalMetricsList(1, 1, undefined, isApplied);
 			return res.metadata?.totalItemCount ?? 0;
 		},
+		initialData: () => getStoredProtocolCount(isApplied),
 	});
 }
 

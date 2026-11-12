@@ -98,6 +98,18 @@ export const DEFAULT_MICROSERVICES: MicroserviceStatus[] = [
 	},
 ];
 
+export const INITIAL_DASHBOARD_METRICS: DashboardMetrics = {
+	totalPatients: 38,
+	totalAntibiotics: 64,
+	totalPathogens: 29,
+	totalAntibioticGroups: 12,
+	totalTreatments: 8,
+	totalUsers: 16,
+	systemUptime: "99.98%",
+	activeServicesCount: 7,
+	totalServicesCount: 7,
+};
+
 export const MOCK_AUDIT_LOGS: AuditLogItem[] = [
 	{
 		id: "log-1",
