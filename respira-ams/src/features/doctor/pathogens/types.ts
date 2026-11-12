@@ -48,4 +48,5 @@ export interface RiskFactorDto {
 	id: string;
 	pathogen: { id: string; name: string };
 	criterion: { id: string; name: string; formula: string };
+	isCriticalFactor?: boolean;
 }

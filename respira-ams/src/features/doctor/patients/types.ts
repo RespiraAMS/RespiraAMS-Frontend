@@ -82,8 +82,9 @@ export interface PatientDto {
 	admission: string;
 	discharge?: string | null;
 	treatmentOutcome: TreatmentOutcome;
-	nextOfKins: NextOfKin[];
-	treatments: { id: string }[];
+	nextOfKins?: NextOfKin[];
+	treatments?: { id: string }[];
+	treatmentPlans?: { id: string }[];
 }
 
 export interface PatientPayload {

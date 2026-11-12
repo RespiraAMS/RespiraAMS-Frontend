@@ -159,7 +159,7 @@ export function AdminProtocolsView() {
 		deleteMutation.mutate(item.id, {
 			onSuccess: () => {
 				setDeleteItem(null);
-				toast.success(`Đã xóa phác đồ "${item.name}"`);
+				toast.success(`Đã xóa mềm phác đồ "${item.name}"`);
 				if (items.length === 1 && page > 1) setPage(page - 1);
 			},
 			onError: (e) => toast.error(`Xóa thất bại: ${errorMessage(e)}`),
@@ -193,8 +193,6 @@ export function AdminProtocolsView() {
 					setPage(1);
 				}}
 				onCreate={openCreate}
-				onRefresh={() => refetch()}
-				isRefreshing={isFetching}
 			/>
 
 			{isError ? (

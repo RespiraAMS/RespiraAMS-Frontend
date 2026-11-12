@@ -25,7 +25,7 @@ export function useClinicalMetricsList(page: number, pageSize: number, searchTer
     return useQuery({
         queryKey: clinicalMetricKeys.list({ page, pageSize, searchTerm, isApplied }),
         queryFn: () => getClinicalMetricsList(page, pageSize, searchTerm, isApplied),
-        initialData: () => getStoredClinicalMetrics(page, pageSize, searchTerm, isApplied),
+        staleTime: 60 * 1000,
         placeholderData: (previousData) => previousData,
     });
 }

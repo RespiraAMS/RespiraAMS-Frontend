@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { AntibioticGroupItem } from "../types";
-import { fetchPagedAntibioticGroups, searchAntibioticGroups, INITIAL_ANTIBIOTIC_GROUPS } from "../api";
+import { fetchPagedAntibioticGroups, searchAntibioticGroups } from "../api";
 import { AntibioticGroupSearchBar } from "./AntibioticGroupSearchBar";
 import { AntibioticGroupsTable } from "./AntibioticGroupsTable";
 import { AntibioticGroupDetailDialog } from "./AntibioticGroupDetailDialog";
@@ -15,15 +15,6 @@ export function AntibioticGroupsView() {
 	const [query, setQuery] = useState("");
 	const [debouncedQuery, setDebouncedQuery] = useState("");
 	const [page, setPage] = useState(1);
-	const [groups, setGroups] = useState<AntibioticGroupItem[]>(() =>
-		INITIAL_ANTIBIOTIC_GROUPS.slice(0, PAGE_SIZE)
-	);
-	const [totalCount, setTotalCount] = useState(() => INITIAL_ANTIBIOTIC_GROUPS.length);
-	const [totalPages, setTotalPages] = useState(() =>
-		Math.max(1, Math.ceil(INITIAL_ANTIBIOTIC_GROUPS.length / PAGE_SIZE))
-	);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 
 	const [selected, setSelected] = useState<AntibioticGroupItem | null>(null);
 	const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -37,55 +28,29 @@ export function AntibioticGroupsView() {
 		return () => clearTimeout(timer);
 	}, [query]);
 
-	// Fetch data from backend
-	useEffect(() => {
-		let isMounted = true;
-		if (groups.length === 0) {
-			setIsLoading(true);
-		}
-		setError(null);
+	const {
+		data,
+		isLoading,
+		isError,
+	} = useQuery({
+		queryKey: ["antibioticGroups", "list", { page, query: debouncedQuery }],
+		queryFn: () =>
+			debouncedQuery
+				? searchAntibioticGroups({
+						page,
+						size: PAGE_SIZE,
+						searchTerm: debouncedQuery,
+				  })
+				: fetchPagedAntibioticGroups({
+						page,
+						size: PAGE_SIZE,
+				  }),
+	});
 
-		const request = debouncedQuery
-			? searchAntibioticGroups({
-					page,
-					size: PAGE_SIZE,
-					searchTerm: debouncedQuery,
-				})
-			: fetchPagedAntibioticGroups({
-					page,
-					size: PAGE_SIZE,
-				});
-
-		request
-			.then((res) => {
-				if (isMounted) {
-					setGroups(res.items);
-					setTotalCount(res.totalCount);
-					setTotalPages(res.totalPages);
-				}
-			})
-			.catch((err) => {
-				if (isMounted) {
-					setGroups([]);
-					setTotalCount(0);
-					setTotalPages(1);
-					setError(
-						err instanceof Error
-							? err.message
-							: "Không thể tải danh sách nhóm kháng sinh."
-					);
-				}
-			})
-			.finally(() => {
-				if (isMounted) {
-					setIsLoading(false);
-				}
-			});
-
-		return () => {
-			isMounted = false;
-		};
-	}, [page, debouncedQuery]);
+	const groups = data?.items || [];
+	const totalCount = data?.totalCount || 0;
+	const totalPages = data?.totalPages || 1;
+	const error = isError ? "Không thể tải danh sách nhóm kháng sinh." : null;
 
 	const handleSelectGroup = (item: AntibioticGroupItem) => {
 		setSelected(item);
@@ -94,26 +59,12 @@ export function AntibioticGroupsView() {
 
 	return (
 		<div className="min-h-full bg-[#F8FAFC] p-6 lg:p-8 space-y-5">
-			<Link
-				href="/doctor/info"
-				className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#0EA5E9] hover:text-[#25B4F8] transition-colors"
-			>
-				<ArrowLeft className="h-4 w-4" />
-				<span>Danh sách danh mục</span>
-			</Link>
-
 			<AntibioticGroupSearchBar
 				searchQuery={query}
 				onSearchChange={(v) => {
 					setQuery(v);
 				}}
 			/>
-
-			{error && (
-				<p className="text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-[10px] px-3.5 py-2.5">
-					{error}
-				</p>
-			)}
 
 			<AntibioticGroupsTable
 				groups={groups}

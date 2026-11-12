@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { fetchDiagnosisForm, fetchAntibioticList, diagnose } from "../api";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDiagnosisForm, diagnose } from "../api";
 import { AntibioticItem, ClinicalVariable, DiagnoseResponse } from "../types";
 import {
 	FieldMeta,
@@ -18,13 +19,66 @@ import { AllergiesStep } from "./AllergiesStep";
 import { DiagnosisResultView } from "./DiagnosisResultView";
 import { DiagnoseErrorModal, ErrorModalState } from "./DiagnoseErrorModal";
 
-const CLOSED_MODAL: ErrorModalState = { isOpen: false, title: "Error", message: "", details: [] };
+function translateServerErrorMessage(msg: string): string {
+	if (!msg) return "Chẩn đoán không thành công do lỗi hệ thống.";
+	const lower = msg.toLowerCase();
+	if (lower.includes("failed to find any candidate treatment protocols")) {
+		return "Hệ thống chưa tìm thấy phác đồ điều trị phù hợp trong cơ sở dữ liệu (Hiện chưa có phác đồ điều trị nào được áp dụng cho mức độ bệnh này trong hệ thống).";
+	}
+	if (lower.includes("failed to perform severity diagnosis") || lower.includes("no severity diagnosis")) {
+		return "Không thể xác định mức độ nặng của bệnh nhân từ các chỉ số đã cung cấp.";
+	}
+	if (lower.includes("invalid observation value")) {
+		return "Giá trị của một hoặc nhiều chỉ số lâm sàng nhập vào không hợp lệ.";
+	}
+	if (lower.includes("not all pathogen ids exists") || lower.includes("variable not found")) {
+		return "Dữ liệu chỉ số hoặc tác nhân không tồn tại trong hệ thống.";
+	}
+	if (lower.includes("invalid allergies list")) {
+		return "Danh sách kháng sinh dị ứng không hợp lệ.";
+	}
+	if (lower.includes("allergic antibiotic ids must not be empty")) {
+		return "Mã kháng sinh dị ứng không hợp lệ.";
+	}
+	if (lower.includes("allergy was given value that semantically conflicted")) {
+		return "Thông tin tiền sử dị ứng kháng sinh không nhất quán.";
+	}
+	return msg;
+}
+
+const CLOSED_MODAL: ErrorModalState = { isOpen: false, title: "Lỗi", message: "", details: [] };
 
 export function DoctorDiagnoseView() {
-	const [variables, setVariables] = useState<ClinicalVariable[]>([]);
-	const [antibiotics, setAntibiotics] = useState<AntibioticItem[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [loadError, setLoadError] = useState<string | null>(null);
+	const {
+		data: formData,
+		isLoading,
+		error: queryError,
+	} = useQuery({
+		queryKey: ["diagnose", "form"],
+		queryFn: fetchDiagnosisForm,
+	});
+
+	const variables = useMemo<ClinicalVariable[]>(() => {
+		if (!formData) return [];
+		return (
+			formData.variables ||
+			formData.Variables ||
+			formData.clinicalVariables ||
+			formData.ClinicalVariables ||
+			[]
+		);
+	}, [formData]);
+
+	const antibiotics = useMemo<AntibioticItem[]>(() => {
+		if (!formData) return [];
+		return formData.antibiotics || formData.Antibiotics || [];
+	}, [formData]);
+
+	const loadError = queryError
+		? queryError instanceof Error
+			? queryError.message
+			: "Không thể tải biểu mẫu chẩn đoán từ hệ thống. Vui lòng kiểm tra lại kết nối."
+		: null;
 
 	const [currentStep, setCurrentStep] = useState<1 | 2>(1);
 	const [values, setValues] = useState<Record<string, string>>({});
@@ -38,31 +92,17 @@ export function DoctorDiagnoseView() {
 
 	const fieldRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+	// Initialize form values when clinical variables are loaded
 	useEffect(() => {
-		let isMounted = true;
-		setIsLoading(true);
-		setLoadError(null);
-
-		Promise.all([fetchDiagnosisForm(), fetchAntibioticList()])
-			.then(([formData, antibioticList]) => {
-				if (!isMounted) return;
-				const vars = formData.variables || formData.Variables || [];
-				setVariables(vars);
-				setAntibiotics(antibioticList || []);
-				setValues(buildInitialValues(vars));
-			})
-			.catch((err) => {
-				if (!isMounted) return;
-				setLoadError(err instanceof Error ? err.message : "Failed to load diagnosis form");
-			})
-			.finally(() => {
-				if (isMounted) setIsLoading(false);
+		if (variables.length > 0) {
+			setValues((prev) => {
+				if (Object.keys(prev).length === 0) {
+					return buildInitialValues(variables);
+				}
+				return prev;
 			});
-
-		return () => {
-			isMounted = false;
-		};
-	}, []);
+		}
+	}, [variables]);
 
 	const metaMap = useMemo(() => {
 		const map: Record<string, FieldMeta> = {};
@@ -70,7 +110,7 @@ export function DoctorDiagnoseView() {
 			const id = String(v.id || v.Id);
 			map[id] = {
 				id,
-				name: v.name || v.Name || "Field",
+				name: v.name || v.Name || "Chỉ số",
 				valueType: v.valueType || v.ValueType || "Numeric",
 				isRequired: !!(v.isRequired !== undefined ? v.isRequired : v.IsRequired),
 				unit: v.canonicalUnit || v.CanonicalUnit || null,
@@ -93,7 +133,7 @@ export function DoctorDiagnoseView() {
 
 		if (value === "") {
 			return meta.isRequired
-				? { error: `${meta.name} is required.`, warning: null }
+				? { error: `Vui lòng nhập ${meta.name}.`, warning: null }
 				: { error: null, warning: null };
 		}
 
@@ -101,12 +141,12 @@ export function DoctorDiagnoseView() {
 
 		const num = Number(value);
 		if (!Number.isFinite(num)) {
-			return { error: `${meta.name} must be a valid number.`, warning: null };
+			return { error: `${meta.name} phải là một số hợp lệ.`, warning: null };
 		}
 
 		if (meta.acceptedRange && !inRange(num, meta.acceptedRange)) {
 			return {
-				error: `Value must be within the accepted range (${describeRange(meta.acceptedRange, meta.unit)}).`,
+				error: `Giá trị phải nằm trong khoảng cho phép (${describeRange(meta.acceptedRange, meta.unit)}).`,
 				warning: null,
 			};
 		}
@@ -114,7 +154,7 @@ export function DoctorDiagnoseView() {
 		if (meta.normalRange && !inRange(num, meta.normalRange)) {
 			return {
 				error: null,
-				warning: `Outside the normal range (${describeRange(meta.normalRange, meta.unit)}). This value is accepted and can still be submitted.`,
+				warning: `Nằm ngoài khoảng giá trị sinh lý bình thường (${describeRange(meta.normalRange, meta.unit)}). Giá trị này vẫn được chấp nhận để chẩn đoán.`,
 			};
 		}
 
@@ -154,8 +194,8 @@ export function DoctorDiagnoseView() {
 	const showValidationError = (invalidCount: number, firstInvalidId: string | null, action: string) => {
 		setErrorModal({
 			isOpen: true,
-			title: "Error",
-			message: `Please fix the highlighted ${invalidCount === 1 ? "field" : "fields"} before ${action}.`,
+			title: "Thông tin chưa hợp lệ",
+			message: `Vui lòng kiểm tra lại ${invalidCount === 1 ? "trường thông tin" : `${invalidCount} trường thông tin`} được đánh dấu đỏ trước khi ${action}.`,
 			details: [],
 		});
 		if (firstInvalidId) scrollToField(firstInvalidId);
@@ -165,7 +205,7 @@ export function DoctorDiagnoseView() {
 		if (target > currentStep) {
 			const { invalidCount, firstInvalidId } = validateAll();
 			if (invalidCount > 0) {
-				showValidationError(invalidCount, firstInvalidId, "continuing to the next step");
+				showValidationError(invalidCount, firstInvalidId, "chuyển sang bước tiếp theo");
 				return;
 			}
 		}
@@ -202,7 +242,7 @@ export function DoctorDiagnoseView() {
 
 		const { invalidCount, firstInvalidId } = validateAll();
 		if (invalidCount > 0) {
-			showValidationError(invalidCount, firstInvalidId, "submitting");
+			showValidationError(invalidCount, firstInvalidId, "xác nhận chẩn đoán");
 			return;
 		}
 
@@ -222,7 +262,9 @@ export function DoctorDiagnoseView() {
 			setResult(res);
 			window.scrollTo({ top: 0, behavior: "smooth" });
 		} catch (err: unknown) {
-			const description = err instanceof Error ? err.message : "Diagnosis failed";
+			const rawDescription =
+				err instanceof Error ? err.message : "Chẩn đoán không thành công do lỗi hệ thống.";
+			const description = translateServerErrorMessage(rawDescription);
 			const detail = (err as { detail?: Record<string, string> })?.detail;
 
 			if (detail && typeof detail === "object") {
@@ -237,13 +279,18 @@ export function DoctorDiagnoseView() {
 
 				setErrorModal({
 					isOpen: true,
-					title: "Error",
-					message: `${description}. Please review the highlighted fields below.`,
+					title: "Không thể thực hiện chẩn đoán",
+					message: `${description}. Vui lòng kiểm tra lại các trường được đánh dấu đỏ bên dưới.`,
 					details: Object.values(detail).filter(Boolean),
 				});
 				if (firstId) scrollToField(firstId);
 			} else {
-				setErrorModal({ isOpen: true, title: "Error", message: description, details: [] });
+				setErrorModal({
+					isOpen: true,
+					title: "Không thể thực hiện chẩn đoán",
+					message: description,
+					details: [],
+				});
 			}
 		} finally {
 			setIsDiagnosing(false);
@@ -268,13 +315,13 @@ export function DoctorDiagnoseView() {
 				{isLoading && (
 					<div className="text-center py-16 text-slate-500">
 						<div className="inline-block w-8 h-8 border-2 border-slate-200 border-t-[#0EA5E9] rounded-full animate-spin mb-3" />
-						<p className="text-sm font-medium">Loading diagnosis form...</p>
+						<p className="text-sm font-medium">Đang tải biểu mẫu chẩn đoán...</p>
 					</div>
 				)}
 
 				{loadError && (
 					<div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-semibold text-center mb-6">
-						Failed to load form: {loadError}
+						{loadError}
 					</div>
 				)}
 
@@ -314,8 +361,7 @@ export function DoctorDiagnoseView() {
 						)}
 
 						<p className="text-center text-xs text-slate-400 mt-6 px-4">
-							For clinical decision support use only. Always correlate with clinical
-							judgment.
+							Chỉ sử dụng để hỗ trợ quyết định lâm sàng. Luôn kết hợp với đánh giá chuyên môn của bác sĩ điều trị.
 						</p>
 					</>
 				)}

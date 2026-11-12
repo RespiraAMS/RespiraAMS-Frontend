@@ -52,8 +52,14 @@ export interface ClinicalVariable {
 }
 
 export interface DiagnosisFormResponse {
-	variables: ClinicalVariable[];
+	variables?: ClinicalVariable[];
 	Variables?: ClinicalVariable[];
+	clinicalVariables?: ClinicalVariable[];
+	ClinicalVariables?: ClinicalVariable[];
+	antibiotics?: AntibioticItem[];
+	Antibiotics?: AntibioticItem[];
+	pathogens?: PathogenResult[];
+	Pathogens?: PathogenResult[];
 }
 
 export interface AntibioticItem {
@@ -63,6 +69,14 @@ export interface AntibioticItem {
 	Name?: string;
 }
 
+export type AllergyType = "Yes" | "No" | "NonRegisteredAntibiotic" | "Unknown";
+
+export interface AllergyQuery {
+	type: AllergyType;
+	allergicAntibioticIds?: string[];
+	otherAllergy?: string | null;
+}
+
 export interface Observation {
 	variableId: string;
 	value: string;
@@ -70,7 +84,26 @@ export interface Observation {
 
 export interface DiagnoseRequest {
 	observations: Observation[];
-	allergies: string[];
+	allergies?: string[];
+	allergy?: AllergyQuery;
+	specialMedicalHistory?: string[];
+	otherInfections?: string[];
+	microbialSamples?: unknown[];
+}
+
+export interface WarnAntibioticCombinationRequest {
+	antibioticIds: string[];
+}
+
+export interface WarnAntibioticCombinationResult {
+	needWarning: boolean;
+}
+
+export interface ConfirmTreatmentRequest {
+	patientId: string;
+	diagnosis: unknown;
+	medicines: string[];
+	reasonForMedicineChoice?: string | null;
 }
 
 export interface PathogenResult {
@@ -148,8 +181,16 @@ export interface DiagnoseResponse {
 	Evidences?: (Evidence | string)[];
 	missingVariables: { id?: string; name?: string; code?: string; Code?: string; Name?: string }[];
 	MissingVariables?: { id?: string; name?: string; code?: string; Code?: string; Name?: string }[];
-	allergies: AntibioticItem[];
+	allergies?: AntibioticItem[];
 	Allergies?: AntibioticItem[];
+	allergy?: {
+		type?: string;
+		Type?: string;
+		allergicAntibiotics?: AntibioticItem[];
+		AllergicAntibiotics?: AntibioticItem[];
+		otherAllergy?: string | null;
+		OtherAllergy?: string | null;
+	};
 	isPatientPregnantOrInLactationPhase?: boolean;
 	IsPatientPregnantOrInLactationPhase?: boolean;
 }

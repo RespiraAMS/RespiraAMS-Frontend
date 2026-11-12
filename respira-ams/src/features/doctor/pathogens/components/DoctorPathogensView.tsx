@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { DoctorPathogenItem } from "../types";
-import { fetchPagedPathogens, searchPathogens, INITIAL_PATHOGENS } from "../api";
+import { fetchPagedPathogens, searchPathogens } from "../api";
 import { PathogenSearchBar } from "./PathogenSearchBar";
 import { PathogensTable } from "./PathogensTable";
 import { PathogenDetailDialog } from "./PathogenDetailDialog";
@@ -15,15 +15,6 @@ export function DoctorPathogensView() {
 	const [query, setQuery] = useState("");
 	const [debouncedQuery, setDebouncedQuery] = useState("");
 	const [page, setPage] = useState(1);
-	const [pathogens, setPathogens] = useState<DoctorPathogenItem[]>(() =>
-		INITIAL_PATHOGENS.slice(0, PAGE_SIZE)
-	);
-	const [totalCount, setTotalCount] = useState(() => INITIAL_PATHOGENS.length);
-	const [totalPages, setTotalPages] = useState(() =>
-		Math.max(1, Math.ceil(INITIAL_PATHOGENS.length / PAGE_SIZE))
-	);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 
 	const [selectedPathogen, setSelectedPathogen] =
 		useState<DoctorPathogenItem | null>(null);
@@ -38,55 +29,29 @@ export function DoctorPathogensView() {
 		return () => clearTimeout(timer);
 	}, [query]);
 
-	// Fetch data from backend API
-	useEffect(() => {
-		let isMounted = true;
-		if (pathogens.length === 0) {
-			setIsLoading(true);
-		}
-		setError(null);
+	const {
+		data,
+		isLoading,
+		isError,
+	} = useQuery({
+		queryKey: ["pathogens", "list", { page, query: debouncedQuery }],
+		queryFn: () =>
+			debouncedQuery
+				? searchPathogens({
+						page,
+						size: PAGE_SIZE,
+						searchTerm: debouncedQuery,
+				  })
+				: fetchPagedPathogens({
+						page,
+						size: PAGE_SIZE,
+				  }),
+	});
 
-		const request = debouncedQuery
-			? searchPathogens({
-					page,
-					size: PAGE_SIZE,
-					searchTerm: debouncedQuery,
-				})
-			: fetchPagedPathogens({
-					page,
-					size: PAGE_SIZE,
-				});
-
-		request
-			.then((res) => {
-				if (isMounted) {
-					setPathogens(res.items);
-					setTotalCount(res.totalCount);
-					setTotalPages(res.totalPages);
-				}
-			})
-			.catch((err) => {
-				if (isMounted) {
-					setPathogens([]);
-					setTotalCount(0);
-					setTotalPages(1);
-					setError(
-						err instanceof Error
-							? err.message
-							: "Không thể tải danh sách tác nhân gây bệnh."
-					);
-				}
-			})
-			.finally(() => {
-				if (isMounted) {
-					setIsLoading(false);
-				}
-			});
-
-		return () => {
-			isMounted = false;
-		};
-	}, [page, debouncedQuery]);
+	const pathogens = data?.items || [];
+	const totalCount = data?.totalCount || 0;
+	const totalPages = data?.totalPages || 1;
+	const error = isError ? "Không thể tải danh sách tác nhân gây bệnh." : null;
 
 	const handleSearchChange = (val: string) => {
 		setQuery(val);
@@ -99,27 +64,11 @@ export function DoctorPathogensView() {
 
 	return (
 		<div className="min-h-full bg-[#F8FAFC] p-6 lg:p-8 space-y-5">
-			{/* Back Link */}
-			<Link
-				href="/doctor/info"
-				className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#0EA5E9] hover:text-[#25B4F8] transition-colors"
-			>
-				<ArrowLeft className="h-4 w-4" />
-				<span>Danh sách danh mục</span>
-			</Link>
-
 			{/* Search Bar */}
 			<PathogenSearchBar
 				searchQuery={query}
 				onSearchChange={handleSearchChange}
 			/>
-
-			{/* Error Alert */}
-			{error && (
-				<p className="text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-[10px] px-3.5 py-2.5">
-					{error}
-				</p>
-			)}
 
 			{/* Table */}
 			<PathogensTable

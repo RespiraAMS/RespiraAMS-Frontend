@@ -36,26 +36,26 @@ export function AllergiesStep({
 					<span className="h-6 w-6 rounded-full bg-[#0EA5E9] text-white flex items-center justify-center text-xs font-extrabold shrink-0">
 						2
 					</span>
-					Antibiotic Allergies
+					Tiền sử dị ứng kháng sinh
 				</h2>
 
 				<p className="text-xs text-slate-500 leading-relaxed mb-4">
-					Select every antibiotic the patient is allergic to. Selected ones are added to the
-					diagnosis request and excluded from treatment suggestions. None selected is valid.
+					Chọn các kháng sinh mà bệnh nhân có tiền sử dị ứng. Kháng sinh được chọn sẽ được loại trừ
+					khỏi gợi ý phác đồ điều trị. Nếu bệnh nhân không có tiền sử dị ứng, có thể để trống.
 				</p>
 
 				<label
 					htmlFor="antibioticSearch"
 					className="block font-bold text-xs uppercase tracking-wider text-slate-600 mb-1.5"
 				>
-					Search antibiotics
+					Tìm kiếm kháng sinh
 				</label>
 				<input
 					id="antibioticSearch"
 					type="search"
 					value={search}
 					onChange={(e) => onSearchChange(e.target.value)}
-					placeholder="Type to filter..."
+					placeholder="Nhập tên kháng sinh để lọc danh sách..."
 					autoComplete="off"
 					className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm font-medium outline-none focus:border-[#0EA5E9] focus:ring-2 focus:ring-[#0EA5E9]/20 transition-all bg-white"
 				/>
@@ -63,7 +63,7 @@ export function AllergiesStep({
 				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-[340px] overflow-y-auto p-1 mt-3">
 					{filtered.length === 0 ? (
 						<div className="col-span-full py-6 text-center text-xs italic text-slate-400">
-							No antibiotics match your search
+							Không tìm thấy kháng sinh phù hợp
 						</div>
 					) : (
 						filtered.map((a) => {
@@ -95,7 +95,7 @@ export function AllergiesStep({
 				</div>
 
 				<div className="flex items-center gap-2 mt-5 mb-2 pb-2 border-b border-dashed border-slate-200 text-xs font-extrabold tracking-wider uppercase text-slate-500">
-					<span>Selected allergies</span>
+					<span>Kháng sinh đã chọn dị ứng</span>
 					<span className="rounded-full bg-slate-100 text-slate-600 px-2 py-0.5 text-[0.7rem] font-extrabold min-w-[1.45rem] text-center">
 						{selectedAllergies.size}
 					</span>
@@ -103,7 +103,9 @@ export function AllergiesStep({
 
 				<div className="flex flex-wrap gap-2 min-h-[32px] items-center">
 					{selectedAllergies.size === 0 ? (
-						<div className="text-xs italic text-slate-400 py-1">No allergies selected</div>
+						<div className="text-xs italic text-slate-400 py-1">
+							Chưa chọn kháng sinh nào (Không ghi nhận dị ứng)
+						</div>
 					) : (
 						Array.from(selectedAllergies.entries()).map(([id, name]) => (
 							<span
@@ -115,7 +117,7 @@ export function AllergiesStep({
 									type="button"
 									onClick={() => onRemove(id)}
 									className="h-4.5 w-4.5 rounded-full bg-[#0EA5E9]/15 hover:bg-red-500 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer"
-									aria-label={`Remove ${name}`}
+									aria-label={`Bỏ chọn ${name}`}
 								>
 									&times;
 								</button>
@@ -131,7 +133,7 @@ export function AllergiesStep({
 					onClick={onBack}
 					className="flex-1 py-3.5 px-6 rounded-xl bg-[#F0F9FF] hover:bg-sky-100 text-[#0284C7] font-bold text-sm border border-[#BAE6FD] transition-colors cursor-pointer"
 				>
-					Back
+					Quay lại
 				</button>
 				<button
 					type="submit"
@@ -141,14 +143,13 @@ export function AllergiesStep({
 					{isDiagnosing ? (
 						<>
 							<span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-							<span>Diagnosing...</span>
+							<span>Đang chẩn đoán...</span>
 						</>
 					) : (
-						<span>Submit Diagnosis</span>
+						<span>Xác nhận chẩn đoán</span>
 					)}
 				</button>
 			</div>
 		</section>
 	);
 }
-

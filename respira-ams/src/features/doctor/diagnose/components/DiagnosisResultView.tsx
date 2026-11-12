@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { DiagnoseResponse, Evidence, MetricsSeverityDiagnosis } from "../types";
-import { formatTreatmentSite, severityBadgeClass } from "../utils";
+import { formatSeverity, formatTreatmentSite, severityBadgeClass } from "../utils";
 import { ResultCard, ResultRow } from "./ResultCard";
 import { MetricsSeverityList } from "./MetricsSeverityList";
 import { EvidencesPanel } from "./EvidencesPanel";
@@ -20,14 +20,23 @@ export function DiagnosisResultView({ result, onReset }: DiagnosisResultViewProp
 	const pregnant = !!(
 		result.isPatientPregnantOrInLactationPhase || result.IsPatientPregnantOrInLactationPhase
 	);
-	const allergies = result.allergies || result.Allergies || [];
+
+	// Lấy danh sách dị ứng từ allergicAntibiotics hoặc allergies
+	const allergicList =
+		result.allergy?.allergicAntibiotics ||
+		result.allergy?.AllergicAntibiotics ||
+		result.allergies ||
+		result.Allergies ||
+		[];
+
+	const allergyNames = allergicList
+		.map((a) => a.name || a.Name || "")
+		.filter(Boolean);
+
 	const allergyText =
-		allergies.length > 0
-			? allergies
-					.map((a) => a.name || a.Name || "")
-					.filter(Boolean)
-					.join(", ")
-			: "None";
+		allergyNames.length > 0
+			? allergyNames.join(", ")
+			: result.allergy?.otherAllergy || result.allergy?.OtherAllergy || "Không ghi nhận dị ứng";
 
 	const metrics = (result.metricsSeverityDiagnosis ||
 		result.MetricsSeverityDiagnosis ||
@@ -39,32 +48,32 @@ export function DiagnosisResultView({ result, onReset }: DiagnosisResultViewProp
 
 	return (
 		<div className="space-y-5 animate-in fade-in duration-200">
-			<ResultCard step={1} title="Diagnosis Result">
+			<ResultCard step={1} title="Kết quả chẩn đoán mức độ nặng">
 				<div className="space-y-2.5">
-					<ResultRow label="Severity">
+					<ResultRow label="Mức độ nặng">
 						<span
 							className={cn(
 								"px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider",
 								severityBadgeClass(severity)
 							)}
 						>
-							{severity || "Unknown"}
+							{formatSeverity(severity)}
 						</span>
 					</ResultRow>
 
-					<ResultRow label="Treatment Site">
+					<ResultRow label="Nơi điều trị">
 						<span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#F0F9FF] text-[#0284C7] border border-[#BAE6FD]">
 							{formatTreatmentSite(treatmentSite)}
 						</span>
 					</ResultRow>
 
-					<ResultRow label="Pregnant / Lactating">
+					<ResultRow label="Mang thai / Cho con bú">
 						<span className="text-sm font-semibold text-slate-900">
-							{pregnant ? "Yes" : "No"}
+							{pregnant ? "Có" : "Không"}
 						</span>
 					</ResultRow>
 
-					<ResultRow label="Allergies">
+					<ResultRow label="Tiền sử dị ứng">
 						<span className="text-sm font-semibold text-slate-900 text-right">
 							{allergyText}
 						</span>
@@ -80,9 +89,11 @@ export function DiagnosisResultView({ result, onReset }: DiagnosisResultViewProp
 				/>
 			</ResultCard>
 
-			<ResultCard step={2} title="Missing Variables" headingClassName="mb-3">
+			<ResultCard step={2} title="Các chỉ số lâm sàng còn thiếu" headingClassName="mb-3">
 				{missingVars.length === 0 ? (
-					<div className="text-xs italic text-slate-400 py-1">All variables were provided</div>
+					<div className="text-xs italic text-slate-400 py-1">
+						Đã cung cấp đầy đủ tất cả các chỉ số cần thiết
+					</div>
 				) : (
 					<div className="space-y-2">
 						{missingVars.map((v, idx) => (
@@ -91,7 +102,7 @@ export function DiagnosisResultView({ result, onReset }: DiagnosisResultViewProp
 								className="flex items-center justify-between gap-3 p-3 bg-[#FBFCFE] border border-slate-200 rounded-xl font-semibold text-sm"
 							>
 								<span className="font-extrabold text-slate-900">
-									{v.code || v.Code || "Variable"}
+									{v.code || v.Code || "Chỉ số"}
 								</span>
 								<span className="text-slate-500 text-xs">{v.name || v.Name || ""}</span>
 							</div>
@@ -107,9 +118,8 @@ export function DiagnosisResultView({ result, onReset }: DiagnosisResultViewProp
 				onClick={onReset}
 				className="w-full py-3.5 px-6 rounded-xl bg-[#0EA5E9] hover:bg-[#0284C7] text-white font-bold text-sm shadow-[0_4px_12px_rgba(14,165,233,0.25)] transition-all cursor-pointer"
 			>
-				New Diagnosis
+				Thực hiện chẩn đoán mới
 			</button>
 		</div>
 	);
 }
-

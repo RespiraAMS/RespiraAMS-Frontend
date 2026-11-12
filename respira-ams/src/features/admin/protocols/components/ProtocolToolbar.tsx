@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Plus, RotateCw, X } from "lucide-react";
+import { Search, Plus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +18,6 @@ interface ProtocolToolbarProps {
 	filter: ProtocolFilter;
 	onFilterChange: (value: ProtocolFilter) => void;
 	onCreate: () => void;
-	onRefresh: () => void;
-	isRefreshing?: boolean;
 }
 
 export function ProtocolToolbar({
@@ -28,8 +26,6 @@ export function ProtocolToolbar({
 	filter,
 	onFilterChange,
 	onCreate,
-	onRefresh,
-	isRefreshing = false,
 }: ProtocolToolbarProps) {
 	return (
 		<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
@@ -64,18 +60,6 @@ export function ProtocolToolbar({
 						<SelectItem value="NOT_APPLIED">Chưa áp dụng</SelectItem>
 					</SelectContent>
 				</Select>
-
-				<Button
-					type="button"
-					variant="outline"
-					size="icon"
-					onClick={onRefresh}
-					disabled={isRefreshing}
-					className="h-9.5 w-9.5 rounded-lg border-slate-200"
-					title="Làm mới"
-				>
-					<RotateCw className={`w-4 h-4 text-slate-500 ${isRefreshing ? "animate-spin" : ""}`} />
-				</Button>
 
 				<Button
 					type="button"

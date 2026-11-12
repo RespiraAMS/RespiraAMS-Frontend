@@ -1,13 +1,11 @@
-import { API_BASE_URL } from "@/lib/api-config";
+import { apiRequest, buildQuery } from "@/lib/api";
 import {
 	AntibioticResult,
-	ApiResult,
 	ClinicalRange,
 	PagedAntibioticItem,
 	Pagination,
 	RouteOfAdministration,
 } from "../types";
-import { FALLBACK_ANTIBIOTICS } from "../mockData";
 
 /**
  * Format khoảng lọc cầu thận (CrCl / GFR) sang chuỗi tiếng Việt dễ hiểu
@@ -18,8 +16,8 @@ export function formatCrclRange(crcl: ClinicalRange | null): string {
 	}
 
 	const unit = crcl.unit || "mL/phút";
-	const isMaxInf = crcl.max >= 999999 || crcl.max == null;
-	const isMinZero = crcl.min <= 0 || crcl.min == null;
+	const isMaxInf = crcl.max == null || crcl.max >= 999999;
+	const isMinZero = crcl.min == null || crcl.min <= 0;
 
 	if (isMaxInf) {
 		const symbol = crcl.isMinExclusive ? ">" : "≥";
@@ -40,7 +38,8 @@ export function formatCrclRange(crcl: ClinicalRange | null): string {
  * Dịch đường dùng thuốc sang tiếng Việt
  */
 export function translateRoute(route: RouteOfAdministration): string {
-	if (!route) return "Chưa xác định";
+	if (route === undefined || route === null || route === "")
+		return "Chưa xác định";
 	const normalized = String(route).toLowerCase();
 	if (normalized === "oral" || normalized === "0") {
 		return "Đường uống";
@@ -61,48 +60,18 @@ export async function fetchAntibiotics(params?: {
 	antibioticGroupId?: string;
 	classification?: string;
 }): Promise<Pagination<PagedAntibioticItem>> {
-	const page = params?.page ?? 1;
-	const size = params?.size ?? 8;
-	const query = new URLSearchParams({
-		Page: page.toString(),
-		Size: size.toString(),
-	});
-
-	if (params?.antibioticGroupId) {
-		query.append("AntibioticGroupId", params.antibioticGroupId);
-	}
-	if (params?.classification) {
-		query.append("Classification", params.classification);
-	}
-
-	const url = `${API_BASE_URL}/antibiotics?${query.toString()}`;
-
-	try {
-		const res = await fetch(url, {
-			method: "GET",
-			signal: AbortSignal.timeout(1500),
-			headers: {
-				Accept: "application/json",
-			},
-			cache: "no-store",
-		});
-
-		if (!res.ok) {
-			throw new Error(`API error: ${res.status} ${res.statusText}`);
-		}
-
-		const json: ApiResult<Pagination<PagedAntibioticItem>> = await res.json();
-		if (json.data && Array.isArray(json.data.items)) {
-			return json.data;
-		}
+	const data = await apiRequest<Pagination<PagedAntibioticItem>>(
+		`/antibiotics${buildQuery({
+			Page: params?.page ?? 1,
+			Size: params?.size ?? 8,
+			AntibioticGroupId: params?.antibioticGroupId,
+			Classification: params?.classification,
+		})}`
+	);
+	if (!data || !Array.isArray(data.items)) {
 		throw new Error("Phản hồi không hợp lệ từ máy chủ");
-	} catch (err) {
-		console.warn(
-			`[AntibioticAPI] Không thể kết nối tới ${url}. Sử dụng dữ liệu dự phòng.`,
-			err
-		);
-		return getFallbackPagination(page, size);
 	}
+	return data;
 }
 
 /**
@@ -115,17 +84,16 @@ export async function searchAntibiotics(params: {
 	size?: number;
 }): Promise<Pagination<PagedAntibioticItem>> {
 	const trimmed = params.searchTerm.trim();
-	if (!trimmed) {
-		return fetchAntibiotics({ page: params.page, size: params.size });
-	}
-
 	const page = params.page ?? 1;
 	const size = params.size ?? 8;
 
-	// Backend validator requires searchTerm >= 2 characters on /antibiotics/search.
-	// For 1 character search, fetch standard list and filter locally to avoid 400 Bad Request.
+	if (!trimmed) {
+		return fetchAntibiotics({ page, size });
+	}
+
+	// Backend yêu cầu searchTerm >= 2 ký tự: với 1 ký tự thì lọc trên dữ liệu thật đã tải.
 	if (trimmed.length < 2) {
-		const all = await fetchAntibiotics({ page: 1, size: 50 });
+		const all = await fetchAntibiotics({ page: 1, size: 100 });
 		const lower = trimmed.toLowerCase();
 		const matched = (all.items || []).filter(
 			(item) =>
@@ -133,75 +101,31 @@ export async function searchAntibiotics(params: {
 				item.antibioticGroup?.name?.toLowerCase().includes(lower) ||
 				item.classification?.toLowerCase().includes(lower)
 		);
+		const pageCount = Math.max(1, Math.ceil(matched.length / size));
 		return {
-			items: matched,
-			metadata: {
-				currentPage: 1,
-				pageSize: size,
-				totalItemCount: matched.length,
-				pageCount: Math.max(1, Math.ceil(matched.length / size)),
-				hasPreviousPage: false,
-				hasNextPage: false,
-			},
-		};
-	}
-
-	const query = new URLSearchParams({
-		SearchTerm: trimmed,
-		Page: page.toString(),
-		Size: size.toString(),
-	});
-
-	const url = `${API_BASE_URL}/antibiotics/search?${query.toString()}`;
-
-	try {
-		const res = await fetch(url, {
-			method: "GET",
-			signal: AbortSignal.timeout(1500),
-			headers: {
-				Accept: "application/json",
-			},
-			cache: "no-store",
-		});
-
-		if (!res.ok) {
-			throw new Error(`API error: ${res.status} ${res.statusText}`);
-		}
-
-		const json: ApiResult<Pagination<PagedAntibioticItem>> = await res.json();
-		if (json.data && Array.isArray(json.data.items)) {
-			return json.data;
-		}
-		throw new Error("Phản hồi không hợp lệ từ máy chủ");
-	} catch (err) {
-		console.warn(
-			`[AntibioticAPI] Tìm kiếm thất bại tại ${url}. Lọc dữ liệu dự phòng.`,
-			err
-		);
-		const filtered = FALLBACK_ANTIBIOTICS.filter((a) =>
-			a.name.toLowerCase().includes(trimmed.toLowerCase())
-		);
-		const total = filtered.length;
-		const pageCount = Math.max(1, Math.ceil(total / size));
-		const paged = filtered.slice((page - 1) * size, page * size).map((a) => ({
-			id: a.id,
-			name: a.name,
-			antibioticGroup: a.antibioticGroup,
-			classification: a.classification,
-		}));
-
-		return {
+			items: matched.slice((page - 1) * size, page * size),
 			metadata: {
 				currentPage: page,
 				pageSize: size,
+				totalItemCount: matched.length,
 				pageCount,
-				totalItemCount: total,
-				hasNextPage: page < pageCount,
 				hasPreviousPage: page > 1,
+				hasNextPage: page < pageCount,
 			},
-			items: paged,
 		};
 	}
+
+	const data = await apiRequest<Pagination<PagedAntibioticItem>>(
+		`/antibiotics/search${buildQuery({
+			SearchTerm: trimmed,
+			Page: page,
+			Size: size,
+		})}`
+	);
+	if (!data || !Array.isArray(data.items)) {
+		throw new Error("Phản hồi không hợp lệ từ máy chủ");
+	}
+	return data;
 }
 
 /**
@@ -210,71 +134,10 @@ export async function searchAntibiotics(params: {
  */
 export async function fetchAntibioticById(
 	id: string
-): Promise<AntibioticResult | null> {
-	if (!id) return null;
-
-	const url = `${API_BASE_URL}/antibiotics/${id}`;
-
-	try {
-		const res = await fetch(url, {
-			method: "GET",
-			signal: AbortSignal.timeout(1500),
-			headers: {
-				Accept: "application/json",
-			},
-			cache: "no-store",
-		});
-
-		if (res.status === 404) {
-			return null;
-		}
-
-		if (!res.ok) {
-			throw new Error(`API error: ${res.status} ${res.statusText}`);
-		}
-
-		const json: ApiResult<AntibioticResult> = await res.json();
-		if (json.data) {
-			return json.data;
-		}
-		return null;
-	} catch (err) {
-		console.warn(
-			`[AntibioticAPI] Không thể tải chi tiết kháng sinh ${id} từ ${url}. Thử tìm trong dữ liệu dự phòng.`,
-			err
-		);
-		const found = FALLBACK_ANTIBIOTICS.find(
-			(a) => a.id.toLowerCase() === id.toLowerCase()
-		);
-		return found ?? null;
+): Promise<AntibioticResult> {
+	const data = await apiRequest<AntibioticResult>(`/antibiotics/${id}`);
+	if (!data) {
+		throw new Error("Không tìm thấy thông tin kháng sinh.");
 	}
-}
-
-function getFallbackPagination(
-	page: number,
-	size: number
-): Pagination<PagedAntibioticItem> {
-	const total = FALLBACK_ANTIBIOTICS.length;
-	const pageCount = Math.max(1, Math.ceil(total / size));
-	const items = FALLBACK_ANTIBIOTICS.slice(
-		(page - 1) * size,
-		page * size
-	).map((a) => ({
-		id: a.id,
-		name: a.name,
-		antibioticGroup: a.antibioticGroup,
-		classification: a.classification,
-	}));
-
-	return {
-		metadata: {
-			currentPage: page,
-			pageSize: size,
-			pageCount,
-			totalItemCount: total,
-			hasNextPage: page < pageCount,
-			hasPreviousPage: page > 1,
-		},
-		items,
-	};
+	return data;
 }

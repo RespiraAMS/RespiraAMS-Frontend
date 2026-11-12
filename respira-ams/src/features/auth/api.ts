@@ -69,10 +69,20 @@ export function parseJwt(token: string): AuthUser | null {
 		);
 		const decoded = JSON.parse(jsonPayload);
 
-		const role =
+		const rawRole =
 			decoded.role ||
 			decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
 			"Doctor";
+
+		let role: "Doctor" | "Manager" | "Admin" = "Doctor";
+		const r = String(rawRole).toLowerCase();
+		if (r === "admin") {
+			role = "Admin";
+		} else if (r === "manager" || r === "medicalregulationreviewer") {
+			role = "Manager";
+		} else {
+			role = "Doctor";
+		}
 
 		const id =
 			decoded.sub ||
@@ -176,14 +186,17 @@ export function saveAuthSession(session: AuthSession): void {
 		}
 	}
 
-	setCookie(COOKIE_KEYS.ACCESS_TOKEN, session.accessToken, { maxAge: accessMaxAge });
-	setCookie(COOKIE_KEYS.REFRESH_TOKEN, session.refreshToken, { days: 30 });
-	setCookie(COOKIE_KEYS.USER_DATA, JSON.stringify(session.user), { days: 30 });
-	setCookie(COOKIE_KEYS.USER_ROLE, session.user.role, { days: 30 });
+	const normalizedRole = session.user.role.toLowerCase();
+
+	setCookie(COOKIE_KEYS.ACCESS_TOKEN, session.accessToken, { maxAge: accessMaxAge, path: "/" });
+	setCookie(COOKIE_KEYS.REFRESH_TOKEN, session.refreshToken, { days: 30, path: "/" });
+	setCookie(COOKIE_KEYS.USER_DATA, JSON.stringify(session.user), { days: 30, path: "/" });
+	setCookie(COOKIE_KEYS.USER_ROLE, normalizedRole, { days: 30, path: "/" });
 
 	localStorage.setItem(COOKIE_KEYS.ACCESS_TOKEN, session.accessToken);
 	localStorage.setItem(COOKIE_KEYS.REFRESH_TOKEN, session.refreshToken);
 	localStorage.setItem(COOKIE_KEYS.USER_DATA, JSON.stringify(session.user));
+	localStorage.setItem(COOKIE_KEYS.USER_ROLE, normalizedRole);
 }
 
 /**
@@ -192,14 +205,16 @@ export function saveAuthSession(session: AuthSession): void {
 export function clearStoredAuth(): void {
 	if (typeof window === "undefined") return;
 
-	deleteCookie(COOKIE_KEYS.ACCESS_TOKEN);
-	deleteCookie(COOKIE_KEYS.REFRESH_TOKEN);
-	deleteCookie(COOKIE_KEYS.USER_DATA);
-	deleteCookie(COOKIE_KEYS.USER_ROLE);
+	deleteCookie(COOKIE_KEYS.ACCESS_TOKEN, "/");
+	deleteCookie(COOKIE_KEYS.REFRESH_TOKEN, "/");
+	deleteCookie(COOKIE_KEYS.USER_DATA, "/");
+	deleteCookie(COOKIE_KEYS.USER_ROLE, "/");
 
 	localStorage.removeItem(COOKIE_KEYS.ACCESS_TOKEN);
 	localStorage.removeItem(COOKIE_KEYS.REFRESH_TOKEN);
 	localStorage.removeItem(COOKIE_KEYS.USER_DATA);
+	localStorage.removeItem(COOKIE_KEYS.USER_ROLE);
+	localStorage.removeItem("respira_doctor_profile_v1");
 }
 
 export function isAuthenticated(): boolean {
@@ -226,7 +241,7 @@ export async function login(credentials: LoginRequest): Promise<AuthSession> {
 	try {
 		response = await fetch(`${API_BASE_URL}/auth/login`, {
 			method: "POST",
-			signal: AbortSignal.timeout(1500),
+			signal: AbortSignal.timeout(8000),
 			headers: {
 				"Content-Type": "application/json",
 				Accept: "application/json",

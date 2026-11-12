@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Upload, X, ShieldAlert, Check } from "lucide-react";
+import { Upload, X, ShieldAlert, Check, AlertCircle } from "lucide-react";
 import {
 	Dialog,
 	DialogDescription,
@@ -29,6 +29,8 @@ import {
 	PositionType,
 	UpdateUserPayload,
 	UserItem,
+	UserRole,
+	UserStatus,
 } from "../types";
 import {
 	ACADEMIC_TITLE_LABELS,
@@ -79,7 +81,8 @@ export function UserFormDialog({
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [phone, setPhone] = useState("");
-	const [role, setRole] = useState<"Doctor" | "Manager">("Doctor");
+	const [role, setRole] = useState<UserRole>("Doctor");
+	const [status, setStatus] = useState<UserStatus>("Active");
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [gender, setGender] = useState<GenderType>("Male");
@@ -95,13 +98,15 @@ export function UserFormDialog({
 	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
 	const [errors, setErrors] = useState<Record<string, string>>({});
+	const [touched, setTouched] = useState<Record<string, boolean>>({});
 
 	useEffect(() => {
 		if (editingUser) {
 			setEmail(editingUser.email || "");
 			setPassword("");
 			setPhone(editingUser.phone || "");
-			setRole(editingUser.role === "Manager" ? "Manager" : "Doctor");
+			setRole(editingUser.role || "Doctor");
+			setStatus(editingUser.status || "Active");
 			setFirstName(editingUser.firstName || "");
 			setLastName(editingUser.lastName || "");
 			setGender(editingUser.gender || "Male");
@@ -122,6 +127,7 @@ export function UserFormDialog({
 			setPassword("Respira@123");
 			setPhone("");
 			setRole("Doctor");
+			setStatus("Active");
 			setFirstName("");
 			setLastName("");
 			setGender("Male");
@@ -135,6 +141,7 @@ export function UserFormDialog({
 			setAvatarPreview(null);
 		}
 		setErrors({});
+		setTouched({});
 	}, [editingUser, isOpen]);
 
 	const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,29 +158,120 @@ export function UserFormDialog({
 		);
 	};
 
-	const validate = (): boolean => {
-		const nextErr: Record<string, string> = {};
-
-		if (!email.trim()) nextErr.email = "Email là bắt buộc";
-		else if (!/\S+@\S+\.\S+/.test(email)) nextErr.email = "Email không đúng định dạng";
-
-		if (!isEdit && !password.trim()) {
-			nextErr.password = "Mật khẩu khởi tạo là bắt buộc";
+	const validateField = (field: string, value: string): string | null => {
+		const val = (value || "").trim();
+		switch (field) {
+			case "email":
+				if (!val) return "Email là bắt buộc.";
+				if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return "Email không đúng định dạng.";
+				return null;
+			case "phone":
+				if (!val) return "Số điện thoại là bắt buộc.";
+				if (!/^(0|\+84|84)(3|5|7|8|9)[0-9]{8}$/.test(val)) {
+					return "Số điện thoại không hợp lệ (10 số, bắt đầu 03, 05, 07, 08, 09).";
+				}
+				return null;
+			case "password":
+				if (!isEdit && !val) return "Mật khẩu khởi tạo là bắt buộc.";
+				if (val && val.length < 6) return "Mật khẩu phải có ít nhất 6 ký tự.";
+				return null;
+			case "lastName":
+				if (!val) return "Họ và tên đệm là bắt buộc.";
+				return null;
+			case "firstName":
+				if (!val) return "Tên là bắt buộc.";
+				return null;
+			case "citizenId":
+				const rawCccd = val.replace(/\s+/g, "");
+				if (!rawCccd) return "Số CCCD/CMND là bắt buộc.";
+				if (!/^[0-9]{9,12}$/.test(rawCccd)) {
+					return "Số CCCD/CMND phải gồm 9 hoặc 12 chữ số.";
+				}
+				return null;
+			case "dateOfBirth":
+				if (val) {
+					const d = new Date(val);
+					if (isNaN(d.getTime())) return "Ngày sinh không hợp lệ.";
+					if (d > new Date()) return "Ngày sinh không được ở tương lai.";
+					const age = new Date().getFullYear() - d.getFullYear();
+					if (age < 18) return "Nhân viên y tế phải từ 18 tuổi trở lên.";
+				}
+				return null;
+			case "address":
+				if (!val) return "Địa chỉ là bắt buộc.";
+				return null;
+			default:
+				return null;
 		}
+	};
 
-		if (!phone.trim()) nextErr.phone = "Số điện thoại là bắt buộc";
-		if (!firstName.trim()) nextErr.firstName = "Tên là bắt buộc";
-		if (!lastName.trim()) nextErr.lastName = "Họ và tên đệm là bắt buộc";
-		if (!citizenId.trim()) nextErr.citizenId = "Số CCCD/CMND là bắt buộc";
-		if (!address.trim()) nextErr.address = "Địa chỉ là bắt buộc";
+	const handleBlur = (field: string, value: string) => {
+		setTouched((prev) => ({ ...prev, [field]: true }));
+		const err = validateField(field, value);
+		setErrors((prev) => {
+			const next = { ...prev };
+			if (err) next[field] = err;
+			else delete next[field];
+			return next;
+		});
+	};
 
-		setErrors(nextErr);
-		return Object.keys(nextErr).length === 0;
+	const handleFieldChange = (
+		field: string,
+		value: string,
+		setter: (val: string) => void
+	) => {
+		setter(value);
+		if (touched[field]) {
+			const err = validateField(field, value);
+			setErrors((prev) => {
+				const next = { ...prev };
+				if (err) next[field] = err;
+				else delete next[field];
+				return next;
+			});
+		}
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!validate()) return;
+
+		const fieldsToValidate = [
+			{ name: "email", value: email, id: "usr-email" },
+			{ name: "phone", value: phone, id: "usr-phone" },
+			{ name: "password", value: password, id: "usr-pass" },
+			{ name: "lastName", value: lastName, id: "usr-lname" },
+			{ name: "firstName", value: firstName, id: "usr-fname" },
+			{ name: "citizenId", value: citizenId, id: "usr-citizen" },
+			{ name: "dateOfBirth", value: dateOfBirth, id: "usr-dob" },
+			{ name: "address", value: address, id: "usr-address" },
+		];
+
+		const nextErr: Record<string, string> = {};
+		const allTouched: Record<string, boolean> = { ...touched };
+		let firstInvalidId: string | null = null;
+
+		for (const f of fieldsToValidate) {
+			allTouched[f.name] = true;
+			const err = validateField(f.name, f.value);
+			if (err) {
+				nextErr[f.name] = err;
+				if (!firstInvalidId) firstInvalidId = f.id;
+			}
+		}
+
+		setTouched(allTouched);
+		setErrors(nextErr);
+
+		if (firstInvalidId) {
+			// Nhập sai format: Báo ngay, không out ra ngoài mà cuộn và focus ngay vào ô sai!
+			const targetEl = document.getElementById(firstInvalidId);
+			if (targetEl) {
+				targetEl.focus();
+				targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+			}
+			return;
+		}
 
 		const dobIso = dateOfBirth ? new Date(dateOfBirth).toISOString() : undefined;
 
@@ -184,6 +282,8 @@ export function UserFormDialog({
 				email: email.trim(),
 				phone: phone.trim(),
 				password: password.trim() || undefined,
+				role,
+				status,
 				firstName: firstName.trim(),
 				lastName: lastName.trim(),
 				degrees,
@@ -201,7 +301,7 @@ export function UserFormDialog({
 				email: email.trim(),
 				password: password.trim(),
 				phone: phone.trim(),
-				role,
+				role: role === "Manager" ? "Manager" : "Doctor",
 				firstName: firstName.trim(),
 				lastName: lastName.trim(),
 				degrees,
@@ -231,7 +331,7 @@ export function UserFormDialog({
 					</DialogDescription>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit} className="space-y-5 pt-2 min-w-0">
+				<form onSubmit={handleSubmit} noValidate className="space-y-5 pt-2 min-w-0">
 					{/* Avatar & Basic Role */}
 					<div className="flex items-center gap-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800">
 						<Avatar className="h-16 w-16 border-2 border-white shadow-sm shrink-0">
@@ -276,14 +376,14 @@ export function UserFormDialog({
 							</div>
 						</div>
 
-						{!isEdit && (
-							<div className="w-40">
+						<div className="flex items-center gap-3">
+							<div className="w-36">
 								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
 									Vai trò phân quyền <span className="text-red-500">*</span>
 								</Label>
 								<Select
 									value={role}
-									onValueChange={(val: "Doctor" | "Manager") => setRole(val)}
+									onValueChange={(val: UserRole) => setRole(val)}
 								>
 									<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
 										<SelectValue />
@@ -291,10 +391,34 @@ export function UserFormDialog({
 									<SelectContent>
 										<SelectItem value="Doctor">Bác sĩ</SelectItem>
 										<SelectItem value="Manager">Trưởng khoa</SelectItem>
+										{editingUser?.role === "Admin" && (
+											<SelectItem value="Admin">Quản trị viên</SelectItem>
+										)}
 									</SelectContent>
 								</Select>
 							</div>
-						)}
+
+							{isEdit && (
+								<div className="w-32">
+									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+										Trạng thái
+									</Label>
+									<Select
+										value={status}
+										onValueChange={(val: UserStatus) => setStatus(val)}
+										disabled={editingUser?.role === "Admin"}
+									>
+										<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="Active">Hoạt động</SelectItem>
+											<SelectItem value="Inactive">Đã khóa</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+							)}
+						</div>
 					</div>
 
 					{/* Account Info */}
@@ -307,12 +431,18 @@ export function UserFormDialog({
 								id="usr-email"
 								type="email"
 								value={email}
-								onChange={(e) => setEmail(e.target.value)}
+								onChange={(e) => handleFieldChange("email", e.target.value, setEmail)}
+								onBlur={() => handleBlur("email", email)}
 								placeholder="doctor@respira.vn"
-								className="mt-1 h-9 text-xs"
+								className={`mt-1 h-9 text-xs ${
+									touched.email && errors.email ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+								}`}
 							/>
-							{errors.email && (
-								<p className="text-[11px] font-semibold text-red-500 mt-1">{errors.email}</p>
+							{touched.email && errors.email && (
+								<p className="text-[11px] font-semibold text-red-500 mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+									<AlertCircle className="w-3.5 h-3.5 shrink-0" />
+									<span>{errors.email}</span>
+								</p>
 							)}
 						</div>
 
@@ -324,12 +454,18 @@ export function UserFormDialog({
 								id="usr-phone"
 								type="tel"
 								value={phone}
-								onChange={(e) => setPhone(e.target.value)}
+								onChange={(e) => handleFieldChange("phone", e.target.value, setPhone)}
+								onBlur={() => handleBlur("phone", phone)}
 								placeholder="0912345678"
-								className="mt-1 h-9 text-xs"
+								className={`mt-1 h-9 text-xs ${
+									touched.phone && errors.phone ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+								}`}
 							/>
-							{errors.phone && (
-								<p className="text-[11px] font-semibold text-red-500 mt-1">{errors.phone}</p>
+							{touched.phone && errors.phone && (
+								<p className="text-[11px] font-semibold text-red-500 mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+									<AlertCircle className="w-3.5 h-3.5 shrink-0" />
+									<span>{errors.phone}</span>
+								</p>
 							)}
 						</div>
 
@@ -341,12 +477,18 @@ export function UserFormDialog({
 								id="usr-pass"
 								type="password"
 								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								placeholder={isEdit ? "••••••••" : "Mật khẩu ít nhất 8 ký tự..."}
-								className="mt-1 h-9 text-xs"
+								onChange={(e) => handleFieldChange("password", e.target.value, setPassword)}
+								onBlur={() => handleBlur("password", password)}
+								placeholder={isEdit ? "••••••••" : "Mật khẩu ít nhất 6 ký tự..."}
+								className={`mt-1 h-9 text-xs ${
+									touched.password && errors.password ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+								}`}
 							/>
-							{errors.password && (
-								<p className="text-[11px] font-semibold text-red-500 mt-1">{errors.password}</p>
+							{touched.password && errors.password && (
+								<p className="text-[11px] font-semibold text-red-500 mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+									<AlertCircle className="w-3.5 h-3.5 shrink-0" />
+									<span>{errors.password}</span>
+								</p>
 							)}
 						</div>
 					</div>
@@ -365,12 +507,18 @@ export function UserFormDialog({
 								<Input
 									id="usr-lname"
 									value={lastName}
-									onChange={(e) => setLastName(e.target.value)}
+									onChange={(e) => handleFieldChange("lastName", e.target.value, setLastName)}
+									onBlur={() => handleBlur("lastName", lastName)}
 									placeholder="Nguyễn Văn"
-									className="mt-1 h-9 text-xs"
+									className={`mt-1 h-9 text-xs ${
+										touched.lastName && errors.lastName ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+									}`}
 								/>
-								{errors.lastName && (
-									<p className="text-[11px] font-semibold text-red-500 mt-1">{errors.lastName}</p>
+								{touched.lastName && errors.lastName && (
+									<p className="text-[11px] font-semibold text-red-500 mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+										<AlertCircle className="w-3.5 h-3.5 shrink-0" />
+										<span>{errors.lastName}</span>
+									</p>
 								)}
 							</div>
 
@@ -381,12 +529,18 @@ export function UserFormDialog({
 								<Input
 									id="usr-fname"
 									value={firstName}
-									onChange={(e) => setFirstName(e.target.value)}
+									onChange={(e) => handleFieldChange("firstName", e.target.value, setFirstName)}
+									onBlur={() => handleBlur("firstName", firstName)}
 									placeholder="An"
-									className="mt-1 h-9 text-xs"
+									className={`mt-1 h-9 text-xs ${
+										touched.firstName && errors.firstName ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+									}`}
 								/>
-								{errors.firstName && (
-									<p className="text-[11px] font-semibold text-red-500 mt-1">{errors.firstName}</p>
+								{touched.firstName && errors.firstName && (
+									<p className="text-[11px] font-semibold text-red-500 mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+										<AlertCircle className="w-3.5 h-3.5 shrink-0" />
+										<span>{errors.firstName}</span>
+									</p>
 								)}
 							</div>
 
@@ -397,12 +551,18 @@ export function UserFormDialog({
 								<Input
 									id="usr-citizen"
 									value={citizenId}
-									onChange={(e) => setCitizenId(e.target.value)}
+									onChange={(e) => handleFieldChange("citizenId", e.target.value, setCitizenId)}
+									onBlur={() => handleBlur("citizenId", citizenId)}
 									placeholder="001088012345"
-									className="mt-1 h-9 text-xs"
+									className={`mt-1 h-9 text-xs ${
+										touched.citizenId && errors.citizenId ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+									}`}
 								/>
-								{errors.citizenId && (
-									<p className="text-[11px] font-semibold text-red-500 mt-1">{errors.citizenId}</p>
+								{touched.citizenId && errors.citizenId && (
+									<p className="text-[11px] font-semibold text-red-500 mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+										<AlertCircle className="w-3.5 h-3.5 shrink-0" />
+										<span>{errors.citizenId}</span>
+									</p>
 								)}
 							</div>
 
@@ -431,9 +591,18 @@ export function UserFormDialog({
 										id="usr-dob"
 										type="date"
 										value={dateOfBirth}
-										onChange={(e) => setDateOfBirth(e.target.value)}
-										className="mt-1 h-9 text-xs"
+										onChange={(e) => handleFieldChange("dateOfBirth", e.target.value, setDateOfBirth)}
+										onBlur={() => handleBlur("dateOfBirth", dateOfBirth)}
+										className={`mt-1 h-9 text-xs ${
+											touched.dateOfBirth && errors.dateOfBirth ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+										}`}
 									/>
+									{touched.dateOfBirth && errors.dateOfBirth && (
+										<p className="text-[11px] font-semibold text-red-500 mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+											<AlertCircle className="w-3.5 h-3.5 shrink-0" />
+											<span>{errors.dateOfBirth}</span>
+										</p>
+									)}
 								</div>
 							</div>
 
@@ -444,12 +613,18 @@ export function UserFormDialog({
 								<Input
 									id="usr-address"
 									value={address}
-									onChange={(e) => setAddress(e.target.value)}
+									onChange={(e) => handleFieldChange("address", e.target.value, setAddress)}
+									onBlur={() => handleBlur("address", address)}
 									placeholder="Khoa Hồi sức tích cực, Bệnh viện Bạch Mai"
-									className="mt-1 h-9 text-xs"
+									className={`mt-1 h-9 text-xs ${
+										touched.address && errors.address ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+									}`}
 								/>
-								{errors.address && (
-									<p className="text-[11px] font-semibold text-red-500 mt-1">{errors.address}</p>
+								{touched.address && errors.address && (
+									<p className="text-[11px] font-semibold text-red-500 mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+										<AlertCircle className="w-3.5 h-3.5 shrink-0" />
+										<span>{errors.address}</span>
+									</p>
 								)}
 							</div>
 						</div>

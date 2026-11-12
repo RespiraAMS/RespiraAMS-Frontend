@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Patient, PatientPayload, StatFilter } from "../types";
 import {
 	createPatient,
@@ -10,7 +12,6 @@ import {
 	fetchPatients,
 	searchPatients,
 	updatePatient,
-	getStoredPatients,
 } from "../api";
 import { PatientStatsCards } from "./PatientStatsCards";
 import { PatientSearchBar } from "./PatientSearchBar";
@@ -26,39 +27,12 @@ function errorText(err: unknown): string {
 
 export function PatientsView() {
 	const router = useRouter();
-	const [patients, setPatients] = useState<Patient[]>(() => {
-		if (typeof window === "undefined") return [];
-		return getStoredPatients().slice(0, PAGE_SIZE);
-	});
-	const [totalCount, setTotalCount] = useState(() => {
-		if (typeof window === "undefined") return 0;
-		return getStoredPatients().length;
-	});
-	const [totalPages, setTotalPages] = useState(() => {
-		if (typeof window === "undefined") return 1;
-		return Math.max(1, Math.ceil(getStoredPatients().length / PAGE_SIZE));
-	});
-	const [isLoading, setIsLoading] = useState(() => {
-		if (typeof window === "undefined") return true;
-		return getStoredPatients().length === 0;
-	});
-	const [loadError, setLoadError] = useState<string | null>(null);
-	const [actionError, setActionError] = useState<string | null>(null);
+	const queryClient = useQueryClient();
 
-	const [stats, setStats] = useState(() => {
-		if (typeof window === "undefined") return { total: 0, male: 0, female: 0 };
-		const all = getStoredPatients();
-		return {
-			total: all.length,
-			male: all.filter((p) => p.gender === "Nam").length,
-			female: all.filter((p) => p.gender === "Nữ").length,
-		};
-	});
 	const [searchQuery, setSearchQuery] = useState("");
 	const [debouncedQuery, setDebouncedQuery] = useState("");
 	const [activeFilter, setActiveFilter] = useState<StatFilter>("all");
 	const [currentPage, setCurrentPage] = useState(1);
-	const [reloadKey, setReloadKey] = useState(0);
 
 	// Dialog states
 	const [isAddEditOpen, setIsAddEditOpen] = useState(false);
@@ -67,77 +41,62 @@ export function PatientsView() {
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
 
-	const reload = useCallback(() => setReloadKey((k) => k + 1), []);
-
 	// Debounce search input nhanh (180ms)
 	useEffect(() => {
 		const timer = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 180);
 		return () => clearTimeout(timer);
 	}, [searchQuery]);
 
-	// Summary counts (use page size 1 and read the total from pagination metadata)
-	useEffect(() => {
-		let cancelled = false;
-		Promise.all([
-			fetchPatients({ page: 1, size: 1 }),
-			fetchPatients({ page: 1, size: 1, gender: "Male" }),
-			fetchPatients({ page: 1, size: 1, gender: "Female" }),
-		])
-			.then(([all, male, female]) => {
-				if (cancelled) return;
-				setStats({
-					total: all.totalCount,
-					male: male.totalCount,
-					female: female.totalCount,
-				});
-			})
-			.catch(() => {
-				// Stat cards are informational; list loading reports errors.
-			});
-		return () => {
-			cancelled = true;
-		};
-	}, [reloadKey]);
+	// React Query: Summary counts (cache lâu dài, chỉ refetch khi có update/delete)
+	const { data: statsData } = useQuery({
+		queryKey: ["patients", "stats"],
+		queryFn: async () => {
+			const [all, male, female] = await Promise.all([
+				fetchPatients({ page: 1, size: 1 }),
+				fetchPatients({ page: 1, size: 1, gender: "Male" }),
+				fetchPatients({ page: 1, size: 1, gender: "Female" }),
+			]);
+			return {
+				total: all.totalCount,
+				male: male.totalCount,
+				female: female.totalCount,
+			};
+		},
+	});
 
-	// Patients list (server-side pagination, filter & search)
-	useEffect(() => {
-		let cancelled = false;
-		if (patients.length === 0) {
-			setIsLoading(true);
-		}
-		setLoadError(null);
+	const stats = statsData ?? { total: 0, male: 0, female: 0 };
 
-		const request = debouncedQuery
-			? searchPatients({
+	// React Query: Patients list (server-side pagination, filter & search)
+	const {
+		data: listData,
+		isLoading,
+		error: queryError,
+	} = useQuery({
+		queryKey: [
+			"patients",
+			"list",
+			{ page: currentPage, size: PAGE_SIZE, query: debouncedQuery, filter: activeFilter },
+		],
+		queryFn: async () => {
+			if (debouncedQuery) {
+				return await searchPatients({
 					page: currentPage,
 					size: PAGE_SIZE,
 					searchTerm: debouncedQuery,
-				})
-			: fetchPatients({
-					page: currentPage,
-					size: PAGE_SIZE,
-					gender: activeFilter === "all" ? undefined : activeFilter,
 				});
-
-		request
-			.then((result) => {
-				if (cancelled) return;
-				setPatients(result.items);
-				setTotalCount(result.totalCount);
-				setTotalPages(result.totalPages);
-			})
-			.catch((err) => {
-				if (cancelled) return;
-				setLoadError(errorText(err));
-			})
-			.finally(() => {
-				if (!cancelled) setIsLoading(false);
+			}
+			return await fetchPatients({
+				page: currentPage,
+				size: PAGE_SIZE,
+				gender: activeFilter === "all" ? undefined : activeFilter,
 			});
+		},
+	});
 
-		return () => {
-			cancelled = true;
-		};
-	}, [currentPage, debouncedQuery, activeFilter, reloadKey]);
+	const patients = listData?.items ?? [];
+	const totalCount = listData?.totalCount ?? 0;
+	const totalPages = listData?.totalPages ?? 1;
+	const loadError = queryError ? errorText(queryError) : null;
 
 	// Handlers
 	const handleFilterChange = (filter: StatFilter) => {
@@ -158,13 +117,12 @@ export function PatientsView() {
 	};
 
 	const handleEditPatient = async (patient: Patient) => {
-		setActionError(null);
 		try {
 			// List items only carry summary data, load the full record for editing
 			setEditingPatient(await fetchPatientById(patient.id));
 			setIsAddEditOpen(true);
 		} catch (err) {
-			setActionError(errorText(err));
+			toast.error(errorText(err));
 		}
 	};
 
@@ -178,22 +136,40 @@ export function PatientsView() {
 	};
 
 	const handleSavePatient = async (payload: PatientPayload, id?: string) => {
-		if (id) {
-			await updatePatient(id, payload);
-		} else {
-			await createPatient(payload);
-			setCurrentPage(1);
+		try {
+			if (id) {
+				await updatePatient(id, payload);
+				toast.success("Cập nhật thông tin bệnh nhân thành công!");
+			} else {
+				await createPatient(payload);
+				toast.success("Thêm mới hồ sơ bệnh nhân thành công!");
+				setCurrentPage(1);
+			}
+			// Chỉ tự động refetch khi có update / create
+			await queryClient.invalidateQueries({ queryKey: ["patients"] });
+		} catch (err) {
+			toast.error(errorText(err));
 		}
-		reload();
 	};
 
 	const handleConfirmDelete = async (id: string) => {
-		await deletePatient(id);
-		// Move back a page if the last item of the last page was removed
-		if (patients.length === 1 && currentPage > 1) {
-			setCurrentPage(currentPage - 1);
+		try {
+			await deletePatient(id);
+			toast.success("Đã xóa mềm hồ sơ bệnh nhân thành công!");
+			if (patients.length === 1 && currentPage > 1) {
+				setCurrentPage(currentPage - 1);
+			}
+			// Chỉ tự động refetch khi có xóa
+			await queryClient.invalidateQueries({ queryKey: ["patients"] });
+		} catch (err) {
+			const rawMsg = err instanceof Error ? err.message : "";
+			if (rawMsg.includes("already received treatments")) {
+				toast.error("Bệnh nhân đã có phác đồ điều trị, hệ thống không cho phép xóa để bảo toàn bệnh án.");
+			} else {
+				toast.error(errorText(err));
+			}
+			throw err;
 		}
-		reload();
 	};
 
 	return (
@@ -214,40 +190,34 @@ export function PatientsView() {
 				onAddPatient={handleAddPatient}
 			/>
 
-			{actionError && (
-				<p className="mt-4 text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-[10px] px-3.5 py-2.5">
-					{actionError}
-				</p>
-			)}
-
-			{/* Main Patients Table with actions & pagination */}
+			{/* Patients Table or Empty / Loading State */}
 			<PatientsTable
 				patients={patients}
 				totalCount={totalCount}
 				pageSize={PAGE_SIZE}
+				totalPages={totalPages}
+				currentPage={currentPage}
 				isLoading={isLoading}
 				errorMessage={loadError}
-				currentPage={currentPage}
-				totalPages={totalPages}
 				onPageChange={setCurrentPage}
 				onViewDetails={handleViewDetails}
 				onEditPatient={handleEditPatient}
 				onDeletePatient={handleDeletePatient}
 			/>
 
-			{/* Add/Edit Modal */}
+			{/* Add / Edit Patient Modal */}
 			<PatientDialog
 				open={isAddEditOpen}
-				onOpenChange={setIsAddEditOpen}
 				initialData={editingPatient}
+				onOpenChange={setIsAddEditOpen}
 				onSave={handleSavePatient}
 			/>
 
-			{/* Confirm Delete Modal */}
+			{/* Confirm Delete Dialog */}
 			<DeletePatientDialog
 				open={isDeleteOpen}
-				onOpenChange={setIsDeleteOpen}
 				patient={patientToDelete}
+				onOpenChange={setIsDeleteOpen}
 				onConfirmDelete={handleConfirmDelete}
 			/>
 		</div>

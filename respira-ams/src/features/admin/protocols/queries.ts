@@ -19,7 +19,7 @@ export function useProtocolCount(isApplied: boolean | null) {
 			const res = await getClinicalMetricsList(1, 1, undefined, isApplied);
 			return res.metadata?.totalItemCount ?? 0;
 		},
-		initialData: () => getStoredProtocolCount(isApplied),
+		staleTime: 60 * 1000,
 	});
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search, UserPlus, RotateCw, X } from "lucide-react";
+import { Search, UserPlus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +17,7 @@ interface UserSearchBarProps {
 	filters: UserFilters;
 	onFiltersChange: (newFilters: UserFilters) => void;
 	onOpenCreateDialog: () => void;
-	onRefresh: () => void;
+	onRefresh?: () => void;
 	isLoading?: boolean;
 }
 
@@ -25,7 +25,6 @@ export function UserSearchBar({
 	filters,
 	onFiltersChange,
 	onOpenCreateDialog,
-	onRefresh,
 	isLoading = false,
 }: UserSearchBarProps) {
 	return (
@@ -84,19 +83,6 @@ export function UserSearchBar({
 						<SelectItem value="Inactive">Đã khóa</SelectItem>
 					</SelectContent>
 				</Select>
-
-				{/* Refresh Button */}
-				<Button
-					type="button"
-					variant="outline"
-					size="icon"
-					onClick={onRefresh}
-					disabled={isLoading}
-					className="h-9.5 w-9.5 rounded-lg border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
-					title="Làm mới danh sách"
-				>
-					<RotateCw className={`w-4 h-4 text-slate-500 ${isLoading ? "animate-spin" : ""}`} />
-				</Button>
 
 				{/* Create User Button */}
 				<Button

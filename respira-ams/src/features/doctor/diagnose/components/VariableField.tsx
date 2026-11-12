@@ -25,7 +25,7 @@ export function VariableField({
 	registerRef,
 }: VariableFieldProps) {
 	const id = String(v.id || v.Id);
-	const name = v.name || v.Name || "Field";
+	const name = v.name || v.Name || "Chỉ số";
 	const desc = v.description || v.Description;
 	const vt = v.valueType || v.ValueType;
 	const isReq = meta?.isRequired;
@@ -139,7 +139,7 @@ export function VariableField({
 								value === "false" ? SEGMENT_ACTIVE : SEGMENT_IDLE
 							)}
 						>
-							No
+							Không
 						</button>
 						<button
 							type="button"
@@ -150,7 +150,7 @@ export function VariableField({
 								value === "true" ? SEGMENT_ACTIVE : SEGMENT_IDLE
 							)}
 						>
-							Yes
+							Có
 						</button>
 					</div>
 				)}
@@ -176,4 +176,3 @@ export function VariableField({
 		</div>
 	);
 }
-

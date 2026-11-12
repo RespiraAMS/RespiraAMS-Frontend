@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { RefreshCw, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DashboardMetrics, MicroserviceStatus, AuditLogItem } from "../types";
 import {
 	fetchAdminDashboardMetrics,
 	fetchMicroservicesStatus,
 	fetchRecentAuditLogs,
-	INITIAL_DASHBOARD_METRICS,
-	DEFAULT_MICROSERVICES,
-	MOCK_AUDIT_LOGS,
 } from "../api";
 import { DashboardStatsCards } from "./DashboardStatsCards";
 import { MicroservicesHealthCard } from "./MicroservicesHealthCard";
@@ -18,28 +15,22 @@ import { RecentAuditLogsCard } from "./RecentAuditLogsCard";
 import { QuickActionsCard } from "./QuickActionsCard";
 
 export function AdminDashboardView() {
-	const [metrics, setMetrics] = useState<DashboardMetrics | null>(() => INITIAL_DASHBOARD_METRICS);
-	const [services, setServices] = useState<MicroserviceStatus[]>(() => DEFAULT_MICROSERVICES);
-	const [logs, setLogs] = useState<AuditLogItem[]>(() => MOCK_AUDIT_LOGS);
-	const [isLoading, setIsLoading] = useState(false);
-	const [isRefreshing, setIsRefreshing] = useState(false);
+	const queryClient = useQueryClient();
 	const [lastUpdated, setLastUpdated] = useState<string>("");
 
-	const loadData = useCallback(async (isRefresh = false) => {
-		if (isRefresh) {
-			setIsRefreshing(true);
-		}
-
-		try {
+	const {
+		data,
+		isLoading,
+		isFetching,
+		refetch,
+	} = useQuery({
+		queryKey: ["admin", "dashboard"],
+		queryFn: async () => {
 			const [metricsData, servicesData, logsData] = await Promise.all([
 				fetchAdminDashboardMetrics(),
 				fetchMicroservicesStatus(),
 				fetchRecentAuditLogs(),
 			]);
-
-			setMetrics(metricsData);
-			setServices(servicesData);
-			setLogs(logsData);
 			setLastUpdated(
 				new Date().toLocaleTimeString("vi-VN", {
 					hour: "2-digit",
@@ -47,17 +38,22 @@ export function AdminDashboardView() {
 					second: "2-digit",
 				})
 			);
-		} catch (error) {
-			console.error("Lỗi khi tải dữ liệu Admin Dashboard:", error);
-		} finally {
-			setIsLoading(false);
-			setIsRefreshing(false);
-		}
-	}, []);
+			return {
+				metrics: metricsData,
+				services: servicesData,
+				logs: logsData,
+			};
+		},
+	});
 
-	useEffect(() => {
-		loadData(false);
-	}, [loadData]);
+	const metrics = data?.metrics || null;
+	const services = useMemo(() => data?.services || [], [data?.services]);
+	const logs = useMemo(() => data?.logs || [], [data?.logs]);
+
+	const handleRefresh = async () => {
+		await queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+		await refetch();
+	};
 
 	return (
 		<div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
@@ -86,14 +82,14 @@ export function AdminDashboardView() {
 
 					<button
 						type="button"
-						onClick={() => loadData(true)}
-						disabled={isRefreshing || isLoading}
+						onClick={handleRefresh}
+						disabled={isFetching || isLoading}
 						className="inline-flex items-center gap-2 rounded-[10px] bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80 px-3.5 py-2 text-xs font-semibold cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98] transition-all disabled:opacity-50"
 					>
 						<RefreshCw
-							className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-[#0EA5E9]" : "text-slate-500"}`}
+							className={`h-3.5 w-3.5 ${isFetching ? "animate-spin text-[#0EA5E9]" : "text-slate-500"}`}
 						/>
-						<span>{isRefreshing ? "Đang đồng bộ..." : "Làm mới dữ liệu"}</span>
+						<span>{isFetching ? "Đang đồng bộ..." : "Làm mới dữ liệu"}</span>
 					</button>
 				</div>
 			</div>

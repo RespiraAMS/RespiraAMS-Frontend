@@ -79,6 +79,10 @@ function mapListItem(dto: PatientListItemDto): Patient {
 
 function mapPatient(dto: PatientDto): Patient {
 	const birthYear = Number(dto.dateOfBirth.slice(0, 4));
+	const treatmentsCount =
+		dto.treatmentPlans?.length ??
+		dto.treatments?.length ??
+		0;
 	return {
 		id: dto.id,
 		name: dto.fullName,
@@ -96,128 +100,46 @@ function mapPatient(dto: PatientDto): Patient {
 		admission: dto.admission,
 		discharge: dto.discharge ?? null,
 		nextOfKins: dto.nextOfKins ?? [],
-		treatmentCount: dto.treatments?.length ?? 0,
+		treatmentCount: treatmentsCount,
 	};
 }
 
-// ---- Storage & Fallback for offline resilience ----
+// ---- Storage & Cache Helpers (chỉ lưu dữ liệu thật từ API) ----
 
 const PATIENTS_STORAGE_KEY = "respira_doctor_patients_v1";
 
-export const INITIAL_PATIENTS: Patient[] = [
-	{
-		id: "pat-001",
-		name: "Nguyễn Văn Hùng",
-		code: "BA-2026-00088",
-		age: 58,
-		gender: "Nam",
-		status: "treating",
-		birthDate: "15/04/1968",
-		phone: "0912345671",
-		bhyt: "GD4797931852468",
-		address: "Số 24 Hoàng Hoa Thám, Ba Đình, Hà Nội",
-		city: "Hà Nội",
-		height: 168,
-		weight: 65,
-		admission: new Date(Date.now() - 5 * 86400000).toISOString(),
-		treatmentCount: 2,
-	},
-	{
-		id: "pat-002",
-		name: "Trần Thị Mai",
-		code: "BA-2026-00089",
-		age: 46,
-		gender: "Nữ",
-		status: "recovered",
-		birthDate: "20/08/1980",
-		phone: "0987654322",
-		bhyt: "DN4797931852469",
-		address: "Số 112 Lê Lợi, Quận 1, TP.HCM",
-		city: "TP.HCM",
-		height: 156,
-		weight: 52,
-		admission: new Date(Date.now() - 10 * 86400000).toISOString(),
-		discharge: new Date(Date.now() - 1 * 86400000).toISOString(),
-		treatmentCount: 1,
-	},
-	{
-		id: "pat-003",
-		name: "Lê Hoàng Phúc",
-		code: "BA-2026-00090",
-		age: 67,
-		gender: "Nam",
-		status: "treating",
-		birthDate: "03/11/1959",
-		phone: "0934567893",
-		bhyt: "HT4797931852470",
-		address: "Xã An Khánh, Hoài Đức, Hà Nội",
-		city: "Hà Nội",
-		height: 165,
-		weight: 60,
-		admission: new Date(Date.now() - 2 * 86400000).toISOString(),
-		treatmentCount: 1,
-	},
-	{
-		id: "pat-004",
-		name: "Phạm Thu Hà",
-		code: "BA-2026-00091",
-		age: 39,
-		gender: "Nữ",
-		status: "treating",
-		birthDate: "12/06/1987",
-		phone: "0945678904",
-		bhyt: "DN4797931852471",
-		address: "Phường Thảo Điền, TP. Thủ Đức, TP.HCM",
-		city: "TP.HCM",
-		height: 160,
-		weight: 55,
-		admission: new Date(Date.now() - 1 * 86400000).toISOString(),
-		treatmentCount: 1,
-	},
-	{
-		id: "pat-005",
-		name: "Vũ Đình Trọng",
-		code: "BA-2026-00092",
-		age: 72,
-		gender: "Nam",
-		status: "treating",
-		birthDate: "28/01/1954",
-		phone: "0912345675",
-		bhyt: "GD4797931852472",
-		address: "Số 88 Giải Phóng, Hai Bà Trưng, Hà Nội",
-		city: "Hà Nội",
-		height: 170,
-		weight: 68,
-		admission: new Date(Date.now() - 3 * 86400000).toISOString(),
-		treatmentCount: 1,
-	},
-];
-
 export function getStoredPatients(): Patient[] {
-	if (typeof window === "undefined") return INITIAL_PATIENTS;
+	if (typeof window === "undefined") return [];
 	try {
 		const raw = localStorage.getItem(PATIENTS_STORAGE_KEY);
-		if (!raw) {
-			localStorage.setItem(PATIENTS_STORAGE_KEY, JSON.stringify(INITIAL_PATIENTS));
-			return INITIAL_PATIENTS;
-		}
+		if (!raw) return [];
 		const parsed = JSON.parse(raw);
-		return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_PATIENTS;
+		if (!Array.isArray(parsed)) return [];
+		// Loại bỏ triệt để dữ liệu giả lập cũ nếu còn sót lại trong cache trình duyệt
+		const clean = parsed.filter(
+			(p: Patient) => p.id && !p.id.startsWith("pat-")
+		);
+		if (clean.length !== parsed.length) {
+			localStorage.setItem(PATIENTS_STORAGE_KEY, JSON.stringify(clean));
+		}
+		return clean;
 	} catch {
-		return INITIAL_PATIENTS;
+		return [];
 	}
 }
 
 function saveStoredPatients(items: Patient[]): void {
 	if (typeof window === "undefined") return;
 	try {
-		localStorage.setItem(PATIENTS_STORAGE_KEY, JSON.stringify(items));
+		// Chỉ lưu các bản ghi hợp lệ từ API (không chứa ID giả dạng pat-)
+		const clean = items.filter((p) => p.id && !p.id.startsWith("pat-"));
+		localStorage.setItem(PATIENTS_STORAGE_KEY, JSON.stringify(clean));
 	} catch (e) {
 		console.error("Failed to save patients to localStorage:", e);
 	}
 }
 
-// ---- API calls ----
+// ---- API calls (100% dữ liệu thực từ Backend) ----
 
 export interface PagedPatients {
 	items: Patient[];
@@ -238,32 +160,25 @@ export async function fetchPatients(params: {
 	size: number;
 	gender?: ApiGender;
 }): Promise<PagedPatients> {
-	try {
-		const data = await apiRequest<Pagination<PatientListItemDto>>(
-			`/patients${buildQuery({ page: params.page, size: params.size, gender: params.gender })}`
-		);
-		if (data?.items) {
-			return mapPage(data);
-		}
-	} catch (err) {
-		console.warn("[PatientsAPI] Backend unavailable, using cached patients:", err instanceof Error ? err.message : String(err));
-	}
+	const query = buildQuery({
+		page: params.page,
+		size: params.size,
+		gender: params.gender,
+	});
 
-	// Fallback to local stored patients
-	let all = getStoredPatients();
-	if (params.gender) {
-		const targetGender: DisplayGender = params.gender === "Male" ? "Nam" : "Nữ";
-		all = all.filter((p) => p.gender === targetGender);
+	const data = await apiRequest<Pagination<PatientListItemDto>>(`/patients${query}`);
+	if (data?.items) {
+		const mapped = mapPage(data);
+		if (params.page === 1 && !params.gender) {
+			saveStoredPatients(mapped.items);
+		}
+		return mapped;
 	}
-	const total = all.length;
-	const totalPages = Math.max(1, Math.ceil(total / params.size));
-	const start = (params.page - 1) * params.size;
-	const items = all.slice(start, start + params.size);
 
 	return {
-		items,
-		totalCount: total,
-		totalPages,
+		items: [],
+		totalCount: 0,
+		totalPages: 1,
 	};
 }
 
@@ -277,171 +192,59 @@ export async function searchPatients(params: {
 		return fetchPatients({ page: params.page, size: params.size });
 	}
 
-	// 1 ký tự: Lọc client ngay lập tức
-	if (trimmed.length < 2) {
-		const list = await fetchPatients({ page: 1, size: 50 });
-		const lower = trimmed.toLowerCase();
-		const matched = list.items.filter(
-			(p) =>
-				p.name?.toLowerCase().includes(lower) ||
-				p.code?.toLowerCase().includes(lower) ||
-				p.phone?.toLowerCase().includes(lower) ||
-				p.bhyt?.toLowerCase().includes(lower)
-		);
-		return {
-			items: matched,
-			totalCount: matched.length,
-			totalPages: 1,
-		};
+	const query = buildQuery({
+		page: params.page,
+		size: params.size,
+		searchTerm: trimmed,
+	});
+
+	const data = await apiRequest<Pagination<PatientListItemDto>>(`/patients/search${query}`);
+	if (data?.items) {
+		return mapPage(data);
 	}
 
-	try {
-		const data = await apiRequest<Pagination<PatientListItemDto>>(
-			`/patients/search${buildQuery({ page: params.page, size: params.size, searchTerm: trimmed })}`
-		);
-		if (data?.items) {
-			return mapPage(data);
-		}
-	} catch (err) {
-		console.warn("[PatientsAPI] Search backend failed, searching locally:", err);
-	}
-
-	const all = getStoredPatients();
-	const lower = trimmed.toLowerCase();
-	const matched = all.filter(
-		(p) =>
-			p.name?.toLowerCase().includes(lower) ||
-			p.code?.toLowerCase().includes(lower) ||
-			p.phone?.toLowerCase().includes(lower) ||
-			p.bhyt?.toLowerCase().includes(lower)
-	);
-	const start = (params.page - 1) * params.size;
 	return {
-		items: matched.slice(start, start + params.size),
-		totalCount: matched.length,
-		totalPages: Math.max(1, Math.ceil(matched.length / params.size)),
+		items: [],
+		totalCount: 0,
+		totalPages: 1,
 	};
 }
 
 export async function fetchPatientById(id: string): Promise<Patient> {
-	try {
-		const data = await apiRequest<PatientDto>(`/patients/${id}`);
-		if (data) {
-			return mapPatient(data);
-		}
-	} catch (err) {
-		console.warn("[PatientsAPI] Get by ID failed, searching locally:", err);
+	const data = await apiRequest<PatientDto>(`/patients/${id}`);
+	if (data) {
+		return mapPatient(data);
 	}
-
-	const local = getStoredPatients().find((p) => p.id === id);
-	if (local) return local;
-
 	throw new Error("Không tìm thấy thông tin bệnh nhân.");
 }
 
 export async function createPatient(payload: PatientPayload): Promise<string> {
-	try {
-		const result = await apiRequest<{ id: string }>("/patients", {
-			method: "POST",
-			body: payload,
-		});
-		if (result?.id) return result.id;
-	} catch (err) {
-		console.warn("[PatientsAPI] Backend create failed, saving to local cache:", err);
+	const result = await apiRequest<{ id: string }>("/patients", {
+		method: "POST",
+		body: payload,
+	});
+	if (!result?.id) {
+		throw new Error("Không nhận được mã ID bệnh nhân từ máy chủ.");
 	}
-
-	const newId = `pat-${Date.now()}`;
-	const current = getStoredPatients();
-	const newPatient: Patient = {
-		id: newId,
-		name: `${payload.lastName} ${payload.firstName}`.trim(),
-		code: payload.medicalRecordCode,
-		age: new Date().getFullYear() - Number(payload.dateOfBirth.slice(0, 4)),
-		gender: payload.gender === "Male" ? "Nam" : "Nữ",
-		status: "treating",
-		birthDate: isoDateToDisplay(payload.dateOfBirth),
-		phone: payload.phoneNumber,
-		bhyt: payload.healthInsuranceCard,
-		address: payload.address,
-		city: payload.city,
-		height: payload.height,
-		weight: payload.weight,
-		admission: new Date().toISOString(),
-		treatmentCount: 1,
-	};
-	saveStoredPatients([newPatient, ...current]);
-	return newId;
+	return result.id;
 }
 
 export async function updatePatient(
 	id: string,
 	payload: PatientPayload
 ): Promise<void> {
-	try {
-		await apiRequest(`/patients/${id}`, { method: "PUT", body: payload });
-		return;
-	} catch (err) {
-		console.warn("[PatientsAPI] Backend update failed, updating local cache:", err);
-	}
-
-	const current = getStoredPatients();
-	const updated = current.map((p) => {
-		if (p.id === id) {
-			return {
-				...p,
-				name: `${payload.lastName} ${payload.firstName}`.trim(),
-				code: payload.medicalRecordCode,
-				age: new Date().getFullYear() - Number(payload.dateOfBirth.slice(0, 4)),
-				gender: (payload.gender === "Male" ? "Nam" : "Nữ") as DisplayGender,
-				birthDate: isoDateToDisplay(payload.dateOfBirth),
-				phone: payload.phoneNumber,
-				bhyt: payload.healthInsuranceCard,
-				address: payload.address,
-				city: payload.city,
-				height: payload.height,
-				weight: payload.weight,
-			};
-		}
-		return p;
-	});
-	saveStoredPatients(updated);
+	await apiRequest(`/patients/${id}`, { method: "PUT", body: payload });
 }
 
 export async function dischargePatient(
 	id: string,
 	outcome: TreatmentOutcome
 ): Promise<void> {
-	try {
-		await apiRequest(`/patients/${id}/discharge${buildQuery({ outcome })}`, {
-			method: "PUT",
-		});
-		return;
-	} catch (err) {
-		console.warn("[PatientsAPI] Backend discharge failed, updating local cache:", err);
-	}
-
-	const current = getStoredPatients();
-	const updated = current.map((p) => {
-		if (p.id === id) {
-			return {
-				...p,
-				status: OUTCOME_TO_STATUS[outcome] ?? "recovered",
-				discharge: new Date().toISOString(),
-			};
-		}
-		return p;
+	await apiRequest(`/patients/${id}/discharge${buildQuery({ outcome })}`, {
+		method: "PUT",
 	});
-	saveStoredPatients(updated);
 }
 
 export async function deletePatient(id: string): Promise<void> {
-	try {
-		await apiRequest(`/patients/${id}`, { method: "DELETE" });
-		return;
-	} catch (err) {
-		console.warn("[PatientsAPI] Backend delete failed, updating local cache:", err);
-	}
-
-	const current = getStoredPatients();
-	saveStoredPatients(current.filter((p) => p.id !== id));
+	await apiRequest(`/patients/${id}`, { method: "DELETE" });
 }

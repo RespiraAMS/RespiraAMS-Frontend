@@ -9,8 +9,11 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
             new QueryClient({
                 defaultOptions: {
                     queries: {
-                        staleTime: 60 * 1000,
-                        refetchOnWindowFocus: false,
+                        staleTime: Infinity, // Đã load rồi thì lưu cache, không tự fetch lại
+                        gcTime: 1000 * 60 * 60, // Lưu trong bộ nhớ cache 1 giờ
+                        refetchOnWindowFocus: false, // Không fetch lại khi chuyển tab
+                        refetchOnMount: false, // Khi chuyển trang quay lại không fetch lại nếu đã có cache
+                        refetchOnReconnect: false,
                         retry: 1,
                     },
                 },

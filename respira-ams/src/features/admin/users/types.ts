@@ -70,6 +70,8 @@ export interface UpdateUserPayload {
 	email: string;
 	phone: string;
 	password?: string;
+	role?: UserRole;
+	status?: UserStatus;
 	firstName: string;
 	lastName: string;
 	degrees: DegreeType[];

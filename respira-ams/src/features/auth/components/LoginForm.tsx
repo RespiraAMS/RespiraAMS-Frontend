@@ -31,6 +31,7 @@ import {
 	getRememberedEmail,
 	setRememberedEmail,
 } from "../api";
+import { fetchCurrentDoctorProfile } from "@/features/profile/api";
 
 type AuthMode = "login" | "forgot-email" | "forgot-otp" | "forgot-reset";
 
@@ -160,19 +161,44 @@ export function LoginForm() {
 
 			setRememberedEmail(trimmedEmail, rememberMe);
 
+			const role = (session.user.role || "").toLowerCase();
+
+			// Xóa cache cũ để tránh hiển thị nhầm thông tin của tài khoản trước đó
+			if (typeof window !== "undefined") {
+				localStorage.removeItem("respira_doctor_profile_v1");
+			}
+
+			// Nếu đăng nhập vai trò Bác sĩ, tự động đồng bộ hồ sơ thực tế từ Backend
+			if (role === "doctor" || role === "headdepartmentdoctor") {
+				await fetchCurrentDoctorProfile().catch(() => {});
+			}
+
 			const redirectParam = searchParams.get("redirect");
-			if (redirectParam && redirectParam.startsWith("/")) {
-				router.push(redirectParam);
+
+			// Phân quyền điều hướng thông minh & an toàn
+			let target = "/doctor/patients";
+			if (role === "admin") {
+				target = "/admin/dashboard";
+				if (redirectParam && redirectParam.startsWith("/")) {
+					target = redirectParam;
+				}
+			} else if (role === "manager" || role === "medicalregulationreviewer") {
+				target = "/manage/dashboard";
+				if (redirectParam && redirectParam.startsWith("/manage")) {
+					target = redirectParam;
+				}
 			} else {
-				const role = session.user.role?.toLowerCase() || "";
-				if (role === "admin") {
-					router.push("/admin/dashboard");
-				} else if (role === "manager") {
-					router.push("/manage/dashboard");
-				} else {
-					router.push("/doctor/patients");
+				// Doctor / HeadDepartmentDoctor
+				target = "/doctor/patients";
+				if (
+					redirectParam &&
+					(redirectParam.startsWith("/doctor") || redirectParam.startsWith("/profile"))
+				) {
+					target = redirectParam === "/profile" ? "/doctor/profile" : redirectParam;
 				}
 			}
+
+			router.push(target);
 		} catch (err: unknown) {
 			setError(
 				err instanceof Error
@@ -467,6 +493,56 @@ export function LoginForm() {
 									<p className="text-[11px] text-slate-500 leading-relaxed">
 										Tự động khóa sau 15 phút không thao tác nhằm bảo vệ bí mật y khoa và quyền hạn chỉ định dược lâm sàng.
 									</p>
+								</div>
+							</div>
+
+							{/* Tài khoản mẫu thử nghiệm phân quyền */}
+							<div className="rounded-[16px] border border-slate-200/80 bg-slate-50/70 p-3.5 space-y-2 mt-3">
+								<div className="flex items-center justify-between">
+									<p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+										Tài khoản mẫu thử nghiệm
+									</p>
+									<span className="text-[10px] text-slate-400">Click để điền nhanh</span>
+								</div>
+								<div className="grid grid-cols-3 gap-2">
+									<button
+										type="button"
+										onClick={() => {
+											setEmail("doctor@respira.ams");
+											setPassword("Admin@123");
+											setError(null);
+										}}
+										className="rounded-[10px] border border-sky-200 bg-white p-2 text-left hover:border-sky-400 hover:bg-sky-50/30 transition-all cursor-pointer shadow-2xs"
+									>
+										<p className="text-[11px] font-bold text-[#0284C7]">Bác sĩ</p>
+										<p className="text-[9.5px] text-slate-500 truncate">doctor@respira.ams</p>
+									</button>
+
+									<button
+										type="button"
+										onClick={() => {
+											setEmail("admin@respira.ams");
+											setPassword("Admin@123");
+											setError(null);
+										}}
+										className="rounded-[10px] border border-purple-200 bg-white p-2 text-left hover:border-purple-400 hover:bg-purple-50/30 transition-all cursor-pointer shadow-2xs"
+									>
+										<p className="text-[11px] font-bold text-purple-700">Admin</p>
+										<p className="text-[9.5px] text-slate-500 truncate">admin@respira.ams</p>
+									</button>
+
+									<button
+										type="button"
+										onClick={() => {
+											setEmail("manager@respira.ams");
+											setPassword("Admin@123");
+											setError(null);
+										}}
+										className="rounded-[10px] border border-emerald-200 bg-white p-2 text-left hover:border-emerald-400 hover:bg-emerald-50/30 transition-all cursor-pointer shadow-2xs"
+									>
+										<p className="text-[11px] font-bold text-emerald-700">Quản lý</p>
+										<p className="text-[9.5px] text-slate-500 truncate">manager@respira.ams</p>
+									</button>
 								</div>
 							</div>
 						</form>

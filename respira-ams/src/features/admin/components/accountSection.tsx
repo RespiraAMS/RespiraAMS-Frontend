@@ -1,9 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { LogOut, Settings, User } from "lucide-react";
-import { logout } from "@/features/auth/api";
+import { LogOut } from "lucide-react";
+import { logout, getStoredUser, getStoredAccessToken, parseJwt } from "@/features/auth/api";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -26,15 +26,81 @@ export interface AdminUserInfo {
 	department?: string;
 	email?: string;
 	initials: string;
+	avatarUrl?: string;
 }
 
-export const DEFAULT_ADMIN_USER: AdminUserInfo = {
-	name: "Quản trị viên Hệ thống",
-	role: "Administrator",
-	department: "Trung tâm CNTT & Hạ tầng",
-	email: "admin@respira.vn",
-	initials: "AD",
-};
+function resolveAdminAccount(customUser?: AdminUserInfo): AdminUserInfo {
+	if (customUser) return customUser;
+
+	const storedUser = getStoredUser();
+	let tokenUser = null;
+	const token = getStoredAccessToken();
+	if (token) {
+		tokenUser = parseJwt(token);
+	}
+
+	const active = storedUser || tokenUser;
+	const email = active?.email || "";
+	const role = active?.role || "Admin";
+
+	let name = "";
+	let avatarUrl: string | undefined = undefined;
+
+	if (typeof window !== "undefined") {
+		try {
+			const rawUsers = localStorage.getItem("respira_admin_users_v1");
+			if (rawUsers && email) {
+				const users = JSON.parse(rawUsers);
+				if (Array.isArray(users)) {
+					const matched = users.find(
+						(u: any) =>
+							(u.email && u.email.toLowerCase() === email.toLowerCase()) ||
+							(active?.id && (u.id === active.id || u.doctorId === active.id))
+					);
+					if (matched) {
+						if (matched.lastName || matched.firstName) {
+							name = `${matched.lastName || ""} ${matched.firstName || ""}`.trim();
+						}
+						if (matched.avatarUrl) {
+							avatarUrl = matched.avatarUrl;
+						}
+					}
+				}
+			}
+		} catch {
+			// ignore
+		}
+	}
+
+	if (!name) {
+		const customName = (active as { name?: string } | null)?.name;
+		if (customName) {
+			name = customName;
+		} else if (email) {
+			const prefix = email.split("@")[0];
+			name = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+		} else {
+			name = "Quản trị viên";
+		}
+	}
+
+	const initials =
+		name
+			.split(" ")
+			.filter(Boolean)
+			.slice(-2)
+			.map((s) => s.charAt(0).toUpperCase())
+			.join("") || "AD";
+
+	return {
+		name,
+		role: role === "Admin" ? "Quản trị viên" : role,
+		department: email,
+		email,
+		initials: initials.slice(0, 2),
+		avatarUrl,
+	};
+}
 
 export interface AdminAccountSectionProps {
 	user?: AdminUserInfo;
@@ -43,11 +109,25 @@ export interface AdminAccountSectionProps {
 }
 
 export function AdminAccountSection({
-	user = DEFAULT_ADMIN_USER,
+	user: propUser,
 	collapsed = false,
 	className,
 }: AdminAccountSectionProps) {
 	const router = useRouter();
+
+	const [currentUser, setCurrentUser] = useState<AdminUserInfo>(() =>
+		propUser || {
+			name: "Quản trị viên",
+			role: "Quản trị viên",
+			department: "",
+			email: "",
+			initials: "AD",
+		}
+	);
+
+	useEffect(() => {
+		setCurrentUser(resolveAdminAccount(propUser));
+	}, [propUser]);
 
 	const handleLogout = async (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -68,18 +148,26 @@ export function AdminAccountSection({
 							<DropdownMenuTrigger asChild>
 								<button
 									type="button"
-									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] hover:ring-2 hover:ring-sky-300 transition-all mx-auto cursor-pointer"
+									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] hover:ring-2 hover:ring-sky-300 transition-all mx-auto cursor-pointer overflow-hidden"
 									id="admin-account-trigger-collapsed"
 								>
-									<span>{user.initials}</span>
+									{currentUser.avatarUrl ? (
+										<img
+											src={currentUser.avatarUrl}
+											alt={currentUser.name}
+											className="h-full w-full object-cover"
+										/>
+									) : (
+										<span>{currentUser.initials}</span>
+									)}
 									<span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-[#22C55E] ring-2 ring-white" />
 								</button>
 							</DropdownMenuTrigger>
 						</TooltipTrigger>
 						<TooltipContent side="right">
-							<p className="font-semibold text-xs">{user.name}</p>
+							<p className="font-semibold text-xs">{currentUser.name}</p>
 							<p className="text-[10px] text-muted-foreground">
-								{user.role} - {user.department}
+								{currentUser.email || currentUser.role}
 							</p>
 						</TooltipContent>
 					</Tooltip>
@@ -88,32 +176,19 @@ export function AdminAccountSection({
 				<DropdownMenuContent align="end" side="right" className="w-52 text-xs">
 					<DropdownMenuLabel className="font-normal">
 						<div className="flex flex-col gap-0.5">
-							<p className="text-xs font-semibold">{user.name}</p>
-							<p className="text-[10px] text-muted-foreground">
-								{user.role} - {user.department}
+							<p className="text-xs font-semibold text-slate-900">{currentUser.name}</p>
+							<p className="text-[10px] text-muted-foreground truncate">
+								{currentUser.email ? `${currentUser.role} • ${currentUser.email}` : currentUser.role}
 							</p>
 						</div>
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
-					<DropdownMenuItem asChild>
-						<Link href="/profile" className="flex items-center gap-2 cursor-pointer text-xs">
-							<User className="h-3.5 w-3.5" />
-							Thông tin cá nhân
-						</Link>
-					</DropdownMenuItem>
-					<DropdownMenuItem asChild>
-						<Link href="/admin/settings" className="flex items-center gap-2 cursor-pointer text-xs">
-							<Settings className="h-3.5 w-3.5" />
-							Cài đặt hệ thống
-						</Link>
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
 					<DropdownMenuItem
 						onClick={handleLogout}
-						className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs"
+						className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs text-red-600 focus:text-red-600"
 					>
-						<LogOut className="h-3.5 w-3.5" />
-						Đăng xuất
+						<LogOut className="h-3.5 w-3.5 text-red-500" />
+						<span>Đăng xuất</span>
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
@@ -136,21 +211,29 @@ export function AdminAccountSection({
 						id="admin-account-trigger"
 					>
 						{/* Avatar Circle with Online Dot */}
-						<div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] select-none">
-							<span>{user.initials}</span>
+						<div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] select-none overflow-hidden">
+							{currentUser.avatarUrl ? (
+								<img
+									src={currentUser.avatarUrl}
+									alt={currentUser.name}
+									className="h-full w-full object-cover"
+								/>
+							) : (
+								<span>{currentUser.initials}</span>
+							)}
 							<span
 								className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-[#22C55E] ring-2 ring-white"
 								title="Đang trực tuyến"
 							/>
 						</div>
 
-						{/* Admin Name and Role */}
+						{/* Admin Name and Role / Email */}
 						<div className="min-w-0 flex-1">
 							<p className="truncate text-[11.5px] font-bold text-slate-800 leading-tight">
-								{user.name}
+								{currentUser.name}
 							</p>
 							<p className="truncate text-[9.5px] text-slate-400 font-medium leading-tight mt-0.5">
-								{user.role} - {user.department}
+								{currentUser.email || currentUser.role}
 							</p>
 						</div>
 					</button>
@@ -162,7 +245,7 @@ export function AdminAccountSection({
 					onClick={handleLogout}
 					title="Đăng xuất"
 					aria-label="Đăng xuất"
-					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
 					id="admin-logout-button"
 				>
 					<LogOut className="h-3.5 w-3.5" />
@@ -172,32 +255,19 @@ export function AdminAccountSection({
 			<DropdownMenuContent align="end" className="w-52 mb-2 rounded-[12px] text-xs">
 				<DropdownMenuLabel className="font-normal">
 					<div className="flex flex-col gap-0.5">
-						<p className="text-xs font-semibold text-slate-900">{user.name}</p>
-						<p className="text-[10px] text-muted-foreground">
-							{user.role} - {user.department}
+						<p className="text-xs font-semibold text-slate-900">{currentUser.name}</p>
+						<p className="text-[10px] text-muted-foreground truncate">
+							{currentUser.email ? `${currentUser.role} • ${currentUser.email}` : currentUser.role}
 						</p>
 					</div>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem asChild>
-					<Link href="/profile" className="flex items-center gap-2 cursor-pointer text-xs">
-						<User className="h-3.5 w-3.5" />
-						Thông tin cá nhân
-					</Link>
-				</DropdownMenuItem>
-				<DropdownMenuItem asChild>
-					<Link href="/admin/settings" className="flex items-center gap-2 cursor-pointer text-xs">
-						<Settings className="h-3.5 w-3.5" />
-						Cài đặt hệ thống
-					</Link>
-				</DropdownMenuItem>
-				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					onClick={handleLogout}
-					className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs"
+					className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs text-red-600 focus:text-red-600"
 				>
-					<LogOut className="h-3.5 w-3.5" />
-					Đăng xuất
+					<LogOut className="h-3.5 w-3.5 text-red-500" />
+					<span>Đăng xuất</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

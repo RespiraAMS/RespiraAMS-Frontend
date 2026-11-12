@@ -7,7 +7,6 @@ import {
 	Edit,
 	Trash2,
 	Lock,
-	Unlock,
 	Mail,
 	Phone,
 	CheckCircle,
@@ -202,13 +201,45 @@ export function UsersTable({
 									</span>
 								</TableCell>
 
-								{/* Status */}
+								{/* Status with interactive switch toggle */}
 								<TableCell className="py-3">
-									<div className="flex items-center gap-1.5">
+									<div className="flex items-center gap-2.5">
+										{/* Nút bật/tắt khóa tài khoản riêng ở ngoài */}
+										<button
+											type="button"
+											role="switch"
+											aria-checked={user.status === "Active"}
+											disabled={user.role === "Admin"}
+											onClick={(e) => {
+												e.stopPropagation();
+												onToggleStatus(user);
+											}}
+											title={
+												user.role === "Admin"
+													? "Không thể khóa tài khoản Quản trị viên"
+													: user.status === "Active"
+													? "Tài khoản đang hoạt động. Nhấn để khóa tài khoản"
+													: "Tài khoản đang bị khóa. Nhấn để mở khóa tài khoản"
+											}
+											className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 ${
+												user.role === "Admin"
+													? "opacity-50 cursor-not-allowed bg-emerald-500/60"
+													: user.status === "Active"
+													? "bg-emerald-500 hover:bg-emerald-600"
+													: "bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600"
+											}`}
+										>
+											<span
+												className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+													user.status === "Active" ? "translate-x-4.5" : "translate-x-0.5"
+												}`}
+											/>
+										</button>
+
 										{user.status === "Active" ? (
 											<Badge
 												variant="success"
-												className="font-bold flex items-center gap-1 text-[11px]"
+												className="font-bold flex items-center gap-1 text-[11px] py-0.5 px-2 bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300"
 											>
 												<CheckCircle className="w-3 h-3" />
 												<span>Hoạt động</span>
@@ -216,7 +247,7 @@ export function UsersTable({
 										) : (
 											<Badge
 												variant="destructive"
-												className="font-bold flex items-center gap-1 text-[11px]"
+												className="font-bold flex items-center gap-1 text-[11px] py-0.5 px-2 bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300"
 											>
 												<Lock className="w-3 h-3" />
 												<span>Đã khóa</span>
@@ -234,61 +265,49 @@ export function UsersTable({
 
 								{/* Action Menu */}
 								<TableCell className="py-3 text-right">
-									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-8 w-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
-											>
-												<MoreVertical className="w-4 h-4" />
-											</Button>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent align="end" className="w-48">
-											<DropdownMenuItem
-												onClick={() => onViewUser(user)}
-												className="cursor-pointer text-xs font-semibold gap-2 py-2"
-											>
-												<Eye className="w-3.5 h-3.5 text-slate-500" />
-												<span>Xem chi tiết</span>
-											</DropdownMenuItem>
+									<div className="flex items-center justify-end gap-1">
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={() => onEditUser(user)}
+											title="Chỉnh sửa toàn bộ thông tin"
+											className="h-8 w-8 rounded-lg text-slate-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/40"
+										>
+											<Edit className="w-3.5 h-3.5" />
+										</Button>
 
-											<DropdownMenuItem
-												onClick={() => onEditUser(user)}
-												className="cursor-pointer text-xs font-semibold gap-2 py-2"
-											>
-												<Edit className="w-3.5 h-3.5 text-sky-600" />
-												<span>Chỉnh sửa hồ sơ</span>
-											</DropdownMenuItem>
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<Button
+													variant="ghost"
+													size="icon"
+													className="h-8 w-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+												>
+													<MoreVertical className="w-4 h-4" />
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent align="end" className="w-44">
+												<DropdownMenuItem
+													onClick={() => onViewUser(user)}
+													className="cursor-pointer text-xs font-semibold gap-2 py-2"
+												>
+													<Eye className="w-3.5 h-3.5 text-slate-500" />
+													<span>Xem chi tiết</span>
+												</DropdownMenuItem>
 
-											<DropdownMenuItem
-												onClick={() => onToggleStatus(user)}
-												className="cursor-pointer text-xs font-semibold gap-2 py-2"
-											>
-												{user.status === "Active" ? (
-													<>
-														<Lock className="w-3.5 h-3.5 text-amber-600" />
-														<span>Khóa tài khoản</span>
-													</>
-												) : (
-													<>
-														<Unlock className="w-3.5 h-3.5 text-emerald-600" />
-														<span>Mở khóa tài khoản</span>
-													</>
-												)}
-											</DropdownMenuItem>
+												<DropdownMenuSeparator />
 
-											<DropdownMenuSeparator />
-
-											<DropdownMenuItem
-												onClick={() => onDeleteUser(user)}
-												className="cursor-pointer text-xs font-semibold gap-2 py-2 text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/40"
-											>
-												<Trash2 className="w-3.5 h-3.5 text-red-600" />
-												<span>Xóa người dùng</span>
-											</DropdownMenuItem>
-										</DropdownMenuContent>
-									</DropdownMenu>
+												<DropdownMenuItem
+													onClick={() => onDeleteUser(user)}
+													disabled={user.role === "Admin"}
+													className="cursor-pointer text-xs font-semibold gap-2 py-2 text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/40"
+												>
+													<Trash2 className="w-3.5 h-3.5 text-red-600" />
+													<span>Xóa người dùng</span>
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</div>
 								</TableCell>
 							</TableRow>
 						);

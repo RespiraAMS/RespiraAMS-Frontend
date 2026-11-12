@@ -8,7 +8,6 @@ import {
 	fetchAuditLogs,
 	exportAuditLogsToCsv,
 	exportAuditLogsToJson,
-	INITIAL_AUDIT_LOGS,
 } from "../api";
 import { AuditLogStatsCards } from "./AuditLogStatsCards";
 import { AuditLogToolbar } from "./AuditLogToolbar";
@@ -30,22 +29,18 @@ export function AdminAuditLogsView() {
 	const [filters, setFilters] = useState<AuditLogFilters>(DEFAULT_FILTERS);
 	const [page, setPage] = useState(1);
 
-	const [logs, setLogs] = useState<AuditLogItem[]>(() => INITIAL_AUDIT_LOGS.slice(0, PAGE_SIZE));
-	const [total, setTotal] = useState(() => INITIAL_AUDIT_LOGS.length);
-	const [stats, setStats] = useState<AuditLogStats>(() => ({
-		total: INITIAL_AUDIT_LOGS.length,
-		successCount: INITIAL_AUDIT_LOGS.filter((l) => l.status === "success").length,
-		warningCount: INITIAL_AUDIT_LOGS.filter((l) => l.status === "warning").length,
-		errorCount: INITIAL_AUDIT_LOGS.filter((l) => l.status === "error").length,
-		uniqueActorsCount: new Set(INITIAL_AUDIT_LOGS.map((l) => l.actor)).size,
-		successRatePercent: Math.round(
-			(INITIAL_AUDIT_LOGS.filter((l) => l.status === "success").length /
-				INITIAL_AUDIT_LOGS.length) *
-				100
-		),
-	}));
+	const [logs, setLogs] = useState<AuditLogItem[]>([]);
+	const [total, setTotal] = useState(0);
+	const [stats, setStats] = useState<AuditLogStats>({
+		total: 0,
+		successCount: 0,
+		warningCount: 0,
+		errorCount: 0,
+		uniqueActorsCount: 0,
+		successRatePercent: 100,
+	});
 
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 
 	// Detail dialog state

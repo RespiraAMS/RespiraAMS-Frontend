@@ -6,8 +6,8 @@ interface DiagnoseStepperProps {
 }
 
 const STEPS: { step: 1 | 2; label: string }[] = [
-	{ step: 1, label: "Clinical Observations" },
-	{ step: 2, label: "Antibiotic Allergies" },
+	{ step: 1, label: "Chỉ số & Triệu chứng lâm sàng" },
+	{ step: 2, label: "Tiền sử dị ứng kháng sinh" },
 ];
 
 export function DiagnoseStepper({ currentStep, onStepChange }: DiagnoseStepperProps) {
@@ -42,4 +42,3 @@ export function DiagnoseStepper({ currentStep, onStepChange }: DiagnoseStepperPr
 		</div>
 	);
 }
-

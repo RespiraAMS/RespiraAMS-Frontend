@@ -102,9 +102,14 @@ export async function apiFetch<T>(
 // Helper functions and classes for Doctor features
 // ---------------------------------------------------------
 
-const DOCTOR_API_URL = (
-	process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5016/api/v1"
-).replace(/\/$/, "");
+const DOCTOR_API_URL =
+	typeof window !== "undefined"
+		? "/api/backend"
+		: (
+				process.env.BACKEND_API_URL ||
+				process.env.NEXT_PUBLIC_API_URL ||
+				"http://localhost:5016/api/v1"
+			).replace(/\/$/, "");
 
 export class ApiError extends Error {
 	status: number;
@@ -154,12 +159,16 @@ export async function apiRequest<T = void>(
 	options: Omit<RequestInit, "body"> & { body?: unknown } = {}
 ): Promise<T> {
 	const { body, headers, ...rest } = options;
-	const token = typeof window !== "undefined" ? window.localStorage.getItem("accessToken") : null;
+	const token =
+		typeof window !== "undefined"
+			? window.localStorage.getItem("accessToken") ||
+				window.localStorage.getItem("respira_auth_token_v1")
+			: null;
 
 	let response: Response;
 	try {
 		response = await fetch(`${DOCTOR_API_URL}${path}`, {
-			signal: rest.signal || AbortSignal.timeout(1500),
+			signal: rest.signal || AbortSignal.timeout(10000),
 			...rest,
 			headers: {
 				Accept: "application/json",
@@ -169,7 +178,8 @@ export async function apiRequest<T = void>(
 			},
 			body: body !== undefined ? JSON.stringify(body) : undefined,
 		});
-	} catch {
+	} catch (networkErr) {
+		console.warn(`[apiRequest] Network error calling ${DOCTOR_API_URL}${path}:`, networkErr);
 		throw new ApiError("Không thể kết nối tới máy chủ.", 0);
 	}
 

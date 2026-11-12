@@ -60,7 +60,7 @@ export function describeRange(range?: ValueRange | null, unit?: string | null): 
 	const minOp = range.isMinExclusive ? ">" : "≥";
 	const maxOp = range.isMaxExclusive ? "<" : "≤";
 	if (range.min !== null && range.max !== null) {
-		return `${minOp} ${range.min} and ${maxOp} ${range.max}${suffix}`;
+		return `${minOp} ${range.min} và ${maxOp} ${range.max}${suffix}`;
 	}
 	if (range.min !== null) return `${minOp} ${range.min}${suffix}`;
 	if (range.max !== null) return `${maxOp} ${range.max}${suffix}`;
@@ -68,25 +68,25 @@ export function describeRange(range?: ValueRange | null, unit?: string | null): 
 }
 
 export function normalPlaceholder(range?: ValueRange | null): string {
-	if (!range) return "Enter value";
-	if (range.min !== null && range.max !== null) return `normal: ${range.min}-${range.max}`;
-	if (range.min !== null) return `normal: ${range.min}+`;
-	return `normal: up to ${range.max}`;
+	if (!range) return "Nhập giá trị";
+	if (range.min !== null && range.max !== null) return `Bình thường: ${range.min} - ${range.max}`;
+	if (range.min !== null) return `Bình thường: ≥ ${range.min}`;
+	return `Bình thường: ≤ ${range.max}`;
 }
 
 const CATEGORY_ENUM_ORDER = ["PersonalInformation", "Paraclinical", "Clinical"];
 const CATEGORY_DISPLAY_ORDER = ["PersonalInformation", "Clinical", "Paraclinical"];
 export const CATEGORY_LABELS: Record<string, string> = {
-	PersonalInformation: "Personal Information",
-	Clinical: "Clinical",
-	Paraclinical: "Paraclinical",
+	PersonalInformation: "Thông tin hành chính & Nhân thân",
+	Clinical: "Dấu hiệu & Triệu chứng lâm sàng",
+	Paraclinical: "Chỉ số cận lâm sàng & Xét nghiệm",
 };
 
 export function normalizeCategoryKey(raw?: unknown): string {
-	if (raw === undefined || raw === null || raw === "") return "Other";
+	if (raw === undefined || raw === null || raw === "") return "Khác";
 	const text = String(raw).trim();
 	if (/^\d+$/.test(text)) {
-		return CATEGORY_ENUM_ORDER[Number(text)] || "Other";
+		return CATEGORY_ENUM_ORDER[Number(text)] || "Khác";
 	}
 	const match = Object.keys(CATEGORY_LABELS).find(
 		(key) => key.toLowerCase() === text.toLowerCase()
@@ -100,8 +100,21 @@ export function categoryRank(key: string): number {
 }
 
 export function formatTreatmentSite(site?: string): string {
-	if (!site) return "Unknown";
-	return site === "IntensiveCareUnit" ? "ICU" : site;
+	if (!site) return "Chưa xác định";
+	const s = site.toLowerCase();
+	if (s === "outpatient") return "Ngoại trú";
+	if (s === "inpatient") return "Nội trú";
+	if (s === "intensivecareunit" || s === "icu") return "Khoa Hồi sức tích cực (ICU)";
+	return site;
+}
+
+export function formatSeverity(severity?: string): string {
+	if (!severity) return "Chưa xác định";
+	const s = severity.toLowerCase();
+	if (s === "mild") return "Nhẹ";
+	if (s === "moderate") return "Trung bình";
+	if (s === "severe") return "Nặng";
+	return severity;
 }
 
 /** Giá trị mặc định cho trường Boolean / Categorical khi mở form hoặc đặt lại. */

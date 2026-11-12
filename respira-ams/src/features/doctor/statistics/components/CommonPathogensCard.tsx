@@ -34,48 +34,54 @@ export function CommonPathogensCard({ pathogens }: CommonPathogensCardProps) {
 
 			{/* Pathogens List */}
 			<div className="space-y-4 my-auto py-2">
-				{pathogens.map((item) => (
-					<div key={item.id} className="group">
-						{/* Title and Count */}
-						<div className="flex items-center justify-between text-xs sm:text-sm">
-							<span className="italic font-medium text-slate-800">
-								{item.name}
-							</span>
-							<span className="font-bold text-slate-900">
-								{item.count}
-							</span>
-						</div>
-
-						{/* Progress Bar */}
-						<div
-							style={{ borderRadius: "9999px" }}
-							className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mt-1.5"
-						>
-							<div
-								className="h-full rounded-full transition-all duration-700 ease-out"
-								style={{
-									width: `${item.percentage}%`,
-									backgroundColor: item.barColor,
-									borderRadius: "9999px",
-								}}
-							/>
-						</div>
-
-						{/* Sub-info */}
-						<div className="flex items-center justify-between text-[11px] mt-1 text-slate-400">
-							<span>{item.sensitivityText}</span>
-							<span
-								className={cn(
-									item.isWarning
-										? cn("font-semibold", item.warningColor || "text-amber-500")
-										: "text-slate-400"
-								)}
-							>
-								{item.extraInfo}
-							</span>
-						</div>
+				{pathogens.length === 0 ? (
+					<div className="py-12 text-center text-xs italic text-slate-400">
+						Chưa có dữ liệu tác nhân vi sinh từ phòng xét nghiệm
 					</div>
-				))}
+				) : (
+					pathogens.map((item) => (
+						<div key={item.id} className="group">
+							{/* Title and Count */}
+							<div className="flex items-center justify-between text-xs sm:text-sm">
+								<span className="italic font-medium text-slate-800">
+									{item.name}
+								</span>
+								<span className="font-bold text-slate-900">
+									{item.count}
+								</span>
+							</div>
+
+							{/* Progress Bar */}
+							<div
+								style={{ borderRadius: "9999px" }}
+								className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mt-1.5"
+							>
+								<div
+									className="h-full rounded-full transition-all duration-700 ease-out"
+									style={{
+										width: `${item.percentage}%`,
+										backgroundColor: item.barColor,
+										borderRadius: "9999px",
+									}}
+								/>
+							</div>
+
+							{/* Sub-info */}
+							<div className="flex items-center justify-between text-[11px] mt-1 text-slate-400">
+								<span>{item.sensitivityText}</span>
+								<span
+									className={cn(
+										item.isWarning
+											? cn("font-semibold", item.warningColor || "text-amber-500")
+											: "text-slate-400"
+									)}
+								>
+									{item.extraInfo}
+								</span>
+							</div>
+						</div>
+					))
+				)}
 			</div>
 		</div>
 	);

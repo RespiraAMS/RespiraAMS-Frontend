@@ -12,7 +12,7 @@ export function InfectionAssessmentCard({ heavy, worth }: InfectionAssessmentCar
 	const [worthExpanded, setWorthExpanded] = useState(false);
 
 	return (
-		<ResultCard step={3} title="Infection Assessment">
+		<ResultCard step={3} title="Đánh giá tác nhân vi sinh gây bệnh">
 			{/* Heavy Suspected */}
 			<div className="bg-linear-to-br from-red-50 to-rose-50 border-2 border-red-200 rounded-xl p-4 mb-4">
 				<h3 className="flex items-center gap-1.5 text-red-800 font-extrabold text-sm mb-1">
@@ -29,15 +29,15 @@ export function InfectionAssessmentCard({ heavy, worth }: InfectionAssessmentCar
 						<line x1="12" y1="8" x2="12" y2="12" />
 						<line x1="12" y1="16" x2="12.01" y2="16" />
 					</svg>
-					<span>Heavy Suspected</span>
+					<span>Tác nhân nghi ngờ cao</span>
 				</h3>
 				<p className="text-xs text-red-700/80 mb-3">
-					Ranked from most to least suspected - rank 1 is the most likely.
+					Được sắp xếp theo mức độ nghi ngờ từ cao xuống thấp (vị trí #1 có khả năng cao nhất).
 				</p>
 
 				{heavy.length === 0 ? (
 					<div className="text-xs italic text-slate-400 py-1">
-						No heavy suspected pathogens
+						Không ghi nhận tác nhân nghi ngờ cao
 					</div>
 				) : (
 					<div className="space-y-1">
@@ -82,7 +82,7 @@ export function InfectionAssessmentCard({ heavy, worth }: InfectionAssessmentCar
 					>
 						<polyline points="9 6 15 12 9 18" />
 					</svg>
-					<span>Worth Suspected</span>
+					<span>Tác nhân đáng lưu ý</span>
 					<span className="ml-auto rounded-full bg-slate-200 text-slate-600 px-2 py-0.5 text-xs font-extrabold">
 						{worth.length}
 					</span>
@@ -92,7 +92,7 @@ export function InfectionAssessmentCard({ heavy, worth }: InfectionAssessmentCar
 					<div className="mt-3 pt-3 border-t border-slate-200/80 space-y-1">
 						{worth.length === 0 ? (
 							<div className="text-xs italic text-slate-400 py-1">
-								No worth suspected pathogens
+								Không có tác nhân đáng lưu ý
 							</div>
 						) : (
 							worth.map((p, idx) => (
@@ -110,4 +110,3 @@ export function InfectionAssessmentCard({ heavy, worth }: InfectionAssessmentCar
 		</ResultCard>
 	);
 }
-

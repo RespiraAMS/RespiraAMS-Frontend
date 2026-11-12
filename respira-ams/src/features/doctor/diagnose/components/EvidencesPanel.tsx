@@ -11,7 +11,7 @@ function ObservationRow({ obs }: { obs: RelatedObservation }) {
 	};
 	const code = vObj.code || vObj.Code || "";
 	const name = vObj.name || vObj.Name || "";
-	const label = name && code ? `${code} - ${name}` : code || name || "Unknown";
+	const label = name && code ? `${code} - ${name}` : code || name || "Chưa xác định";
 
 	const num = o.numericValue ?? o.NumericValue;
 	const bool = o.booleanValue ?? o.BooleanValue;
@@ -21,9 +21,9 @@ function ObservationRow({ obs }: { obs: RelatedObservation }) {
 			? num
 			: bool !== undefined && bool !== null
 			? bool
-				? "true"
-				: "false"
-			: cat ?? "(no value)";
+				? "Có"
+				: "Không"
+			: cat ?? "(chưa có giá trị)";
 
 	return (
 		<div className="flex items-baseline justify-between gap-2 font-mono text-[0.75rem]">
@@ -43,7 +43,7 @@ function EvidenceItem({ evidence }: { evidence: Evidence | string }) {
 	}
 
 	const ev = evidence;
-	const source = ev.source || ev.Source || "Evidence";
+	const source = ev.source || ev.Source || "Bằng chứng";
 	const formula = ev.formula || ev.Formula;
 	const related = (ev.relatedObservations || ev.RelatedObservations || []) as RelatedObservation[];
 	const missing = (ev.missingVariables || ev.MissingVariables || []) as {
@@ -65,7 +65,7 @@ function EvidenceItem({ evidence }: { evidence: Evidence | string }) {
 			{formula && (
 				<div className="flex items-baseline justify-between gap-2">
 					<span className="font-extrabold uppercase text-[0.7rem] text-slate-400 tracking-wider shrink-0">
-						Formula
+						Công thức
 					</span>
 					<code className="font-mono text-xs bg-slate-100 border border-slate-200 rounded px-2 py-0.5 text-slate-700 break-all text-right">
 						{formula}
@@ -76,27 +76,27 @@ function EvidenceItem({ evidence }: { evidence: Evidence | string }) {
 			{(related.length > 0 || missingCodes.length > 0) && (
 				<div className="bg-slate-50 border border-dashed border-slate-200 rounded-lg p-2.5 space-y-1">
 					<div className="text-[0.7rem] font-extrabold uppercase tracking-wider text-slate-500 mb-1">
-						Variables
+						Biến số liên quan
 					</div>
 					{related.length > 0 ? (
 						related.map((obs, i) => <ObservationRow key={i} obs={obs} />)
 					) : (
-						<div className="text-slate-400 italic">(none)</div>
+						<div className="text-slate-400 italic">(không có)</div>
 					)}
 				</div>
 			)}
 
 			<div className="flex items-baseline justify-between gap-2">
 				<span className="font-extrabold uppercase text-[0.7rem] text-slate-400 tracking-wider shrink-0">
-					Value
+					Giá trị đánh giá
 				</span>
 				{missingCodes.length > 0 ? (
 					<span className="font-semibold text-amber-700 text-right">
-						not evaluated (missing {missingCodes.join(", ")})
+						Chưa đánh giá (thiếu {missingCodes.join(", ")})
 					</span>
 				) : (
 					<span className="font-bold text-slate-900 text-right">
-						{rawVal !== null && rawVal !== undefined ? String(rawVal) : "not evaluated"}
+						{rawVal !== null && rawVal !== undefined ? String(rawVal) : "Chưa đánh giá"}
 					</span>
 				)}
 			</div>
@@ -105,7 +105,7 @@ function EvidenceItem({ evidence }: { evidence: Evidence | string }) {
 				<div className="flex flex-wrap gap-1.5 pt-1">
 					{hasScore && (
 						<span className="px-2 py-0.5 rounded-full text-[0.72rem] font-extrabold bg-[#F0F9FF] text-[#0284C7]">
-							Score: {score}
+							Điểm: {score}
 						</span>
 					)}
 					{hasMajor && (
@@ -115,7 +115,7 @@ function EvidenceItem({ evidence }: { evidence: Evidence | string }) {
 								isMajor ? "bg-red-100 text-red-800" : "bg-slate-100 text-slate-600"
 							)}
 						>
-							{isMajor ? "Major criteria" : "Minor criteria"}
+							{isMajor ? "Tiêu chuẩn chính" : "Tiêu chuẩn phụ"}
 						</span>
 					)}
 				</div>
@@ -140,13 +140,13 @@ export function EvidencesPanel({ evidences, expanded, onToggle }: EvidencesPanel
 				onClick={onToggle}
 				className="w-full py-2.5 px-4 rounded-xl bg-[#F0F9FF] hover:bg-sky-100 text-[#0284C7] font-bold text-xs border border-[#BAE6FD] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
 			>
-				{expanded ? "Hide" : "View"} Evidences ({evidences.length})
+				{expanded ? "Ẩn" : "Xem"} bằng chứng lâm sàng ({evidences.length})
 			</button>
 
 			{expanded && (
 				<div className="mt-3 p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl space-y-3">
 					<h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">
-						Evidences
+						Bằng chứng lâm sàng
 					</h3>
 					<div className="space-y-2.5">
 						{evidences.map((e, i) => (
@@ -158,4 +158,3 @@ export function EvidencesPanel({ evidences, expanded, onToggle }: EvidencesPanel
 		</div>
 	);
 }
-

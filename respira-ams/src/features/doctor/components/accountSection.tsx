@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogOut, Settings, User } from "lucide-react";
-import { logout } from "@/features/auth/api";
+import { logout, getStoredUser } from "@/features/auth/api";
+import { getStoredDoctorProfile, fetchCurrentDoctorProfile } from "@/features/profile/api";
+import { getDoctorDisplayName, POSITION_LABELS, DoctorProfile } from "@/features/profile/types";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -30,14 +33,44 @@ export interface UserInfo {
 	initials: string;
 }
 
-export const MOCK_DOCTOR_USER: UserInfo = {
-	name: "BS.CKII Lê Hoàng Minh",
-	title: "Bác sĩ Chuyên khoa II",
-	department: "Hồi sức Tích cực",
-	hospital: "BV TW",
-	email: "minh.le@respira.com",
-	initials: "HM",
-};
+function buildUserInfo(profile?: DoctorProfile | null, authUser?: { name?: string; email?: string } | null): UserInfo {
+	if (profile && (profile.firstName || profile.lastName)) {
+		const name = getDoctorDisplayName(profile);
+		const initial = (profile.firstName || profile.lastName || "B").trim().charAt(0).toUpperCase();
+		const positionText = POSITION_LABELS[profile.position] || "Bác sĩ điều trị";
+		return {
+			name,
+			title: positionText,
+			department: profile.email || authUser?.email || "Respira AMS",
+			hospital: "",
+			email: profile.email || authUser?.email || "",
+			avatarUrl: profile.avatarUrl || profile.mediaUrl,
+			initials: initial,
+		};
+	}
+
+	if (authUser?.name || authUser?.email) {
+		const displayName = authUser.name || authUser.email?.split("@")[0] || "Bác sĩ";
+		const initial = displayName.charAt(0).toUpperCase();
+		return {
+			name: `BS. ${displayName}`,
+			title: "Bác sĩ",
+			department: authUser.email || "Respira AMS",
+			hospital: "",
+			email: authUser.email || "",
+			initials: initial,
+		};
+	}
+
+	return {
+		name: "Bác sĩ",
+		title: "Bác sĩ",
+		department: "Respira AMS",
+		hospital: "",
+		email: "",
+		initials: "BS",
+	};
+}
 
 export interface AccountSectionProps {
 	user?: UserInfo;
@@ -46,11 +79,71 @@ export interface AccountSectionProps {
 }
 
 export function AccountSection({
-	user = MOCK_DOCTOR_USER,
+	user: initialUser,
 	collapsed = false,
 	className,
 }: AccountSectionProps) {
 	const router = useRouter();
+	const [mounted, setMounted] = useState(false);
+
+	// Khởi tạo đồng nhất trên SSR và Client để ngăn lỗi Hydration Mismatch
+	const [currentUserInfo, setCurrentUserInfo] = useState<UserInfo>(() => {
+		if (initialUser) return initialUser;
+		return buildUserInfo(null, null);
+	});
+
+	const applyDoctorProfile = useCallback((profile: DoctorProfile) => {
+		const storedUser = getStoredUser();
+		const info = buildUserInfo(profile, storedUser);
+		setCurrentUserInfo(info);
+	}, []);
+
+	// Đồng bộ thông tin cá nhân từ Backend sau khi client đã mount
+	useEffect(() => {
+		setMounted(true);
+
+		// 1. Kiểm tra cache có sẵn
+		const cached = getStoredDoctorProfile();
+		const storedUser = getStoredUser();
+		if (cached && (cached.firstName || cached.lastName)) {
+			applyDoctorProfile(cached);
+		} else if (storedUser) {
+			setCurrentUserInfo(buildUserInfo(null, storedUser));
+		}
+
+		// 2. Luôn chủ động fetch mới nhất từ backend
+		fetchCurrentDoctorProfile()
+			.then((latest) => {
+				if (latest && (latest.firstName || latest.lastName)) {
+					applyDoctorProfile(latest);
+				}
+			})
+			.catch((err) => {
+				console.warn("[AccountSection] Could not sync doctor profile:", err);
+			});
+
+		// 3. Lắng nghe event phát ra khi profile thay đổi hoặc lưu
+		const handleProfileUpdate = (e: Event) => {
+			const customEvent = e as CustomEvent<DoctorProfile>;
+			if (customEvent.detail) {
+				applyDoctorProfile(customEvent.detail);
+			} else {
+				const updated = getStoredDoctorProfile();
+				if (updated) applyDoctorProfile(updated);
+			}
+		};
+
+		window.addEventListener("respira:profile-updated", handleProfileUpdate);
+		window.addEventListener("storage", handleProfileUpdate);
+
+		return () => {
+			window.removeEventListener("respira:profile-updated", handleProfileUpdate);
+			window.removeEventListener("storage", handleProfileUpdate);
+		};
+	}, [applyDoctorProfile]);
+
+	const user = currentUserInfo;
+	const activeAvatarUrl = mounted ? user.avatarUrl : undefined;
 
 	const handleLogout = async (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -71,10 +164,19 @@ export function AccountSection({
 							<DropdownMenuTrigger asChild>
 								<button
 									type="button"
-									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] hover:ring-2 hover:ring-sky-300 transition-all mx-auto cursor-pointer"
+									suppressHydrationWarning
+									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] hover:ring-2 hover:ring-sky-300 transition-all mx-auto cursor-pointer overflow-hidden"
 									id="doctor-account-trigger-collapsed"
 								>
-									<span>{user.initials}</span>
+									{activeAvatarUrl ? (
+										<img
+											src={activeAvatarUrl}
+											alt={user.name}
+											className="h-full w-full object-cover"
+										/>
+									) : (
+										<span suppressHydrationWarning>{user.initials}</span>
+									)}
 									<span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-[#22C55E] ring-2 ring-white" />
 								</button>
 							</DropdownMenuTrigger>
@@ -82,7 +184,7 @@ export function AccountSection({
 						<TooltipContent side="right">
 							<p className="font-semibold text-xs">{user.name}</p>
 							<p className="text-[10px] text-muted-foreground">
-								{user.department} - {user.hospital}
+								{user.title} {user.email ? `• ${user.email}` : ""}
 							</p>
 						</TooltipContent>
 					</Tooltip>
@@ -93,13 +195,13 @@ export function AccountSection({
 						<div className="flex flex-col gap-0.5">
 							<p className="text-xs font-semibold">{user.name}</p>
 							<p className="text-[10px] text-muted-foreground">
-								{user.department} - {user.hospital}
+								{user.title} {user.email ? `• ${user.email}` : ""}
 							</p>
 						</div>
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem asChild>
-						<Link href="/profile" className="flex items-center gap-2 cursor-pointer text-xs">
+						<Link href="/doctor/profile" className="flex items-center gap-2 cursor-pointer text-xs">
 							<User className="h-3.5 w-3.5" />
 							Thông tin cá nhân
 						</Link>
@@ -135,25 +237,43 @@ export function AccountSection({
 				<DropdownMenuTrigger asChild>
 					<button
 						type="button"
+						suppressHydrationWarning
 						className="flex items-center gap-2 min-w-0 text-left flex-1 cursor-pointer focus:outline-hidden"
 						id="doctor-account-trigger"
 					>
 						{/* Avatar Circle with Online Dot */}
-						<div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] select-none">
-							<span>{user.initials}</span>
+						<div
+							suppressHydrationWarning
+							className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] select-none overflow-hidden"
+						>
+							{activeAvatarUrl ? (
+								<img
+									src={activeAvatarUrl}
+									alt={user.name}
+									className="h-full w-full object-cover"
+								/>
+							) : (
+								<span suppressHydrationWarning>{user.initials}</span>
+							)}
 							<span
 								className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-[#22C55E] ring-2 ring-white"
 								title="Đang trực tuyến"
 							/>
 						</div>
 
-						{/* Doctor Name and Department */}
-						<div className="min-w-0 flex-1">
-							<p className="truncate text-[11.5px] font-bold text-slate-800 leading-tight">
+						{/* Doctor Name and Position */}
+						<div className="min-w-0 flex-1" suppressHydrationWarning>
+							<p
+								suppressHydrationWarning
+								className="truncate text-[11.5px] font-bold text-slate-800 leading-tight"
+							>
 								{user.name}
 							</p>
-							<p className="truncate text-[9.5px] text-slate-400 font-medium leading-tight mt-0.5">
-								{user.department} - {user.hospital}
+							<p
+								suppressHydrationWarning
+								className="truncate text-[9.5px] text-slate-400 font-medium leading-tight mt-0.5"
+							>
+								{user.title} {user.email ? `• ${user.email}` : ""}
 							</p>
 						</div>
 					</button>
@@ -177,13 +297,13 @@ export function AccountSection({
 					<div className="flex flex-col gap-0.5">
 						<p className="text-xs font-semibold text-slate-900">{user.name}</p>
 						<p className="text-[10px] text-muted-foreground">
-							{user.department} - {user.hospital}
+							{user.title} {user.email ? `• ${user.email}` : ""}
 						</p>
 					</div>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem asChild>
-					<Link href="/profile" className="flex items-center gap-2 cursor-pointer text-xs">
+					<Link href="/doctor/profile" className="flex items-center gap-2 cursor-pointer text-xs">
 						<User className="h-3.5 w-3.5" />
 						Thông tin cá nhân
 					</Link>

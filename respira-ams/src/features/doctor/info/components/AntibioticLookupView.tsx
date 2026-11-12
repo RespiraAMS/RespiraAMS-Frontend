@@ -1,85 +1,60 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft, Info, Loader2, RefreshCw, Search, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Info, Loader2, Search, X } from "lucide-react";
+import { toast } from "sonner";
 import { PagedAntibioticItem, PaginationMetadata } from "../types";
 import {
 	fetchAntibiotics,
 	searchAntibiotics,
 } from "../services/antibioticApi";
-import { FALLBACK_ANTIBIOTICS } from "../mockData";
 import { AwareBadge } from "./AwareBadge";
+import { AntibioticDetailDialog } from "./AntibioticDetailDialog";
 
 const PAGE_SIZE = 8;
 
 export function AntibioticLookupView() {
 	const [query, setQuery] = useState("");
+	const [debouncedQuery, setDebouncedQuery] = useState("");
 	const [page, setPage] = useState(1);
-	const [items, setItems] = useState<PagedAntibioticItem[]>(() =>
-		FALLBACK_ANTIBIOTICS.slice(0, PAGE_SIZE).map((a) => ({
-			id: a.id,
-			name: a.name,
-			classification: a.classification,
-			antibioticGroup: a.antibioticGroup,
-		}))
-	);
-	const [metadata, setMetadata] = useState<PaginationMetadata | null>(() => ({
-		totalItemCount: FALLBACK_ANTIBIOTICS.length,
-		pageCount: Math.ceil(FALLBACK_ANTIBIOTICS.length / PAGE_SIZE),
-		currentPage: 1,
-		pageSize: PAGE_SIZE,
-		hasNextPage: FALLBACK_ANTIBIOTICS.length > PAGE_SIZE,
-		hasPreviousPage: false,
-	}));
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	const [selectedId, setSelectedId] = useState<string | null>(null);
 
 	const inputRef = useRef<HTMLInputElement>(null);
-	const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-	// Load data from API
-	const loadData = useCallback(async (searchTerm: string, pageNum: number) => {
-		setLoading(true);
-		setError(null);
-		try {
-			const res = searchTerm.trim()
-				? await searchAntibiotics({
-						searchTerm: searchTerm.trim(),
-						page: pageNum,
+	// Debounce query
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedQuery(query.trim());
+			setPage(1);
+		}, 250);
+		return () => clearTimeout(timer);
+	}, [query]);
+
+	const {
+		data,
+		isLoading: loading,
+		isError,
+	} = useQuery({
+		queryKey: ["antibiotics", "list", { page, query: debouncedQuery }],
+		queryFn: () =>
+			debouncedQuery
+				? searchAntibiotics({
+						searchTerm: debouncedQuery,
+						page,
 						size: PAGE_SIZE,
 				  })
-				: await fetchAntibiotics({
-						page: pageNum,
+				: fetchAntibiotics({
+						page,
 						size: PAGE_SIZE,
-				  });
+				  }),
+	});
 
-			setItems(res.items || []);
-			setMetadata(res.metadata);
-		} catch (err) {
-			console.error("[AntibioticLookupView] Lỗi tải danh sách kháng sinh:", err);
-			setError("Không thể tải danh mục kháng sinh từ máy chủ. Vui lòng thử lại.");
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	// Debounce search input and handle page changes
-	useEffect(() => {
-		if (debounceTimerRef.current) {
-			clearTimeout(debounceTimerRef.current);
-		}
-
-		debounceTimerRef.current = setTimeout(() => {
-			loadData(query, page);
-		}, 300);
-
-		return () => {
-			if (debounceTimerRef.current) {
-				clearTimeout(debounceTimerRef.current);
-			}
-		};
-	}, [query, page, loadData]);
+	const items = data?.items || [];
+	const metadata = data?.metadata || null;
+	const error = isError
+		? "Không thể tải danh mục kháng sinh từ máy chủ. Vui lòng thử lại."
+		: null;
 
 	// Shortcut Ctrl/Cmd + K
 	useEffect(() => {
@@ -98,28 +73,6 @@ export function AntibioticLookupView() {
 
 	return (
 		<div className="min-h-full bg-[#F8FAFC] p-6 lg:p-8 space-y-5">
-			{/* Breadcrumb / Back Navigation */}
-			<div className="flex items-center justify-between">
-				<Link
-					href="/doctor/info"
-					className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#0EA5E9] hover:text-[#25B4F8] transition-colors"
-				>
-					<ArrowLeft className="h-4 w-4" />
-					<span>Tra cứu kháng sinh & liều dùng</span>
-				</Link>
-
-				<button
-					type="button"
-					onClick={() => loadData(query, page)}
-					disabled={loading}
-					className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium text-slate-600 bg-white border border-slate-200/70 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-					title="Làm mới dữ liệu"
-				>
-					<RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin text-[#0EA5E9]" : "text-slate-400"}`} />
-					<span>{loading ? "Đang tải..." : "Làm mới"}</span>
-				</button>
-			</div>
-
 			{/* Search Bar */}
 			<div
 				style={{ borderRadius: "14px" }}
@@ -160,20 +113,6 @@ export function AntibioticLookupView() {
 					</span>
 				</div>
 			</div>
-
-			{/* Error Alert */}
-			{error && (
-				<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[12px] flex items-center justify-between text-xs">
-					<span>{error}</span>
-					<button
-						type="button"
-						onClick={() => loadData(query, page)}
-						className="font-bold underline ml-3 cursor-pointer hover:text-red-900"
-					>
-						Thử lại
-					</button>
-				</div>
-			)}
 
 			{/* Table Card */}
 			<div
@@ -224,12 +163,13 @@ export function AntibioticLookupView() {
 										className="hover:bg-slate-50/60 transition-colors"
 									>
 										<td className="px-6 py-3.5">
-											<Link
-												href={`/doctor/info/${a.id}`}
-												className="font-bold text-slate-800 text-[13.5px] hover:text-[#0EA5E9] transition-colors"
+											<button
+												type="button"
+												onClick={() => setSelectedId(a.id)}
+												className="font-bold text-slate-800 text-[13.5px] hover:text-[#0EA5E9] transition-colors cursor-pointer text-left"
 											>
 												{a.name}
-											</Link>
+											</button>
 										</td>
 										<td className="px-6 py-3.5 text-center text-slate-600 font-medium text-[13px]">
 											{a.antibioticGroup?.name || "Chưa phân nhóm"}
@@ -238,14 +178,15 @@ export function AntibioticLookupView() {
 											<AwareBadge value={a.classification} />
 										</td>
 										<td className="px-6 py-3.5 text-right">
-											<Link
-												href={`/doctor/info/${a.id}`}
+											<button
+												type="button"
+												onClick={() => setSelectedId(a.id)}
 												title="Xem chi tiết & liều dùng"
 												style={{ borderRadius: "6px" }}
-												className="inline-flex p-1.5 text-slate-500 hover:text-[#0EA5E9] hover:bg-sky-50 transition-colors"
+												className="inline-flex p-1.5 text-slate-500 hover:text-[#0EA5E9] hover:bg-sky-50 transition-colors cursor-pointer"
 											>
 												<Info className="h-[18px] w-[18px]" />
-											</Link>
+											</button>
 										</td>
 									</tr>
 								))
@@ -297,6 +238,13 @@ export function AntibioticLookupView() {
 					</div>
 				</div>
 			</div>
+
+			<AntibioticDetailDialog
+				antibioticId={selectedId}
+				onOpenChange={(open) => {
+					if (!open) setSelectedId(null);
+				}}
+			/>
 		</div>
 	);
 }

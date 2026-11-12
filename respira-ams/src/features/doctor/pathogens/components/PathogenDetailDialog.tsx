@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
 	Dialog,
 	DialogContent,
@@ -54,41 +54,31 @@ export function PathogenDetailDialog({
 	open,
 	onOpenChange,
 }: PathogenDetailDialogProps) {
-	const [causes, setCauses] = useState<SuspectedCauseDto[]>([]);
-	const [riskFactors, setRiskFactors] = useState<RiskFactorDto[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [loadError, setLoadError] = useState<string | null>(null);
-
 	const pathogenId = pathogen?.id;
 
-	useEffect(() => {
-		if (!open || !pathogenId) return;
-		let cancelled = false;
-		setIsLoading(true);
-		setLoadError(null);
-		setCauses([]);
-		setRiskFactors([]);
+	const {
+		data,
+		isLoading,
+		error: queryErr,
+	} = useQuery({
+		queryKey: ["pathogens", "detail", pathogenId],
+		queryFn: async () => {
+			const [c, r] = await Promise.all([
+				fetchSuspectedCauses(pathogenId!),
+				fetchRiskFactors(pathogenId!),
+			]);
+			return { causes: c, riskFactors: r };
+		},
+		enabled: open && !!pathogenId,
+	});
 
-		Promise.all([fetchSuspectedCauses(pathogenId), fetchRiskFactors(pathogenId)])
-			.then(([c, r]) => {
-				if (cancelled) return;
-				setCauses(c);
-				setRiskFactors(r);
-			})
-			.catch((err) => {
-				if (cancelled) return;
-				setLoadError(
-					err instanceof Error ? err.message : "Không thể tải thông tin chi tiết."
-				);
-			})
-			.finally(() => {
-				if (!cancelled) setIsLoading(false);
-			});
-
-		return () => {
-			cancelled = true;
-		};
-	}, [open, pathogenId]);
+	const causes = data?.causes ?? [];
+	const riskFactors = data?.riskFactors ?? [];
+	const loadError = queryErr
+		? queryErr instanceof Error
+			? queryErr.message
+			: "Không thể tải thông tin chi tiết."
+		: null;
 
 	if (!pathogen) return null;
 
@@ -118,6 +108,9 @@ export function PathogenDetailDialog({
 							</div>
 							<p className="text-[11px] text-slate-400 mt-0.5">
 								Chi tiết tác nhân vi sinh
+							</p>
+							<p className="text-[10.5px] text-slate-400 font-mono mt-0.5 break-all">
+								Mã: {pathogen.id}
 							</p>
 						</div>
 					</div>
@@ -188,9 +181,16 @@ export function PathogenDetailDialog({
 										style={{ borderRadius: "10px" }}
 										className="border border-slate-100 bg-[#F8FAFC] rounded-[10px] px-3 py-2"
 									>
-										<p className="text-xs font-semibold text-slate-800">
-											{factor.criterion.name}
-										</p>
+										<div className="flex items-start justify-between gap-2">
+											<p className="text-xs font-semibold text-slate-800">
+												{factor.criterion.name}
+											</p>
+											{factor.isCriticalFactor && (
+												<span className="shrink-0 inline-flex items-center rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[10.5px] font-semibold">
+													Yếu tố quan trọng
+												</span>
+											)}
+										</div>
 										<p className="text-[11px] text-slate-500 font-mono mt-0.5 break-all">
 											{factor.criterion.formula}
 										</p>

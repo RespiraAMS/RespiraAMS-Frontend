@@ -16,7 +16,7 @@ export function DiagnoseErrorModal({ state, onClose }: DiagnoseErrorModalProps) 
 	return (
 		<div
 			className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150"
-			onClick={(e) => {
+			onMouseDown={(e) => {
 				if (e.target === e.currentTarget) onClose();
 			}}
 		>
@@ -57,11 +57,10 @@ export function DiagnoseErrorModal({ state, onClose }: DiagnoseErrorModalProps) 
 						onClick={onClose}
 						className="px-6 py-2 rounded-lg bg-[#0EA5E9] hover:bg-[#0284C7] text-white font-bold text-sm shadow-sm transition-colors cursor-pointer"
 					>
-						OK
+						Đã hiểu
 					</button>
 				</div>
 			</div>
 		</div>
 	);
 }
-

@@ -17,12 +17,11 @@ export function DiagnoseHeader() {
 				</svg>
 			</div>
 			<h1 className="text-2xl sm:text-[1.6rem] font-extrabold tracking-tight text-slate-900">
-				Respira Empirical Diagnosis
+				Chẩn đoán kinh nghiệm Respira
 			</h1>
 			<p className="text-slate-500 text-sm mt-1">
-				Fill in clinical observations to generate a diagnosis
+				Nhập các chỉ số lâm sàng và cận lâm sàng để đánh giá mức độ nặng và dự đoán tác nhân gây bệnh
 			</p>
 		</header>
 	);
 }
-

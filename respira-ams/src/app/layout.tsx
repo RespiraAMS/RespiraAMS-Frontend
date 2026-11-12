@@ -38,7 +38,7 @@ export default async function RootLayout({
           <NextIntlClientProvider messages={messages}>
             <QueryProvider>
                     {children}
-                    <Toaster richColors position="top-right" />
+                    <Toaster richColors position="top-center" duration={3000} closeButton />
             </QueryProvider>
           </NextIntlClientProvider>
         </ThemeProvider>

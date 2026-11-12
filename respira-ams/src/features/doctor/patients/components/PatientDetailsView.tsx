@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, RefreshCw, TrendingUp, Check, Users } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Patient, PatientStatus } from "../types";
 import { dischargePatient, fetchPatientById, STATUS_TO_OUTCOME } from "../api";
 import { PatientStatusBadge } from "./PatientStatusBadge";
@@ -77,9 +78,7 @@ function buildTimeline(patient: Patient): Milestone[] {
 }
 
 export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
-	const [patient, setPatient] = useState<Patient | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [loadError, setLoadError] = useState<string | null>(null);
+	const queryClient = useQueryClient();
 
 	// Quick modal for "Cập nhật trạng thái" (discharge)
 	const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
@@ -87,24 +86,20 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 	const [statusError, setStatusError] = useState<string | null>(null);
 	const [isSavingStatus, setIsSavingStatus] = useState(false);
 
-	const load = useCallback(async () => {
-		setIsLoading(true);
-		setLoadError(null);
-		try {
-			setPatient(await fetchPatientById(patientId));
-		} catch (err) {
-			setLoadError(
-				err instanceof Error ? err.message : "Không thể tải hồ sơ bệnh nhân."
-			);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [patientId]);
+	const {
+		data: patient,
+		isLoading,
+		error: queryErr,
+	} = useQuery({
+		queryKey: ["patients", "detail", patientId],
+		queryFn: () => fetchPatientById(patientId),
+	});
 
-	useEffect(() => {
-		// eslint-disable-next-line react-hooks/set-state-in-effect
-		void load();
-	}, [load]);
+	const loadError = queryErr
+		? queryErr instanceof Error
+			? queryErr.message
+			: "Không thể tải hồ sơ bệnh nhân."
+		: null;
 
 	const handleUpdateStatus = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -113,7 +108,7 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 		try {
 			await dischargePatient(patientId, STATUS_TO_OUTCOME[statusValue]);
 			setIsStatusDialogOpen(false);
-			await load();
+			await queryClient.invalidateQueries({ queryKey: ["patients"] });
 		} catch (err) {
 			setStatusError(
 				err instanceof Error ? err.message : "Không thể cập nhật trạng thái."

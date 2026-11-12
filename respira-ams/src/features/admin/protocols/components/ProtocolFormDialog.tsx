@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +40,7 @@ export function ProtocolFormDialog({
 	const isEdit = !!editingItem;
 	const [values, setValues] = useState<ProtocolFormValues>(EMPTY);
 	const [errors, setErrors] = useState<Partial<Record<keyof ProtocolFormValues, string>>>({});
+	const [touched, setTouched] = useState<Partial<Record<keyof ProtocolFormValues, boolean>>>({});
 
 	useEffect(() => {
 		if (!open) return;
@@ -56,21 +57,90 @@ export function ProtocolFormDialog({
 				: EMPTY
 		);
 		setErrors({});
+		setTouched({});
 	}, [open, editingItem]);
 
-	const set = <K extends keyof ProtocolFormValues>(key: K, value: ProtocolFormValues[K]) =>
+	const validateField = (key: keyof ProtocolFormValues, val: any): string | null => {
+		const str = typeof val === "string" ? val.trim() : "";
+		switch (key) {
+			case "name":
+				if (!str) return "Tên phác đồ là bắt buộc.";
+				return null;
+			case "code":
+				if (!isEdit && !str) return "Mã phác đồ là bắt buộc.";
+				return null;
+			case "version":
+				if (!str) return "Phiên bản là bắt buộc.";
+				return null;
+			case "publisher":
+				if (!str) return "Đơn vị ban hành là bắt buộc.";
+				return null;
+			case "description":
+				if (!str) return "Mô tả là bắt buộc.";
+				return null;
+			default:
+				return null;
+		}
+	};
+
+	const handleBlur = (key: keyof ProtocolFormValues, val: any) => {
+		setTouched((prev) => ({ ...prev, [key]: true }));
+		const err = validateField(key, val);
+		setErrors((prev) => {
+			const next = { ...prev };
+			if (err) next[key] = err;
+			else delete next[key];
+			return next;
+		});
+	};
+
+	const set = <K extends keyof ProtocolFormValues>(key: K, value: ProtocolFormValues[K]) => {
 		setValues((prev) => ({ ...prev, [key]: value }));
+		if (touched[key]) {
+			const err = validateField(key, value);
+			setErrors((prev) => {
+				const next = { ...prev };
+				if (err) next[key] = err;
+				else delete next[key];
+				return next;
+			});
+		}
+	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
+		const fields: { key: keyof ProtocolFormValues; id: string }[] = [
+			{ key: "name", id: "pr-name" },
+			{ key: "code", id: "pr-code" },
+			{ key: "version", id: "pr-version" },
+			{ key: "publisher", id: "pr-publisher" },
+			{ key: "description", id: "pr-desc" },
+		];
+
 		const next: typeof errors = {};
-		if (!values.name.trim()) next.name = "Tên phác đồ là bắt buộc";
-		if (!isEdit && !values.code.trim()) next.code = "Mã phác đồ là bắt buộc";
-		if (!values.description.trim()) next.description = "Mô tả là bắt buộc";
-		if (!values.version.trim()) next.version = "Phiên bản là bắt buộc";
-		if (!values.publisher.trim()) next.publisher = "Đơn vị ban hành là bắt buộc";
+		const allTouched: typeof touched = { ...touched };
+		let firstInvalidId: string | null = null;
+
+		for (const f of fields) {
+			allTouched[f.key] = true;
+			const err = validateField(f.key, values[f.key]);
+			if (err) {
+				next[f.key] = err;
+				if (!firstInvalidId) firstInvalidId = f.id;
+			}
+		}
+
+		setTouched(allTouched);
 		setErrors(next);
-		if (Object.keys(next).length > 0) return;
+
+		if (firstInvalidId) {
+			const targetEl = document.getElementById(firstInvalidId);
+			if (targetEl) {
+				targetEl.focus();
+				targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+			}
+			return;
+		}
 
 		onSubmit({
 			name: values.name.trim(),
@@ -83,7 +153,13 @@ export function ProtocolFormDialog({
 	};
 
 	const err = (key: keyof ProtocolFormValues) =>
-		errors[key] && <p className="text-[11px] font-semibold text-red-500 mt-1">{errors[key]}</p>;
+		touched[key] &&
+		errors[key] && (
+			<p className="text-[11px] font-semibold text-red-500 mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+				<AlertCircle className="w-3.5 h-3.5 shrink-0" />
+				<span>{errors[key]}</span>
+			</p>
+		);
 
 	return (
 		<Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -99,7 +175,7 @@ export function ProtocolFormDialog({
 					</DialogDescription>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit} className="space-y-4 pt-4">
+				<form onSubmit={handleSubmit} noValidate className="space-y-4 pt-4">
 					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
 						<div className="sm:col-span-2">
 							<Label htmlFor="pr-name" className="text-xs font-semibold">
@@ -109,8 +185,11 @@ export function ProtocolFormDialog({
 								id="pr-name"
 								value={values.name}
 								onChange={(e) => set("name", e.target.value)}
+								onBlur={() => handleBlur("name", values.name)}
 								placeholder="CURB-65"
-								className="mt-1 h-9 text-sm"
+								className={`mt-1 h-9 text-sm ${
+									touched.name && errors.name ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+								}`}
 							/>
 							{err("name")}
 						</div>
@@ -123,9 +202,12 @@ export function ProtocolFormDialog({
 								id="pr-code"
 								value={values.code}
 								onChange={(e) => set("code", e.target.value)}
+								onBlur={() => handleBlur("code", values.code)}
 								disabled={isEdit}
 								placeholder="CURB65"
-								className="mt-1 h-9 text-sm font-mono"
+								className={`mt-1 h-9 text-sm font-mono ${
+									touched.code && errors.code ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+								}`}
 							/>
 							{err("code")}
 						</div>
@@ -138,8 +220,11 @@ export function ProtocolFormDialog({
 								id="pr-version"
 								value={values.version}
 								onChange={(e) => set("version", e.target.value)}
+								onBlur={() => handleBlur("version", values.version)}
 								placeholder="1.0"
-								className="mt-1 h-9 text-sm"
+								className={`mt-1 h-9 text-sm ${
+									touched.version && errors.version ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+								}`}
 							/>
 							{err("version")}
 						</div>
@@ -152,8 +237,11 @@ export function ProtocolFormDialog({
 								id="pr-publisher"
 								value={values.publisher}
 								onChange={(e) => set("publisher", e.target.value)}
+								onBlur={() => handleBlur("publisher", values.publisher)}
 								placeholder="British Thoracic Society"
-								className="mt-1 h-9 text-sm"
+								className={`mt-1 h-9 text-sm ${
+									touched.publisher && errors.publisher ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+								}`}
 							/>
 							{err("publisher")}
 						</div>
@@ -166,9 +254,12 @@ export function ProtocolFormDialog({
 								id="pr-desc"
 								value={values.description}
 								onChange={(e) => set("description", e.target.value)}
+								onBlur={() => handleBlur("description", values.description)}
 								rows={4}
 								placeholder="Thang điểm đánh giá mức độ nặng viêm phổi cộng đồng..."
-								className="mt-1 text-sm"
+								className={`mt-1 text-sm ${
+									touched.description && errors.description ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
+								}`}
 							/>
 							{err("description")}
 						</div>

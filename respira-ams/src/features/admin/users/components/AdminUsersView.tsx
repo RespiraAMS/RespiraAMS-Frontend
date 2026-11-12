@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Users } from "lucide-react";
+import { toast } from "sonner";
 import { UserStatsCards } from "./UserStatsCards";
 import { UserSearchBar } from "./UserSearchBar";
 import { UsersTable } from "./UsersTable";
@@ -21,21 +23,10 @@ import {
 	fetchUsers,
 	toggleUserStatus,
 	updateUser,
-	INITIAL_USERS,
 } from "../api";
 
 export function AdminUsersView() {
-	const [users, setUsers] = useState<UserItem[]>(() => INITIAL_USERS.slice(0, 10));
-	const [total, setTotal] = useState(() => INITIAL_USERS.length);
-	const [stats, setStats] = useState<UserStats>(() => ({
-		total: INITIAL_USERS.length,
-		doctors: INITIAL_USERS.filter((u) => u.role === "Doctor").length,
-		managers: INITIAL_USERS.filter((u) => u.role === "Manager").length,
-		admins: INITIAL_USERS.filter((u) => u.role === "Admin").length,
-		active: INITIAL_USERS.filter((u) => u.status === "Active").length,
-		inactive: INITIAL_USERS.filter((u) => u.status === "Inactive").length,
-	}));
-	const [isLoading, setIsLoading] = useState(false);
+	const queryClient = useQueryClient();
 
 	const [filters, setFilters] = useState<UserFilters>({
 		search: "",
@@ -52,6 +43,35 @@ export function AdminUsersView() {
 		return () => clearTimeout(timer);
 	}, [filters.search]);
 
+	const {
+		data,
+		isLoading,
+		refetch,
+	} = useQuery({
+		queryKey: [
+			"admin",
+			"users",
+			{ search: debouncedSearch, role: filters.role, status: filters.status },
+		],
+		queryFn: () =>
+			fetchUsers({
+				search: debouncedSearch,
+				role: filters.role,
+				status: filters.status,
+			}),
+	});
+
+	const users = data?.items || [];
+	const total = data?.total || 0;
+	const stats: UserStats = data?.stats || {
+		total: 0,
+		doctors: 0,
+		managers: 0,
+		admins: 0,
+		active: 0,
+		inactive: 0,
+	};
+
 	// Dialog states
 	const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
 	const [editingUser, setEditingUser] = useState<UserItem | null>(null);
@@ -64,49 +84,23 @@ export function AdminUsersView() {
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	// Notification banner
-	const [notice, setNotice] = useState<{ message: string; type: "success" | "error" } | null>(
-		null
-	);
-
 	const showNotice = (message: string, type: "success" | "error" = "success") => {
-		setNotice({ message, type });
-		setTimeout(() => setNotice(null), 4000);
+		if (type === "success") {
+			toast.success(message);
+		} else {
+			toast.error(message);
+		}
 	};
-
-	const loadData = useCallback(async () => {
-		if (users.length === 0) {
-			setIsLoading(true);
-		}
-		try {
-			const activeFilters: UserFilters = {
-				...filters,
-				search: debouncedSearch,
-			};
-			const res = await fetchUsers(activeFilters);
-			setUsers(res.items);
-			setTotal(res.total);
-			setStats(res.stats);
-		} catch (error) {
-			console.error("Failed to load users:", error);
-			showNotice("Không thể tải danh sách người dùng", "error");
-		} finally {
-			setIsLoading(false);
-		}
-	}, [debouncedSearch, filters, users.length]);
-
-	useEffect(() => {
-		loadData();
-	}, [loadData]);
 
 	// Create user
 	const handleCreateUser = async (payload: CreateUserPayload) => {
 		setIsSubmittingForm(true);
 		try {
-			const res = await createUser(payload);
+			await createUser(payload);
 			setIsFormDialogOpen(false);
 			showNotice(`Đã tạo tài khoản thành công cho ${payload.lastName} ${payload.firstName}`);
-			await loadData();
+			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error creating user:", error);
 			showNotice(error instanceof Error ? error.message : "Tạo người dùng thất bại", "error");
@@ -123,7 +117,8 @@ export function AdminUsersView() {
 			setIsFormDialogOpen(false);
 			setEditingUser(null);
 			showNotice(`Đã cập nhật hồ sơ thành công`);
-			await loadData();
+			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error updating user:", error);
 			showNotice(error instanceof Error ? error.message : "Cập nhật người dùng thất bại", "error");
@@ -139,8 +134,9 @@ export function AdminUsersView() {
 			await deleteUser(user.id, user.doctorId, user.mediaId);
 			setIsDeleteOpen(false);
 			setDeleteTargetUser(null);
-			showNotice(`Đã xóa người dùng ${user.lastName} ${user.firstName}`);
-			await loadData();
+			showNotice(`Đã xóa mềm người dùng ${user.lastName} ${user.firstName}`);
+			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error deleting user:", error);
 			showNotice(error instanceof Error ? error.message : "Xóa người dùng thất bại", "error");
@@ -152,11 +148,12 @@ export function AdminUsersView() {
 	// Toggle status
 	const handleToggleStatus = async (user: UserItem) => {
 		try {
-			const updated = await toggleUserStatus(user.id);
+			const updated = await toggleUserStatus(user.id, user);
 			showNotice(
-				`Đã ${updated.status === "Active" ? "kích hoạt" : "khóa"} tài khoản ${user.email}`
+				`Đã ${updated.status === "Active" ? "mở khóa" : "khóa"} tài khoản ${user.lastName} ${user.firstName} (${user.email})`
 			);
-			await loadData();
+			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error toggling status:", error);
 			showNotice("Không thể thay đổi trạng thái tài khoản", "error");
@@ -182,26 +179,6 @@ export function AdminUsersView() {
 				</div>
 			</div>
 
-			{/* Notice banner */}
-			{notice && (
-				<div
-					className={`p-3.5 rounded-xl border text-xs font-semibold flex items-center justify-between animate-in fade-in duration-200 ${
-						notice.type === "success"
-							? "bg-emerald-50 border-emerald-200 text-emerald-800"
-							: "bg-red-50 border-red-200 text-red-800"
-					}`}
-				>
-					<span>{notice.message}</span>
-					<button
-						type="button"
-						onClick={() => setNotice(null)}
-						className="text-xs opacity-70 hover:opacity-100"
-					>
-						&times;
-					</button>
-				</div>
-			)}
-
 			{/* Stats Cards */}
 			<UserStatsCards stats={stats} />
 
@@ -213,7 +190,6 @@ export function AdminUsersView() {
 					setEditingUser(null);
 					setIsFormDialogOpen(true);
 				}}
-				onRefresh={loadData}
 				isLoading={isLoading}
 			/>
 

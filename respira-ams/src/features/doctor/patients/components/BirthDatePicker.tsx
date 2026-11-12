@@ -12,16 +12,20 @@ interface BirthDatePickerProps {
 	id?: string;
 	value: string;
 	onChange: (dateStr: string) => void;
+	onBlur?: () => void;
 	placeholder?: string;
 	required?: boolean;
+	hasError?: boolean;
 }
 
 export function BirthDatePicker({
 	id = "patient-dob",
 	value,
 	onChange,
+	onBlur,
 	placeholder = "12/08/1970",
 	required = false,
+	hasError = false,
 }: BirthDatePickerProps) {
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -127,9 +131,14 @@ export function BirthDatePicker({
 						type="text"
 						value={value}
 						onChange={(e) => onChange(e.target.value)}
+						onBlur={onBlur}
 						placeholder={placeholder}
 						required={required}
-						className="w-full h-10 pl-3.5 pr-10 bg-[#F6F8FA] border border-transparent focus:border-[#0EA5E9] focus:bg-white rounded-[10px] text-xs font-medium text-slate-800 placeholder:text-slate-400 outline-none transition-all"
+						className={`w-full h-10 pl-3.5 pr-10 bg-[#F8FAFC] border rounded-[10px] text-xs font-medium text-slate-800 placeholder:text-slate-400 outline-none transition-all shadow-2xs ${
+							hasError
+								? "border-red-400 focus:border-red-500 bg-red-50/20"
+								: "border-slate-200/80 focus:border-[#0EA5E9] focus:bg-white"
+						}`}
 					/>
 					<button
 						type="button"

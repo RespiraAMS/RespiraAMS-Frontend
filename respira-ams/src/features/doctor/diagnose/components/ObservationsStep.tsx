@@ -52,7 +52,7 @@ export function ObservationsStep({
 					<span className="h-6 w-6 rounded-full bg-[#0EA5E9] text-white flex items-center justify-center text-xs font-extrabold shrink-0">
 						1
 					</span>
-					Clinical Observations
+					Chỉ số & Triệu chứng lâm sàng
 				</h2>
 
 				<div className="space-y-6">
@@ -91,9 +91,8 @@ export function ObservationsStep({
 				onClick={onNext}
 				className="w-full py-3.5 px-6 rounded-xl bg-[#0EA5E9] hover:bg-[#0284C7] text-white font-bold text-sm shadow-[0_4px_12px_rgba(14,165,233,0.25)] transition-all cursor-pointer"
 			>
-				Next: Antibiotic Allergies
+				Tiếp tục: Tiền sử dị ứng kháng sinh
 			</button>
 		</section>
 	);
 }
-
