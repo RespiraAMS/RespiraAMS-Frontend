@@ -73,7 +73,7 @@ export async function fetchPagedAntibioticGroups(params: {
 			};
 		}
 	} catch (err) {
-		console.warn("[AntibioticGroupsAPI] Backend unavailable, using fallback:", err);
+		console.warn("[AntibioticGroupsAPI] Backend unavailable, using fallback:", err instanceof Error ? err.message : String(err));
 	}
 
 	const start = (params.page - 1) * params.size;

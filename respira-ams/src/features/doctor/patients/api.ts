@@ -246,7 +246,7 @@ export async function fetchPatients(params: {
 			return mapPage(data);
 		}
 	} catch (err) {
-		console.warn("[PatientsAPI] Backend unavailable, using cached patients:", err);
+		console.warn("[PatientsAPI] Backend unavailable, using cached patients:", err instanceof Error ? err.message : String(err));
 	}
 
 	// Fallback to local stored patients

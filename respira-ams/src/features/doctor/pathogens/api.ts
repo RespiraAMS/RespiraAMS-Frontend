@@ -85,7 +85,7 @@ export async function fetchPagedPathogens(params: {
 			};
 		}
 	} catch (err) {
-		console.warn("[PathogensAPI] Backend unavailable, using fallback:", err);
+		console.warn("[PathogensAPI] Backend unavailable, using fallback:", err instanceof Error ? err.message : String(err));
 	}
 
 	let filtered = INITIAL_PATHOGENS;
