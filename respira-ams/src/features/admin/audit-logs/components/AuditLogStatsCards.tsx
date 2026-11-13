@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ShieldCheck, CheckCircle2, AlertTriangle, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { AuditLogStats } from "../types";
@@ -10,35 +11,37 @@ interface AuditLogStatsCardsProps {
 }
 
 export function AuditLogStatsCards({ stats, isLoading = false }: AuditLogStatsCardsProps) {
+	const t = useTranslations("admin.auditLogs");
+
 	const cards = [
 		{
-			title: "Tổng số sự kiện kiểm toán",
+			title: t("totalEvents"),
 			value: stats.total,
-			subtitle: `${stats.uniqueActorsCount} tác nhân & hệ thống ghi nhận`,
+			subtitle: `${stats.uniqueActorsCount} ${t("uniqueActorsSuffix", { defaultMessage: "tác nhân & hệ thống ghi nhận" })}`,
 			icon: ShieldCheck,
 			color: "text-[#0EA5E9]",
 			bg: "bg-sky-50",
 		},
 		{
-			title: "Thực thi thành công",
+			title: t("successfulEvents"),
 			value: stats.successCount,
-			subtitle: `Tỷ lệ thành công đạt ${stats.successRatePercent}%`,
+			subtitle: `${t("successRatePrefix", { defaultMessage: "Tỷ lệ thành công đạt" })} ${stats.successRatePercent}%`,
 			icon: CheckCircle2,
 			color: "text-emerald-600",
 			bg: "bg-emerald-50",
 		},
 		{
-			title: "Cảnh báo bảo mật",
+			title: t("warningEvents"),
 			value: stats.warningCount,
-			subtitle: "Cần lưu ý & theo dõi đặc quyền",
+			subtitle: t("warningSubtitle", { defaultMessage: "Cần lưu ý & theo dõi đặc quyền" }),
 			icon: AlertTriangle,
 			color: "text-amber-600",
 			bg: "bg-amber-50",
 		},
 		{
-			title: "Giao dịch lỗi / Thất bại",
+			title: t("errorEvents"),
 			value: stats.errorCount,
-			subtitle: "Sự cố phân tán & vi phạm bảo mật",
+			subtitle: t("errorSubtitle", { defaultMessage: "Sự cố phân tán & vi phạm bảo mật" }),
 			icon: AlertCircle,
 			color: "text-red-600",
 			bg: "bg-red-50",

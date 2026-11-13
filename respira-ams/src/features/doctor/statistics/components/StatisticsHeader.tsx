@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -12,14 +13,16 @@ export function StatisticsHeader({
 	onExport,
 	isExporting = false,
 }: StatisticsHeaderProps) {
+	const t = useTranslations("doctor.statistics");
+
 	return (
 		<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 			<div>
 				<h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-					Thống kê &amp; Giám sát Vi sinh Lâm sàng
+					{t("title", { defaultMessage: "Thống kê & Giám sát Vi sinh Lâm sàng" })}
 				</h1>
 				<p className="text-xs sm:text-sm text-slate-500 mt-1">
-					Dữ liệu giám sát sử dụng kháng sinh, vi sinh lâm sàng và tình hình kháng thuốc AMR
+					{t("subtitle", { defaultMessage: "Dữ liệu giám sát sử dụng kháng sinh, vi sinh lâm sàng và tình hình kháng thuốc AMR" })}
 				</p>
 			</div>
 
@@ -32,12 +35,12 @@ export function StatisticsHeader({
 				{isExporting ? (
 					<>
 						<Loader2 className="h-4 w-4 animate-spin" />
-						<span>Đang xuất Excel...</span>
+						<span>{t("exporting", { defaultMessage: "Đang xuất Excel..." })}</span>
 					</>
 				) : (
 					<>
 						<Download className="h-4 w-4" />
-						<span>Xuất báo cáo Vi sinh</span>
+						<span>{t("exportReport", { defaultMessage: "Xuất báo cáo Vi sinh" })}</span>
 					</>
 				)}
 			</Button>

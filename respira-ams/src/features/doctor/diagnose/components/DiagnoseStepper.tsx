@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface DiagnoseStepperProps {
@@ -5,15 +8,17 @@ interface DiagnoseStepperProps {
 	onStepChange: (step: 1 | 2) => void;
 }
 
-const STEPS: { step: 1 | 2; label: string }[] = [
-	{ step: 1, label: "Chỉ số & Triệu chứng lâm sàng" },
-	{ step: 2, label: "Tiền sử dị ứng kháng sinh" },
-];
-
 export function DiagnoseStepper({ currentStep, onStepChange }: DiagnoseStepperProps) {
+	const t = useTranslations("doctor.diagnose");
+
+	const steps: { step: 1 | 2; label: string }[] = [
+		{ step: 1, label: t("step1Title", { defaultMessage: "Chỉ số & Triệu chứng lâm sàng" }) },
+		{ step: 2, label: t("step2Title", { defaultMessage: "Tiền sử dị ứng kháng sinh" }) },
+	];
+
 	return (
 		<div className="flex gap-2.5 mb-5 flex-col sm:flex-row">
-			{STEPS.map(({ step, label }) => {
+			{steps.map(({ step, label }) => {
 				const active = currentStep === step;
 				return (
 					<button

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { LogOut } from "lucide-react";
 import { logout, getStoredUser, getStoredAccessToken, parseJwt } from "@/features/auth/api";
 import {
@@ -114,6 +115,7 @@ export function AdminAccountSection({
 	className,
 }: AdminAccountSectionProps) {
 	const router = useRouter();
+	const t = useTranslations("admin.account");
 
 	const [currentUser, setCurrentUser] = useState<AdminUserInfo>(() =>
 		propUser || {
@@ -148,19 +150,21 @@ export function AdminAccountSection({
 							<DropdownMenuTrigger asChild>
 								<button
 									type="button"
-									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] hover:ring-2 hover:ring-sky-300 transition-all mx-auto cursor-pointer overflow-hidden"
+									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] hover:ring-2 hover:ring-sky-300 transition-all mx-auto cursor-pointer"
 									id="admin-account-trigger-collapsed"
 								>
-									{currentUser.avatarUrl ? (
-										<img
-											src={currentUser.avatarUrl}
-											alt={currentUser.name}
-											className="h-full w-full object-cover"
-										/>
-									) : (
-										<span>{currentUser.initials}</span>
-									)}
-									<span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-[#22C55E] ring-2 ring-white" />
+									<div className="h-full w-full rounded-full overflow-hidden flex items-center justify-center">
+										{currentUser.avatarUrl ? (
+											<img
+												src={currentUser.avatarUrl}
+												alt={currentUser.name}
+												className="h-full w-full object-cover"
+											/>
+										) : (
+											<span>{currentUser.initials}</span>
+										)}
+									</div>
+									<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#22C55E] ring-2 ring-white dark:ring-slate-900 pointer-events-none z-10" />
 								</button>
 							</DropdownMenuTrigger>
 						</TooltipTrigger>
@@ -188,7 +192,7 @@ export function AdminAccountSection({
 						className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs text-red-600 focus:text-red-600"
 					>
 						<LogOut className="h-3.5 w-3.5 text-red-500" />
-						<span>Đăng xuất</span>
+						<span>{t("logout")}</span>
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
@@ -211,19 +215,21 @@ export function AdminAccountSection({
 						id="admin-account-trigger"
 					>
 						{/* Avatar Circle with Online Dot */}
-						<div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] select-none overflow-hidden">
-							{currentUser.avatarUrl ? (
-								<img
-									src={currentUser.avatarUrl}
-									alt={currentUser.name}
-									className="h-full w-full object-cover"
-								/>
-							) : (
-								<span>{currentUser.initials}</span>
-							)}
+						<div className="relative shrink-0">
+							<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] select-none overflow-hidden">
+								{currentUser.avatarUrl ? (
+									<img
+										src={currentUser.avatarUrl}
+										alt={currentUser.name}
+										className="h-full w-full object-cover"
+									/>
+								) : (
+									<span>{currentUser.initials}</span>
+								)}
+							</div>
 							<span
-								className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-[#22C55E] ring-2 ring-white"
-								title="Đang trực tuyến"
+								className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#22C55E] ring-2 ring-white dark:ring-slate-900 z-10"
+								title={t("online")}
 							/>
 						</div>
 
@@ -243,8 +249,8 @@ export function AdminAccountSection({
 				<button
 					type="button"
 					onClick={handleLogout}
-					title="Đăng xuất"
-					aria-label="Đăng xuất"
+					title={t("logout")}
+					aria-label={t("logout")}
 					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
 					id="admin-logout-button"
 				>
@@ -267,7 +273,7 @@ export function AdminAccountSection({
 					className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs text-red-600 focus:text-red-600"
 				>
 					<LogOut className="h-3.5 w-3.5 text-red-500" />
-					<span>Đăng xuất</span>
+					<span>{t("logout")}</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

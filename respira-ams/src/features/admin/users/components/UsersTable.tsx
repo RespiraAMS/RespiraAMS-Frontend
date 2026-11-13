@@ -31,6 +31,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserItem } from "../types";
+import { useTranslations } from "next-intl";
 import {
 	POSITION_LABELS,
 	ROLE_LABELS,
@@ -55,6 +56,7 @@ export function UsersTable({
 	onDeleteUser,
 	onToggleStatus,
 }: UsersTableProps) {
+	const t = useTranslations("admin.users");
 	// Chỉ hiện spinner toàn màn hình khi chưa có dữ liệu nào
 	if (isLoading && users.length === 0) {
 		return (
@@ -92,26 +94,26 @@ export function UsersTable({
 			<Table className={`transition-opacity duration-150 ${isLoading ? "opacity-60" : "opacity-100"}`}>
 				<TableHeader className="bg-slate-50/80 dark:bg-slate-950/60">
 					<TableRow className="border-b border-slate-200 dark:border-slate-800 hover:bg-transparent">
-						<TableHead className="w-[280px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
-							Họ và tên / Chuyên môn
+						<TableHead className="w-[240px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+							{t("colUser")}
 						</TableHead>
-						<TableHead className="font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
-							Liên hệ
+						<TableHead className="w-[200px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+							{t("colContact")}
 						</TableHead>
-						<TableHead className="font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
-							Vai trò
+						<TableHead className="w-[130px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+							{t("colRole")}
 						</TableHead>
-						<TableHead className="font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
-							Vị trí / Chức vụ
+						<TableHead className="w-[140px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+							{t("colPosition")}
 						</TableHead>
-						<TableHead className="font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
-							Trạng thái
+						<TableHead className="w-[160px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+							{t("colStatus")}
 						</TableHead>
-						<TableHead className="font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
-							Ngày tạo
+						<TableHead className="w-[110px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+							{t("colCreatedAt")}
 						</TableHead>
-						<TableHead className="w-[60px] text-right font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
-							Thao tác
+						<TableHead className="w-[80px] text-right font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+							{t("colActions")}
 						</TableHead>
 					</TableRow>
 				</TableHeader>
@@ -242,7 +244,7 @@ export function UsersTable({
 												className="font-bold flex items-center gap-1 text-[11px] py-0.5 px-2 bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300"
 											>
 												<CheckCircle className="w-3 h-3" />
-												<span>Hoạt động</span>
+												<span>{t("active")}</span>
 											</Badge>
 										) : (
 											<Badge
@@ -250,7 +252,7 @@ export function UsersTable({
 												className="font-bold flex items-center gap-1 text-[11px] py-0.5 px-2 bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300"
 											>
 												<Lock className="w-3 h-3" />
-												<span>Đã khóa</span>
+												<span>{t("locked")}</span>
 											</Badge>
 										)}
 									</div>

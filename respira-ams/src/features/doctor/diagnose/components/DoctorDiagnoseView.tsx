@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDiagnosisForm, diagnose } from "../api";
 import { AntibioticItem, ClinicalVariable, DiagnoseResponse } from "../types";
@@ -49,6 +50,7 @@ function translateServerErrorMessage(msg: string): string {
 const CLOSED_MODAL: ErrorModalState = { isOpen: false, title: "Lỗi", message: "", details: [] };
 
 export function DoctorDiagnoseView() {
+	const t = useTranslations("doctor.diagnose");
 	const {
 		data: formData,
 		isLoading,
@@ -315,7 +317,7 @@ export function DoctorDiagnoseView() {
 				{isLoading && (
 					<div className="text-center py-16 text-slate-500">
 						<div className="inline-block w-8 h-8 border-2 border-slate-200 border-t-[#0EA5E9] rounded-full animate-spin mb-3" />
-						<p className="text-sm font-medium">Đang tải biểu mẫu chẩn đoán...</p>
+						<p className="text-sm font-medium">{t("loadingForm", { defaultMessage: "Đang tải biểu mẫu chẩn đoán..." })}</p>
 					</div>
 				)}
 
@@ -361,7 +363,7 @@ export function DoctorDiagnoseView() {
 						)}
 
 						<p className="text-center text-xs text-slate-400 mt-6 px-4">
-							Chỉ sử dụng để hỗ trợ quyết định lâm sàng. Luôn kết hợp với đánh giá chuyên môn của bác sĩ điều trị.
+							{t("clinicalNotice", { defaultMessage: "Chỉ sử dụng để hỗ trợ quyết định lâm sàng. Luôn kết hợp với đánh giá chuyên môn của bác sĩ điều trị." })}
 						</p>
 					</>
 				)}

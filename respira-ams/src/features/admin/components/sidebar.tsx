@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
 	Tooltip,
@@ -24,6 +25,7 @@ export interface AdminNavItem {
 	icon: LucideIcon;
 	label: string;
 	href: string;
+	key: string;
 	badge?: number;
 }
 
@@ -37,32 +39,39 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
 	{
 		icon: LayoutDashboard,
 		label: "Tổng quan hệ thống",
+		key: "dashboard",
 		href: "/admin/dashboard",
 	},
 	{
 		icon: Users,
 		label: "Quản lý người dùng",
+		key: "users",
 		href: "/admin/users",
 	},
 	{
 		icon: FileText,
 		label: "Phác đồ & Phiên bản",
+		key: "protocols",
 		href: "/admin/protocols",
 	},
 	{
 		icon: ShieldCheck,
 		label: "Nhật ký kiểm toán",
+		key: "auditLogs",
 		href: "/admin/audit-logs",
 	},
 	{
 		icon: Settings,
 		label: "Cấu hình hệ thống",
+		key: "settings",
 		href: "/admin/settings",
 	},
 ];
 
 function NavItemLink({ item, collapsed, active }: AdminNavItemProps) {
-	const { icon: Icon, label, href, badge } = item;
+	const t = useTranslations("admin.nav");
+	const { icon: Icon, href, key, badge } = item;
+	const label = t(key as any);
 
 	const linkContent = (
 		<Link
@@ -129,6 +138,7 @@ function NavItemLink({ item, collapsed, active }: AdminNavItemProps) {
 }
 
 export function AdminSidebar() {
+	const t = useTranslations("admin.nav");
 	const collapsed = useAdminSidebarStore((state) => state.collapsed);
 	const pathname = usePathname();
 
@@ -168,12 +178,9 @@ export function AdminSidebar() {
 									<span className="font-bold text-[#0EA5E9] tracking-tight">
 										AMS
 									</span>
-									<span className="ml-1.5 rounded-[5px] bg-[#E0F2FE] px-1.5 py-0.5 text-[9px] font-bold text-[#0EA5E9] tracking-normal">
-										ADMIN
-									</span>
 								</div>
 								<span className="text-[9px] font-semibold text-slate-400 tracking-wider uppercase block mt-0.5 leading-none">
-									Cổng Quản trị Hệ thống
+									{t("brandSubtitle")}
 								</span>
 							</div>
 						)}
@@ -184,7 +191,7 @@ export function AdminSidebar() {
 				{!collapsed ? (
 					<div className="px-4 pt-4 pb-4">
 						<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-							Danh mục quản trị
+							{t("categoryTitle")}
 						</span>
 					</div>
 				) : (
@@ -222,4 +229,3 @@ export function AdminSidebar() {
 }
 
 export default AdminSidebar;
-

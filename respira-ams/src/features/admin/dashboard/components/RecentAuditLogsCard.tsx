@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ShieldCheck, ArrowRight, CheckCircle2, AlertTriangle, AlertCircle } from "lucide-react";
 import { AuditLogItem } from "../types";
 
@@ -9,27 +10,29 @@ interface RecentAuditLogsCardProps {
 }
 
 export function RecentAuditLogsCard({ logs }: RecentAuditLogsCardProps) {
+	const t = useTranslations("admin.dashboard");
+
 	const renderStatusBadge = (status: AuditLogItem["status"]) => {
 		switch (status) {
 			case "success":
 				return (
 					<span className="inline-flex items-center gap-1 rounded-[6px] bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
 						<CheckCircle2 className="h-3 w-3" />
-						Thành công
+						{t("statusSuccess", { defaultMessage: "Thành công" })}
 					</span>
 				);
 			case "warning":
 				return (
 					<span className="inline-flex items-center gap-1 rounded-[6px] bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
 						<AlertTriangle className="h-3 w-3" />
-						Cảnh báo
+						{t("statusWarning", { defaultMessage: "Cảnh báo" })}
 					</span>
 				);
 			case "error":
 				return (
 					<span className="inline-flex items-center gap-1 rounded-[6px] bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700">
 						<AlertCircle className="h-3 w-3" />
-						Thất bại
+						{t("statusError", { defaultMessage: "Thất bại" })}
 					</span>
 				);
 		}
@@ -44,10 +47,10 @@ export function RecentAuditLogsCard({ logs }: RecentAuditLogsCardProps) {
 					</div>
 					<div>
 						<h3 className="text-sm font-bold text-slate-900">
-							Nhật ký Kiểm toán & Bảo mật Gần đây
+							{t("recentAuditTitle", { defaultMessage: "Nhật ký Kiểm toán & Bảo mật Gần đây" })}
 						</h3>
 						<p className="text-xs text-slate-500">
-							Ghi nhận các thao tác quản trị, đăng nhập và thay đổi phác đồ
+							{t("recentAuditSubtitle", { defaultMessage: "Ghi nhận các thao tác quản trị, đăng nhập và thay đổi phác đồ" })}
 						</p>
 					</div>
 				</div>
@@ -56,7 +59,7 @@ export function RecentAuditLogsCard({ logs }: RecentAuditLogsCardProps) {
 					href="/admin/audit-logs"
 					className="inline-flex items-center gap-1 text-xs font-semibold text-[#0EA5E9] hover:text-[#0284C7] transition-colors"
 				>
-					<span>Xem tất cả</span>
+					<span>{t("viewAll", { defaultMessage: "Xem tất cả" })}</span>
 					<ArrowRight className="h-3.5 w-3.5" />
 				</Link>
 			</div>
@@ -78,7 +81,7 @@ export function RecentAuditLogsCard({ logs }: RecentAuditLogsCardProps) {
 								</span>
 							</div>
 							<p className="text-[11px] text-slate-500 mt-1">
-								Bởi <span className="font-medium text-slate-700">{log.actor}</span> ({log.role}) • Mục tiêu: <span className="font-mono text-[10.5px] text-slate-600">{log.target}</span>
+								{t("by", { defaultMessage: "Bởi" })} <span className="font-medium text-slate-700">{log.actor}</span> ({log.role}) • {t("target", { defaultMessage: "Mục tiêu" })}: <span className="font-mono text-[10.5px] text-slate-600">{log.target}</span>
 							</p>
 						</div>
 

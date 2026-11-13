@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowLeft, RefreshCw, TrendingUp, Check, Users } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Patient, PatientStatus } from "../types";
@@ -78,6 +79,7 @@ function buildTimeline(patient: Patient): Milestone[] {
 }
 
 export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
+	const t = useTranslations("doctor.patients");
 	const queryClient = useQueryClient();
 
 	// Quick modal for "Cập nhật trạng thái" (discharge)
@@ -125,7 +127,7 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 			id="back-to-patients-list"
 		>
 			<ArrowLeft className="h-4.5 w-4.5 transition-transform group-hover:-translate-x-1" />
-			<span>Danh sách bệnh nhân</span>
+			<span>{t("title", { defaultMessage: "Danh sách bệnh nhân" })}</span>
 		</Link>
 	);
 
@@ -169,7 +171,7 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 						id="btn-update-status"
 					>
 						<RefreshCw className="h-4 w-4 stroke-[2.2]" />
-						<span>Cập nhật trạng thái</span>
+						<span>{t("updateStatus", { defaultMessage: "Cập nhật trạng thái" })}</span>
 					</button>
 				</div>
 			</div>
@@ -187,7 +189,7 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 							{patient.code}
 						</p>
 						<p className="text-xs text-slate-400 mt-1">
-							{patient.gender} · {patient.age} tuổi
+							{patient.gender === "Nữ" ? t("female", { defaultMessage: "Nữ" }) : t("male", { defaultMessage: "Nam" })} · {patient.age} {t("yearsOld", { defaultMessage: "tuổi" })}
 						</p>
 					</div>
 
@@ -196,28 +198,28 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 
 					{/* Demographics Table */}
 					<div className="space-y-4.5 text-xs">
-						<DetailRow label="Ngày sinh" value={patient.birthDate} bold />
-						<DetailRow label="Số điện thoại" value={patient.phone} />
+						<DetailRow label={t("birthDate", { defaultMessage: "Ngày sinh" })} value={patient.birthDate} bold />
+						<DetailRow label={t("phoneLabel", { defaultMessage: "Số điện thoại" })} value={patient.phone} />
 						<DetailRow
-							label="Số thẻ BHYT"
+							label={t("bhytLabel", { defaultMessage: "Số thẻ BHYT" })}
 							value={patient.bhyt}
 							bold
 							mono
 						/>
 						<DetailRow
-							label="Địa chỉ"
+							label={t("addressLabel", { defaultMessage: "Địa chỉ" })}
 							value={[patient.address, patient.city].filter(Boolean).join(", ")}
 						/>
 						<DetailRow
-							label="Thể trạng"
+							label={t("physiqueLabel", { defaultMessage: "Thể trạng" })}
 							value={`${patient.weight ?? "—"}kg - ${patient.height ?? "—"}cm`}
 						/>
 						<DetailRow
-							label="Ngày nhập viện"
+							label={t("admissionDate", { defaultMessage: "Ngày nhập viện" })}
 							value={formatDateTime(patient.admission)}
 						/>
 						<div className="flex items-center justify-between">
-							<span className="text-slate-400 font-normal">Trạng thái</span>
+							<span className="text-slate-400 font-normal">{t("colStatus", { defaultMessage: "Trạng thái" })}</span>
 							<PatientStatusBadge status={patient.status} />
 						</div>
 					</div>
@@ -226,7 +228,7 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 					<div className="h-px bg-slate-100 my-5" />
 					<div className="flex items-center gap-2 mb-3">
 						<Users className="h-4 w-4 text-slate-400" />
-						<h3 className="text-xs font-bold text-slate-900">Người thân</h3>
+						<h3 className="text-xs font-bold text-slate-900">{t("nextOfKin", { defaultMessage: "Người thân" })}</h3>
 					</div>
 					{patient.nextOfKins && patient.nextOfKins.length > 0 ? (
 						<div className="space-y-3 text-xs">
@@ -248,7 +250,7 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 							))}
 						</div>
 					) : (
-						<p className="text-xs text-slate-400">Chưa có thông tin người thân.</p>
+						<p className="text-xs text-slate-400">{t("noNextOfKin", { defaultMessage: "Chưa có thông tin người thân." })}</p>
 					)}
 				</div>
 
@@ -262,16 +264,16 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 							</div>
 							<div>
 								<h3 className="text-sm font-bold text-slate-900">
-									Tiến trình điều trị
+									{t("treatmentTimeline", { defaultMessage: "Tiến trình điều trị" })}
 								</h3>
 								<p className="text-[11.5px] text-slate-400 mt-0.5">
-									Danh sách mốc thời gian và trạng thái
+									{t("timelineSubtitle", { defaultMessage: "Danh sách mốc thời gian và trạng thái" })}
 								</p>
 							</div>
 						</div>
 
 						<span className="text-[11.5px] font-medium text-slate-400">
-							{timeline.length} mốc ghi nhận
+							{timeline.length} {t("milestonesRecorded", { defaultMessage: "mốc ghi nhận" })}
 						</span>
 					</div>
 
@@ -338,7 +340,7 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 				<DialogContent className="sm:max-w-[420px] rounded-[18px] bg-white p-6 shadow-2xl border-none">
 					<DialogHeader className="pb-3 border-b border-slate-100">
 						<DialogTitle className="text-base font-bold text-slate-900">
-							Cập nhật trạng thái bệnh nhân
+							{t("updateStatusModalTitle", { defaultMessage: "Cập nhật trạng thái bệnh nhân" })}
 						</DialogTitle>
 						<p className="text-xs text-slate-400 mt-0.5">
 							{patient.name} ({patient.code})
@@ -348,19 +350,19 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 					<form onSubmit={handleUpdateStatus} className="space-y-4 pt-2">
 						<div className="space-y-1.5">
 							<label className="text-xs font-semibold text-slate-700 block">
-								Kết quả điều trị (xuất viện)
+								{t("dischargeOutcome", { defaultMessage: "Kết quả điều trị (xuất viện)" })}
 							</label>
 							<select
 								value={statusValue}
 								onChange={(e) => setStatusValue(e.target.value as DischargeStatus)}
 								className="w-full h-10 px-3 bg-[#F6F8FA] border border-transparent focus:border-[#0EA5E9] rounded-[10px] text-xs font-medium text-slate-800 outline-none"
 							>
-								<option value="recovered">Hồi phục</option>
-								<option value="deceased">Tử vong</option>
-								<option value="outOfScope">Ngoài phạm vi điều trị kháng sinh</option>
+								<option value="recovered">{t("statusRecovered", { defaultMessage: "Hồi phục" })}</option>
+								<option value="deceased">{t("statusDeceased", { defaultMessage: "Tử vong" })}</option>
+								<option value="outOfScope">{t("statusOutOfScope", { defaultMessage: "Ngoài phạm vi điều trị kháng sinh" })}</option>
 							</select>
 							<p className="text-[11px] text-slate-400">
-								Thao tác này sẽ ghi nhận xuất viện và không thể thay đổi sau đó.
+								{t("dischargeNotice", { defaultMessage: "Thao tác này sẽ ghi nhận xuất viện và không thể thay đổi sau đó." })}
 							</p>
 						</div>
 
@@ -377,7 +379,7 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 								disabled={isSavingStatus}
 								className="px-3.5 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 cursor-pointer disabled:opacity-50"
 							>
-								Hủy bỏ
+								{t("cancel", { defaultMessage: "Hủy bỏ" })}
 							</button>
 							<button
 								type="submit"
@@ -385,7 +387,7 @@ export function PatientDetailsView({ patientId }: PatientDetailsViewProps) {
 								className="inline-flex items-center gap-1.5 bg-[#0EA5E9] hover:bg-[#25B4F8] text-white text-xs font-semibold px-4 py-2 rounded-[10px] shadow-xs hover:shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:hover:scale-100"
 							>
 								<Check className="h-4 w-4" />
-								<span>{isSavingStatus ? "Đang lưu..." : "Lưu thay đổi"}</span>
+								<span>{isSavingStatus ? t("saving", { defaultMessage: "Đang lưu..." }) : t("saveChanges", { defaultMessage: "Lưu thay đổi" })}</span>
 							</button>
 						</div>
 					</form>

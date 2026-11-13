@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
 	Dialog,
 	DialogContent,
@@ -28,6 +29,7 @@ export function DeletePatientDialog({
 	onOpenChange,
 	onConfirmDelete,
 }: DeletePatientDialogProps) {
+	const t = useTranslations("doctor.patients");
 	const [confirmText, setConfirmText] = useState("");
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -83,20 +85,19 @@ export function DeletePatientDialog({
 							<AlertTriangle className="w-5 h-5" />
 						</div>
 						<DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-							Xác nhận xóa mềm hồ sơ bệnh nhân
+							{t("deleteTitle")}
 						</DialogTitle>
 					</div>
 
 					<DialogDescription asChild>
 						<div className="text-xs text-slate-600 dark:text-slate-400 space-y-3">
 							<p>
-								Bạn có chắc chắn muốn xóa bệnh nhân{" "}
 								<strong className="text-slate-900 dark:text-white">{patient.name}</strong> (
-								Mã BN: {patient.code}) khỏi danh sách theo dõi không?
+								{patient.code})
 							</p>
 
 							<div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-300 font-medium text-[11px] leading-relaxed">
-								Lưu ý: Hệ thống chỉ thực hiện <strong>xóa mềm (soft-delete)</strong> đối với bệnh nhân chưa tiếp nhận phác đồ điều trị. Hồ sơ sẽ được ẩn khỏi danh sách theo dõi nhưng toàn bộ dữ liệu lịch sử vẫn được bảo toàn nguyên vẹn trong hệ thống.
+								{t("deleteWarning")}
 							</div>
 
 							<div className="pt-1 space-y-1.5">
@@ -104,18 +105,17 @@ export function DeletePatientDialog({
 									htmlFor="confirm-delete-patient-input"
 									className="text-xs font-semibold text-slate-700 dark:text-slate-300 block"
 								>
-									Để xác nhận xóa mềm, vui lòng nhập chữ{" "}
+									{t("deletePrompt")}{" "}
 									<span className="font-bold text-red-600 bg-red-50 dark:bg-red-950/60 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-800 tracking-wide">
 										delete
-									</span>{" "}
-									vào ô bên dưới:
+									</span>
 								</label>
 								<Input
 									id="confirm-delete-patient-input"
 									type="text"
 									value={confirmText}
 									onChange={(e) => setConfirmText(e.target.value)}
-									placeholder="Nhập 'delete' để xác nhận"
+									placeholder={t("deleteInputPlaceholder")}
 									className="h-9 text-xs rounded-lg"
 									autoFocus
 								/>
@@ -138,7 +138,7 @@ export function DeletePatientDialog({
 						disabled={isDeleting}
 						className="rounded-[10px] text-xs h-9 font-semibold"
 					>
-						Hủy bỏ
+						{t("deleteCancel")}
 					</Button>
 					<Button
 						type="button"
@@ -151,7 +151,7 @@ export function DeletePatientDialog({
 								: "bg-red-300 dark:bg-red-900/40 cursor-not-allowed opacity-60"
 						}`}
 					>
-						{isDeleting ? "Đang xử lý..." : "Xác nhận xóa mềm"}
+						{isDeleting ? t("deleting") : t("deleteConfirm")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

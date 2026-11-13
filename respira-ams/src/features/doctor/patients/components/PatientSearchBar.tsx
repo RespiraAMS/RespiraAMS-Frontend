@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Search, Plus, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface PatientSearchBarProps {
 	searchQuery: string;
@@ -14,6 +15,7 @@ export function PatientSearchBar({
 	onSearchChange,
 	onAddPatient,
 }: PatientSearchBarProps) {
+	const t = useTranslations("doctor.patients");
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
@@ -37,7 +39,7 @@ export function PatientSearchBar({
 					type="text"
 					value={searchQuery}
 					onChange={(e) => onSearchChange(e.target.value)}
-					placeholder="Tìm theo họ tên, mã bệnh án (BA-2026-...)"
+					placeholder={t("searchPlaceholder")}
 					className="w-full bg-transparent border-none outline-hidden text-xs text-slate-800 placeholder:text-slate-400"
 					id="patient-search-input"
 				/>
@@ -49,7 +51,7 @@ export function PatientSearchBar({
 							inputRef.current?.focus();
 						}}
 						className="text-slate-400 hover:text-slate-600 p-1 mr-1 transition-colors cursor-pointer"
-						title="Xóa tìm kiếm"
+						title="Clear search"
 					>
 						<X className="h-3.5 w-3.5" />
 					</button>
@@ -67,7 +69,7 @@ export function PatientSearchBar({
 				id="btn-add-patient"
 			>
 				<Plus className="h-3.5 w-3.5" />
-				<span>Thêm bệnh nhân</span>
+				<span>{t("addPatient")}</span>
 			</button>
 		</div>
 	);

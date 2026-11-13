@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { StatFilter } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ export function PatientStatsCards({
 	activeFilter,
 	onFilterChange,
 }: PatientStatsCardsProps) {
+	const t = useTranslations("doctor.patients");
 	const formatCount = (num: number) => (num < 10 ? `0${num}` : `${num}`);
 
 	return (
@@ -34,7 +36,7 @@ export function PatientStatsCards({
 				)}
 			>
 				<p className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wider">
-					Tất cả ca bệnh
+					{t("totalPatients")}
 				</p>
 				<p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">
 					{formatCount(total)}
@@ -54,7 +56,7 @@ export function PatientStatsCards({
 				)}
 			>
 				<p className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wider">
-					Bệnh nhân nam
+					{t("malePatients")}
 				</p>
 				<p className="text-2xl font-bold text-[#2563EB] mt-1.5 tracking-tight">
 					{formatCount(male)}
@@ -74,7 +76,7 @@ export function PatientStatsCards({
 				)}
 			>
 				<p className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wider">
-					Bệnh nhân nữ
+					{t("femalePatients")}
 				</p>
 				<p className="text-2xl font-bold text-[#DB2777] mt-1.5 tracking-tight">
 					{formatCount(female)}

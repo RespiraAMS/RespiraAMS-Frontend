@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Info, SquarePen, Trash2 } from "lucide-react";
 import { Patient } from "../types";
 import { PatientStatusBadge } from "./PatientStatusBadge";
@@ -31,6 +32,8 @@ export function PatientsTable({
 	onEditPatient,
 	onDeletePatient,
 }: PatientsTableProps) {
+	const t = useTranslations("doctor.patients");
+
 	// Show a sliding window of at most 5 page buttons
 	const windowStart = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
 	const windowEnd = Math.min(totalPages, windowStart + 4);
@@ -38,6 +41,16 @@ export function PatientsTable({
 		{ length: windowEnd - windowStart + 1 },
 		(_, i) => windowStart + i
 	);
+
+	const renderGender = (gender: string) => {
+		if (gender.toLowerCase() === "male" || gender.toLowerCase() === "nam") {
+			return t("male");
+		}
+		if (gender.toLowerCase() === "female" || gender.toLowerCase() === "nữ") {
+			return t("female");
+		}
+		return gender;
+	};
 
 	return (
 		<div className="bg-white rounded-[14px] border border-slate-100/90 shadow-2xs overflow-hidden mt-4">
@@ -47,16 +60,16 @@ export function PatientsTable({
 					<thead>
 						<tr className="border-b border-slate-100">
 							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-								Bệnh nhân & mã B/A
+								{t("colPatient")}
 							</th>
 							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-								Tuổi / Giới tính
+								{t("colAgeGender")}
 							</th>
 							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-								Tình trạng điều trị
+								{t("colStatus")}
 							</th>
 							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
-								Thao tác
+								{t("colActions")}
 							</th>
 						</tr>
 					</thead>
@@ -65,8 +78,8 @@ export function PatientsTable({
 							<tr>
 								<td colSpan={4} className="px-6 py-10 text-center text-slate-400 text-sm">
 									{isLoading
-										? "Đang tải dữ liệu..."
-										: (errorMessage ?? "Không tìm thấy bệnh nhân nào phù hợp.")}
+										? "..."
+										: (errorMessage ?? t("empty"))}
 								</td>
 							</tr>
 						) : (
@@ -92,7 +105,7 @@ export function PatientsTable({
 
 									{/* Age & Gender */}
 									<td className="px-6 py-3 text-slate-600 font-medium text-[13px]">
-										{patient.age} tuổi · {patient.gender}
+										{patient.age} {t("yearsOld")} · {renderGender(patient.gender)}
 									</td>
 
 									{/* Status Badge */}
@@ -106,7 +119,7 @@ export function PatientsTable({
 											<button
 												type="button"
 												onClick={() => onViewDetails(patient)}
-												title="Xem chi tiết"
+												title="Details"
 												className="p-1 rounded-[5px] hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
 											>
 												<Info className="h-4 w-4" />
@@ -114,7 +127,7 @@ export function PatientsTable({
 											<button
 												type="button"
 												onClick={() => onEditPatient(patient)}
-												title="Chỉnh sửa"
+												title="Edit"
 												className="p-1 rounded-[5px] hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
 											>
 												<SquarePen className="h-4 w-4" />
@@ -122,7 +135,7 @@ export function PatientsTable({
 											<button
 												type="button"
 												onClick={() => onDeletePatient(patient)}
-												title="Xóa bệnh nhân"
+												title="Delete"
 												className="p-1 rounded-[5px] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
 											>
 												<Trash2 className="h-4 w-4" />
@@ -139,8 +152,8 @@ export function PatientsTable({
 			{/* Footer Pagination Row */}
 			<div className="px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 text-[12.5px] text-slate-500">
 				<div>
-					Hiển thị <span className="font-bold text-slate-800">{patients.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} - {(currentPage - 1) * pageSize + patients.length}</span> trong
-					tổng số <span className="font-bold text-slate-800">{totalCount}</span>
+					{t("showing")} <span className="font-bold text-slate-800">{patients.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} - {(currentPage - 1) * pageSize + patients.length}</span> {t("of")}{" "}
+					<span className="font-bold text-slate-800">{totalCount}</span>
 				</div>
 
 				<div className="flex items-center gap-3">
@@ -150,7 +163,7 @@ export function PatientsTable({
 						onClick={() => onPageChange(currentPage - 1)}
 						className="text-slate-400 hover:text-slate-700 disabled:opacity-40 disabled:hover:text-slate-400 cursor-pointer font-medium transition-colors text-xs"
 					>
-						Trước
+						{t("prev")}
 					</button>
 
 					{pageNumbers.map((page) => (
@@ -174,7 +187,7 @@ export function PatientsTable({
 						onClick={() => onPageChange(currentPage + 1)}
 						className="text-slate-400 hover:text-slate-700 disabled:opacity-40 disabled:hover:text-slate-400 cursor-pointer font-medium transition-colors text-xs"
 					>
-						Sau
+						{t("next")}
 					</button>
 				</div>
 			</div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Search, Download, X, FileSpreadsheet, FileJson } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ export function AuditLogToolbar({
 	onExportCsv,
 	onExportJson,
 }: AuditLogToolbarProps) {
+	const t = useTranslations("admin.auditLogs");
 	const searchInputRef = useRef<HTMLInputElement>(null);
 
 	// Ctrl + K shortcut to focus search input
@@ -65,7 +67,7 @@ export function AuditLogToolbar({
 							search: e.target.value,
 						}))
 					}
-					placeholder="Tìm theo tác nhân, hành động, đối tượng, IP, correlation ID..."
+					placeholder={t("searchPlaceholder")}
 					className="pl-9 pr-9 h-9.5 text-xs sm:text-sm rounded-lg bg-slate-50/70 border-slate-200 placeholder:text-slate-400 focus-visible:ring-sky-100"
 				/>
 				{filters.search && (
@@ -76,7 +78,7 @@ export function AuditLogToolbar({
 							searchInputRef.current?.focus();
 						}}
 						className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded transition-colors cursor-pointer"
-						title="Xoá tìm kiếm"
+						title={t("clearSearch", { defaultMessage: "Xóa tìm kiếm" })}
 					>
 						<X className="w-3.5 h-3.5" />
 					</button>
@@ -96,10 +98,10 @@ export function AuditLogToolbar({
 						}
 					>
 						<SelectTrigger className="w-[145px] h-9.5 text-xs font-semibold rounded-lg bg-slate-50 border-slate-200">
-							<SelectValue placeholder="Dịch vụ" />
+							<SelectValue placeholder={t("serviceFilter")} />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="ALL">Tất cả dịch vụ</SelectItem>
+							<SelectItem value="ALL">{t("allServices")}</SelectItem>
 							<SelectItem value="Clinical">Clinical</SelectItem>
 							<SelectItem value="Auth">Authentication</SelectItem>
 							<SelectItem value="Patient">Patient</SelectItem>
@@ -121,13 +123,13 @@ export function AuditLogToolbar({
 						}
 					>
 						<SelectTrigger className="w-[140px] h-9.5 text-xs font-semibold rounded-lg bg-slate-50 border-slate-200">
-							<SelectValue placeholder="Trạng thái" />
+							<SelectValue placeholder={t("statusFilter")} />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="ALL">Tất cả trạng thái</SelectItem>
-							<SelectItem value="success">Thành công</SelectItem>
-							<SelectItem value="warning">Cảnh báo</SelectItem>
-							<SelectItem value="error">Thất bại</SelectItem>
+							<SelectItem value="ALL">{t("allStatus")}</SelectItem>
+							<SelectItem value="success">{t("statusSuccess")}</SelectItem>
+							<SelectItem value="warning">{t("statusWarning")}</SelectItem>
+							<SelectItem value="error">{t("statusError")}</SelectItem>
 						</SelectContent>
 					</Select>
 
@@ -142,13 +144,13 @@ export function AuditLogToolbar({
 						}
 					>
 						<SelectTrigger className="w-[145px] h-9.5 text-xs font-semibold rounded-lg bg-slate-50 border-slate-200">
-							<SelectValue placeholder="Thời gian" />
+							<SelectValue placeholder={t("timeFilter")} />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="ALL">Mọi thời gian</SelectItem>
-							<SelectItem value="today">Hôm nay (24h)</SelectItem>
-							<SelectItem value="7d">7 ngày qua</SelectItem>
-							<SelectItem value="30d">30 ngày qua</SelectItem>
+							<SelectItem value="ALL">{t("allTime")}</SelectItem>
+							<SelectItem value="today">{t("today")}</SelectItem>
+							<SelectItem value="7d">{t("last7Days")}</SelectItem>
+							<SelectItem value="30d">{t("last30Days")}</SelectItem>
 						</SelectContent>
 					</Select>
 
@@ -161,17 +163,17 @@ export function AuditLogToolbar({
 								className="h-9.5 px-3.5 rounded-lg border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 gap-1.5 cursor-pointer shadow-2xs"
 							>
 								<Download className="w-3.5 h-3.5 text-slate-500" />
-								<span>Xuất nhật ký</span>
+								<span>{t("exportLogs")}</span>
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end" className="w-44 text-xs font-medium">
 							<DropdownMenuItem onClick={onExportCsv} className="gap-2 cursor-pointer">
 								<FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-								<span>Xuất file Excel (.csv)</span>
+								<span>{t("exportCsv")}</span>
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={onExportJson} className="gap-2 cursor-pointer">
 								<FileJson className="w-4 h-4 text-sky-600" />
-								<span>Xuất định dạng (.json)</span>
+								<span>{t("exportJson")}</span>
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>

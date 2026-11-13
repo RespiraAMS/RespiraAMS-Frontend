@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
 	Table,
 	TableBody,
@@ -31,6 +32,8 @@ interface AuditLogsTableProps {
 }
 
 export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDetail }: AuditLogsTableProps) {
+	const t = useTranslations("admin.auditLogs");
+
 	const formatDateTime = (isoString: string) => {
 		try {
 			const d = new Date(isoString);
@@ -56,21 +59,21 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 				return (
 					<span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200/60">
 						<CheckCircle2 className="h-3 w-3" />
-						<span>Thành công</span>
+						<span>{t("statusSuccess")}</span>
 					</span>
 				);
 			case "warning":
 				return (
 					<span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200/60">
 						<AlertTriangle className="h-3 w-3" />
-						<span>Cảnh báo</span>
+						<span>{t("statusWarning")}</span>
 					</span>
 				);
 			case "error":
 				return (
 					<span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700 border border-red-200/60">
 						<AlertCircle className="h-3 w-3" />
-						<span>Thất bại</span>
+						<span>{t("statusError")}</span>
 					</span>
 				);
 		}
@@ -102,26 +105,26 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 			case "critical":
 				return (
 					<span className="text-[10px] font-extrabold uppercase tracking-wider text-red-600 bg-red-100/70 px-1.5 py-0.2 rounded">
-						Nghiêm trọng
+						{t("sevCritical")}
 					</span>
 				);
 			case "high":
 				return (
 					<span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 bg-orange-100/70 px-1.5 py-0.2 rounded">
-						Cao
+						{t("sevHigh")}
 					</span>
 				);
 			case "medium":
 				return (
 					<span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-100/70 px-1.5 py-0.2 rounded">
-						Trung bình
+						{t("sevMedium")}
 					</span>
 				);
 			case "low":
 			default:
 				return (
 					<span className="text-[10px] font-medium uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded">
-						Thấp
+						{t("sevLow")}
 					</span>
 				);
 		}
@@ -165,8 +168,8 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 				<div className="inline-block animate-spin text-[#0EA5E9] mb-3">
 					<Clock className="w-6 h-6" />
 				</div>
-				<p className="text-sm font-semibold text-slate-700">Đang đồng bộ nhật ký kiểm toán...</p>
-				<p className="text-xs text-slate-400 mt-1">Đang truy vấn các sự kiện từ các vi dịch vụ</p>
+				<p className="text-sm font-semibold text-slate-700">{t("loading", { defaultMessage: "Đang đồng bộ nhật ký kiểm toán..." })}</p>
+				<p className="text-xs text-slate-400 mt-1">{t("loadingDesc", { defaultMessage: "Đang truy vấn các sự kiện từ các vi dịch vụ" })}</p>
 			</div>
 		);
 	}
@@ -177,9 +180,9 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 				<div className="mx-auto w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 text-slate-400 flex items-center justify-center mb-3">
 					<Shield className="w-6 h-6" />
 				</div>
-				<h3 className="text-sm font-bold text-slate-800">Không tìm thấy bản ghi kiểm toán</h3>
+				<h3 className="text-sm font-bold text-slate-800">{t("empty")}</h3>
 				<p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-					Không có nhật ký nào phù hợp với bộ lọc hiện tại. Thử đổi từ khoá tìm kiếm hoặc xóa bộ lọc.
+					{t("emptyDesc", { defaultMessage: "Không có nhật ký nào phù hợp với bộ lọc hiện tại. Thử đổi từ khoá tìm kiếm hoặc xóa bộ lọc." })}
 				</p>
 			</div>
 		);
@@ -192,25 +195,25 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 					<TableHeader className="bg-slate-50/80">
 						<TableRow className="border-b border-slate-200 hover:bg-transparent">
 							<TableHead className="w-[130px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 pl-4">
-								Thời gian
+								{t("colTime")}
 							</TableHead>
 							<TableHead className="w-[210px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
-								Tác nhân (Actor)
+								{t("colActor")}
 							</TableHead>
 							<TableHead className="w-[105px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
-								Dịch vụ
+								{t("colService")}
 							</TableHead>
 							<TableHead className="min-w-[260px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
-								Hành động & Đối tượng
+								{t("colActionTarget")}
 							</TableHead>
 							<TableHead className="w-[125px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
-								IP / Độ trễ
+								{t("colIpDuration")}
 							</TableHead>
 							<TableHead className="w-[135px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
-								Trạng thái & Mức độ
+								{t("colStatusSeverity")}
 							</TableHead>
 							<TableHead className="w-[70px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 text-right pr-4">
-								Chi tiết
+								{t("colDetail")}
 							</TableHead>
 						</TableRow>
 					</TableHeader>

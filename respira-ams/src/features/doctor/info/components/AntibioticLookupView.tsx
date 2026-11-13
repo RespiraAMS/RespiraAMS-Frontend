@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { Info, Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ import { AntibioticDetailDialog } from "./AntibioticDetailDialog";
 const PAGE_SIZE = 8;
 
 export function AntibioticLookupView() {
+	const t = useTranslations("doctor.info");
 	const [query, setQuery] = useState("");
 	const [debouncedQuery, setDebouncedQuery] = useState("");
 	const [page, setPage] = useState(1);
@@ -91,7 +93,7 @@ export function AntibioticLookupView() {
 							setQuery(e.target.value);
 							setPage(1);
 						}}
-						placeholder="Tìm theo tên kháng sinh (ví dụ: Amoxicilin, Ceftriaxone...)"
+						placeholder={t("searchPlaceholder", { defaultMessage: "Tìm theo tên kháng sinh (ví dụ: Amoxicilin, Ceftriaxone...)" })}
 						className="w-full bg-transparent border-none outline-hidden text-xs text-slate-800 placeholder:text-slate-400"
 					/>
 					{query && (
@@ -103,7 +105,7 @@ export function AntibioticLookupView() {
 								inputRef.current?.focus();
 							}}
 							className="text-slate-400 hover:text-slate-600 p-1 mr-1 transition-colors"
-							title="Xóa tìm kiếm"
+							title={t("clearSearch", { defaultMessage: "Xóa tìm kiếm" })}
 						>
 							<X className="h-3.5 w-3.5" />
 						</button>
@@ -124,16 +126,16 @@ export function AntibioticLookupView() {
 						<thead>
 							<tr className="border-b border-slate-100 bg-slate-50/50">
 								<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-									Tên kháng sinh
+									{t("colName", { defaultMessage: "Tên kháng sinh" })}
 								</th>
 								<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
-									Nhóm kháng sinh
+									{t("colGroup", { defaultMessage: "Nhóm kháng sinh" })}
 								</th>
 								<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
-									Phân loại AWaRe
+									{t("whoAware", { defaultMessage: "Phân loại AWaRe" })}
 								</th>
 								<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
-									Thao tác
+									{t("colActions", { defaultMessage: "Thao tác" })}
 								</th>
 							</tr>
 						</thead>
@@ -143,7 +145,7 @@ export function AntibioticLookupView() {
 									<td colSpan={4} className="px-6 py-12 text-center text-slate-400 text-sm">
 										<div className="flex flex-col items-center justify-center gap-2">
 											<Loader2 className="h-6 w-6 animate-spin text-[#0EA5E9]" />
-											<span className="text-xs">Đang tải dữ liệu kháng sinh...</span>
+											<span className="text-xs">{t("loading", { defaultMessage: "Đang tải dữ liệu kháng sinh..." })}</span>
 										</div>
 									</td>
 								</tr>
@@ -153,7 +155,7 @@ export function AntibioticLookupView() {
 										colSpan={4}
 										className="px-6 py-10 text-center text-slate-400 text-sm"
 									>
-										Không tìm thấy kháng sinh phù hợp.
+										{t("empty", { defaultMessage: "Không tìm thấy kháng sinh phù hợp." })}
 									</td>
 								</tr>
 							) : (
@@ -172,7 +174,7 @@ export function AntibioticLookupView() {
 											</button>
 										</td>
 										<td className="px-6 py-3.5 text-center text-slate-600 font-medium text-[13px]">
-											{a.antibioticGroup?.name || "Chưa phân nhóm"}
+											{a.antibioticGroup?.name || t("ungrouped", { defaultMessage: "Chưa phân nhóm" })}
 										</td>
 										<td className="px-6 py-3.5 text-center">
 											<AwareBadge value={a.classification} />
@@ -181,7 +183,7 @@ export function AntibioticLookupView() {
 											<button
 												type="button"
 												onClick={() => setSelectedId(a.id)}
-												title="Xem chi tiết & liều dùng"
+												title={t("viewDetail", { defaultMessage: "Xem chi tiết & liều dùng" })}
 												style={{ borderRadius: "6px" }}
 												className="inline-flex p-1.5 text-slate-500 hover:text-[#0EA5E9] hover:bg-sky-50 transition-colors cursor-pointer"
 											>
@@ -198,9 +200,8 @@ export function AntibioticLookupView() {
 				{/* Pagination Footer */}
 				<div className="px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 text-[12.5px] text-slate-500">
 					<div>
-						Hiển thị{" "}
-						<span className="font-bold text-slate-800">{items.length}</span> trong
-						tổng số{" "}
+						{t("showing", { defaultMessage: "Hiển thị" })}{" "}
+						<span className="font-bold text-slate-800">{items.length}</span> {t("of", { defaultMessage: "trong tổng số" })}{" "}
 						<span className="font-bold text-slate-800">{totalItems}</span>
 					</div>
 					<div className="flex items-center gap-2">
@@ -210,7 +211,7 @@ export function AntibioticLookupView() {
 							onClick={() => setPage((p) => Math.max(1, p - 1))}
 							className="px-2.5 py-1 text-slate-500 hover:text-slate-800 disabled:opacity-40 disabled:hover:text-slate-500 cursor-pointer font-medium transition-colors text-xs rounded-[6px] hover:bg-slate-100"
 						>
-							Trước
+							{t("prev", { defaultMessage: "Trước" })}
 						</button>
 						{Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
 							<button
@@ -233,7 +234,7 @@ export function AntibioticLookupView() {
 							onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
 							className="px-2.5 py-1 text-slate-500 hover:text-slate-800 disabled:opacity-40 disabled:hover:text-slate-500 cursor-pointer font-medium transition-colors text-xs rounded-[6px] hover:bg-slate-100"
 						>
-							Sau
+							{t("next", { defaultMessage: "Sau" })}
 						</button>
 					</div>
 				</div>

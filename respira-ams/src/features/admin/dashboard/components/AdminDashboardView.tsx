@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +16,7 @@ import { RecentAuditLogsCard } from "./RecentAuditLogsCard";
 import { QuickActionsCard } from "./QuickActionsCard";
 
 export function AdminDashboardView() {
+	const t = useTranslations("admin.dashboard");
 	const queryClient = useQueryClient();
 	const [lastUpdated, setLastUpdated] = useState<string>("");
 
@@ -62,21 +64,21 @@ export function AdminDashboardView() {
 				<div>
 					<div className="flex items-center gap-2">
 						<h2 className="text-base font-bold text-slate-900 tracking-tight">
-							Bảng điều khiển Quản trị Hệ thống
+							{t("title")}
 						</h2>
 						<span className="rounded-[6px] bg-[#E0F2FE] px-2 py-0.5 text-[10px] font-bold text-[#0EA5E9]">
 							PROD READY
 						</span>
 					</div>
 					<p className="text-xs text-slate-500 mt-0.5">
-						Theo dõi thời gian thực dữ liệu vi sinh lâm sàng, hồ sơ bệnh nhân và tình trạng hạ tầng vi dịch vụ
+						{t("subtitle")}
 					</p>
 				</div>
 
 				<div className="flex items-center gap-3">
 					{lastUpdated && (
 						<span className="text-[11px] text-slate-400 font-medium">
-							Cập nhật lúc: <span className="text-slate-600 font-semibold">{lastUpdated}</span>
+							{t("updatedAt", { defaultMessage: "Cập nhật lúc:" })} <span className="text-slate-600 font-semibold">{lastUpdated}</span>
 						</span>
 					)}
 
@@ -89,7 +91,7 @@ export function AdminDashboardView() {
 						<RefreshCw
 							className={`h-3.5 w-3.5 ${isFetching ? "animate-spin text-[#0EA5E9]" : "text-slate-500"}`}
 						/>
-						<span>{isFetching ? "Đang đồng bộ..." : "Làm mới dữ liệu"}</span>
+						<span>{isFetching ? t("syncing", { defaultMessage: "Đang đồng bộ..." }) : t("refresh", { defaultMessage: "Làm mới dữ liệu" })}</span>
 					</button>
 				</div>
 			</div>

@@ -1,38 +1,40 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { FileText, CheckCircle2, PauseCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProtocolCount } from "../queries";
 
 export function ProtocolStatsCards() {
+	const t = useTranslations("admin.protocols");
 	const total = useProtocolCount(null);
 	const applied = useProtocolCount(true);
 	const notApplied = useProtocolCount(false);
 
 	const cards = [
 		{
-			title: "Tổng số phác đồ",
+			title: t("totalProtocols", { defaultMessage: "Tổng số phác đồ" }),
 			value: total.data,
 			loading: total.isLoading,
-			subtitle: "Phác đồ / thang điểm lâm sàng",
+			subtitle: t("protocolsSubtitle", { defaultMessage: "Phác đồ / thang điểm lâm sàng" }),
 			icon: FileText,
 			color: "text-[#0EA5E9]",
 			bg: "bg-sky-50",
 		},
 		{
-			title: "Đang áp dụng",
+			title: t("applied", { defaultMessage: "Đang áp dụng" }),
 			value: applied.data,
 			loading: applied.isLoading,
-			subtitle: "Dùng trong chẩn đoán",
+			subtitle: t("appliedSubtitle", { defaultMessage: "Dùng trong chẩn đoán" }),
 			icon: CheckCircle2,
 			color: "text-emerald-600",
 			bg: "bg-emerald-50",
 		},
 		{
-			title: "Chưa áp dụng",
+			title: t("notApplied", { defaultMessage: "Chưa áp dụng" }),
 			value: notApplied.data,
 			loading: notApplied.isLoading,
-			subtitle: "Bản nháp / phiên bản cũ",
+			subtitle: t("notAppliedSubtitle", { defaultMessage: "Bản nháp / phiên bản cũ" }),
 			icon: PauseCircle,
 			color: "text-amber-600",
 			bg: "bg-amber-50",

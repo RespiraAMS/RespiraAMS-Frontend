@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatisticsHeader } from "./StatisticsHeader";
 import { StatisticsTimeFilter } from "./StatisticsTimeFilter";
@@ -31,6 +32,7 @@ import {
 const PATHOGEN_COLORS = ["#0EA5E9", "#F59E0B", "#14B8A6", "#EF4444", "#8B5CF6", "#6366F1"];
 
 export function DoctorStatisticsView() {
+	const t = useTranslations("doctor.statistics");
 	const queryClient = useQueryClient();
 	const [timeRange, setTimeRange] = useState<TimeRange>("30d");
 	const [isExporting, setIsExporting] = useState(false);
@@ -139,7 +141,7 @@ export function DoctorStatisticsView() {
 		return [
 			{
 				id: "diagnosis",
-				title: "Tổng ca bệnh nhân ghi nhận",
+				title: t("totalPatientsKpi", { defaultMessage: "Tổng ca bệnh nhân ghi nhận" }),
 				value: Math.round(totalPatientCount * multiplier),
 				changePercent: 12,
 				subtitle: patientSub,
@@ -147,7 +149,7 @@ export function DoctorStatisticsView() {
 			},
 			{
 				id: "treatment",
-				title: "Tỷ lệ tuân thủ phác đồ kháng sinh",
+				title: t("adherenceRateKpi", { defaultMessage: "Tỷ lệ tuân thủ phác đồ kháng sinh" }),
 				value: `${adherenceRate}%`,
 				changePercent: 8,
 				subtitle: adherenceSub,
@@ -155,7 +157,7 @@ export function DoctorStatisticsView() {
 			},
 			{
 				id: "microbiology",
-				title: "Tỷ lệ hồi phục lâm sàng",
+				title: t("recoveryRateKpi", { defaultMessage: "Tỷ lệ hồi phục lâm sàng" }),
 				value: `${recoveryRate}%`,
 				changePercent: 5,
 				subtitle: recoverySub,

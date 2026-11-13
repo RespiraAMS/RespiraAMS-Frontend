@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
 
 interface AntibioticGroupSearchBarProps {
@@ -12,6 +13,7 @@ export function AntibioticGroupSearchBar({
 	searchQuery,
 	onSearchChange,
 }: AntibioticGroupSearchBarProps) {
+	const t = useTranslations("doctor.antibioticGroups");
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
@@ -41,7 +43,7 @@ export function AntibioticGroupSearchBar({
 					type="text"
 					value={searchQuery}
 					onChange={(e) => onSearchChange(e.target.value)}
-					placeholder="Tìm theo tên nhóm kháng sinh"
+					placeholder={t("searchPlaceholder", { defaultMessage: "Tìm theo tên nhóm kháng sinh" })}
 					className="w-full bg-transparent border-none outline-hidden text-xs text-slate-800 placeholder:text-slate-400"
 				/>
 				{searchQuery && (
@@ -52,7 +54,7 @@ export function AntibioticGroupSearchBar({
 							inputRef.current?.focus();
 						}}
 						className="text-slate-400 hover:text-slate-600 p-1 mr-1 transition-colors cursor-pointer"
-						title="Xóa tìm kiếm"
+						title={t("clearSearch", { defaultMessage: "Xóa tìm kiếm" })}
 					>
 						<X className="h-3.5 w-3.5" />
 					</button>

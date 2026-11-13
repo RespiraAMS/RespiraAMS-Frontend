@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
 	Tooltip,
@@ -25,6 +26,7 @@ export interface NavItem {
 	icon: LucideIcon;
 	label: string;
 	href: string;
+	key: string;
 	badge?: number;
 }
 
@@ -38,37 +40,45 @@ export const DOCTOR_NAV_ITEMS: NavItem[] = [
 	{
 		icon: User,
 		label: "Quản lý bệnh nhân",
+		key: "patients",
 		href: "/doctor/patients",
 	},
 	{
 		icon: Search,
 		label: "Tra cứu",
+		key: "lookup",
 		href: "/doctor/info",
 	},
 	{
 		icon: Bug,
 		label: "Tác nhân gây bệnh",
+		key: "pathogens",
 		href: "/doctor/pathogens",
 	},
 	{
 		icon: Layers,
 		label: "Nhóm kháng sinh",
+		key: "antibioticGroups",
 		href: "/doctor/antibiotic-groups",
 	},
 	{
 		icon: CheckCircle2,
 		label: "Chẩn đoán lâm sàng",
+		key: "diagnose",
 		href: "/doctor/diagnose",
 	},
 	{
 		icon: BarChart3,
 		label: "Thống kê & Giám sát AMR",
+		key: "statistics",
 		href: "/doctor/statistics",
 	},
 ];
 
 function NavItemLink({ item, collapsed, active }: NavItemProps) {
-	const { icon: Icon, label, href, badge } = item;
+	const t = useTranslations("doctor.nav");
+	const { icon: Icon, href, key, badge } = item;
+	const label = t(key as any);
 
 	const linkContent = (
 		<Link
@@ -91,10 +101,10 @@ function NavItemLink({ item, collapsed, active }: NavItemProps) {
 
 			{!collapsed && (
 				<div className="flex-1 leading-snug">
-					{label === "Thống kê & Giám sát AMR" ? (
+					{key === "statistics" ? (
 						<>
-							<span className="block text-[12.5px] leading-tight">Thống kê & Giám sát</span>
-							<span className="block text-[12.5px] leading-tight font-bold">AMR</span>
+							<span className="block text-[12.5px] leading-tight">{t("statisticsLine1")}</span>
+							<span className="block text-[12.5px] leading-tight font-bold">{t("statisticsLine2")}</span>
 						</>
 					) : (
 						<span className="text-[12.5px] leading-tight">{label}</span>
@@ -142,6 +152,7 @@ function NavItemLink({ item, collapsed, active }: NavItemProps) {
 }
 
 export function DoctorSidebar() {
+	const t = useTranslations("doctor.nav");
 	const collapsed = useSidebarStore((state) => state.collapsed);
 	const pathname = usePathname();
 
@@ -183,7 +194,7 @@ export function DoctorSidebar() {
 									</span>
 								</div>
 								<span className="text-[9px] font-semibold text-slate-400 tracking-wider uppercase block mt-0.5 leading-none">
-									Hệ thống vi sinh lâm sàng
+									{t("brandSubtitle")}
 								</span>
 							</div>
 						)}
@@ -194,7 +205,7 @@ export function DoctorSidebar() {
 				{!collapsed ? (
 					<div className="px-4 pt-4 pb-4">
 						<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-							Danh mục chuyên môn
+							{t("categoryTitle")}
 						</span>
 					</div>
 				) : (

@@ -1,33 +1,37 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
-const PAGE_TITLES: Record<string, string> = {
-	"/doctor/patients": "Danh sách bệnh nhân",
-	"/doctor/pathogens": "Danh sách tác nhân gây bệnh",
-	"/doctor/antibiotic-groups": "Danh sách nhóm kháng sinh",
-	"/doctor/info": "Danh sách kháng sinh",
-	"/doctor/diagnose": "Chẩn đoán lâm sàng",
-	"/doctor/statistics": "Thống kê & Giám sát Vi sinh Lâm sàng",
-	"/doctor/history": "Lịch sử điều trị",
-	"/doctor/profile": "Thông tin cá nhân & Hồ sơ Bác sĩ",
+const PAGE_TITLE_KEYS: Record<string, string> = {
+	"/doctor/patients": "patients",
+	"/doctor/pathogens": "pathogens",
+	"/doctor/antibiotic-groups": "antibioticGroups",
+	"/doctor/info": "info",
+	"/doctor/diagnose": "diagnose",
+	"/doctor/statistics": "statistics",
+	"/doctor/history": "history",
+	"/doctor/profile": "profile",
+	"/doctor/settings": "settings",
 };
 
 export function DoctorHeader() {
 	const pathname = usePathname();
-	let title = "RespiraAMS";
+	const t = useTranslations("doctor.header");
+	let title = t("default");
 
 	if (pathname.startsWith("/doctor/patients/")) {
-		title = "Chi tiết bệnh nhân";
+		title = t("patientDetail");
 	} else if (pathname.startsWith("/doctor/pathogens/")) {
-		title = "Chi tiết tác nhân gây bệnh";
+		title = t("pathogenDetail");
 	} else if (pathname.startsWith("/doctor/info/")) {
-		title = "Chi tiết kháng sinh";
+		title = t("antibioticDetail");
 	} else {
-		title =
-			Object.entries(PAGE_TITLES).find(
-				([href]) => pathname === href || pathname.startsWith(href + "/")
-			)?.[1] ?? "RespiraAMS";
+		const key = Object.entries(PAGE_TITLE_KEYS).find(
+			([href]) => pathname === href || pathname.startsWith(href + "/")
+		)?.[1];
+		if (key) title = t(key);
 	}
 
 	return (
@@ -35,6 +39,9 @@ export function DoctorHeader() {
 			<h1 className="truncate text-lg font-bold tracking-tight text-slate-900">
 				{title}
 			</h1>
+			<div className="flex items-center gap-2">
+				<LanguageSwitcher />
+			</div>
 		</header>
 	);
 }

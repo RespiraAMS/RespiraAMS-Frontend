@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
 	AlertDialog,
 	AlertDialogCancel,
@@ -23,6 +24,7 @@ interface DeleteProtocolDialogProps {
 }
 
 export function DeleteProtocolDialog({ item, isDeleting, onClose, onConfirm }: DeleteProtocolDialogProps) {
+	const t = useTranslations("admin.protocols");
 	const [confirmText, setConfirmText] = useState("");
 
 	useEffect(() => {
@@ -47,18 +49,17 @@ export function DeleteProtocolDialog({ item, isDeleting, onClose, onConfirm }: D
 							<AlertTriangle className="w-5 h-5" />
 						</div>
 						<AlertDialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-							Xác nhận xóa mềm phác đồ
+							{t("deleteTitle")}
 						</AlertDialogTitle>
 					</div>
 
 					<AlertDialogDescription asChild>
 						<div className="text-xs text-slate-600 dark:text-slate-400 space-y-3">
 							<p>
-								Bạn có chắc chắn muốn xóa phác đồ{" "}
-								<strong className="text-slate-900 dark:text-white">{item.name}</strong> (v{item.version})?
+								<strong className="text-slate-900 dark:text-white">{item.name}</strong> (v{item.version})
 							</p>
 							<div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-300 font-medium text-[11px] leading-relaxed">
-								Lưu ý: Hệ thống thực hiện <strong>xóa mềm (soft-delete)</strong>. Phác đồ và toàn bộ quy tắc (rules) liên kết sẽ bị ẩn khỏi danh sách sử dụng lâm sàng, nhưng toàn bộ lịch sử đánh giá bệnh nhân đã áp dụng trước đây vẫn được bảo toàn nguyên vẹn trong hệ thống.
+								{t("deleteWarning")}
 							</div>
 
 							<div className="pt-1 space-y-1.5">
@@ -66,18 +67,17 @@ export function DeleteProtocolDialog({ item, isDeleting, onClose, onConfirm }: D
 									htmlFor="confirm-delete-protocol-input"
 									className="text-xs font-semibold text-slate-700 dark:text-slate-300 block"
 								>
-									Để xác nhận, vui lòng nhập chữ{" "}
+									{t("deletePrompt")}{" "}
 									<span className="font-bold text-red-600 bg-red-50 dark:bg-red-950/60 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-800 tracking-wide">
 										delete
-									</span>{" "}
-									vào ô bên dưới:
+									</span>
 								</label>
 								<Input
 									id="confirm-delete-protocol-input"
 									type="text"
 									value={confirmText}
 									onChange={(e) => setConfirmText(e.target.value)}
-									placeholder="Nhập 'delete' để xác nhận"
+									placeholder={t("deletePlaceholder")}
 									className="h-9 text-xs rounded-lg"
 									autoFocus
 								/>
@@ -92,7 +92,7 @@ export function DeleteProtocolDialog({ item, isDeleting, onClose, onConfirm }: D
 						onClick={() => setConfirmText("")}
 						className="text-xs h-9 font-semibold"
 					>
-						Hủy bỏ
+						{t("deleteCancel")}
 					</AlertDialogCancel>
 					<Button
 						type="button"
@@ -109,7 +109,7 @@ export function DeleteProtocolDialog({ item, isDeleting, onClose, onConfirm }: D
 						}`}
 					>
 						{isDeleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-						{isDeleting ? "Đang xử lý..." : "Xác nhận xóa mềm"}
+						{isDeleting ? t("deleting") : t("deleteConfirm")}
 					</Button>
 				</AlertDialogFooter>
 			</AlertDialogContent>

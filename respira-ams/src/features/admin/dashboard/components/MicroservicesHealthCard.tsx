@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Activity, CheckCircle2, Server } from "lucide-react";
 import { MicroserviceStatus } from "../types";
 
@@ -8,6 +9,8 @@ interface MicroservicesHealthCardProps {
 }
 
 export function MicroservicesHealthCard({ services }: MicroservicesHealthCardProps) {
+	const t = useTranslations("admin.dashboard");
+
 	return (
 		<div className="bg-white rounded-[12px] p-5 border border-slate-100 shadow-2xs">
 			<div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
@@ -17,10 +20,10 @@ export function MicroservicesHealthCard({ services }: MicroservicesHealthCardPro
 					</div>
 					<div>
 						<h3 className="text-sm font-bold text-slate-900">
-							Hạ tầng Vi dịch vụ (Microservices Architecture)
+							{t("microservicesTitle", { defaultMessage: "Hạ tầng Vi dịch vụ (Microservices Architecture)" })}
 						</h3>
 						<p className="text-xs text-slate-500">
-							Giám sát tình trạng hoạt động thực tế của cụm dịch vụ Backend .NET 10 & Aspire
+							{t("microservicesSubtitle", { defaultMessage: "Giám sát tình trạng hoạt động thực tế của cụm dịch vụ Backend .NET 10 & Aspire" })}
 						</p>
 					</div>
 				</div>
@@ -30,7 +33,7 @@ export function MicroservicesHealthCard({ services }: MicroservicesHealthCardPro
 						<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
 						<span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
 					</span>
-					<span>7/7 Đang hoạt động</span>
+					<span>7/7 {t("operating", { defaultMessage: "Đang hoạt động" })}</span>
 				</div>
 			</div>
 
@@ -38,11 +41,11 @@ export function MicroservicesHealthCard({ services }: MicroservicesHealthCardPro
 				<table className="w-full text-left border-collapse text-xs">
 					<thead>
 						<tr className="border-b border-slate-100 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
-							<th className="py-2.5 px-3">Tên Dịch vụ</th>
+							<th className="py-2.5 px-3">{t("colServiceName", { defaultMessage: "Tên Dịch vụ" })}</th>
 							<th className="py-2.5 px-3">Microservice</th>
 							<th className="py-2.5 px-3">Port</th>
-							<th className="py-2.5 px-3">Trạng thái</th>
-							<th className="py-2.5 px-3">Độ trễ</th>
+							<th className="py-2.5 px-3">{t("colStatus", { defaultMessage: "Trạng thái" })}</th>
+							<th className="py-2.5 px-3">{t("colLatency", { defaultMessage: "Độ trễ" })}</th>
 							<th className="py-2.5 px-3 text-right">Uptime</th>
 						</tr>
 					</thead>

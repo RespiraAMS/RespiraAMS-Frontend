@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { LogOut, Settings, User } from "lucide-react";
 import { logout, getStoredUser } from "@/features/auth/api";
@@ -84,6 +85,7 @@ export function AccountSection({
 	className,
 }: AccountSectionProps) {
 	const router = useRouter();
+	const t = useTranslations("doctor.account");
 	const [mounted, setMounted] = useState(false);
 
 	// Khởi tạo đồng nhất trên SSR và Client để ngăn lỗi Hydration Mismatch
@@ -165,19 +167,21 @@ export function AccountSection({
 								<button
 									type="button"
 									suppressHydrationWarning
-									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] hover:ring-2 hover:ring-sky-300 transition-all mx-auto cursor-pointer overflow-hidden"
+									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] hover:ring-2 hover:ring-sky-300 transition-all mx-auto cursor-pointer"
 									id="doctor-account-trigger-collapsed"
 								>
-									{activeAvatarUrl ? (
-										<img
-											src={activeAvatarUrl}
-											alt={user.name}
-											className="h-full w-full object-cover"
-										/>
-									) : (
-										<span suppressHydrationWarning>{user.initials}</span>
-									)}
-									<span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-[#22C55E] ring-2 ring-white" />
+									<div className="h-full w-full rounded-full overflow-hidden flex items-center justify-center">
+										{activeAvatarUrl ? (
+											<img
+												src={activeAvatarUrl}
+												alt={user.name}
+												className="h-full w-full object-cover"
+											/>
+										) : (
+											<span suppressHydrationWarning>{user.initials}</span>
+										)}
+									</div>
+									<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#22C55E] ring-2 ring-white dark:ring-slate-900 z-10 pointer-events-none" />
 								</button>
 							</DropdownMenuTrigger>
 						</TooltipTrigger>
@@ -203,13 +207,13 @@ export function AccountSection({
 					<DropdownMenuItem asChild>
 						<Link href="/doctor/profile" className="flex items-center gap-2 cursor-pointer text-xs">
 							<User className="h-3.5 w-3.5" />
-							Thông tin cá nhân
+							{t("profile")}
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
-						<Link href="/settings" className="flex items-center gap-2 cursor-pointer text-xs">
+						<Link href="/doctor/settings" className="flex items-center gap-2 cursor-pointer text-xs">
 							<Settings className="h-3.5 w-3.5" />
-							Cài đặt
+							{t("settings")}
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
@@ -218,7 +222,7 @@ export function AccountSection({
 						className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs"
 					>
 						<LogOut className="h-3.5 w-3.5" />
-						Đăng xuất
+						{t("logout")}
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
@@ -244,20 +248,25 @@ export function AccountSection({
 						{/* Avatar Circle with Online Dot */}
 						<div
 							suppressHydrationWarning
-							className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] select-none overflow-hidden"
+							className="relative shrink-0"
 						>
-							{activeAvatarUrl ? (
-								<img
-									src={activeAvatarUrl}
-									alt={user.name}
-									className="h-full w-full object-cover"
-								/>
-							) : (
-								<span suppressHydrationWarning>{user.initials}</span>
-							)}
+							<div
+								suppressHydrationWarning
+								className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] select-none overflow-hidden"
+							>
+								{activeAvatarUrl ? (
+									<img
+										src={activeAvatarUrl}
+										alt={user.name}
+										className="h-full w-full object-cover"
+									/>
+								) : (
+									<span suppressHydrationWarning>{user.initials}</span>
+								)}
+							</div>
 							<span
-								className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-[#22C55E] ring-2 ring-white"
-								title="Đang trực tuyến"
+								className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#22C55E] ring-2 ring-white dark:ring-slate-900 z-10"
+								title={t("online")}
 							/>
 						</div>
 
@@ -283,8 +292,8 @@ export function AccountSection({
 				<button
 					type="button"
 					onClick={handleLogout}
-					title="Đăng xuất"
-					aria-label="Đăng xuất"
+					title={t("logout")}
+					aria-label={t("logout")}
 					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
 					id="doctor-logout-button"
 				>
@@ -305,13 +314,13 @@ export function AccountSection({
 				<DropdownMenuItem asChild>
 					<Link href="/doctor/profile" className="flex items-center gap-2 cursor-pointer text-xs">
 						<User className="h-3.5 w-3.5" />
-						Thông tin cá nhân
+						{t("profile")}
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
-					<Link href="/settings" className="flex items-center gap-2 cursor-pointer text-xs">
+					<Link href="/doctor/settings" className="flex items-center gap-2 cursor-pointer text-xs">
 						<Settings className="h-3.5 w-3.5" />
-						Cài đặt
+						{t("settings")}
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
@@ -320,7 +329,7 @@ export function AccountSection({
 					className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs"
 				>
 					<LogOut className="h-3.5 w-3.5" />
-					Đăng xuất
+					{t("logout")}
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PatientStatus } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +10,8 @@ interface PatientStatusBadgeProps {
 }
 
 export function PatientStatusBadge({ status, className }: PatientStatusBadgeProps) {
+	const t = useTranslations("doctor.patients");
+
 	if (status === "treating") {
 		return (
 			<span
@@ -18,7 +21,7 @@ export function PatientStatusBadge({ status, className }: PatientStatusBadgeProp
 				)}
 			>
 				<span className="h-1.5 w-1.5 rounded-full bg-[#D97706] shrink-0" />
-				<span>Đang điều trị</span>
+				<span>{t("statusTreating")}</span>
 			</span>
 		);
 	}
@@ -32,7 +35,7 @@ export function PatientStatusBadge({ status, className }: PatientStatusBadgeProp
 				)}
 			>
 				<span className="h-1.5 w-1.5 rounded-full bg-[#16A34A] shrink-0" />
-				<span>Hồi Phục</span>
+				<span>{t("statusRecovered")}</span>
 			</span>
 		);
 	}
@@ -46,7 +49,7 @@ export function PatientStatusBadge({ status, className }: PatientStatusBadgeProp
 				)}
 			>
 				<span className="h-1.5 w-1.5 rounded-full bg-[#DC2626] shrink-0" />
-				<span>Tử vong</span>
+				<span>{t("statusDeceased")}</span>
 			</span>
 		);
 	}
@@ -60,7 +63,7 @@ export function PatientStatusBadge({ status, className }: PatientStatusBadgeProp
 				)}
 			>
 				<span className="h-1.5 w-1.5 rounded-full bg-[#64748B] shrink-0" />
-				<span>Ngoài phạm vi</span>
+				<span>{t("statusOutOfScope")}</span>
 			</span>
 		);
 	}

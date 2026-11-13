@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
 	UserPlus,
 	UserCog,
@@ -38,6 +39,7 @@ export function PatientDialog({
 	initialData,
 	onSave,
 }: PatientDialogProps) {
+	const t = useTranslations("doctor.patients");
 	const [lastName, setLastName] = useState("");
 	const [firstName, setFirstName] = useState("");
 	const [code, setCode] = useState("");
@@ -318,15 +320,15 @@ export function PatientDialog({
 						<div>
 							<div className="flex items-center gap-2 flex-wrap">
 								<h2 className="text-base font-bold text-slate-900 tracking-tight">
-									{initialData ? "Chỉnh sửa thông tin bệnh nhân" : "Thêm bệnh nhân mới"}
+									{initialData ? t("editPatient", { defaultMessage: "Chỉnh sửa thông tin bệnh nhân" }) : t("newPatient", { defaultMessage: "Thêm bệnh nhân mới" })}
 								</h2>
 								<span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sky-50 text-[#0284C7] border border-sky-200/60">
 									<span className="h-1.5 w-1.5 rounded-full bg-[#0EA5E9]" />
-									<span>{initialData ? "Cập nhật hồ sơ" : "Hồ sơ mới"}</span>
+									<span>{initialData ? t("updateProfileBadge", { defaultMessage: "Cập nhật hồ sơ" }) : t("newProfileBadge", { defaultMessage: "Hồ sơ mới" })}</span>
 								</span>
 							</div>
 							<p className="text-[11px] text-slate-400 mt-0.5">
-								Thông tin hành chính & thể trạng bệnh nhân
+								{t("patientDialogSubtitle", { defaultMessage: "Thông tin hành chính & thể trạng bệnh nhân" })}
 							</p>
 						</div>
 					</div>
@@ -335,7 +337,7 @@ export function PatientDialog({
 						type="button"
 						onClick={() => onOpenChange(false)}
 						className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-						aria-label="Đóng"
+						aria-label={t("cancel", { defaultMessage: "Đóng" })}
 					>
 						<X className="h-4 w-4" />
 					</button>
@@ -347,13 +349,13 @@ export function PatientDialog({
 					<div className="space-y-3">
 						<div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
 							<User className="h-3.5 w-3.5 text-[#0EA5E9]" />
-							<span>Thông tin định danh</span>
+							<span>{t("identityGroup", { defaultMessage: "Thông tin định danh" })}</span>
 						</div>
 
 						<div className="grid grid-cols-2 gap-3.5">
 							<div className="space-y-1.5">
 								<label htmlFor="patient-last-name" className={LABEL_CLASS}>
-									Họ và tên đệm <Required />
+									{t("lastNameLabel", { defaultMessage: "Họ và tên đệm" })} <Required />
 								</label>
 								<input
 									id="patient-last-name"
@@ -380,7 +382,7 @@ export function PatientDialog({
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="patient-first-name" className={LABEL_CLASS}>
-									Tên <Required />
+									{t("firstNameLabel", { defaultMessage: "Tên" })} <Required />
 								</label>
 								<input
 									id="patient-first-name"
@@ -410,7 +412,7 @@ export function PatientDialog({
 						<div className="grid grid-cols-2 gap-3.5">
 							<div className="space-y-1.5">
 								<label htmlFor="patient-dob" className={LABEL_CLASS}>
-									Ngày sinh <Required />
+									{t("birthDate", { defaultMessage: "Ngày sinh" })} <Required />
 								</label>
 								<BirthDatePicker
 									id="patient-dob"
@@ -433,7 +435,7 @@ export function PatientDialog({
 
 							<div className="space-y-1.5">
 								<label className={LABEL_CLASS}>
-									Giới tính <Required />
+									{t("gender", { defaultMessage: "Giới tính" })} <Required />
 								</label>
 								<div className="grid grid-cols-2 gap-2">
 									{genderButton("Nam")}
@@ -447,13 +449,13 @@ export function PatientDialog({
 					<div className="space-y-3 pt-1 border-t border-slate-100">
 						<div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 pt-2">
 							<Activity className="h-3.5 w-3.5 text-indigo-500" />
-							<span>Mã bệnh án & Thể trạng</span>
+							<span>{t("clinicalInfoGroup", { defaultMessage: "Mã bệnh án & Thể trạng" })}</span>
 						</div>
 
 						<div className="grid grid-cols-2 gap-3.5">
 							<div className="space-y-1.5">
 								<label htmlFor="patient-code" className={LABEL_CLASS}>
-									Mã bệnh án <Required />
+									{t("patientCode", { defaultMessage: "Mã bệnh án" })} <Required />
 								</label>
 								<input
 									id="patient-code"
@@ -480,7 +482,7 @@ export function PatientDialog({
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="patient-bhyt" className={LABEL_CLASS}>
-									Số thẻ BHYT (đúng 10 số) <Required />
+									{t("bhytLabel", { defaultMessage: "Số thẻ BHYT (đúng 10 số)" })} <Required />
 								</label>
 								<input
 									id="patient-bhyt"
@@ -511,7 +513,7 @@ export function PatientDialog({
 						<div className="grid grid-cols-2 gap-3.5">
 							<div className="space-y-1.5">
 								<label htmlFor="patient-height" className={LABEL_CLASS}>
-									Chiều cao (cm) <Required />
+									{t("heightLabel", { defaultMessage: "Chiều cao (cm)" })} <Required />
 								</label>
 								<input
 									id="patient-height"
@@ -540,7 +542,7 @@ export function PatientDialog({
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="patient-weight" className={LABEL_CLASS}>
-									Cân nặng (kg) <Required />
+									{t("weightLabel", { defaultMessage: "Cân nặng (kg)" })} <Required />
 								</label>
 								<input
 									id="patient-weight"
@@ -574,12 +576,12 @@ export function PatientDialog({
 					<div className="space-y-3 pt-1 border-t border-slate-100">
 						<div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 pt-2">
 							<MapPin className="h-3.5 w-3.5 text-amber-500" />
-							<span>Thông tin liên hệ & Cư trú</span>
+							<span>{t("contactGroup", { defaultMessage: "Thông tin liên hệ & Cư trú" })}</span>
 						</div>
 
 						<div className="space-y-1.5">
 							<label htmlFor="patient-phone" className={LABEL_CLASS}>
-								Số điện thoại liên hệ <Required />
+								{t("phoneLabel", { defaultMessage: "Số điện thoại liên hệ" })} <Required />
 							</label>
 							<input
 								id="patient-phone"
@@ -608,7 +610,7 @@ export function PatientDialog({
 						<div className="grid grid-cols-2 gap-3.5">
 							<div className="space-y-1.5">
 								<label htmlFor="patient-address" className={LABEL_CLASS}>
-									Địa chỉ cư trú <Required />
+									{t("addressLabel", { defaultMessage: "Địa chỉ cư trú" })} <Required />
 								</label>
 								<input
 									id="patient-address"
@@ -635,7 +637,7 @@ export function PatientDialog({
 							</div>
 							<div className="space-y-1.5">
 								<label htmlFor="patient-city" className={LABEL_CLASS}>
-									Tỉnh / Thành phố <Required />
+									{t("cityLabel", { defaultMessage: "Tỉnh / Thành phố" })} <Required />
 								</label>
 								<input
 									id="patient-city"
@@ -677,7 +679,7 @@ export function PatientDialog({
 							disabled={isSaving}
 							className="px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors cursor-pointer disabled:opacity-50"
 						>
-							Hủy bỏ
+							{t("cancel", { defaultMessage: "Hủy bỏ" })}
 						</button>
 						<button
 							type="submit"
@@ -689,7 +691,7 @@ export function PatientDialog({
 							) : (
 								<Check className="h-4 w-4 stroke-[2.5]" />
 							)}
-							<span>{isSaving ? "Đang lưu..." : "Lưu hồ sơ"}</span>
+							<span>{isSaving ? t("saving", { defaultMessage: "Đang lưu..." }) : t("saveRecord", { defaultMessage: "Lưu hồ sơ" })}</span>
 						</button>
 					</div>
 				</form>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, Plus, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,8 @@ export function ProtocolToolbar({
 	onFilterChange,
 	onCreate,
 }: ProtocolToolbarProps) {
+	const t = useTranslations("admin.protocols");
+
 	return (
 		<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
 			<div className="relative flex-1 min-w-[200px]">
@@ -34,7 +37,7 @@ export function ProtocolToolbar({
 				<Input
 					value={search}
 					onChange={(e) => onSearchChange(e.target.value)}
-					placeholder="Tìm theo tên hoặc mã phác đồ..."
+					placeholder={t("searchPlaceholder")}
 					className="pl-9 pr-9 h-9.5 text-sm rounded-lg bg-slate-50/70 border-slate-200"
 				/>
 				{search && (
@@ -42,7 +45,7 @@ export function ProtocolToolbar({
 						type="button"
 						onClick={() => onSearchChange("")}
 						className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
-						title="Xoá tìm kiếm"
+						title="Clear search"
 					>
 						<X className="w-4 h-4" />
 					</button>
@@ -52,12 +55,12 @@ export function ProtocolToolbar({
 			<div className="flex items-center gap-2 flex-wrap">
 				<Select value={filter} onValueChange={(v) => onFilterChange(v as ProtocolFilter)}>
 					<SelectTrigger className="w-[165px] h-9.5 text-xs font-semibold rounded-lg bg-slate-50 border-slate-200">
-						<SelectValue placeholder="Trạng thái" />
+						<SelectValue placeholder={t("statusFilter")} />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="ALL">Tất cả trạng thái</SelectItem>
-						<SelectItem value="APPLIED">Đang áp dụng</SelectItem>
-						<SelectItem value="NOT_APPLIED">Chưa áp dụng</SelectItem>
+						<SelectItem value="ALL">{t("allStatus")}</SelectItem>
+						<SelectItem value="APPLIED">{t("applied")}</SelectItem>
+						<SelectItem value="NOT_APPLIED">{t("notApplied")}</SelectItem>
 					</SelectContent>
 				</Select>
 
@@ -67,10 +70,9 @@ export function ProtocolToolbar({
 					className="h-9.5 px-4 rounded-lg bg-[#0EA5E9] hover:bg-[#0284C7] text-white font-semibold text-xs gap-1.5 shadow-sm cursor-pointer"
 				>
 					<Plus className="w-4 h-4" />
-					<span>Thêm phác đồ</span>
+					<span>{t("addProtocol")}</span>
 				</Button>
 			</div>
 		</div>
 	);
 }
-
