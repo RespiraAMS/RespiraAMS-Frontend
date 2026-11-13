@@ -1,7 +1,9 @@
 import { apiRequest, buildQuery } from "@/lib/api";
 import {
+	AdherenceState,
 	ApiGender,
 	DisplayGender,
+	NextOfKinPayload,
 	Pagination,
 	Patient,
 	PatientDto,
@@ -9,6 +11,7 @@ import {
 	PatientPayload,
 	PatientStatus,
 	TreatmentOutcome,
+	TreatmentPlanDetailDto,
 } from "./types";
 
 // ---- Mapping helpers ----
@@ -101,6 +104,7 @@ function mapPatient(dto: PatientDto): Patient {
 		discharge: dto.discharge ?? null,
 		nextOfKins: dto.nextOfKins ?? [],
 		treatmentCount: treatmentsCount,
+		treatmentPlans: dto.treatmentPlans ?? [],
 	};
 }
 
@@ -248,3 +252,65 @@ export async function dischargePatient(
 export async function deletePatient(id: string): Promise<void> {
 	await apiRequest(`/patients/${id}`, { method: "DELETE" });
 }
+
+// ---- Next Of Kin APIs (Tasks 72, 80, 74) ----
+
+export async function addNextOfKin(
+	patientId: string,
+	payload: NextOfKinPayload
+): Promise<string> {
+	const res = await apiRequest<{ id: string }>(`/patients/${patientId}/next-of-kin`, {
+		method: "POST",
+		body: payload,
+	});
+	return res?.id ?? "";
+}
+
+export async function updateNextOfKin(
+	nextOfKinId: string,
+	payload: NextOfKinPayload
+): Promise<void> {
+	await apiRequest(`/patients/next-of-kin/${nextOfKinId}`, {
+		method: "PUT",
+		body: payload,
+	});
+}
+
+export async function deleteNextOfKin(nextOfKinId: string): Promise<void> {
+	await apiRequest(`/patients/next-of-kin/${nextOfKinId}`, {
+		method: "DELETE",
+	});
+}
+
+// ---- Treatment Plans APIs (Tasks 82, 83, 84) ----
+
+export async function fetchTreatmentPlanById(
+	planId: string
+): Promise<TreatmentPlanDetailDto> {
+	const data = await apiRequest<TreatmentPlanDetailDto>(`/treatment-plans/${planId}`);
+	if (data) {
+		return data;
+	}
+	throw new Error("Không tìm thấy thông tin phác đồ điều trị.");
+}
+
+export async function closeTreatmentPlan(
+	planId: string,
+	reason: string
+): Promise<void> {
+	await apiRequest(`/treatment-plans/${planId}/close`, {
+		method: "PUT",
+		body: { reason },
+	});
+}
+
+export async function reviewTreatmentPlan(
+	planId: string,
+	adherenceState: AdherenceState
+): Promise<void> {
+	await apiRequest(`/treatment-plans/${planId}/review`, {
+		method: "PUT",
+		body: { adherenceState },
+	});
+}
+

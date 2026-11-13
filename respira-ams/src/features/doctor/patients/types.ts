@@ -8,6 +8,42 @@ export type PatientStatus = "treating" | "recovered" | "deceased" | "outOfScope"
 
 export type DisplayGender = "Nam" | "Nữ";
 
+export type AdherenceState = "Adhere" | "NotAdhere" | "NotAdhereValid" | "NotAdhereInvalid";
+
+export type TreatmentPlanStatus = "InProgress" | "Closed";
+
+export interface TreatmentPlanItemDto {
+	id: string;
+	adherenceState: AdherenceState;
+	treatmentPlanStatus: TreatmentPlanStatus;
+	updatedAt: string;
+}
+
+export interface TreatmentPlanDetailDto {
+	id: string;
+	patient: {
+		id: string;
+		name: string;
+	};
+	doctorId: string;
+	diagnosis: string;
+	medicines: Array<{
+		id: string;
+		name: string;
+		classification: string;
+	}>;
+	reasonForMedicineChoice?: string | null;
+	adherenceState: AdherenceState;
+	status: TreatmentPlanStatus;
+	closeReason?: string | null;
+}
+
+export interface NextOfKinPayload {
+	fullName: string;
+	phoneNumber: string;
+	relationship: string;
+}
+
 export interface NextOfKin {
 	id: string;
 	fullName: string;
@@ -37,6 +73,7 @@ export interface Patient {
 	discharge?: string | null;
 	nextOfKins?: NextOfKin[];
 	treatmentCount?: number;
+	treatmentPlans?: TreatmentPlanItemDto[];
 }
 
 export type StatFilter = "all" | "Male" | "Female";
@@ -84,7 +121,7 @@ export interface PatientDto {
 	treatmentOutcome: TreatmentOutcome;
 	nextOfKins?: NextOfKin[];
 	treatments?: { id: string }[];
-	treatmentPlans?: { id: string }[];
+	treatmentPlans?: TreatmentPlanItemDto[];
 }
 
 export interface PatientPayload {
