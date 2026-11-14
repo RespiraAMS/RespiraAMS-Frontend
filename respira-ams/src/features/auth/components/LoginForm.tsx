@@ -25,15 +25,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-	login,
 	sendEmailVerification,
 	confirmEmailVerification,
 	getRememberedEmail,
 	setRememberedEmail,
 } from "../api";
+import { login } from "@/lib/auth";
 import { fetchCurrentDoctorProfile } from "@/features/profile/api";
 
 type AuthMode = "login" | "forgot-email" | "forgot-otp" | "forgot-reset";
+
+// Tạm ẩn luồng quên mật khẩu cho tới khi backend hỗ trợ đặt lại mật khẩu.
+const ENABLE_PASSWORD_RESET = false;
 
 export function LoginForm() {
 	const router = useRouter();
@@ -154,14 +157,14 @@ export function LoginForm() {
 		setIsLoading(true);
 
 		try {
-			const session = await login({
+			const user = await login({
 				email: trimmedEmail,
 				password: password,
 			});
 
 			setRememberedEmail(trimmedEmail, rememberMe);
 
-			const role = (session.user.role || "").toLowerCase();
+			const role = (user.role || "").toLowerCase();
 
 			// Xóa cache cũ để tránh hiển thị nhầm thông tin của tài khoản trước đó
 			if (typeof window !== "undefined") {
@@ -308,14 +311,14 @@ export function LoginForm() {
 	};
 
 	return (
-		<div className="flex w-full lg:w-1/2 flex-col justify-between bg-white px-8 py-10 min-h-screen select-none">
+		<div className="flex w-full lg:w-1/2 flex-col justify-between bg-surface px-8 py-10 min-h-screen select-none">
 			{/* Mobile logo header */}
 			<div className="mb-6 flex items-center gap-3 lg:hidden">
-				<div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[#0EA5E9] text-white font-bold text-sm shadow-[0_4px_12px_rgba(14,165,233,0.3)]">
+				<div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/30">
 					R.
 				</div>
-				<span className="text-lg font-bold text-slate-900">
-					Respira<span className="text-[#0EA5E9]">AMS</span>
+				<span className="text-lg font-bold text-text-primary">
+					Respira<span className="text-primary">AMS</span>
 				</span>
 			</div>
 
@@ -323,24 +326,24 @@ export function LoginForm() {
 			<div className="w-full max-w-md mx-auto my-auto py-4">
 				{/* Token loading state */}
 				{isConfirmingToken && (
-					<div className="mb-5 flex items-center gap-2.5 rounded-[16px] border border-sky-200 bg-sky-50 px-4 py-3 text-xs text-sky-800">
-						<Loader2 className="h-4 w-4 animate-spin text-[#0EA5E9]" />
+					<div className="mb-5 flex items-center gap-2.5 rounded-[16px] border border-primary/30 bg-primary/10 px-4 py-3 text-xs text-primary">
+						<Loader2 className="h-4 w-4 animate-spin text-primary" />
 						<span>Đang xác nhận liên kết kích hoạt tài khoản...</span>
 					</div>
 				)}
 
 				{/* Error Banner */}
 				{error && (
-					<div className="mb-5 flex items-start gap-2.5 rounded-[16px] border border-red-200 bg-red-50/80 px-4 py-3 text-xs text-red-700">
-						<AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+					<div className="mb-5 flex items-start gap-2.5 rounded-[16px] border border-error/30 bg-error/10 px-4 py-3 text-xs text-error">
+						<AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-error" />
 						<p className="flex-1 font-medium">{error}</p>
 					</div>
 				)}
 
 				{/* Success Banner */}
 				{successMessage && (
-					<div className="mb-5 flex items-start gap-2.5 rounded-[16px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
-						<CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+					<div className="mb-5 flex items-start gap-2.5 rounded-[16px] border border-success/30 bg-success/10 px-4 py-3 text-xs text-success">
+						<CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
 						<p className="flex-1 font-medium">{successMessage}</p>
 					</div>
 				)}
@@ -350,10 +353,10 @@ export function LoginForm() {
 					<div className="space-y-6">
 						{/* Title */}
 						<div className="space-y-1">
-							<h2 className="text-3xl font-bold tracking-tight text-slate-900">
+							<h2 className="text-3xl font-bold tracking-tight text-text-primary">
 								Đăng nhập
 							</h2>
-							<p className="text-xs text-slate-500 leading-relaxed">
+							<p className="text-xs text-text-secondary leading-relaxed">
 								Tiếp tục vào không gian làm việc y tế lâm sàng RespiraAMS.
 							</p>
 						</div>
@@ -364,12 +367,12 @@ export function LoginForm() {
 							<div className="space-y-1.5">
 								<Label
 									htmlFor="login-email"
-									className="text-xs font-semibold text-slate-700"
+									className="text-xs font-semibold text-text-primary"
 								>
 									Email hoặc mã nhân viên y tế
 								</Label>
 								<div className="relative">
-									<User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+									<User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
 									<Input
 										id="login-email"
 										type="text"
@@ -378,7 +381,7 @@ export function LoginForm() {
 										onChange={(e) => setEmail(e.target.value)}
 										disabled={isLoading}
 										required
-										className="h-12 pl-11 pr-4 text-xs rounded-[16px] border-slate-200 bg-white shadow-2xs focus-visible:ring-2 focus-visible:ring-[#0EA5E9]/20 focus-visible:border-[#0EA5E9] transition-all"
+										className="h-12 pl-11 pr-4 text-xs rounded-[16px] border-border-default bg-surface shadow-2xs focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
 									/>
 								</div>
 							</div>
@@ -387,12 +390,12 @@ export function LoginForm() {
 							<div className="space-y-1.5">
 								<Label
 									htmlFor="login-password"
-									className="text-xs font-semibold text-slate-700"
+									className="text-xs font-semibold text-text-primary"
 								>
 									Mật khẩu
 								</Label>
 								<div className="relative">
-									<Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+									<Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
 									<Input
 										id="login-password"
 										type={showPassword ? "text" : "password"}
@@ -401,13 +404,13 @@ export function LoginForm() {
 										onChange={(e) => setPassword(e.target.value)}
 										disabled={isLoading}
 										required
-										className="h-12 pl-11 pr-11 text-xs rounded-[16px] border-slate-200 bg-white shadow-2xs focus-visible:ring-2 focus-visible:ring-[#0EA5E9]/20 focus-visible:border-[#0EA5E9] transition-all"
+										className="h-12 pl-11 pr-11 text-xs rounded-[16px] border-border-default bg-surface shadow-2xs focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
 									/>
 									<button
 										type="button"
 										onClick={() => setShowPassword(!showPassword)}
 										tabIndex={-1}
-										className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+										className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer"
 									>
 										{showPassword ? (
 											<EyeOff className="h-4 w-4" />
@@ -425,34 +428,36 @@ export function LoginForm() {
 										id="remember-session"
 										checked={rememberMe}
 										onCheckedChange={(checked) => setRememberMe(checked === true)}
-										className="border-slate-300 data-[state=checked]:bg-[#0EA5E9] data-[state=checked]:border-[#0EA5E9] rounded-[5px] cursor-pointer"
+										className="border-border-default data-[state=checked]:bg-primary data-[state=checked]:border-primary rounded-[5px] cursor-pointer"
 									/>
 									<Label
 										htmlFor="remember-session"
-										className="text-xs text-slate-600 cursor-pointer font-normal select-none"
+										className="text-xs text-text-secondary cursor-pointer font-normal select-none"
 									>
 										Ghi nhớ phiên làm việc trên máy này
 									</Label>
 								</div>
-								<button
-									type="button"
-									onClick={() => {
-										setMode("forgot-email");
-										setForgotEmail(email);
-										setError(null);
-										setSuccessMessage(null);
-									}}
-									className="text-xs font-medium text-[#0EA5E9] hover:underline cursor-pointer"
-								>
-									Quên mật khẩu?
-								</button>
+								{ENABLE_PASSWORD_RESET && (
+									<button
+										type="button"
+										onClick={() => {
+											setMode("forgot-email");
+											setForgotEmail(email);
+											setError(null);
+											setSuccessMessage(null);
+										}}
+										className="text-xs font-medium text-primary hover:underline cursor-pointer"
+									>
+										Quên mật khẩu?
+									</button>
+								)}
 							</div>
 
 							{/* Nút Đăng nhập */}
 							<Button
 								type="submit"
 								disabled={isLoading}
-								className="w-full h-12 rounded-[16px] bg-[#0EA5E9] hover:bg-[#0284C7] text-white text-xs font-semibold shadow-[0_4px_14px_rgba(14,165,233,0.3)] transition-all cursor-pointer flex items-center justify-center gap-2"
+								className="w-full h-12 rounded-[16px] bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-lg shadow-primary/30 transition-all cursor-pointer flex items-center justify-center gap-2"
 							>
 								{isLoading ? (
 									<Loader2 className="h-4 w-4 animate-spin" />
@@ -466,8 +471,8 @@ export function LoginForm() {
 
 							{/* Phân cách: hoặc */}
 							<div className="relative my-4 flex items-center justify-center">
-								<div className="w-full border-t border-slate-100" />
-								<span className="absolute bg-white px-3 text-[11px] text-slate-400">
+								<div className="w-full border-t border-border-subtle" />
+								<span className="absolute bg-surface px-3 text-[11px] text-text-tertiary">
 									hoặc
 								</span>
 							</div>
@@ -475,34 +480,34 @@ export function LoginForm() {
 							{/* Nút dùng mã nhân viên / thẻ bệnh viện */}
 							<button
 								type="button"
-								className="w-full h-12 rounded-[16px] border border-[#0EA5E9] text-[#0EA5E9] hover:bg-sky-50/40 text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+								className="w-full h-12 rounded-[16px] border border-primary text-primary hover:bg-primary/10 text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
 							>
-								<CreditCard className="h-4 w-4 text-[#0EA5E9]" />
+								<CreditCard className="h-4 w-4 text-primary" />
 								<span>Dùng mã nhân viên / Thẻ bệnh viện</span>
 							</button>
 
 							{/* Box Phiên đăng nhập an toàn */}
-							<div className="rounded-[20px] bg-[#F8FAFC] border border-slate-100 p-4.5 flex items-start gap-3.5 mt-5">
-								<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-sky-50 text-[#0EA5E9]">
+							<div className="rounded-[20px] bg-background border border-border-subtle p-4.5 flex items-start gap-3.5 mt-5">
+								<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-primary/10 text-primary">
 									<ShieldCheck className="h-4 w-4" />
 								</div>
 								<div className="space-y-0.5">
-									<h4 className="text-xs font-bold text-slate-800">
+									<h4 className="text-xs font-bold text-text-primary">
 										Phiên đăng nhập an toàn
 									</h4>
-									<p className="text-[11px] text-slate-500 leading-relaxed">
+									<p className="text-[11px] text-text-secondary leading-relaxed">
 										Tự động khóa sau 15 phút không thao tác nhằm bảo vệ bí mật y khoa và quyền hạn chỉ định dược lâm sàng.
 									</p>
 								</div>
 							</div>
 
 							{/* Tài khoản mẫu thử nghiệm phân quyền */}
-							<div className="rounded-[16px] border border-slate-200/80 bg-slate-50/70 p-3.5 space-y-2 mt-3">
+							<div className="rounded-[16px] border border-border-default/80 bg-surface-secondary/70 p-3.5 space-y-2 mt-3">
 								<div className="flex items-center justify-between">
-									<p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+									<p className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
 										Tài khoản mẫu thử nghiệm
 									</p>
-									<span className="text-[10px] text-slate-400">Click để điền nhanh</span>
+									<span className="text-[10px] text-text-tertiary">Click để điền nhanh</span>
 								</div>
 								<div className="grid grid-cols-3 gap-2">
 									<button
@@ -512,10 +517,10 @@ export function LoginForm() {
 											setPassword("Admin@123");
 											setError(null);
 										}}
-										className="rounded-[10px] border border-sky-200 bg-white p-2 text-left hover:border-sky-400 hover:bg-sky-50/30 transition-all cursor-pointer shadow-2xs"
+										className="rounded-[10px] border border-primary/30 bg-surface p-2 text-left hover:border-primary hover:bg-primary/10 transition-all cursor-pointer shadow-2xs"
 									>
-										<p className="text-[11px] font-bold text-[#0284C7]">Bác sĩ</p>
-										<p className="text-[9.5px] text-slate-500 truncate">doctor@respira.ams</p>
+										<p className="text-[11px] font-bold text-primary">Bác sĩ</p>
+										<p className="text-[9.5px] text-text-secondary truncate">doctor@respira.ams</p>
 									</button>
 
 									<button
@@ -525,10 +530,10 @@ export function LoginForm() {
 											setPassword("Admin@123");
 											setError(null);
 										}}
-										className="rounded-[10px] border border-purple-200 bg-white p-2 text-left hover:border-purple-400 hover:bg-purple-50/30 transition-all cursor-pointer shadow-2xs"
+										className="rounded-[10px] border border-warning/30 bg-surface p-2 text-left hover:border-warning hover:bg-warning/10 transition-all cursor-pointer shadow-2xs"
 									>
-										<p className="text-[11px] font-bold text-purple-700">Admin</p>
-										<p className="text-[9.5px] text-slate-500 truncate">admin@respira.ams</p>
+										<p className="text-[11px] font-bold text-warning">Admin</p>
+										<p className="text-[9.5px] text-text-secondary truncate">admin@respira.ams</p>
 									</button>
 
 									<button
@@ -538,10 +543,10 @@ export function LoginForm() {
 											setPassword("Admin@123");
 											setError(null);
 										}}
-										className="rounded-[10px] border border-emerald-200 bg-white p-2 text-left hover:border-emerald-400 hover:bg-emerald-50/30 transition-all cursor-pointer shadow-2xs"
+										className="rounded-[10px] border border-success/30 bg-surface p-2 text-left hover:border-success hover:bg-success/10 transition-all cursor-pointer shadow-2xs"
 									>
-										<p className="text-[11px] font-bold text-emerald-700">Quản lý</p>
-										<p className="text-[9.5px] text-slate-500 truncate">manager@respira.ams</p>
+										<p className="text-[11px] font-bold text-success">Quản lý</p>
+										<p className="text-[9.5px] text-text-secondary truncate">manager@respira.ams</p>
 									</button>
 								</div>
 							</div>
@@ -554,13 +559,13 @@ export function LoginForm() {
 					<div className="space-y-6">
 						{/* Icon Key Header */}
 						<div>
-							<div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-sky-50 text-[#0EA5E9] mb-4">
+							<div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-primary/10 text-primary mb-4">
 								<Key className="h-5 w-5" />
 							</div>
-							<h2 className="text-2xl font-bold tracking-tight text-slate-900">
+							<h2 className="text-2xl font-bold tracking-tight text-text-primary">
 								Quên mật khẩu?
 							</h2>
-							<p className="text-xs text-slate-500 mt-2 leading-relaxed">
+							<p className="text-xs text-text-secondary mt-2 leading-relaxed">
 								Nhập email công việc hoặc mã nhân viên y tế đã đăng ký. Hệ thống sẽ gửi mã xác thực gồm 6 chữ số để khôi phục quyền truy cập tài khoản.
 							</p>
 						</div>
@@ -570,12 +575,12 @@ export function LoginForm() {
 							<div className="space-y-1.5">
 								<Label
 									htmlFor="forgot-email"
-									className="text-xs font-semibold text-slate-700"
+									className="text-xs font-semibold text-text-primary"
 								>
-									Email công việc hoặc Mã nhân viên <span className="text-red-500">*</span>
+									Email công việc hoặc Mã nhân viên <span className="text-error">*</span>
 								</Label>
 								<div className="relative">
-									<AtSign className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+									<AtSign className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
 									<Input
 										id="forgot-email"
 										type="email"
@@ -584,10 +589,10 @@ export function LoginForm() {
 										onChange={(e) => setForgotEmail(e.target.value)}
 										disabled={isSendingVerify}
 										required
-										className="h-12 pl-11 pr-4 text-xs rounded-[16px] border-slate-200 bg-white shadow-2xs focus-visible:ring-2 focus-visible:ring-[#0EA5E9]/20 focus-visible:border-[#0EA5E9] transition-all"
+										className="h-12 pl-11 pr-4 text-xs rounded-[16px] border-border-default bg-surface shadow-2xs focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
 									/>
 								</div>
-								<p className="text-[11px] text-slate-400">
+								<p className="text-[11px] text-text-tertiary">
 									Được cấp bởi Ban Công nghệ Thông tin Bệnh viện tiếp nhận dịch vụ.
 								</p>
 							</div>
@@ -596,7 +601,7 @@ export function LoginForm() {
 							<Button
 								type="submit"
 								disabled={isSendingVerify}
-								className="w-full h-12 rounded-[16px] bg-[#0EA5E9] hover:bg-[#0284C7] text-white text-xs font-semibold shadow-[0_4px_14px_rgba(14,165,233,0.3)] transition-all cursor-pointer flex items-center justify-center gap-2"
+								className="w-full h-12 rounded-[16px] bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-lg shadow-primary/30 transition-all cursor-pointer flex items-center justify-center gap-2"
 							>
 								{isSendingVerify ? (
 									<Loader2 className="h-4 w-4 animate-spin" />
@@ -616,22 +621,22 @@ export function LoginForm() {
 									setError(null);
 									setSuccessMessage(null);
 								}}
-								className="w-full h-12 rounded-[16px] bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer"
+								className="w-full h-12 rounded-[16px] bg-surface-secondary hover:bg-surface-tertiary text-text-primary text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer"
 							>
 								Quay lại đăng nhập
 							</button>
 
 							{/* Box Không nhận được email */}
-							<div className="rounded-[20px] bg-[#F8FAFC] border border-slate-100 p-4.5 flex items-start gap-3.5 mt-5">
-								<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-amber-50 text-amber-500">
+							<div className="rounded-[20px] bg-background border border-border-subtle p-4.5 flex items-start gap-3.5 mt-5">
+								<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-warning/10 text-warning">
 									<HelpCircle className="h-4 w-4" />
 								</div>
 								<div className="space-y-0.5">
-									<h4 className="text-xs font-bold text-slate-800">
+									<h4 className="text-xs font-bold text-text-primary">
 										Không nhận được email?
 									</h4>
-									<p className="text-[11px] text-slate-500 leading-relaxed">
-										Kiểm tra thư rác (Spam) hoặc liên hệ trực tiếp <span className="font-semibold text-slate-700">Quản trị viên CNTT Bệnh viện</span> để được hỗ trợ xác minh danh tính và cấp lại tài khoản nhân viên y tế khẩn cấp.
+									<p className="text-[11px] text-text-secondary leading-relaxed">
+										Kiểm tra thư rác (Spam) hoặc liên hệ trực tiếp <span className="font-semibold text-text-primary">Quản trị viên CNTT Bệnh viện</span> để được hỗ trợ xác minh danh tính và cấp lại tài khoản nhân viên y tế khẩn cấp.
 									</p>
 								</div>
 							</div>
@@ -644,21 +649,21 @@ export function LoginForm() {
 					<div className="space-y-6">
 						{/* Step Badge */}
 						<div className="flex justify-center">
-							<span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3.5 py-1 text-[11px] font-semibold text-[#0EA5E9]">
-								<span className="h-1.5 w-1.5 rounded-full bg-[#0EA5E9]" />
+							<span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-[11px] font-semibold text-primary">
+								<span className="h-1.5 w-1.5 rounded-full bg-primary" />
 								Bước 1/2 · Xác minh danh tính
 							</span>
 						</div>
 
 						{/* Title */}
 						<div className="text-center space-y-1.5">
-							<h2 className="text-2xl font-bold tracking-tight text-slate-900">
+							<h2 className="text-2xl font-bold tracking-tight text-text-primary">
 								Nhập mã xác thực
 							</h2>
-							<p className="text-xs text-slate-500 leading-relaxed">
+							<p className="text-xs text-text-secondary leading-relaxed">
 								Mã 6 chữ số đã được gửi đến hộp thư công vụ
 								<br />
-								<span className="font-semibold text-slate-700">{maskEmail(forgotEmail)}</span>
+								<span className="font-semibold text-text-primary">{maskEmail(forgotEmail)}</span>
 							</p>
 						</div>
 
@@ -677,14 +682,14 @@ export function LoginForm() {
 										value={digit}
 										onChange={(e) => handleOtpChange(idx, e.target.value)}
 										onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-										className="h-14 w-12 sm:w-13 rounded-[16px] border border-slate-200 text-center text-xl font-bold text-slate-900 shadow-2xs focus:border-[#0EA5E9] focus:ring-2 focus:ring-[#0EA5E9]/20 outline-none transition-all"
+										className="h-14 w-12 sm:w-13 rounded-[16px] border border-border-default text-center text-xl font-bold text-text-primary shadow-2xs focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
 									/>
 								))}
 							</div>
 
 							{/* Countdown & Gửi lại */}
 							<div className="flex items-center justify-between text-xs px-1">
-								<div className="flex items-center gap-1.5 text-slate-500">
+								<div className="flex items-center gap-1.5 text-text-secondary">
 									<Clock className="h-3.5 w-3.5" />
 									<span>Gửi lại mã sau {formatCountdown(countdown)}</span>
 								</div>
@@ -692,7 +697,7 @@ export function LoginForm() {
 									type="button"
 									onClick={handleResendOtp}
 									disabled={!canResend || isSendingVerify}
-									className="font-semibold text-[#0EA5E9] hover:underline disabled:opacity-40 disabled:no-underline cursor-pointer"
+									className="font-semibold text-primary hover:underline disabled:opacity-40 disabled:no-underline cursor-pointer"
 								>
 									Gửi lại mã
 								</button>
@@ -701,7 +706,7 @@ export function LoginForm() {
 							{/* Nút Xác nhận */}
 							<Button
 								type="submit"
-								className="w-full h-12 rounded-[16px] bg-[#0EA5E9] hover:bg-[#0284C7] text-white text-xs font-semibold shadow-[0_4px_14px_rgba(14,165,233,0.3)] transition-all cursor-pointer flex items-center justify-center gap-2"
+								className="w-full h-12 rounded-[16px] bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-lg shadow-primary/30 transition-all cursor-pointer flex items-center justify-center gap-2"
 							>
 								<span>Xác nhận</span>
 								<ArrowRight className="h-4 w-4" />
@@ -714,21 +719,21 @@ export function LoginForm() {
 									setMode("forgot-email");
 									setError(null);
 								}}
-								className="w-full h-12 rounded-[16px] bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer"
+								className="w-full h-12 rounded-[16px] bg-surface-secondary hover:bg-surface-tertiary text-text-primary text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer"
 							>
 								Đổi email nhận mã
 							</button>
 
 							{/* Box Bảo mật tài khoản */}
-							<div className="rounded-[20px] bg-[#F8FAFC] border border-slate-100 p-4.5 flex items-start gap-3.5 mt-5">
-								<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-emerald-50 text-emerald-600">
+							<div className="rounded-[20px] bg-background border border-border-subtle p-4.5 flex items-start gap-3.5 mt-5">
+								<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-success/10 text-success">
 									<ShieldCheck className="h-4 w-4" />
 								</div>
 								<div className="space-y-0.5">
-									<h4 className="text-xs font-bold text-slate-800">
+									<h4 className="text-xs font-bold text-text-primary">
 										Bảo mật tài khoản
 									</h4>
-									<p className="text-[11px] text-slate-500 leading-relaxed">
+									<p className="text-[11px] text-text-secondary leading-relaxed">
 										Không chia sẻ mã xác thực cho bất kỳ ai. Mã sẽ hết hiệu lực sau 10 phút và chỉ dùng một lần duy nhất cho phiên làm việc này.
 									</p>
 								</div>
@@ -742,18 +747,18 @@ export function LoginForm() {
 					<div className="space-y-6">
 						{/* Step Badge */}
 						<div className="flex justify-center">
-							<span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3.5 py-1 text-[11px] font-semibold text-[#0EA5E9]">
-								<span className="h-1.5 w-1.5 rounded-full bg-[#0EA5E9]" />
+							<span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-[11px] font-semibold text-primary">
+								<span className="h-1.5 w-1.5 rounded-full bg-primary" />
 								Bước 2/2 · Thiết lập mật khẩu
 							</span>
 						</div>
 
 						{/* Title */}
 						<div className="text-center space-y-1.5">
-							<h2 className="text-2xl font-bold tracking-tight text-slate-900">
+							<h2 className="text-2xl font-bold tracking-tight text-text-primary">
 								Tạo mật khẩu mới
 							</h2>
-							<p className="text-xs text-slate-500 leading-relaxed">
+							<p className="text-xs text-text-secondary leading-relaxed">
 								Chọn mật khẩu mạnh để bảo vệ thông tin bệnh nhân và phiên làm việc
 							</p>
 						</div>
@@ -764,12 +769,12 @@ export function LoginForm() {
 							<div className="space-y-1.5">
 								<Label
 									htmlFor="new-password"
-									className="text-xs font-semibold text-slate-700"
+									className="text-xs font-semibold text-text-primary"
 								>
 									Mật khẩu mới
 								</Label>
 								<div className="relative">
-									<Key className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+									<Key className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
 									<Input
 										id="new-password"
 										type={showNewPassword ? "text" : "password"}
@@ -777,13 +782,13 @@ export function LoginForm() {
 										value={newPassword}
 										onChange={(e) => setNewPassword(e.target.value)}
 										required
-										className="h-12 pl-11 pr-11 text-xs rounded-[16px] border-slate-200 bg-white shadow-2xs focus-visible:ring-2 focus-visible:ring-[#0EA5E9]/20 focus-visible:border-[#0EA5E9] transition-all"
+										className="h-12 pl-11 pr-11 text-xs rounded-[16px] border-border-default bg-surface shadow-2xs focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
 									/>
 									<button
 										type="button"
 										onClick={() => setShowNewPassword(!showNewPassword)}
 										tabIndex={-1}
-										className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+										className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer"
 									>
 										{showNewPassword ? (
 											<EyeOff className="h-4 w-4" />
@@ -798,12 +803,12 @@ export function LoginForm() {
 							<div className="space-y-1.5">
 								<Label
 									htmlFor="confirm-password"
-									className="text-xs font-semibold text-slate-700"
+									className="text-xs font-semibold text-text-primary"
 								>
 									Mật khẩu
 								</Label>
 								<div className="relative">
-									<Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+									<Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
 									<Input
 										id="confirm-password"
 										type={showConfirmPassword ? "text" : "password"}
@@ -811,13 +816,13 @@ export function LoginForm() {
 										value={confirmPassword}
 										onChange={(e) => setConfirmPassword(e.target.value)}
 										required
-										className="h-12 pl-11 pr-11 text-xs rounded-[16px] border-slate-200 bg-white shadow-2xs focus-visible:ring-2 focus-visible:ring-[#0EA5E9]/20 focus-visible:border-[#0EA5E9] transition-all"
+										className="h-12 pl-11 pr-11 text-xs rounded-[16px] border-border-default bg-surface shadow-2xs focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
 									/>
 									<button
 										type="button"
 										onClick={() => setShowConfirmPassword(!showConfirmPassword)}
 										tabIndex={-1}
-										className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+										className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer"
 									>
 										{showConfirmPassword ? (
 											<EyeOff className="h-4 w-4" />
@@ -831,7 +836,7 @@ export function LoginForm() {
 							{/* Nút Đổi mật khẩu */}
 							<Button
 								type="submit"
-								className="w-full h-12 rounded-[16px] bg-[#0EA5E9] hover:bg-[#0284C7] text-white text-xs font-semibold shadow-[0_4px_14px_rgba(14,165,233,0.3)] transition-all cursor-pointer flex items-center justify-center gap-2"
+								className="w-full h-12 rounded-[16px] bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-lg shadow-primary/30 transition-all cursor-pointer flex items-center justify-center gap-2"
 							>
 								<span>Đổi mật khẩu</span>
 								<ArrowRight className="h-4 w-4" />
@@ -844,7 +849,7 @@ export function LoginForm() {
 									setMode("login");
 									setError(null);
 								}}
-								className="w-full h-12 rounded-[16px] bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer"
+								className="w-full h-12 rounded-[16px] bg-surface-secondary hover:bg-surface-tertiary text-text-primary text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer"
 							>
 								Hủy và quay lại
 							</button>
@@ -854,12 +859,12 @@ export function LoginForm() {
 			</div>
 
 			{/* Footer Copyright */}
-			<div className="w-full text-center space-y-1 pt-6 text-[10.5px] text-slate-400">
+			<div className="w-full text-center space-y-1 pt-6 text-[10.5px] text-text-tertiary">
 				<p>
 					Cần hỗ trợ? Liên hệ Quản trị viên CNTT Bệnh viện qua tổng đài nội bộ hoặc Hotline:{" "}
-					<span className="font-semibold text-slate-600">1900 6868</span>
+					<span className="font-semibold text-text-secondary">1900 6868</span>
 				</p>
-				<p className="text-[10px] text-slate-400/80">
+				<p className="text-[10px] text-text-tertiary/80">
 					&copy; 2025 RespiraAMS Healthcare Technology. Bản quyền thuộc về Bộ Y tế &amp; Viện Vi sinh.
 				</p>
 			</div>

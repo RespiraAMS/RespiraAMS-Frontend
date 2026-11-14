@@ -1,5 +1,6 @@
 import { apiRequest, buildQuery } from "@/lib/api";
-import { getStoredUser, parseJwt, getStoredAccessToken } from "@/features/auth/api";
+import { getUser } from "@/lib/auth";
+import { API_V1, CLIENT_API_BASE } from "@/lib/api-base";
 import {
 	UserItem,
 	CreateUserPayload,
@@ -7,10 +8,47 @@ import {
 	UserFilters,
 	UserStats,
 	UserStatus,
+	UserRole,
+	AcademicTitle,
+	DegreeType,
+	GenderType,
+	PositionType,
 } from "./types";
 
 const USERS_STORAGE_KEY = "respira_admin_users_v1";
 const DELETED_USERS_STORAGE_KEY = "respira_admin_deleted_users_v1";
+const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+const CREATE_POLL_INTERVAL_MS = 1200;
+const CREATE_TIMEOUT_MS = 30000;
+
+export interface CreateUserResult {
+	sagaId: string;
+	user: UserItem | null;
+	emailSent: boolean;
+}
+
+interface CreateSagaStatus {
+	sagaId?: string;
+	step?: string;
+	accountId?: string;
+	doctorId?: string;
+	failureReason?: string | null;
+}
+
+interface BackendAuditLogEntry {
+	id: string;
+	action: string;
+	correlationId?: string | null;
+}
+
+interface BackendAuditLogPagination {
+	items?: BackendAuditLogEntry[];
+}
+
+interface AuditOutcome {
+	created: boolean;
+	emailFailed: boolean;
+}
 
 function getStoredDeletedUserIds(): string[] {
 	if (typeof window === "undefined") return [];
@@ -82,18 +120,18 @@ interface BackendDoctorDto {
 }
 
 function mapBackendDoctorToUser(doc: BackendDoctorDto): UserItem {
-	const roleStr =
-		doc.accountRole ||
-		(doc.role === "HeadDepartmentDoctor" ? "Manager" : "Doctor");
-	const role: "Doctor" | "Manager" | "Admin" =
-		roleStr === "Admin"
-			? "Admin"
-			: roleStr === "HeadDepartmentDoctor" || roleStr === "Manager"
-			? "Manager"
-			: "Doctor";
+	const roleStr = doc.accountRole || doc.role || "Doctor";
+	let role: UserRole = "Doctor";
 
-	const status: UserStatus =
-		doc.accountStatus === "Inactive" ? "Inactive" : "Active";
+	if (roleStr === "Admin") {
+		role = "Admin";
+	} else if (roleStr === "MedicalRegulationReviewer") {
+		role = "Manager";
+	} else if (roleStr === "HeadDepartmentDoctor") {
+		role = "HeadDepartmentDoctor";
+	}
+
+	const status: UserStatus = doc.accountStatus === "Inactive" ? "Inactive" : "Active";
 
 	return {
 		id: doc.accountId || doc.id,
@@ -106,10 +144,10 @@ function mapBackendDoctorToUser(doc: BackendDoctorDto): UserItem {
 		isEmailConfirmed: doc.isEmailConfirmed ?? true,
 		firstName: doc.firstName || "",
 		lastName: doc.lastName || "",
-		degrees: (doc.degrees as any) || [],
-		academicTitle: (doc.academicTitle as any) || "None",
-		position: (doc.position as any) || "StaffDoctor",
-		gender: (doc.gender as any) || "Male",
+		degrees: (doc.degrees as DegreeType[] | undefined) || [],
+		academicTitle: (doc.academicTitle as AcademicTitle | undefined) || "None",
+		position: (doc.position as PositionType | undefined) || "StaffDoctor",
+		gender: (doc.gender as GenderType | undefined) || "Male",
 		citizenIdentificationNumber: doc.citizenIdentificationNumber || "",
 		dateOfBirth: doc.dateOfBirth
 			? String(doc.dateOfBirth)
@@ -132,7 +170,6 @@ export async function fetchUsers(
 	pageSize: number = 10
 ): Promise<{ items: UserItem[]; total: number; stats: UserStats }> {
 	let remoteUsers: UserItem[] = [];
-	let backendTotal = 0;
 
 	// 1. Gọi trực tiếp API Backend qua Gateway
 	try {
@@ -141,9 +178,12 @@ export async function fetchUsers(
 			Size: Math.max(pageSize, 50),
 		};
 
-		if (filters?.role && filters.role !== "ALL") {
-			query["Filter.Role"] =
-				filters.role === "Manager" ? "HeadDepartmentDoctor" : filters.role;
+		if (
+			filters?.role &&
+			filters.role !== "ALL" &&
+			(filters.role === "Doctor" || filters.role === "HeadDepartmentDoctor")
+		) {
+			query.Role = filters.role;
 		}
 
 		let endpoint = "/doctors";
@@ -160,10 +200,6 @@ export async function fetchUsers(
 
 		if (res?.items && Array.isArray(res.items)) {
 			remoteUsers = res.items.map(mapBackendDoctorToUser);
-			backendTotal =
-				res.metadata?.totalItemCount ??
-				res.metadata?.totalCount ??
-				remoteUsers.length;
 		}
 	} catch (e) {
 		console.warn("[AdminUsersAPI] Không thể tải /doctors từ Backend, kiểm tra bộ nhớ đệm:", e);
@@ -179,13 +215,7 @@ export async function fetchUsers(
 	);
 
 	// 2. Bổ sung tài khoản Admin đang đăng nhập thực tế (nếu role cho phép)
-	const currentAuthUser = getStoredUser();
-	let currentTokenUser = null;
-	const token = getStoredAccessToken();
-	if (token) {
-		currentTokenUser = parseJwt(token);
-	}
-	const activeAccount = currentAuthUser || currentTokenUser;
+	const activeAccount = getUser();
 
 	// Nạp các cập nhật cục bộ của Admin lên ưu tiên hàng đầu để không bị đè mất
 	const localStored = getStoredLocalUsers();
@@ -212,7 +242,7 @@ export async function fetchUsers(
 				email: lu.email || ru.email,
 				firstName: lu.firstName || ru.firstName,
 				lastName: lu.lastName || ru.lastName,
-				role: lu.role || ru.role,
+				role: ru.role,
 				status: lu.status || ru.status,
 				phone: lu.phone || ru.phone,
 				citizenIdentificationNumber:
@@ -233,35 +263,21 @@ export async function fetchUsers(
 		mergedMap.set(key, u);
 	}
 
-	// Thêm các tài khoản tạo mới cục bộ chưa có trong backend
-	for (const lu of localStored) {
-		const key = lu.id || lu.email.toLowerCase();
-		if (!mergedMap.has(key)) {
-			const existsByEmail = Array.from(mergedMap.values()).some(
-				(item) => item.email.toLowerCase() === lu.email.toLowerCase()
-			);
-			if (!existsByEmail) {
-				mergedMap.set(key, lu);
-			}
-		}
-	}
-
 	// Bổ sung tài khoản Admin đang hoạt động nếu chưa có trong danh sách
-	if (
-		activeAccount?.email &&
-		(activeAccount.role === "Admin" || (activeAccount as any).role === "Admin")
-	) {
+	if (activeAccount?.email && activeAccount.role === "Admin") {
 		const exists = Array.from(mergedMap.values()).some(
 			(u) =>
 				u.role === "Admin" ||
 				u.email.toLowerCase() === activeAccount.email.toLowerCase()
 		);
 		if (!exists) {
-			const adminName = (activeAccount as any).name || "Quản trị viên";
+			const adminName =
+				[activeAccount.firstName, activeAccount.lastName].filter(Boolean).join(" ") ||
+				"Quản trị viên";
 			const adminUser: UserItem = {
 				id: activeAccount.id || "admin-account-id",
 				email: activeAccount.email,
-				phone: (activeAccount as any).phone || "",
+				phone: activeAccount.phoneNumber || "",
 				role: "Admin",
 				status: "Active",
 				isEmailConfirmed: true,
@@ -307,7 +323,9 @@ export async function fetchUsers(
 	const stats: UserStats = {
 		total: allUsers.length,
 		doctors: allUsers.filter((u) => u.role === "Doctor").length,
-		managers: allUsers.filter((u) => u.role === "Manager").length,
+		managers: allUsers.filter(
+			(u) => u.role === "Manager" || u.role === "HeadDepartmentDoctor"
+		).length,
 		admins: allUsers.filter((u) => u.role === "Admin").length,
 		active: allUsers.filter((u) => u.status === "Active").length,
 		inactive: allUsers.filter((u) => u.status === "Inactive").length,
@@ -338,85 +356,214 @@ export async function fetchUserById(id: string): Promise<UserItem | null> {
 	return local.find((u) => u.id === id || u.doctorId === id) || null;
 }
 
-/**
- * Tạo người dùng mới qua Saga ProfileCreate
- */
-export async function createUser(
-	payload: CreateUserPayload
-): Promise<{ sagaId: string; user: UserItem }> {
-	let backendSagaId: string | null = null;
+function delay(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-	const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-	const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5016/api/v1").replace(/\/$/, "");
+function translateCreateError(message: string): string {
+	if (/already exists/i.test(message)) return "Email này đã được sử dụng.";
+	if (/avatar.*required/i.test(message)) {
+		return "Ảnh đại diện là bắt buộc với tài khoản bác sĩ.";
+	}
+	if (/cannot create/i.test(message)) {
+		return "Bạn không có quyền tạo tài khoản với vai trò này.";
+	}
+	return message;
+}
 
+async function getCreateSagaStatus(sagaId: string): Promise<CreateSagaStatus | null> {
 	try {
-		const formData = new FormData();
-		const requestBody = {
-			email: payload.email,
-			password: payload.password,
-			phone: payload.phone,
-			role: payload.role === "Manager" ? "HeadDepartmentDoctor" : "Doctor",
-			firstName: payload.firstName,
-			lastName: payload.lastName,
-			degrees: payload.degrees,
-			academicTitle: payload.academicTitle,
-			position: payload.position,
-			gender: payload.gender,
-			citizenIdentificationNumber: payload.citizenIdentificationNumber,
-			dateOfBirth: payload.dateOfBirth,
-			address: payload.address,
+		return await apiRequest<CreateSagaStatus>(`/profile/create/${sagaId}`);
+	} catch {
+		return null;
+	}
+}
+
+async function findDoctorById(doctorId: string): Promise<UserItem | null> {
+	try {
+		const res = await apiRequest<BackendDoctorDto>(`/doctors/${doctorId}`);
+		return res ? mapBackendDoctorToUser(res) : null;
+	} catch {
+		return null;
+	}
+}
+
+async function findDoctorByEmail(email: string): Promise<UserItem | null> {
+	try {
+		const res = await apiRequest<{ items?: BackendDoctorDto[] }>(
+			`/doctors${buildQuery({ Page: 1, Size: 200 })}`
+		);
+		const normalizedEmail = email.trim().toLowerCase();
+		const match = res?.items?.find(
+			(item) => (item.email || "").trim().toLowerCase() === normalizedEmail
+		);
+		return match ? mapBackendDoctorToUser(match) : null;
+	} catch {
+		return null;
+	}
+}
+
+async function readCreateAudit(sagaId: string): Promise<AuditOutcome> {
+	try {
+		const res = await apiRequest<BackendAuditLogPagination>(
+			`/audit-logs${buildQuery({ page: 1, pageSize: 100 })}`
+		);
+		const items = res?.items ?? [];
+
+		return {
+			created: items.some(
+				(entry) =>
+					entry.correlationId === sagaId &&
+					entry.action === "Authentication.AccountCreated"
+			),
+			emailFailed: items.some(
+				(entry) =>
+					entry.correlationId === sagaId &&
+					entry.action === "Authentication.VerificationEmailFailed"
+			),
 		};
+	} catch {
+		return { created: false, emailFailed: false };
+	}
+}
 
-		formData.append("request", JSON.stringify(requestBody));
-		if (payload.avatarFile) {
-			formData.append("avatar", payload.avatarFile);
+async function waitForCreatedAccount(
+	sagaId: string,
+	payload: CreateUserPayload
+): Promise<CreateUserResult> {
+	const startedAt = Date.now();
+	const deadline = startedAt + CREATE_TIMEOUT_MS;
+	let lastFailure: string | null = null;
+	let lastAudit: AuditOutcome = { created: false, emailFailed: false };
+
+	while (Date.now() < deadline) {
+		const status = await getCreateSagaStatus(sagaId);
+		if (status?.failureReason) lastFailure = status.failureReason;
+
+		if (status?.doctorId && status.doctorId !== EMPTY_GUID) {
+			const doctor = await findDoctorById(status.doctorId);
+			if (doctor) {
+				const audit = await readCreateAudit(sagaId);
+				return { sagaId, user: doctor, emailSent: !audit.emailFailed };
+			}
 		}
 
-		const response = await fetch(`${API_BASE}/profile/create`, {
-			method: "POST",
-			headers: {
-				...(token ? { Authorization: `Bearer ${token}` } : {}),
-			},
-			body: formData,
-		});
+		lastAudit = await readCreateAudit(sagaId);
 
-		if (response.ok) {
-			const json = await response.json();
-			backendSagaId = json?.data || json?.id;
+		if (payload.role !== "Manager") {
+			const doctor = await findDoctorByEmail(payload.email);
+			if (doctor) {
+				return { sagaId, user: doctor, emailSent: !lastAudit.emailFailed };
+			}
 		}
-	} catch (e) {
-		console.warn("Lỗi khi kết nối tới Saga ProfileCreate:", e);
+
+		if (lastAudit.created) {
+			if (payload.role !== "Manager") {
+				const doctor = await findDoctorByEmail(payload.email);
+				if (doctor) {
+					return { sagaId, user: doctor, emailSent: !lastAudit.emailFailed };
+				}
+			} else {
+				return { sagaId, user: null, emailSent: !lastAudit.emailFailed };
+			}
+		}
+
+		if (lastFailure) {
+			await delay(700);
+			const finalAudit = await readCreateAudit(sagaId);
+			if (finalAudit.created) {
+				return { sagaId, user: null, emailSent: !finalAudit.emailFailed };
+			}
+			throw new Error(translateCreateError(lastFailure));
+		}
+
+		await delay(Date.now() - startedAt < 5000 ? 500 : CREATE_POLL_INTERVAL_MS);
 	}
 
-	const sagaId = backendSagaId || `saga-create-${Date.now()}`;
-	const newId = `usr-${Date.now()}`;
-	const newDoctorId = `doc-${Date.now()}`;
+	if (lastAudit.created) {
+		return { sagaId, user: null, emailSent: !lastAudit.emailFailed };
+	}
 
-	const newUser: UserItem = {
-		id: newId,
-		doctorId: newDoctorId,
-		email: payload.email,
-		phone: payload.phone,
-		role: payload.role,
-		status: "Active",
-		isEmailConfirmed: true,
-		firstName: payload.firstName,
-		lastName: payload.lastName,
-		degrees: payload.degrees,
-		academicTitle: payload.academicTitle,
-		position: payload.position,
-		gender: payload.gender,
-		citizenIdentificationNumber: payload.citizenIdentificationNumber,
-		dateOfBirth: payload.dateOfBirth,
-		address: payload.address,
-		avatarUrl: payload.avatarFile ? URL.createObjectURL(payload.avatarFile) : undefined,
-		createdAt: new Date().toISOString(),
-	};
+	throw new Error(
+		"Tạo tài khoản chưa hoàn tất. Vui lòng kiểm tra lại danh sách hoặc nhật ký hệ thống."
+	);
+}
 
-	const currentUsers = getStoredLocalUsers();
-	saveStoredLocalUsers([newUser, ...currentUsers]);
+/**
+ * Tạo người dùng mới qua Saga ProfileCreate.
+ * Manager được tạo với role MedicalRegulationReviewer (account-only).
+ */
+export async function createUser(payload: CreateUserPayload): Promise<CreateUserResult> {
+	const isManager = payload.role === "Manager";
 
-	return { sagaId, user: newUser };
+	const existingDoctor = await findDoctorByEmail(payload.email);
+	if (existingDoctor) {
+		throw new Error("Email này đã được sử dụng.");
+	}
+
+	const formData = new FormData();
+	const requestBody = isManager
+		? {
+				email: payload.email,
+				password: payload.password,
+				phone: payload.phone,
+				role: "MedicalRegulationReviewer",
+		  }
+		: {
+				email: payload.email,
+				password: payload.password,
+				phone: payload.phone,
+				role: payload.role,
+				firstName: payload.firstName,
+				lastName: payload.lastName,
+				degrees: payload.degrees,
+				academicTitle: payload.academicTitle,
+				position: payload.position,
+				gender: payload.gender,
+				citizenIdentificationNumber: payload.citizenIdentificationNumber,
+				dateOfBirth: payload.dateOfBirth,
+				address: payload.address,
+		  };
+
+	formData.append("request", JSON.stringify(requestBody));
+	if (!isManager && payload.avatarFile) {
+		formData.append("avatar", payload.avatarFile);
+	}
+
+	const createUrl = typeof window !== "undefined" ? CLIENT_API_BASE : API_V1;
+
+	let response: Response;
+	try {
+		response = await fetch(`${createUrl}/profile/create`, {
+			method: "POST",
+			headers: { Accept: "application/json" },
+			body: formData,
+			signal: AbortSignal.timeout(45000),
+		});
+	} catch {
+		throw new Error("Không thể kết nối tới máy chủ. Vui lòng thử lại.");
+	}
+
+	const json = (await response.json().catch(() => null)) as {
+		data?: string;
+		error?: { description?: string } | null;
+	} | null;
+
+	if (!response.ok) {
+		throw new Error(
+			translateCreateError(
+				json?.error?.description || `Tạo tài khoản thất bại (${response.status}).`
+			)
+		);
+	}
+
+	const sagaId = typeof json?.data === "string" ? json.data : "";
+
+	if (!sagaId) {
+		throw new Error("Máy chủ không trả về mã Saga. Vui lòng thử lại.");
+	}
+
+	return waitForCreatedAccount(sagaId, payload);
 }
 
 /**
@@ -426,11 +573,6 @@ export async function updateUser(
 	payload: UpdateUserPayload
 ): Promise<{ sagaId: string; user: UserItem }> {
 	let backendSagaId: string | null = null;
-	const token =
-		typeof window !== "undefined"
-			? localStorage.getItem("accessToken") || localStorage.getItem("respira_auth_token_v1")
-			: null;
-	const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5016/api/v1").replace(/\/$/, "");
 
 	try {
 		const formData = new FormData();
@@ -456,22 +598,33 @@ export async function updateUser(
 			formData.append("avatar", payload.avatarFile);
 		}
 
-		// Gọi qua Next.js proxy route để hỗ trợ cookies, SSL, CORS
-		const updateUrl = typeof window !== "undefined" ? "/api/backend/profile/update" : `${API_BASE}/profile/update`;
-		const response = await fetch(updateUrl, {
+		const updateBase = typeof window !== "undefined" ? CLIENT_API_BASE : API_V1;
+		const response = await fetch(`${updateBase}/profile/update`, {
 			method: "POST",
-			headers: {
-				...(token ? { Authorization: `Bearer ${token}` } : {}),
-			},
+			headers: { Accept: "application/json" },
 			body: formData,
+			signal: AbortSignal.timeout(45000),
 		});
 
-		if (response.ok) {
-			const json = await response.json();
-			backendSagaId = json?.data || json?.id;
+		const json = (await response.json().catch(() => null)) as {
+			data?: string;
+			id?: string;
+			error?: { description?: string } | null;
+			message?: string;
+		} | null;
+
+		if (!response.ok) {
+			throw new Error(
+				json?.error?.description ||
+					json?.message ||
+					`Cập nhật hồ sơ thất bại (${response.status}).`
+			);
 		}
+
+		backendSagaId = json?.data || json?.id || null;
 	} catch (e) {
-		console.warn("Lỗi khi kết nối tới Saga ProfileUpdate:", e);
+		if (e instanceof Error) throw e;
+		throw new Error("Không thể kết nối tới máy chủ. Vui lòng thử lại.");
 	}
 
 	const currentUsers = getStoredLocalUsers();
@@ -533,34 +686,38 @@ export async function deleteUser(
 	mediaId?: string
 ): Promise<{ sagaId: string }> {
 	let backendSagaId: string | null = null;
-	const token =
-		typeof window !== "undefined"
-			? localStorage.getItem("accessToken") || localStorage.getItem("respira_auth_token_v1")
-			: null;
-	const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5016/api/v1").replace(/\/$/, "");
 
-	try {
-		const deleteUrl = typeof window !== "undefined" ? "/api/backend/profile/delete" : `${API_BASE}/profile/delete`;
-		const response = await fetch(deleteUrl, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				...(token ? { Authorization: `Bearer ${token}` } : {}),
-			},
-			body: JSON.stringify({
-				accountId,
-				doctorId: doctorId || "00000000-0000-0000-0000-000000000000",
-				mediaId: mediaId || "00000000-0000-0000-0000-000000000000",
-			}),
-		});
+	const deleteBase = typeof window !== "undefined" ? CLIENT_API_BASE : API_V1;
+	const response = await fetch(`${deleteBase}/profile/delete`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Accept: "application/json",
+		},
+		body: JSON.stringify({
+			accountId,
+			doctorId: doctorId || EMPTY_GUID,
+			mediaId: mediaId || EMPTY_GUID,
+		}),
+		signal: AbortSignal.timeout(30000),
+	});
 
-		if (response.ok) {
-			const json = await response.json();
-			backendSagaId = json?.data || json?.id;
-		}
-	} catch (e) {
-		console.warn("Lỗi khi kết nối tới Saga ProfileDelete:", e);
+	const json = (await response.json().catch(() => null)) as {
+		data?: string;
+		id?: string;
+		error?: { description?: string } | null;
+		message?: string;
+	} | null;
+
+	if (!response.ok) {
+		throw new Error(
+			json?.error?.description ||
+				json?.message ||
+				`Xóa người dùng thất bại (${response.status}).`
+		);
 	}
+
+	backendSagaId = json?.data || json?.id || null;
 
 	// Đánh dấu xóa mềm cục bộ để ẩn ngay lập tức khỏi giao diện
 	addStoredDeletedUserIds([accountId, doctorId || ""]);
