@@ -382,90 +382,76 @@ export function UserFormDialog({
 		<Dialog open={isOpen} onOpenChange={onClose}>
 			<UserDialogContent className="max-w-2xl">
 				<DialogHeader>
-					<DialogTitle className="text-lg font-bold text-text-primary dark:text-primary-foreground">
+					<DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">
 						{isEdit ? "Chỉnh sửa thông tin người dùng" : "Tạo mới tài khoản y tế"}
 					</DialogTitle>
-					<DialogDescription className="text-xs text-text-secondary">
+					<DialogDescription className="text-xs text-slate-500">
 						{isEdit
 							? "Cập nhật thông tin tài khoản và hồ sơ bác sĩ theo quy trình Saga của hệ thống."
-							: isAccountOnly
-								? "Tài khoản Quản lý chuyên môn chỉ khởi tạo tài khoản (không có hồ sơ bác sĩ)."
-								: "Hệ thống sẽ đồng thời khởi tạo Tài khoản (Authentication), Hồ sơ Bác sĩ (Doctor), và cấp quyền tương ứng."}
+							: "Hệ thống sẽ đồng thời khởi tạo Tài khoản (Authentication), Hồ sơ Bác sĩ (Doctor), và cấp quyền tương ứng."}
 					</DialogDescription>
 				</DialogHeader>
 
 				<form onSubmit={handleSubmit} noValidate className="space-y-5 pt-2 min-w-0">
 					{/* Avatar & Basic Role */}
-					<div className="flex items-center gap-5 p-4 rounded-xl bg-surface-secondary dark:bg-background/40 border border-border-default dark:border-border-default">
-						{!isAccountOnly && (
-							<>
-								<Avatar className="h-16 w-16 border-2 border-surface shadow-sm shrink-0">
-									{avatarPreview ? (
-										<AvatarImage src={avatarPreview} alt="Preview" />
-									) : (
-										<AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
-											{firstName ? firstName[0] : "BS"}
-										</AvatarFallback>
-									)}
-								</Avatar>
+					<div className="flex items-center gap-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800">
+						<Avatar className="h-16 w-16 border-2 border-white shadow-sm shrink-0">
+							{avatarPreview ? (
+								<AvatarImage src={avatarPreview} alt="Preview" />
+							) : (
+								<AvatarFallback className="bg-sky-100 text-sky-800 font-bold text-lg">
+									{firstName ? firstName[0] : "BS"}
+								</AvatarFallback>
+							)}
+						</Avatar>
 
-								<div className="flex-1 space-y-1.5">
-									<Label className="text-xs font-semibold text-text-primary dark:text-text-tertiary">
-										Ảnh đại diện y bác sĩ (.jpg, .png, .webp){" "}
-										{!isEdit && <span className="text-error">*</span>}
-									</Label>
-									<div className="flex items-center gap-2">
-										<label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface dark:bg-surface border border-border-default dark:border-border-default text-xs font-semibold text-text-primary dark:text-text-tertiary hover:bg-surface-secondary transition-colors">
-											<Upload className="w-3.5 h-3.5 text-text-secondary" />
-											<span>Chọn ảnh</span>
-											<input
-												type="file"
-												accept="image/png,image/jpeg,image/webp"
-												onChange={handleAvatarChange}
-												className="hidden"
-											/>
-										</label>
-										{avatarPreview && (
-											<Button
-												type="button"
-												variant="ghost"
-												size="sm"
-												onClick={() => {
-													setAvatarFile(null);
-													setAvatarPreview(null);
-												}}
-												className="h-8 text-xs text-error hover:text-error hover:bg-error/10"
-											>
-												Xóa ảnh
-											</Button>
-										)}
-									</div>
-									{errors.avatar && (
-										<p className="text-[11px] font-semibold text-error mt-1 flex items-center gap-1">
-											<AlertCircle className="w-3.5 h-3.5 shrink-0" />
-											<span>{errors.avatar}</span>
-										</p>
-									)}
-								</div>
-							</>
-						)}
+						<div className="flex-1 space-y-1.5">
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+								Ảnh đại diện y bác sĩ (.jpg, .png, .webp)
+							</Label>
+							<div className="flex items-center gap-2">
+								<label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 transition-colors">
+									<Upload className="w-3.5 h-3.5 text-slate-500" />
+									<span>Chọn ảnh</span>
+									<input
+										type="file"
+										accept="image/png,image/jpeg,image/webp"
+										onChange={handleAvatarChange}
+										className="hidden"
+									/>
+								</label>
+								{avatarPreview && (
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										onClick={() => {
+											setAvatarFile(null);
+											setAvatarPreview(null);
+										}}
+										className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+									>
+										Xóa ảnh
+									</Button>
+								)}
+							</div>
+						</div>
 
 						<div className="flex items-center gap-3">
 							<div className="w-36">
-								<Label className="text-xs font-semibold text-text-primary dark:text-text-tertiary">
-									Vai trò phân quyền <span className="text-error">*</span>
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+									Vai trò phân quyền <span className="text-red-500">*</span>
 								</Label>
 								<Select
 									value={role}
-									onValueChange={handleRoleChange}
+									onValueChange={(val: UserRole) => setRole(val)}
 								>
-									<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-surface dark:bg-surface">
+									<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="Doctor">Bác sĩ</SelectItem>
-										<SelectItem value="HeadDepartmentDoctor">Trưởng khoa</SelectItem>
-										<SelectItem value="Manager">Quản lý chuyên môn</SelectItem>
+										<SelectItem value="Manager">Trưởng khoa</SelectItem>
 										{editingUser?.role === "Admin" && (
 											<SelectItem value="Admin">Quản trị viên</SelectItem>
 										)}
@@ -475,7 +461,7 @@ export function UserFormDialog({
 
 							{isEdit && (
 								<div className="w-32">
-									<Label className="text-xs font-semibold text-text-primary dark:text-text-tertiary">
+									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
 										Trạng thái
 									</Label>
 									<Select
@@ -483,7 +469,7 @@ export function UserFormDialog({
 										onValueChange={(val: UserStatus) => setStatus(val)}
 										disabled={editingUser?.role === "Admin"}
 									>
-										<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-surface dark:bg-surface">
+										<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>
@@ -500,7 +486,7 @@ export function UserFormDialog({
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
 						<div>
 							<Label htmlFor="usr-email" className="text-xs font-semibold">
-								Email đăng nhập <span className="text-error">*</span>
+								Email đăng nhập <span className="text-red-500">*</span>
 							</Label>
 							<Input
 								id="usr-email"
@@ -509,11 +495,11 @@ export function UserFormDialog({
 								onChange={(e) => handleFieldChange("email", e.target.value, setEmail)}
 								onBlur={() => handleBlur("email", email)}
 								placeholder="doctor@respira.vn"
-								className={`mt-1 h-9 text-xs ${touched.email && errors.email ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
+								className={`mt-1 h-9 text-xs ${touched.email && errors.email ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
 									}`}
 							/>
 							{touched.email && errors.email && (
-								<p className="text-[11px] font-semibold text-error mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+								<p className="text-[11px] font-semibold text-red-500 mt-1 flex items-center gap-1 animate-in fade-in duration-150">
 									<AlertCircle className="w-3.5 h-3.5 shrink-0" />
 									<span>{errors.email}</span>
 								</p>
@@ -755,8 +741,8 @@ export function UserFormDialog({
 														type="button"
 														onClick={() => toggleDegree(deg)}
 														className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${selected
-																? "bg-primary/10 text-primary border-primary/30 dark:bg-primary/10 dark:text-primary"
-																: "bg-surface-secondary text-text-secondary border-border-default hover:bg-surface-secondary"
+															? "bg-primary/10 text-primary border-primary/30 dark:bg-primary/10 dark:text-primary"
+															: "bg-surface-secondary text-text-secondary border-border-default hover:bg-surface-secondary"
 															}`}
 													>
 														{selected && <Check className="w-3.5 h-3.5 text-primary" />}
