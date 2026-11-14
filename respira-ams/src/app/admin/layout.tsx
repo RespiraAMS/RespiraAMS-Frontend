@@ -9,11 +9,11 @@ export default function AdminLayout({
 }>) {
 	return (
 		<AdminThemeScope>
-		<div className="flex min-h-screen bg-[#F8FAFC] antialiased">
+		<div className="flex min-h-screen bg-background antialiased">
 			<AdminSidebar />
 			<div className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-hidden">
 				<AdminHeader />
-				<main className="flex-1 overflow-y-auto bg-[#F8FAFC]">{children}</main>
+				<main className="flex-1 overflow-y-auto bg-background">{children}</main>
 			</div>
 		</div>
 		</AdminThemeScope>

@@ -53,10 +53,10 @@ export function AuditLogToolbar({
 	}, []);
 
 	return (
-		<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+		<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-3.5 rounded-xl border border-border-default shadow-xs">
 			{/* Search Bar matching UserSearchBar style - không bao giờ nhảy form */}
 			<div className="relative flex-1 min-w-[200px]">
-				<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+				<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
 				<Input
 					ref={searchInputRef}
 					type="text"
@@ -68,7 +68,7 @@ export function AuditLogToolbar({
 						}))
 					}
 					placeholder={t("searchPlaceholder")}
-					className="pl-9 pr-9 h-9.5 text-xs sm:text-sm rounded-lg bg-slate-50/70 border-slate-200 placeholder:text-slate-400 focus-visible:ring-sky-100"
+					className="pl-9 pr-9 h-9.5 text-xs sm:text-sm rounded-lg bg-surface-secondary/70 border-border-default placeholder:text-text-tertiary focus-visible:ring-primary/30"
 				/>
 				{filters.search && (
 					<button
@@ -77,7 +77,7 @@ export function AuditLogToolbar({
 							onFiltersChange((prev) => ({ ...prev, search: "" }));
 							searchInputRef.current?.focus();
 						}}
-						className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded transition-colors cursor-pointer"
+						className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary p-0.5 rounded transition-colors cursor-pointer"
 						title={t("clearSearch", { defaultMessage: "Xóa tìm kiếm" })}
 					>
 						<X className="w-3.5 h-3.5" />
@@ -97,7 +97,7 @@ export function AuditLogToolbar({
 							}))
 						}
 					>
-						<SelectTrigger className="w-[145px] h-9.5 text-xs font-semibold rounded-lg bg-slate-50 border-slate-200">
+						<SelectTrigger className="w-[145px] h-9.5 text-xs font-semibold rounded-lg bg-surface-secondary border-border-default">
 							<SelectValue placeholder={t("serviceFilter")} />
 						</SelectTrigger>
 						<SelectContent>
@@ -122,7 +122,7 @@ export function AuditLogToolbar({
 							}))
 						}
 					>
-						<SelectTrigger className="w-[140px] h-9.5 text-xs font-semibold rounded-lg bg-slate-50 border-slate-200">
+						<SelectTrigger className="w-[140px] h-9.5 text-xs font-semibold rounded-lg bg-surface-secondary border-border-default">
 							<SelectValue placeholder={t("statusFilter")} />
 						</SelectTrigger>
 						<SelectContent>
@@ -143,7 +143,7 @@ export function AuditLogToolbar({
 							}))
 						}
 					>
-						<SelectTrigger className="w-[145px] h-9.5 text-xs font-semibold rounded-lg bg-slate-50 border-slate-200">
+						<SelectTrigger className="w-[145px] h-9.5 text-xs font-semibold rounded-lg bg-surface-secondary border-border-default">
 							<SelectValue placeholder={t("timeFilter")} />
 						</SelectTrigger>
 						<SelectContent>
@@ -160,19 +160,19 @@ export function AuditLogToolbar({
 							<Button
 								type="button"
 								variant="outline"
-								className="h-9.5 px-3.5 rounded-lg border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 gap-1.5 cursor-pointer shadow-2xs"
+								className="h-9.5 px-3.5 rounded-lg border-border-default text-xs font-semibold text-text-primary hover:bg-surface-secondary gap-1.5 cursor-pointer shadow-2xs"
 							>
-								<Download className="w-3.5 h-3.5 text-slate-500" />
+								<Download className="w-3.5 h-3.5 text-text-secondary" />
 								<span>{t("exportLogs")}</span>
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end" className="w-44 text-xs font-medium">
 							<DropdownMenuItem onClick={onExportCsv} className="gap-2 cursor-pointer">
-								<FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+								<FileSpreadsheet className="w-4 h-4 text-success" />
 								<span>{t("exportCsv")}</span>
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={onExportJson} className="gap-2 cursor-pointer">
-								<FileJson className="w-4 h-4 text-sky-600" />
+								<FileJson className="w-4 h-4 text-primary" />
 								<span>{t("exportJson")}</span>
 							</DropdownMenuItem>
 						</DropdownMenuContent>

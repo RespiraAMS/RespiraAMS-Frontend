@@ -19,32 +19,32 @@ export function AuditLogStatsCards({ stats, isLoading = false }: AuditLogStatsCa
 			value: stats.total,
 			subtitle: `${stats.uniqueActorsCount} ${t("uniqueActorsSuffix", { defaultMessage: "tác nhân & hệ thống ghi nhận" })}`,
 			icon: ShieldCheck,
-			color: "text-[#0EA5E9]",
-			bg: "bg-sky-50",
+			color: "text-primary",
+			bg: "bg-primary/10",
 		},
 		{
 			title: t("successfulEvents"),
 			value: stats.successCount,
 			subtitle: `${t("successRatePrefix", { defaultMessage: "Tỷ lệ thành công đạt" })} ${stats.successRatePercent}%`,
 			icon: CheckCircle2,
-			color: "text-emerald-600",
-			bg: "bg-emerald-50",
+			color: "text-success",
+			bg: "bg-success/10",
 		},
 		{
 			title: t("warningEvents"),
 			value: stats.warningCount,
 			subtitle: t("warningSubtitle", { defaultMessage: "Cần lưu ý & theo dõi đặc quyền" }),
 			icon: AlertTriangle,
-			color: "text-amber-600",
-			bg: "bg-amber-50",
+			color: "text-warning",
+			bg: "bg-warning/10",
 		},
 		{
 			title: t("errorEvents"),
 			value: stats.errorCount,
 			subtitle: t("errorSubtitle", { defaultMessage: "Sự cố phân tán & vi phạm bảo mật" }),
 			icon: AlertCircle,
-			color: "text-red-600",
-			bg: "bg-red-50",
+			color: "text-error",
+			bg: "bg-error/10",
 		},
 	];
 
@@ -55,19 +55,19 @@ export function AuditLogStatsCards({ stats, isLoading = false }: AuditLogStatsCa
 				return (
 					<Card
 						key={card.title}
-						className="border shadow-xs hover:shadow-md transition-all duration-200 bg-white overflow-hidden"
+						className="border shadow-xs hover:shadow-md transition-all duration-200 bg-surface overflow-hidden"
 					>
 						<CardContent className="p-4">
 							<div className="flex items-center justify-between mb-2">
-								<span className="text-[12px] font-semibold text-slate-500">{card.title}</span>
+								<span className="text-[12px] font-semibold text-text-secondary">{card.title}</span>
 								<div className={`p-2 rounded-xl ${card.bg} ${card.color}`}>
 									<Icon className="w-4 h-4" />
 								</div>
 							</div>
-							<div className="text-2xl font-extrabold text-slate-900 tracking-tight">
+							<div className="text-2xl font-extrabold text-text-primary tracking-tight">
 								{isLoading ? "—" : card.value.toLocaleString()}
 							</div>
-							<p className="text-[11px] text-slate-400 mt-1 font-medium">{card.subtitle}</p>
+							<p className="text-[11px] text-text-tertiary mt-1 font-medium">{card.subtitle}</p>
 						</CardContent>
 					</Card>
 				);

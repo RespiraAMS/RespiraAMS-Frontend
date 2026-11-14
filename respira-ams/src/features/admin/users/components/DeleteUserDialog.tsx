@@ -47,34 +47,34 @@ export function DeleteUserDialog({
 
 	return (
 		<AlertDialog open={isOpen} onOpenChange={onClose}>
-			<AlertDialogContent style={{ borderRadius: "18px" }} className="max-w-md rounded-[18px] bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800">
+			<AlertDialogContent style={{ borderRadius: "18px" }} className="max-w-md rounded-[18px] bg-surface dark:bg-surface p-6 sm:p-8 shadow-2xl border border-border-default dark:border-border-default">
 				<AlertDialogHeader>
 					<div className="flex items-center gap-3 mb-2">
-						<div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-950/60 text-red-600 flex items-center justify-center shrink-0">
+						<div className="w-10 h-10 rounded-full bg-error/10 dark:bg-error/10 text-error flex items-center justify-center shrink-0">
 							<AlertTriangle className="w-5 h-5" />
 						</div>
-						<AlertDialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+						<AlertDialogTitle className="text-base font-bold text-text-primary dark:text-primary-foreground">
 							{t("deleteTitle")}
 						</AlertDialogTitle>
 					</div>
 
 					<AlertDialogDescription asChild>
-						<div className="text-xs text-slate-600 dark:text-slate-400 space-y-3">
+						<div className="text-xs text-text-secondary dark:text-text-tertiary space-y-3">
 							<p>
-								<strong className="text-slate-900 dark:text-white">{displayName}</strong> (
+								<strong className="text-text-primary dark:text-primary-foreground">{displayName}</strong> (
 								{user.email})
 							</p>
-							<div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-300 font-medium text-[11px] leading-relaxed">
+							<div className="p-3 bg-warning/10 dark:bg-warning/10 border border-warning/30 dark:border-warning/30 rounded-lg text-warning dark:text-warning font-medium text-[11px] leading-relaxed">
 								{t("deleteWarning")}
 							</div>
 
 							<div className="pt-1 space-y-1.5">
 								<label
 									htmlFor="confirm-delete-input"
-									className="text-xs font-semibold text-slate-700 dark:text-slate-300 block"
+									className="text-xs font-semibold text-text-primary dark:text-text-tertiary block"
 								>
 									{t("deletePrompt")}{" "}
-									<span className="font-bold text-red-600 bg-red-50 dark:bg-red-950/60 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-800 tracking-wide">
+									<span className="font-bold text-error bg-error/10 dark:bg-error/10 px-1.5 py-0.5 rounded border border-error/30 dark:border-error/40 tracking-wide">
 										delete
 									</span>
 								</label>
@@ -107,10 +107,10 @@ export function DeleteUserDialog({
 							onConfirmDelete(user);
 						}}
 						disabled={!isMatch || isDeleting}
-						className={`text-white text-xs h-9 px-4 font-semibold rounded-lg transition-all ${
+						className={`text-primary-foreground text-xs h-9 px-4 font-semibold rounded-lg transition-all ${
 							isMatch
-								? "bg-red-600 hover:bg-red-700 cursor-pointer shadow-sm"
-								: "bg-red-300 dark:bg-red-900/40 cursor-not-allowed opacity-60"
+								? "bg-error hover:bg-error/90 cursor-pointer shadow-sm"
+								: "bg-error/30 dark:bg-error/20 cursor-not-allowed opacity-60"
 						}`}
 					>
 						{isDeleting ? t("deleting") : t("deleteConfirm")}
