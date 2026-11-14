@@ -697,7 +697,7 @@
       }
     },
     "antibiograms": {
-      "title": "Kháng ính đồ",
+      "title": "Kháng sinh đồ",
       "description": "Quản lý mức độ nhạy cảm kháng sinh của các tác nhân vi sinh.",
       "addButton": "Thêm kháng sinh đồ",
       "dialog": {
