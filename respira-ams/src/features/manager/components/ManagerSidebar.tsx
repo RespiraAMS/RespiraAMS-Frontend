@@ -24,8 +24,8 @@ import {
     FlaskConical,
     FileText,
 } from 'lucide-react';
-import { AccountSection } from './AccountSection';
 import { useSidebarStore } from '../stores/sidebarStore';
+import { AccountSection } from '@/features/doctor/components/accountSection';
 
 export interface NavItemConfig {
     key: string;
@@ -153,7 +153,9 @@ export function ManagerSidebar({
                                 collapsed ? 'max-w-0 opacity-0' : 'max-w-40 opacity-100',
                             )}
                         >
-                            <span className="font-bold text-foreground tracking-tight">Respira</span>
+                            <span className="font-bold text-foreground tracking-tight">
+                                Respira
+                            </span>
                             <span className="font-bold text-primary tracking-tight">AMS</span>
                         </span>
                     </Link>
@@ -205,7 +207,7 @@ export function ManagerSidebar({
                 </nav>
 
                 {/* Account Section */}
-                <div className="border-t border-sidebar-border px-2 py-3 shrink-0">
+                <div className="p-2.5 shrink-0 border-t border-slate-100">
                     <AccountSection collapsed={collapsed} />
                 </div>
             </aside>
