@@ -520,7 +520,7 @@
         "pathogensTitle": "Risk Factor",
         "noPathogens": "No risk factors linked.",
         "metricsTitle": "Clinical Metric",
-        "noMetrics": "No clinical metric scales linked.",
+        "noMetrics": "No clinical metric linked.",
         "dialogUpdateTitle": "Update Criteria",
         "toastUpdateSuccess": "Criteria updated successfully!",
         "toastUpdateError": "Update error: {error}"

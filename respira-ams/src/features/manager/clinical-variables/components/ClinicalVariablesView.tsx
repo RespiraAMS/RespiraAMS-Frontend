@@ -30,7 +30,7 @@ interface ClinicalVariablesViewProps {
 
 export function ClinicalVariablesView({
 	readOnly = false,
-	detailBasePath = "clinical-variables",
+	detailBasePath = "/manage/clinical-variables",
 }: ClinicalVariablesViewProps) {
 	const t = useTranslations("manager.clinicalVariables");
 	const tCommon = useTranslations("common");

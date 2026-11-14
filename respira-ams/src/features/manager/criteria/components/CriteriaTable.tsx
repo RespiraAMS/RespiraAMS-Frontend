@@ -15,12 +15,18 @@ import { PrerequisiteFormatter } from "../../components/PrerequisiteFormatter";
 const PAGE_SIZE = 10;
 
 interface CriteriaTableProps {
+	readOnly?: boolean;
 	onViewDetail: (id: string) => void;
-	onEdit: (item: CriteriaItem) => void;
-	onDelete: (item: CriteriaItem) => void;
+	onEdit?: (item: CriteriaItem) => void;
+	onDelete?: (item: CriteriaItem) => void;
 }
 
-export function CriteriaTable({ onViewDetail, onEdit, onDelete }: CriteriaTableProps) {
+export function CriteriaTable({
+	readOnly = false,
+	onViewDetail,
+	onEdit,
+	onDelete,
+}: CriteriaTableProps) {
 	const tTable = useTranslations("manager.criteria.table");
 	const tCommon = useTranslations("common");
 
@@ -91,28 +97,32 @@ export function CriteriaTable({ onViewDetail, onEdit, onDelete }: CriteriaTableP
 										>
 											<Eye className="h-4 w-4" />
 										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={(e) => {
-												e.stopPropagation();
-												onEdit(item);
-											}}
-											className="hover:bg-accent text-foreground"
-										>
-											<Edit className="h-4 w-4" />
-										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={(e) => {
-												e.stopPropagation();
-												onDelete(item);
-											}}
-											className="hover:bg-destructive/10"
-										>
-											<Trash className="h-4 w-4 text-destructive" />
-										</Button>
+										{!readOnly && onEdit && (
+											<Button
+												variant="ghost"
+												size="icon"
+												onClick={(e) => {
+													e.stopPropagation();
+													onEdit(item);
+												}}
+												className="hover:bg-accent text-foreground"
+											>
+												<Edit className="h-4 w-4" />
+											</Button>
+										)}
+										{!readOnly && onDelete && (
+											<Button
+												variant="ghost"
+												size="icon"
+												onClick={(e) => {
+													e.stopPropagation();
+													onDelete(item);
+												}}
+												className="hover:bg-destructive/10"
+											>
+												<Trash className="h-4 w-4 text-destructive" />
+											</Button>
+										)}
 									</div>
 								</TableCell>
 							</TableRow>

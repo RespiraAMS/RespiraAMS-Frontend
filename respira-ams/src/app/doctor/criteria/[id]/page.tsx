@@ -7,7 +7,7 @@ export default function ClinicalVariableDetailPage({ params }: { params: Promise
 
     return (
         <div className="p-6">
-            <CriteriaDetail id={cleanId} />
+            <CriteriaDetail id={cleanId} readOnly={true}/>
         </div>
     );
 }
