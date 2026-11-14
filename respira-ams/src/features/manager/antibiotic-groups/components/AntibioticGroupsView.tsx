@@ -23,7 +23,7 @@ import {
     type CreateAntibioticGroupRequest,
     type UpdateAntibioticGroupRequest,
 } from '../types';
-import { AntibioticGroupSearch } from '../../components/Search';
+import { TableSearchInput } from '../../components/TableSearchInput';
 
 interface AntibioticGroupsViewProps {
     readOnly?: boolean;
@@ -120,7 +120,7 @@ export function AntibioticGroupsView({ readOnly = false }: AntibioticGroupsViewP
             </div>
 
             {/* Table Card */}
-            <AntibioticGroupSearch onSearchChange={setSearchName} />
+            <TableSearchInput onSearchChange={setSearchName}/>
             <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto text-card-foreground">
                 <AntibioticGroupsTable
                     readOnly={readOnly}

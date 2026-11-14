@@ -9,15 +9,17 @@ import { Button } from '@/components/ui/button';
 const VALID_SEARCH_REGEX = /^[\p{L}\p{N}\s-]+$/u;
 const MIN_SEARCH_LENGTH = 2;
 
-interface AntibioticGroupSearchProps {
-    onSearchChange: (value: string) => void;
-    debounceMs?: number;
+interface TableSearchInputProps {
+	onSearchChange: (value: string) => void;
+	placeholder?: string;
+	debounceMs?: number;
 }
 
-export function AntibioticGroupSearch({
-    onSearchChange,
-    debounceMs = 400,
-}: AntibioticGroupSearchProps) {
+export function TableSearchInput({
+	onSearchChange,
+	placeholder,
+	debounceMs = 400,
+}: TableSearchInputProps) {
     const t = useTranslations('manager.search');
 
     const [inputValue, setInputValue] = useState('');
@@ -68,7 +70,7 @@ export function AntibioticGroupSearch({
                     <Input
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        placeholder={t('placeholder')}
+                        placeholder={placeholder || t("placeholder")}
                         className="pr-9 pl-9 border-border bg-background text-foreground"
                     />
                     {inputValue && (
