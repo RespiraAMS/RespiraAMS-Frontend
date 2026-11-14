@@ -23,7 +23,7 @@ import {
 } from "../types";
 
 const PAGE_SIZE = 10;
-const INITIAL_VISIBLE_TREATMENTS = 5;
+const INITIAL_VISIBLE_TREATMENTS = 3;
 
 function TreatmentGroupList({ groups }: { groups: AntibioticItem[][] }) {
 	const tTable = useTranslations("manager.treatmentProtocols.table");
@@ -64,11 +64,16 @@ function TreatmentGroupList({ groups }: { groups: AntibioticItem[][] }) {
 }
 
 interface TreatmentProtocolsTableProps {
-	onEdit: (item: TreatmentProtocolItem) => void;
-	onDelete: (item: TreatmentProtocolItem) => void;
+	readOnly?: boolean;
+	onEdit?: (item: TreatmentProtocolItem) => void;
+	onDelete?: (item: TreatmentProtocolItem) => void;
 }
 
-export function TreatmentProtocolsTable({ onEdit, onDelete }: TreatmentProtocolsTableProps) {
+export function TreatmentProtocolsTable({
+	readOnly = false,
+	onEdit,
+	onDelete,
+}: TreatmentProtocolsTableProps) {
 	const tTable = useTranslations("manager.treatmentProtocols.table");
 	const tForm = useTranslations("manager.treatmentProtocols.form");
 	const tCommon = useTranslations("common");
@@ -97,6 +102,7 @@ export function TreatmentProtocolsTable({ onEdit, onDelete }: TreatmentProtocols
 
 	const items = listData?.items || [];
 	const totalPages = listData?.metadata?.pageCount || 1;
+	const columnCount = readOnly ? 4 : 5;
 
 	const activeFilterCount =
 		(filterSeverity !== "ALL" ? 1 : 0) +
@@ -165,6 +171,162 @@ export function TreatmentProtocolsTable({ onEdit, onDelete }: TreatmentProtocols
 		);
 	};
 
+	const filterPopover = (
+		<Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+			<PopoverTrigger asChild>
+				<Button
+					variant="ghost"
+					size="icon"
+					className="relative hover:bg-accent text-foreground h-8 w-8"
+				>
+					<ListFilter className="h-4 w-4" />
+					{activeFilterCount > 0 && (
+						<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
+							{activeFilterCount}
+						</span>
+					)}
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent
+				align="end"
+				className="w-80 p-4 space-y-4 border-border bg-popover text-popover-foreground shadow-lg max-h-[60vh] overflow-y-auto"
+			>
+				<div className="flex items-center justify-between border-b border-border pb-2">
+					<span className="font-bold text-sm text-foreground">{tTable("filterTitle")}</span>
+					{activeFilterCount > 0 && (
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={resetFilters}
+							className="h-auto p-0 text-xs text-destructive hover:bg-transparent"
+						>
+							<FilterX className="w-3.5 h-3.5 mr-1" /> {tTable("clearFilters")}
+						</Button>
+					)}
+				</div>
+
+				<div className="space-y-1.5">
+					<label className="text-xs font-semibold text-muted-foreground">
+						{tTable("filterSeverityLabel")}
+					</label>
+					<Select
+						value={filterSeverity}
+						onValueChange={(v) => {
+							if (v === "ALL" || v === "Mild" || v === "Moderate" || v === "Severe") {
+								setFilterSeverity(v);
+								setPage(1);
+							}
+						}}
+					>
+						<SelectTrigger className="h-8 text-xs bg-background border-input text-foreground">
+							<SelectValue placeholder={tTable("allSeverities")} />
+						</SelectTrigger>
+						<SelectContent className="bg-popover text-popover-foreground border-border">
+							<SelectItem value="ALL">{tTable("allSeverities")}</SelectItem>
+							<SelectItem value="Mild">{tForm("severityMild")}</SelectItem>
+							<SelectItem value="Moderate">{tForm("severityModerate")}</SelectItem>
+							<SelectItem value="Severe">{tForm("severitySevere")}</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+
+				<div className="space-y-1.5">
+					<label className="text-xs font-semibold text-muted-foreground">
+						{tTable("filterSiteLabel")}
+					</label>
+					<Select
+						value={filterSite}
+						onValueChange={(v) => {
+							if (
+								v === "ALL" ||
+								v === "Outpatient" ||
+								v === "Inpatient" ||
+								v === "IntensiveCareUnit"
+							) {
+								setFilterSite(v);
+								setPage(1);
+							}
+						}}
+					>
+						<SelectTrigger className="h-8 text-xs bg-background border-input text-foreground">
+							<SelectValue placeholder={tTable("allSites")} />
+						</SelectTrigger>
+						<SelectContent className="bg-popover text-popover-foreground border-border">
+							<SelectItem value="ALL">{tTable("allSites")}</SelectItem>
+							<SelectItem value="Outpatient">{tForm("treatmentSiteOutpatient")}</SelectItem>
+							<SelectItem value="Inpatient">{tForm("treatmentSiteInpatient")}</SelectItem>
+							<SelectItem value="IntensiveCareUnit">{tForm("treatmentSiteICU")}</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+
+				<div className="space-y-1.5">
+					<label className="text-xs font-semibold text-muted-foreground">
+						{tTable("filterPathogenLabel")}
+					</label>
+					<Command className="border border-border rounded-md max-h-36 overflow-hidden bg-popover text-popover-foreground">
+						<CommandInput
+							placeholder={tTable("searchPathogenPlaceholder")}
+							className="h-7 text-xs border-none focus:ring-0"
+						/>
+						<CommandList className="max-h-28">
+							<CommandEmpty className="text-xs p-2">{tForm("emptyPathogen")}</CommandEmpty>
+							<CommandGroup>
+								{pathogens.map((p) => (
+									<CommandItem
+										key={p.id}
+										onSelect={() => togglePathogenFilter(p.id)}
+										className="text-xs py-1 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+									>
+										<Check
+											className={cn(
+												"mr-2 h-3.5 w-3.5 text-primary",
+												selectedPathogenIds.includes(p.id) ? "opacity-100" : "opacity-0"
+											)}
+										/>
+										{p.name}
+									</CommandItem>
+								))}
+							</CommandGroup>
+						</CommandList>
+					</Command>
+				</div>
+
+				<div className="space-y-1.5">
+					<label className="text-xs font-semibold text-muted-foreground">
+						{tTable("filterCriteriaLabel")}
+					</label>
+					<Command className="border border-border rounded-md max-h-36 overflow-hidden bg-popover text-popover-foreground">
+						<CommandInput
+							placeholder={tTable("searchCriteriaPlaceholder")}
+							className="h-7 text-xs border-none focus:ring-0"
+						/>
+						<CommandList className="max-h-28">
+							<CommandEmpty className="text-xs p-2">{tForm("emptyCriteria")}</CommandEmpty>
+							<CommandGroup>
+								{criteria.map((c) => (
+									<CommandItem
+										key={c.id}
+										onSelect={() => toggleCriteriaFilter(c.id)}
+										className="text-xs py-1 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+									>
+										<Check
+											className={cn(
+												"mr-2 h-3.5 w-3.5 text-primary",
+												selectedCriteriaIds.includes(c.id) ? "opacity-100" : "opacity-0"
+											)}
+										/>
+										<span className="truncate">{c.name}</span>
+									</CommandItem>
+								))}
+							</CommandGroup>
+						</CommandList>
+					</Command>
+				</div>
+			</PopoverContent>
+		</Popover>
+	);
+
 	return (
 		<div className="relative text-foreground">
 			{isFetching && (
@@ -186,179 +348,35 @@ export function TreatmentProtocolsTable({ onEdit, onDelete }: TreatmentProtocols
 							{tTable("colRegimens")}
 						</TableHead>
 						<TableHead className="text-muted-foreground font-semibold text-center w-28">
-							{tTable("colStatus")}
+							{readOnly ? (
+								<div className="flex items-center justify-center gap-1.5">
+									<span>{tTable("colStatus")}</span>
+									{filterPopover}
+								</div>
+							) : (
+								tTable("colStatus")
+							)}
 						</TableHead>
-						<TableHead className="text-muted-foreground font-semibold text-right w-24">
-							<div className="flex items-center justify-end gap-2">
-								{tCommon("actions")}
-
-								<Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-									<PopoverTrigger asChild>
-										<Button
-											variant="ghost"
-											size="icon"
-											className="relative hover:bg-accent text-foreground h-8 w-8"
-										>
-											<ListFilter className="h-4 w-4" />
-											{activeFilterCount > 0 && (
-												<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
-													{activeFilterCount}
-												</span>
-											)}
-										</Button>
-									</PopoverTrigger>
-									<PopoverContent
-										align="end"
-										className="w-80 p-4 space-y-4 border-border bg-popover text-popover-foreground shadow-lg max-h-[60vh] overflow-y-auto"
-									>
-										<div className="flex items-center justify-between border-b border-border pb-2">
-											<span className="font-bold text-sm text-foreground">{tTable("filterTitle")}</span>
-											{activeFilterCount > 0 && (
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={resetFilters}
-													className="h-auto p-0 text-xs text-destructive hover:bg-transparent"
-												>
-													<FilterX className="w-3.5 h-3.5 mr-1" /> {tTable("clearFilters")}
-												</Button>
-											)}
-										</div>
-
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold text-muted-foreground">
-												{tTable("filterSeverityLabel")}
-											</label>
-											<Select
-												value={filterSeverity}
-												onValueChange={(v) => {
-													if (v === "ALL" || v === "Mild" || v === "Moderate" || v === "Severe") {
-														setFilterSeverity(v);
-														setPage(1);
-													}
-												}}
-											>
-												<SelectTrigger className="h-8 text-xs bg-background border-input text-foreground">
-													<SelectValue placeholder={tTable("allSeverities")} />
-												</SelectTrigger>
-												<SelectContent className="bg-popover text-popover-foreground border-border">
-													<SelectItem value="ALL">{tTable("allSeverities")}</SelectItem>
-													<SelectItem value="Mild">{tForm("severityMild")}</SelectItem>
-													<SelectItem value="Moderate">{tForm("severityModerate")}</SelectItem>
-													<SelectItem value="Severe">{tForm("severitySevere")}</SelectItem>
-												</SelectContent>
-											</Select>
-										</div>
-
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold text-muted-foreground">
-												{tTable("filterSiteLabel")}
-											</label>
-											<Select
-												value={filterSite}
-												onValueChange={(v) => {
-													if (
-														v === "ALL" ||
-														v === "Outpatient" ||
-														v === "Inpatient" ||
-														v === "IntensiveCareUnit"
-													) {
-														setFilterSite(v);
-														setPage(1);
-													}
-												}}
-											>
-												<SelectTrigger className="h-8 text-xs bg-background border-input text-foreground">
-													<SelectValue placeholder={tTable("allSites")} />
-												</SelectTrigger>
-												<SelectContent className="bg-popover text-popover-foreground border-border">
-													<SelectItem value="ALL">{tTable("allSites")}</SelectItem>
-													<SelectItem value="Outpatient">{tForm("treatmentSiteOutpatient")}</SelectItem>
-													<SelectItem value="Inpatient">{tForm("treatmentSiteInpatient")}</SelectItem>
-													<SelectItem value="IntensiveCareUnit">{tForm("treatmentSiteICU")}</SelectItem>
-												</SelectContent>
-											</Select>
-										</div>
-
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold text-muted-foreground">
-												{tTable("filterPathogenLabel")}
-											</label>
-											<Command className="border border-border rounded-md max-h-36 overflow-hidden bg-popover text-popover-foreground">
-												<CommandInput
-													placeholder={tTable("searchPathogenPlaceholder")}
-													className="h-7 text-xs border-none focus:ring-0"
-												/>
-												<CommandList className="max-h-28">
-													<CommandEmpty className="text-xs p-2">{tForm("emptyPathogen")}</CommandEmpty>
-													<CommandGroup>
-														{pathogens.map((p) => (
-															<CommandItem
-																key={p.id}
-																onSelect={() => togglePathogenFilter(p.id)}
-																className="text-xs py-1 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
-															>
-																<Check
-																	className={cn(
-																		"mr-2 h-3.5 w-3.5 text-primary",
-																		selectedPathogenIds.includes(p.id) ? "opacity-100" : "opacity-0"
-																	)}
-																/>
-																{p.name}
-															</CommandItem>
-														))}
-													</CommandGroup>
-												</CommandList>
-											</Command>
-										</div>
-
-										<div className="space-y-1.5">
-											<label className="text-xs font-semibold text-muted-foreground">
-												{tTable("filterCriteriaLabel")}
-											</label>
-											<Command className="border border-border rounded-md max-h-36 overflow-hidden bg-popover text-popover-foreground">
-												<CommandInput
-													placeholder={tTable("searchCriteriaPlaceholder")}
-													className="h-7 text-xs border-none focus:ring-0"
-												/>
-												<CommandList className="max-h-28">
-													<CommandEmpty className="text-xs p-2">{tForm("emptyCriteria")}</CommandEmpty>
-													<CommandGroup>
-														{criteria.map((c) => (
-															<CommandItem
-																key={c.id}
-																onSelect={() => toggleCriteriaFilter(c.id)}
-																className="text-xs py-1 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
-															>
-																<Check
-																	className={cn(
-																		"mr-2 h-3.5 w-3.5 text-primary",
-																		selectedCriteriaIds.includes(c.id) ? "opacity-100" : "opacity-0"
-																	)}
-																/>
-																<span className="truncate">{c.name}</span>
-															</CommandItem>
-														))}
-													</CommandGroup>
-												</CommandList>
-											</Command>
-										</div>
-									</PopoverContent>
-								</Popover>
-							</div>
-						</TableHead>
+						{!readOnly && (
+							<TableHead className="text-muted-foreground font-semibold text-right w-24">
+								<div className="flex items-center justify-end gap-2">
+									{tCommon("actions")}
+									{filterPopover}
+								</div>
+							</TableHead>
+						)}
 					</TableRow>
 				</TableHeader>
 				<TableBody>
 					{isLoading ? (
 						<TableRow className="border-border">
-							<TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+							<TableCell colSpan={columnCount} className="h-32 text-center text-muted-foreground">
 								<Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
 							</TableCell>
 						</TableRow>
 					) : items.length === 0 ? (
 						<TableRow className="border-border">
-							<TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+							<TableCell colSpan={columnCount} className="text-center text-muted-foreground py-10">
 								{tTable("empty")}
 							</TableCell>
 						</TableRow>
@@ -426,26 +444,32 @@ export function TreatmentProtocolsTable({ onEdit, onDelete }: TreatmentProtocols
 										</span>
 									)}
 								</TableCell>
-								<TableCell>
-									<div className="flex justify-end gap-1">
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => onEdit(item)}
-											className="hover:bg-accent text-foreground h-8 w-8"
-										>
-											<Edit className="h-4 w-4" />
-										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => onDelete(item)}
-											className="hover:bg-destructive/10 text-destructive h-8 w-8"
-										>
-											<Trash className="h-4 w-4" />
-										</Button>
-									</div>
-								</TableCell>
+								{!readOnly && (
+									<TableCell>
+										<div className="flex justify-end gap-1">
+											{onEdit && (
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => onEdit(item)}
+													className="hover:bg-accent text-foreground h-8 w-8"
+												>
+													<Edit className="h-4 w-4" />
+												</Button>
+											)}
+											{onDelete && (
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => onDelete(item)}
+													className="hover:bg-destructive/10 text-destructive h-8 w-8"
+												>
+													<Trash className="h-4 w-4" />
+												</Button>
+											)}
+										</div>
+									</TableCell>
+								)}
 							</TableRow>
 						))
 					)}
