@@ -96,9 +96,25 @@ export function AdminUsersView() {
 	const handleCreateUser = async (payload: CreateUserPayload) => {
 		setIsSubmittingForm(true);
 		try {
-			await createUser(payload);
+			const result = await createUser(payload);
 			setIsFormDialogOpen(false);
-			showNotice(`Đã tạo tài khoản thành công cho ${payload.lastName} ${payload.firstName}`);
+
+			const displayName =
+				[payload.lastName, payload.firstName].filter(Boolean).join(" ") || payload.email;
+			showNotice(`Đã tạo tài khoản thành công cho ${displayName}`);
+
+			if (!result.emailSent) {
+				toast.warning(
+					"Tài khoản đã tạo nhưng chưa gửi được email xác thực. Vui lòng kiểm tra cấu hình email của backend."
+				);
+			}
+
+			if (payload.role === "Manager") {
+				toast.info(
+					"Tài khoản Quản lý chuyên môn không có hồ sơ bác sĩ nên không hiển thị trong danh sách này."
+				);
+			}
+
 			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
@@ -166,14 +182,14 @@ export function AdminUsersView() {
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
 					<div className="flex items-center gap-2">
-						<div className="p-2 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-[#0EA5E9]">
+						<div className="p-2 rounded-xl bg-primary/10 dark:bg-primary/10 text-primary">
 							<Users className="w-5 h-5" />
 						</div>
-						<h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+						<h1 className="text-xl sm:text-2xl font-extrabold text-text-primary dark:text-primary-foreground tracking-tight">
 							Quản lý người dùng
 						</h1>
 					</div>
-					<p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+					<p className="text-xs sm:text-sm text-text-secondary dark:text-text-tertiary mt-1">
 						Quản trị danh sách tài khoản y bác sĩ, trưởng khoa và phân quyền hoạt động hệ thống Respira
 					</p>
 				</div>
@@ -192,6 +208,14 @@ export function AdminUsersView() {
 				}}
 				isLoading={isLoading}
 			/>
+
+			{filters.role === "Manager" && (
+				<div className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-xs font-medium text-warning dark:border-warning/30 dark:bg-warning/10 dark:text-warning">
+					Tài khoản Quản lý chuyên môn (MedicalRegulationReviewer) không có hồ sơ bác sĩ nên
+					không hiển thị trong danh sách này. Sự kiện tạo tài khoản vẫn được ghi nhận trong
+					Nhật ký kiểm toán.
+				</div>
+			)}
 
 			{/* Users Table */}
 			<UsersTable
