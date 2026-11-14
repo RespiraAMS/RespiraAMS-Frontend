@@ -7,7 +7,7 @@ export default function AntibioticDetailPage({ params }: { params: Promise<{ id:
 
     return (
         <div className="p-6">
-            <AntibioticDetail id={cleanId} />
+            <AntibioticDetail id={cleanId} readOnly/>
         </div>
     );
 }

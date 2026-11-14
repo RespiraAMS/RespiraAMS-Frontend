@@ -11,12 +11,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import { useAntibioticDetail, useAntibioticMutations, useDosageMutations } from "../queries";
-import { type AntibioticItem, type UpdateAntibioticRequest, type CreateAntibioticRequest, type DosageItem, type DosageRequest } from "../types";
+import {
+	type AntibioticItem,
+	type UpdateAntibioticRequest,
+	type CreateAntibioticRequest,
+	type DosageItem,
+	type DosageRequest,
+} from "../types";
 import { AntibioticForm } from "./AntibioticForm";
 import { DeleteAntibioticSheet } from "./DeleteAntibioticSheet";
 import { DosageFormModal } from "./DosageFormModal";
 import { DeleteDosageDialog } from "./DeleteDosageDialog";
-import { error } from "console";
 
 const MAX_DECIMAL = 79228162514264337593543950335;
 
@@ -54,9 +59,10 @@ function formatRouteOfAdministration(
 
 interface AntibioticDetailProps {
 	id: string;
+	readOnly?: boolean;
 }
 
-export function AntibioticDetail({ id }: AntibioticDetailProps) {
+export function AntibioticDetail({ id, readOnly = false }: AntibioticDetailProps) {
 	const t = useTranslations("manager.antibiotics");
 	const tCommon = useTranslations("common");
 	const router = useRouter();
@@ -217,6 +223,8 @@ export function AntibioticDetail({ id }: AntibioticDetailProps) {
 		}
 	};
 
+	const dosageColumnCount = readOnly ? 3 : 4;
+
 	return (
 		<div className="flex flex-col gap-6 text-foreground bg-background">
 			{/* Header & Main Actions */}
@@ -233,24 +241,26 @@ export function AntibioticDetail({ id }: AntibioticDetailProps) {
 					</Button>
 					<h2 className="text-2xl font-bold tracking-tight text-foreground">{detailData.name}</h2>
 				</div>
-				<div className="flex items-center gap-2">
-					<Button
-						variant="outline"
-						className="gap-2 border-border text-foreground hover:bg-accent"
-						onClick={() => setIsEditModalOpen(true)}
-					>
-						<Edit className="h-4 w-4" />
-						{tCommon("update")}
-					</Button>
-					<Button
-						variant="destructive"
-						className="gap-2"
-						onClick={() => setIsDeleteOpen(true)}
-					>
-						<Trash className="h-4 w-4" />
-						{tCommon("delete")}
-					</Button>
-				</div>
+				{!readOnly && (
+					<div className="flex items-center gap-2">
+						<Button
+							variant="outline"
+							className="gap-2 border-border text-foreground hover:bg-accent"
+							onClick={() => setIsEditModalOpen(true)}
+						>
+							<Edit className="h-4 w-4" />
+							{tCommon("update")}
+						</Button>
+						<Button
+							variant="destructive"
+							className="gap-2"
+							onClick={() => setIsDeleteOpen(true)}
+						>
+							<Trash className="h-4 w-4" />
+							{tCommon("delete")}
+						</Button>
+					</div>
+				)}
 			</div>
 
 			{/* Info Cards */}
@@ -287,14 +297,16 @@ export function AntibioticDetail({ id }: AntibioticDetailProps) {
 			<div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden text-card-foreground">
 				<div className="p-6 pb-2 flex items-center justify-between">
 					<h3 className="font-semibold text-lg text-card-foreground">{t("detail.dosages")}</h3>
-					<Button
-						size="sm"
-						onClick={handleOpenCreateDosage}
-						className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-					>
-						<Plus className="h-4 w-4" />
-						{t("detail.addDosage")}
-					</Button>
+					{!readOnly && (
+						<Button
+							size="sm"
+							onClick={handleOpenCreateDosage}
+							className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+						>
+							<Plus className="h-4 w-4" />
+							{t("detail.addDosage")}
+						</Button>
+					)}
 				</div>
 				<div className="p-4">
 					<Table className="border-border">
@@ -303,7 +315,9 @@ export function AntibioticDetail({ id }: AntibioticDetailProps) {
 								<TableHead className="text-muted-foreground font-semibold">{t("detail.route")}</TableHead>
 								<TableHead className="text-muted-foreground font-semibold">{t("detail.crcl")}</TableHead>
 								<TableHead className="text-muted-foreground font-semibold">{t("detail.dose")}</TableHead>
-								<TableHead className="text-muted-foreground font-semibold text-right">{tCommon("actions")}</TableHead>
+								{!readOnly && (
+									<TableHead className="text-muted-foreground font-semibold text-right">{tCommon("actions")}</TableHead>
+								)}
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -327,32 +341,34 @@ export function AntibioticDetail({ id }: AntibioticDetailProps) {
 											<TableCell className="text-sm whitespace-pre-wrap text-foreground">
 												{dosage.dose}
 											</TableCell>
-											<TableCell className="text-right">
-												<div className="flex justify-end gap-1">
-													<Button
-														variant="ghost"
-														size="icon"
-														onClick={() => handleOpenEditDosage(dosage)}
-														className="hover:bg-accent text-foreground"
-													>
-														<Edit className="h-4 w-4" />
-													</Button>
-													<Button
-														variant="ghost"
-														size="icon"
-														onClick={() => handleDeleteDosageClick(dosage)}
-														className="hover:bg-destructive/10"
-													>
-														<Trash className="h-4 w-4 text-destructive" />
-													</Button>
-												</div>
-											</TableCell>
+											{!readOnly && (
+												<TableCell className="text-right">
+													<div className="flex justify-end gap-1">
+														<Button
+															variant="ghost"
+															size="icon"
+															onClick={() => handleOpenEditDosage(dosage)}
+															className="hover:bg-accent text-foreground"
+														>
+															<Edit className="h-4 w-4" />
+														</Button>
+														<Button
+															variant="ghost"
+															size="icon"
+															onClick={() => handleDeleteDosageClick(dosage)}
+															className="hover:bg-destructive/10"
+														>
+															<Trash className="h-4 w-4 text-destructive" />
+														</Button>
+													</div>
+												</TableCell>
+											)}
 										</TableRow>
 									);
 								})
 							) : (
 								<TableRow className="border-border">
-									<TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+									<TableCell colSpan={dosageColumnCount} className="text-center py-6 text-muted-foreground">
 										{t("detail.noDosages")}
 									</TableCell>
 								</TableRow>
@@ -363,43 +379,47 @@ export function AntibioticDetail({ id }: AntibioticDetailProps) {
 			</div>
 
 			{/* Modals & Dialogs */}
-			<Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
-					<DialogHeader>
-						<DialogTitle className="text-xl text-foreground">{t("dialog.updateTitle")}</DialogTitle>
-					</DialogHeader>
-					<AntibioticForm
-						initialData={antibioticItem}
-						onSubmit={handleUpdate}
-						onCancel={() => setIsEditModalOpen(false)}
-						isPending={updateMutation.isPending}
+			{!readOnly && (
+				<>
+					<Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+						<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
+							<DialogHeader>
+								<DialogTitle className="text-xl text-foreground">{t("dialog.updateTitle")}</DialogTitle>
+							</DialogHeader>
+							<AntibioticForm
+								initialData={antibioticItem}
+								onSubmit={handleUpdate}
+								onCancel={() => setIsEditModalOpen(false)}
+								isPending={updateMutation.isPending}
+							/>
+						</DialogContent>
+					</Dialog>
+
+					<DeleteAntibioticSheet
+						isOpen={isDeleteOpen}
+						onClose={() => setIsDeleteOpen(false)}
+						onConfirm={handleDelete}
+						antibioticName={detailData.name}
+						isDeleting={deleteMutation.isPending}
 					/>
-				</DialogContent>
-			</Dialog>
 
-			<DeleteAntibioticSheet
-				isOpen={isDeleteOpen}
-				onClose={() => setIsDeleteOpen(false)}
-				onConfirm={handleDelete}
-				antibioticName={detailData.name}
-				isDeleting={deleteMutation.isPending}
-			/>
+					<DosageFormModal
+						isOpen={isDosageModalOpen}
+						onClose={() => setIsDosageModalOpen(false)}
+						onSubmit={handleDosageSubmit}
+						initialData={selectedDosage}
+						existingDosages={detailData.dosages || []}
+						isPending={createDosageMutation.isPending || updateDosageMutation.isPending}
+					/>
 
-			<DosageFormModal
-				isOpen={isDosageModalOpen}
-				onClose={() => setIsDosageModalOpen(false)}
-				onSubmit={handleDosageSubmit}
-				initialData={selectedDosage}
-				existingDosages={detailData.dosages || []}
-				isPending={createDosageMutation.isPending || updateDosageMutation.isPending}
-			/>
-
-			<DeleteDosageDialog
-				isOpen={!!deleteDosageId}
-				onClose={() => setDeleteDosageId(null)}
-				onConfirm={handleConfirmDeleteDosage}
-				isDeleting={deleteDosageMutation.isPending}
-			/>
+					<DeleteDosageDialog
+						isOpen={!!deleteDosageId}
+						onClose={() => setDeleteDosageId(null)}
+						onConfirm={handleConfirmDeleteDosage}
+						isDeleting={deleteDosageMutation.isPending}
+					/>
+				</>
+			)}
 		</div>
 	);
 }
