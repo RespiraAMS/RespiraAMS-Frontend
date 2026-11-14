@@ -23,7 +23,9 @@
     "search": {
       "placeholder": "Tìm kiếm...",
       "button": "Tìm kiếm",
-      "minLengthError": "Vui lòng nhập ít nhất 2 ký tự để tìm kiếm!"
+      "minLengthError": "Vui lòng nhập ít nhất 2 ký tự để tìm kiếm!",
+      "minLength": "Vui lòng nhập ít nhất {min} ký tự.",
+      "invalidChars": "Chỉ được chứa chữ, số, dấu gạch ngang và khoảng trắng."
     },
     "nav": {
       "mainNavigation": "Điều hướng chính",

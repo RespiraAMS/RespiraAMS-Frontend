@@ -1,10 +1,14 @@
-import { AntibioticGroupsView } from "@/features/doctor/antibiotic-groups/components/AntibioticGroupsView";
+import { AntibioticGroupsView } from "@/features/manager/antibiotic-groups/components/AntibioticGroupsView";
 
 export const metadata = {
-	title: "Danh sách nhóm kháng sinh | RespiraAMS",
-	description: "Tra cứu các nhóm kháng sinh, cơ chế tác dụng và kháng sinh thuộc nhóm.",
+	title: "Nhóm kháng sinh | RespiraAMS",
+	description: "Quản lý danh sách nhóm kháng sinh trong hệ thống RespiraAMS.",
 };
 
-export default function AntibioticGroupsPage() {
-	return <AntibioticGroupsView />;
+export default function Page() {
+	return (
+		<div className="container mx-auto px-4 py-8">
+			<AntibioticGroupsView readOnly={true}/>
+		</div>
+	);
 }

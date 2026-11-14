@@ -1,21 +1,20 @@
-import { DoctorSidebar } from "@/features/doctor/components/sidebar";
-import { DoctorHeader } from "@/features/doctor/components/header";
-import { DoctorThemeScope } from "@/features/doctor/components/DoctorThemeScope";
+import { DoctorSidebar } from '@/features/doctor/components/sidebar';
+import { DoctorHeader } from '@/features/doctor/components/header';
 
 export default function DoctorLayout({
-	children,
+    children,
 }: Readonly<{
-	children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-	return (
-		<DoctorThemeScope>
-			<div className="flex min-h-screen bg-[#F8FAFC] antialiased">
-				<DoctorSidebar />
-				<div className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-hidden">
-					<DoctorHeader />
-					<main className="flex-1 overflow-y-auto bg-[#F8FAFC]">{children}</main>
-				</div>
-			</div>
-		</DoctorThemeScope>
-	);
+    return (
+        <div className="flex h-screen overflow-hidden bg-background text-foreground">
+            <DoctorSidebar /> 
+            <div className="flex flex-1 flex-col overflow-hidden">
+                <DoctorHeader />
+                <main className="flex-1 overflow-auto bg-background text-foreground">
+                    {children}
+                </main>
+            </div>
+        </div>
+    );
 }

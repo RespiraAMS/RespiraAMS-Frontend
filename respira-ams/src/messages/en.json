@@ -23,7 +23,9 @@
     "search": {
       "placeholder": "Search...",
       "button": "Search",
-      "minLengthError": "Please enter at least 2 characters to search!"
+      "minLengthError": "Please enter at least 2 characters to search!",
+      "minLength": "Please enter at least {min} characters.",
+      "invalidChars": "Only letters, numbers, hyphens, and spaces are allowed."
     },
     "nav": {
       "mainNavigation": "Main Navigation",
