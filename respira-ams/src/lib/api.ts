@@ -5,14 +5,7 @@ import { ApiResult } from "./models";
 const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION ?? "v1";
 
 export const API_BASE = `/api/${API_VERSION}`;
-export const API_BASE_SERVER = `${
-	process.env.NEXT_PUBLIC_GATEWAY_URL ||
-	(process.env.NEXT_PUBLIC_API_URL
-		? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, "")
-		: "") ||
-	process.env.GATEWAY_URL ||
-	"http://localhost:5016"
-}`;
+export const API_BASE_SERVER = `${process.env.GATEWAY_URL || "https://gateway-respira.dev.localhost:7283"}`;
 
 function redirectToLogin(): void {
     if (typeof window !== "undefined") {
@@ -51,7 +44,6 @@ export async function apiFetch<T>(
 
     const resp = await fetch(url, {
         headers,
-        signal: opts?.signal || AbortSignal.timeout(1500),
         ...opts,
     });
 
@@ -60,12 +52,7 @@ export async function apiFetch<T>(
         return null;
     }
 
-    let result: ApiResult<T> | null = null;
-    try {
-        result = (await resp.json()) as ApiResult<T>;
-    } catch {
-        throw new Error(`Máy chủ phản hồi trạng thái ${resp.status} ${resp.statusText}`);
-    }
+    const result = (await resp.json()) as ApiResult<T>;
 
     // Check both HTTP status and the API's custom error object
     if (!resp.ok || result.error) {
@@ -97,10 +84,6 @@ export async function apiFetch<T>(
 
     return result.data;
 }
-
-// ---------------------------------------------------------
-// Helper functions and classes for Doctor features
-// ---------------------------------------------------------
 
 const DOCTOR_API_URL =
 	typeof window !== "undefined"
