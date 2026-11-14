@@ -21,14 +21,14 @@ export function AdminDialogContent({
 					<DialogPrimitive.Content
 						style={{ borderRadius: "18px" }}
 						className={cn(
-							"my-auto relative w-full rounded-[18px] bg-white p-6 sm:p-8 text-sm shadow-2xl outline-none border-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
+							"my-auto relative w-full rounded-[18px] bg-surface p-6 sm:p-8 text-sm shadow-2xl outline-none border-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
 							className
 						)}
 						{...props}
 					>
 						{children}
 						<DialogPrimitive.Close
-							className="absolute top-4 right-4 rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer"
+							className="absolute top-4 right-4 rounded-md p-1 text-text-secondary hover:bg-surface-secondary hover:text-text-primary transition-colors cursor-pointer"
 							aria-label="Đóng"
 						>
 							<XIcon className="h-4 w-4" />

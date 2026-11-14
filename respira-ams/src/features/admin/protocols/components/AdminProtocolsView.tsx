@@ -170,14 +170,14 @@ export function AdminProtocolsView() {
 		<div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 			<div>
 				<div className="flex items-center gap-2">
-					<div className="p-2 rounded-xl bg-sky-50 text-[#0EA5E9]">
+					<div className="p-2 rounded-xl bg-primary/10 text-primary">
 						<FileText className="w-5 h-5" />
 					</div>
-					<h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+					<h1 className="text-xl sm:text-2xl font-extrabold text-text-primary tracking-tight">
 						Phác đồ &amp; Phiên bản
 					</h1>
 				</div>
-				<p className="text-xs sm:text-sm text-slate-500 mt-1">
+				<p className="text-xs sm:text-sm text-text-secondary mt-1">
 					Quản lý các phác đồ / thang điểm lâm sàng, phiên bản ban hành và trạng thái áp dụng trong hệ thống Respira
 				</p>
 			</div>
@@ -196,9 +196,9 @@ export function AdminProtocolsView() {
 			/>
 
 			{isError ? (
-				<div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-					<p className="text-sm font-bold text-red-700">Không thể tải danh sách phác đồ</p>
-					<p className="text-xs text-red-600 mt-1">{errorMessage(error)}</p>
+				<div className="bg-error/10 border border-error/30 rounded-xl p-6 text-center">
+					<p className="text-sm font-bold text-error">Không thể tải danh sách phác đồ</p>
+					<p className="text-xs text-error mt-1">{errorMessage(error)}</p>
 				</div>
 			) : (
 				<ProtocolsTable

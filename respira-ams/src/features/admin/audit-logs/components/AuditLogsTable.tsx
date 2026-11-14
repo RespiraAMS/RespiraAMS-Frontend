@@ -57,21 +57,21 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 		switch (status) {
 			case "success":
 				return (
-					<span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200/60">
+					<span className="inline-flex items-center gap-1 rounded-md bg-success/10 px-2 py-0.5 text-[11px] font-semibold text-success border border-success/30">
 						<CheckCircle2 className="h-3 w-3" />
 						<span>{t("statusSuccess")}</span>
 					</span>
 				);
 			case "warning":
 				return (
-					<span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200/60">
+					<span className="inline-flex items-center gap-1 rounded-md bg-warning/10 px-2 py-0.5 text-[11px] font-semibold text-warning border border-warning/30">
 						<AlertTriangle className="h-3 w-3" />
 						<span>{t("statusWarning")}</span>
 					</span>
 				);
 			case "error":
 				return (
-					<span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700 border border-red-200/60">
+					<span className="inline-flex items-center gap-1 rounded-md bg-error/10 px-2 py-0.5 text-[11px] font-semibold text-error border border-error/30">
 						<AlertCircle className="h-3 w-3" />
 						<span>{t("statusError")}</span>
 					</span>
@@ -81,13 +81,13 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 
 	const renderServiceBadge = (service: AuditServiceType) => {
 		const styles: Record<AuditServiceType, { bg: string; text: string; border: string }> = {
-			Clinical: { bg: "bg-indigo-50", text: "text-indigo-700", border: "border-indigo-200/60" },
-			Auth: { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200/60" },
-			Patient: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200/60" },
-			Doctor: { bg: "bg-sky-50", text: "text-sky-700", border: "border-sky-200/60" },
-			Saga: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200/60" },
-			Media: { bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-200/60" },
-			Gateway: { bg: "bg-slate-100", text: "text-slate-700", border: "border-slate-200/60" },
+			Clinical: { bg: "bg-info/10", text: "text-info", border: "border-info/30" },
+			Auth: { bg: "bg-warning/10", text: "text-warning", border: "border-warning/30" },
+			Patient: { bg: "bg-success/10", text: "text-success", border: "border-success/30" },
+			Doctor: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/30" },
+			Saga: { bg: "bg-warning/10", text: "text-warning", border: "border-warning/30" },
+			Media: { bg: "bg-warning/10", text: "text-warning", border: "border-warning/30" },
+			Gateway: { bg: "bg-surface-secondary", text: "text-text-primary", border: "border-border-default/60" },
 		};
 
 		const s = styles[service] || styles.Gateway;
@@ -104,26 +104,26 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 		switch (severity) {
 			case "critical":
 				return (
-					<span className="text-[10px] font-extrabold uppercase tracking-wider text-red-600 bg-red-100/70 px-1.5 py-0.2 rounded">
+					<span className="text-[10px] font-extrabold uppercase tracking-wider text-error bg-error/10 px-1.5 py-0.2 rounded">
 						{t("sevCritical")}
 					</span>
 				);
 			case "high":
 				return (
-					<span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 bg-orange-100/70 px-1.5 py-0.2 rounded">
+					<span className="text-[10px] font-bold uppercase tracking-wider text-warning bg-warning/10 px-1.5 py-0.2 rounded">
 						{t("sevHigh")}
 					</span>
 				);
 			case "medium":
 				return (
-					<span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-100/70 px-1.5 py-0.2 rounded">
+					<span className="text-[10px] font-bold uppercase tracking-wider text-warning bg-warning/10 px-1.5 py-0.2 rounded">
 						{t("sevMedium")}
 					</span>
 				);
 			case "low":
 			default:
 				return (
-					<span className="text-[10px] font-medium uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded">
+					<span className="text-[10px] font-medium uppercase tracking-wider text-text-secondary bg-surface-secondary px-1.5 py-0.2 rounded">
 						{t("sevLow")}
 					</span>
 				);
@@ -134,19 +134,19 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 		switch (role.toLowerCase()) {
 			case "admin":
 				return (
-					<span className="text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200/60 px-1.5 py-0.2 rounded">
+					<span className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/30 px-1.5 py-0.2 rounded">
 						Admin
 					</span>
 				);
 			case "manager":
 				return (
-					<span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-1.5 py-0.2 rounded">
+					<span className="text-[10px] font-bold text-info bg-info/10 border border-info/30 px-1.5 py-0.2 rounded">
 						Manager
 					</span>
 				);
 			case "doctor":
 				return (
-					<span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.2 rounded">
+					<span className="text-[10px] font-bold text-success bg-success/10 border border-success/30 px-1.5 py-0.2 rounded">
 						Doctor
 					</span>
 				);
@@ -154,7 +154,7 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 			case "gateway":
 			default:
 				return (
-					<span className="text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded">
+					<span className="text-[10px] font-bold text-text-secondary bg-surface-secondary border border-border-default px-1.5 py-0.2 rounded">
 						{role}
 					</span>
 				);
@@ -164,24 +164,24 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 	// Chỉ hiện khung loading to khi mới vào trang lần đầu và chưa có dữ liệu nào
 	if (isLoading && logs.length === 0) {
 		return (
-			<div className="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-xs">
-				<div className="inline-block animate-spin text-[#0EA5E9] mb-3">
+			<div className="bg-surface rounded-xl border border-border-default p-12 text-center shadow-xs">
+				<div className="inline-block animate-spin text-primary mb-3">
 					<Clock className="w-6 h-6" />
 				</div>
-				<p className="text-sm font-semibold text-slate-700">{t("loading", { defaultMessage: "Đang đồng bộ nhật ký kiểm toán..." })}</p>
-				<p className="text-xs text-slate-400 mt-1">{t("loadingDesc", { defaultMessage: "Đang truy vấn các sự kiện từ các vi dịch vụ" })}</p>
+				<p className="text-sm font-semibold text-text-primary">{t("loading", { defaultMessage: "Đang đồng bộ nhật ký kiểm toán..." })}</p>
+				<p className="text-xs text-text-tertiary mt-1">{t("loadingDesc", { defaultMessage: "Đang truy vấn các sự kiện từ các vi dịch vụ" })}</p>
 			</div>
 		);
 	}
 
 	if (logs.length === 0 && !isLoading) {
 		return (
-			<div className="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-xs">
-				<div className="mx-auto w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 text-slate-400 flex items-center justify-center mb-3">
+			<div className="bg-surface rounded-xl border border-border-default p-12 text-center shadow-xs">
+				<div className="mx-auto w-12 h-12 rounded-2xl bg-surface-secondary border border-border-subtle text-text-tertiary flex items-center justify-center mb-3">
 					<Shield className="w-6 h-6" />
 				</div>
-				<h3 className="text-sm font-bold text-slate-800">{t("empty")}</h3>
-				<p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+				<h3 className="text-sm font-bold text-text-primary">{t("empty")}</h3>
+				<p className="text-xs text-text-tertiary mt-1 max-w-sm mx-auto">
 					{t("emptyDesc", { defaultMessage: "Không có nhật ký nào phù hợp với bộ lọc hiện tại. Thử đổi từ khoá tìm kiếm hoặc xóa bộ lọc." })}
 				</p>
 			</div>
@@ -189,30 +189,30 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 	}
 
 	return (
-		<div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+		<div className="bg-surface rounded-xl border border-border-default shadow-xs overflow-hidden">
 			<div className="overflow-x-auto">
 				<Table className="table-fixed w-full">
-					<TableHeader className="bg-slate-50/80">
-						<TableRow className="border-b border-slate-200 hover:bg-transparent">
-							<TableHead className="w-[130px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 pl-4">
+					<TableHeader className="bg-surface-secondary/80">
+						<TableRow className="border-b border-border-default hover:bg-transparent">
+							<TableHead className="w-[130px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5 pl-4">
 								{t("colTime")}
 							</TableHead>
-							<TableHead className="w-[210px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
+							<TableHead className="w-[210px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
 								{t("colActor")}
 							</TableHead>
-							<TableHead className="w-[105px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
+							<TableHead className="w-[105px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
 								{t("colService")}
 							</TableHead>
-							<TableHead className="min-w-[260px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
+							<TableHead className="min-w-[260px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
 								{t("colActionTarget")}
 							</TableHead>
-							<TableHead className="w-[125px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
+							<TableHead className="w-[125px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
 								{t("colIpDuration")}
 							</TableHead>
-							<TableHead className="w-[135px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
+							<TableHead className="w-[135px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
 								{t("colStatusSeverity")}
 							</TableHead>
-							<TableHead className="w-[70px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 text-right pr-4">
+							<TableHead className="w-[70px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5 text-right pr-4">
 								{t("colDetail")}
 							</TableHead>
 						</TableRow>
@@ -223,14 +223,14 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 							return (
 								<TableRow
 									key={log.id}
-									className="border-b border-slate-100 hover:bg-slate-50/60 transition-colors cursor-pointer"
+									className="border-b border-border-subtle hover:bg-surface-secondary/60 transition-colors cursor-pointer"
 									onClick={() => onViewDetail(log)}
 								>
 									{/* Timestamp */}
 									<TableCell className="py-3 pl-4 align-top">
 										<div className="flex flex-col">
-											<span className="font-semibold text-xs text-slate-800">{timeStr}</span>
-											<span className="text-[11px] text-slate-400 font-mono mt-0.5">
+											<span className="font-semibold text-xs text-text-primary">{timeStr}</span>
+											<span className="text-[11px] text-text-tertiary font-mono mt-0.5">
 												{dateStr}
 											</span>
 										</div>
@@ -240,12 +240,12 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 									<TableCell className="py-3 align-top">
 										<div className="flex flex-col gap-1">
 											<div className="flex items-center gap-1.5 flex-wrap">
-												<span className="font-semibold text-xs text-slate-900 leading-tight">
+												<span className="font-semibold text-xs text-text-primary leading-tight">
 													{log.actorName}
 												</span>
 												{renderRoleBadge(log.role)}
 											</div>
-											<span className="text-[11px] text-slate-500 font-mono break-all">
+											<span className="text-[11px] text-text-secondary font-mono break-all">
 												{log.actor}
 											</span>
 										</div>
@@ -259,14 +259,14 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 									{/* Action & Target */}
 									<TableCell className="py-3 align-top">
 										<div className="flex flex-col gap-1">
-											<span className="font-semibold text-xs text-slate-900 line-clamp-2 leading-snug">
+											<span className="font-semibold text-xs text-text-primary line-clamp-2 leading-snug">
 												{log.action}
 											</span>
 											<div className="flex items-center gap-1.5 flex-wrap">
-												<span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded font-mono">
+												<span className="text-[10px] font-semibold text-text-secondary bg-surface-secondary px-1.5 py-0.2 rounded font-mono">
 													{log.category}
 												</span>
-												<span className="text-[11px] text-slate-500 font-mono truncate max-w-[220px]">
+												<span className="text-[11px] text-text-secondary font-mono truncate max-w-[220px]">
 													{log.target}
 												</span>
 											</div>
@@ -276,10 +276,10 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 									{/* IP & Latency */}
 									<TableCell className="py-3 align-top">
 										<div className="flex flex-col">
-											<span className="font-mono text-xs text-slate-700">
+											<span className="font-mono text-xs text-text-primary">
 												{log.ipAddress}
 											</span>
-											<span className="text-[10.5px] text-slate-400 font-mono mt-0.5">
+											<span className="text-[10.5px] text-text-tertiary font-mono mt-0.5">
 												{log.durationMs}ms
 											</span>
 										</div>
@@ -305,7 +305,7 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 											type="button"
 											variant="ghost"
 											size="icon"
-											className="h-8 w-8 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 cursor-pointer"
+											className="h-8 w-8 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-secondary cursor-pointer"
 											title="Xem chi tiết sự kiện"
 										>
 											<Eye className="w-4 h-4" />

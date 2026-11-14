@@ -31,20 +31,20 @@ export function ProtocolToolbar({
 	const t = useTranslations("admin.protocols");
 
 	return (
-		<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+		<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-3.5 rounded-xl border border-border-default shadow-xs">
 			<div className="relative flex-1 min-w-[200px]">
-				<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+				<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
 				<Input
 					value={search}
 					onChange={(e) => onSearchChange(e.target.value)}
 					placeholder={t("searchPlaceholder")}
-					className="pl-9 pr-9 h-9.5 text-sm rounded-lg bg-slate-50/70 border-slate-200"
+					className="pl-9 pr-9 h-9.5 text-sm rounded-lg bg-surface-secondary/70 border-border-default"
 				/>
 				{search && (
 					<button
 						type="button"
 						onClick={() => onSearchChange("")}
-						className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
+						className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary cursor-pointer p-0.5"
 						title="Clear search"
 					>
 						<X className="w-4 h-4" />
@@ -54,7 +54,7 @@ export function ProtocolToolbar({
 
 			<div className="flex items-center gap-2 flex-wrap">
 				<Select value={filter} onValueChange={(v) => onFilterChange(v as ProtocolFilter)}>
-					<SelectTrigger className="w-[165px] h-9.5 text-xs font-semibold rounded-lg bg-slate-50 border-slate-200">
+					<SelectTrigger className="w-[165px] h-9.5 text-xs font-semibold rounded-lg bg-surface-secondary border-border-default">
 						<SelectValue placeholder={t("statusFilter")} />
 					</SelectTrigger>
 					<SelectContent>
@@ -67,7 +67,7 @@ export function ProtocolToolbar({
 				<Button
 					type="button"
 					onClick={onCreate}
-					className="h-9.5 px-4 rounded-lg bg-[#0EA5E9] hover:bg-[#0284C7] text-white font-semibold text-xs gap-1.5 shadow-sm cursor-pointer"
+					className="h-9.5 px-4 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs gap-1.5 shadow-sm cursor-pointer"
 				>
 					<Plus className="w-4 h-4" />
 					<span>{t("addProtocol")}</span>
