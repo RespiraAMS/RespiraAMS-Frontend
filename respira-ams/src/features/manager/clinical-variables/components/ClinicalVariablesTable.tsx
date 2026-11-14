@@ -19,18 +19,24 @@ import {
 	DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { useSearchStore } from "@/features/manager/stores/searchStore";
 import { useClinicalVariables } from "../queries";
 import { type ClinicalVariableItem, type VariableCategory, type VariableValueType } from "../types";
 
 const PAGE_SIZE = 10;
 
 interface ClinicalVariablesTableProps {
+	readOnly?: boolean;
+	searchName?: string;
 	onViewDetail: (id: string) => void;
-	onDelete: (item: ClinicalVariableItem) => void;
+	onDelete?: (item: ClinicalVariableItem) => void;
 }
 
-export function ClinicalVariablesTable({ onViewDetail, onDelete }: ClinicalVariablesTableProps) {
+export function ClinicalVariablesTable({
+	readOnly = false,
+	searchName = "",
+	onViewDetail,
+	onDelete,
+}: ClinicalVariablesTableProps) {
 	const t = useTranslations("manager.clinicalVariables");
 	const tTable = useTranslations("manager.clinicalVariables.table");
 	const tCommon = useTranslations("common");
@@ -40,8 +46,6 @@ export function ClinicalVariablesTable({ onViewDetail, onDelete }: ClinicalVaria
 	const [filterRequired, setFilterRequired] = useState<boolean | null>(null);
 	const [filterValueType, setFilterValueType] = useState<VariableValueType | "">("");
 	const [filterCategory, setFilterCategory] = useState<VariableCategory | "">("");
-
-	const searchName = useSearchStore((s) => s.value);
 
 	const [prevFilters, setPrevFilters] = useState({ searchName, filterRequired, filterValueType, filterCategory });
 	if (
@@ -234,17 +238,19 @@ export function ClinicalVariablesTable({ onViewDetail, onDelete }: ClinicalVaria
 									>
 										<Eye className="h-4 w-4" />
 									</Button>
-									<Button
-										variant="ghost"
-										size="icon"
-										onClick={(e) => {
-											e.stopPropagation();
-											onDelete(item);
-										}}
-										className="hover:bg-destructive/10"
-									>
-										<Trash className="h-4 w-4 text-destructive" />
-									</Button>
+									{!readOnly && onDelete && (
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={(e) => {
+												e.stopPropagation();
+												onDelete(item);
+											}}
+											className="hover:bg-destructive/10"
+										>
+											<Trash className="h-4 w-4 text-destructive" />
+										</Button>
+									)}
 								</TableCell>
 							</TableRow>
 						))

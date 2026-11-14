@@ -19,11 +19,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 import { useClinicalVariableDetail, useClinicalVariableMutations } from "../queries";
 import { type CreateClinicalVariableRequest, type UpdateClinicalVariableRequest } from "../types";
-import { PrerequisiteFormatter } from "../../components/PrerequisiteFormatter";
 import { ClinicalVariableForm } from "./ClinicalVariableForm";
 import { formatRangeDisplay } from "../utils";
 
-export function ClinicalVariableDetail({ id }: { id: string }) {
+interface ClinicalVariableDetailProps {
+	id: string;
+	readOnly?: boolean;
+	listPath?: string;
+}
+
+export function ClinicalVariableDetail({
+	id,
+	readOnly = false,
+	listPath = "/manage/clinical-variables",
+}: ClinicalVariableDetailProps) {
 	const t = useTranslations("manager.clinicalVariables");
 	const tCommon = useTranslations("common");
 	const router = useRouter();
@@ -64,7 +73,7 @@ export function ClinicalVariableDetail({ id }: { id: string }) {
 		deleteMutation.mutate(id, {
 			onSuccess: () => {
 				toast.success(t("toast.deleteSuccess"));
-				router.push("/manage/clinical-variables");
+				router.push(listPath);
 			},
 			onError: (error) => toast.error(t("toast.deleteError") + " " + error.message),
 		});
@@ -106,18 +115,20 @@ export function ClinicalVariableDetail({ id }: { id: string }) {
 					</div>
 				</div>
 
-				<div className="flex gap-2">
-					<Button
-						variant="outline"
-						onClick={() => setIsUpdateOpen(true)}
-						className="border-border text-foreground hover:bg-accent"
-					>
-						<Edit className="h-4 w-4 mr-2" /> {tCommon("update")}
-					</Button>
-					<Button variant="destructive" onClick={() => setIsDeleteOpen(true)}>
-						<Trash className="h-4 w-4 mr-2" /> {tCommon("delete")}
-					</Button>
-				</div>
+				{!readOnly && (
+					<div className="flex gap-2">
+						<Button
+							variant="outline"
+							onClick={() => setIsUpdateOpen(true)}
+							className="border-border text-foreground hover:bg-accent"
+						>
+							<Edit className="h-4 w-4 mr-2" /> {tCommon("update")}
+						</Button>
+						<Button variant="destructive" onClick={() => setIsDeleteOpen(true)}>
+							<Trash className="h-4 w-4 mr-2" /> {tCommon("delete")}
+						</Button>
+					</div>
+				)}
 			</div>
 
 			{/* Info Grid */}
@@ -210,50 +221,54 @@ export function ClinicalVariableDetail({ id }: { id: string }) {
 			<div className="rounded-xl border border-border bg-card p-6 shadow-sm text-card-foreground">
 				<h3 className="font-semibold text-lg mb-4 text-foreground">{t("detail.prerequisiteTitle")}</h3>
 				<div className="bg-muted/50 p-4 rounded-lg border border-border text-foreground">
-					{data.prerequisite}
+					{data.prerequisite ? data.prerequisite : <span className="text-muted-foreground">{t("detail.prerequisiteNull")}</span>}
 				</div>
 			</div>
 
-			{/* UPDATE DIALOG */}
-			<Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
-				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
-					<DialogHeader>
-						<DialogTitle className="text-xl text-foreground">{t("dialog.updateTitle")}</DialogTitle>
-					</DialogHeader>
-					{isUpdateOpen && (
-						<ClinicalVariableForm
-							initialData={data}
-							onSubmit={handleUpdateSubmit}
-							onCancel={() => setIsUpdateOpen(false)}
-							isPending={updateMutation.isPending}
-						/>
-					)}
-				</DialogContent>
-			</Dialog>
+			{!readOnly && (
+				<>
+					{/* UPDATE DIALOG */}
+					<Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
+						<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
+							<DialogHeader>
+								<DialogTitle className="text-xl text-foreground">{t("dialog.updateTitle")}</DialogTitle>
+							</DialogHeader>
+							{isUpdateOpen && (
+								<ClinicalVariableForm
+									initialData={data}
+									onSubmit={handleUpdateSubmit}
+									onCancel={() => setIsUpdateOpen(false)}
+									isPending={updateMutation.isPending}
+								/>
+							)}
+						</DialogContent>
+					</Dialog>
 
-			{/* DELETE ALERT */}
-			<AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-				<AlertDialogContent className="border-border bg-popover text-popover-foreground shadow-lg">
-					<AlertDialogHeader>
-						<AlertDialogTitle className="text-destructive font-semibold">{t("alert.deleteTitle")}</AlertDialogTitle>
-						<AlertDialogDescription className="text-muted-foreground">
-							{t("alert.deleteConfirmMsg", { name: data.name })}
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<Button
-							variant="outline"
-							onClick={() => setIsDeleteOpen(false)}
-							className="border-border text-foreground hover:bg-accent"
-						>
-							{tCommon("cancel")}
-						</Button>
-						<Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
-							{deleteMutation.isPending ? t("alert.deleting") : tCommon("delete")}
-						</Button>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+					{/* DELETE ALERT */}
+					<AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+						<AlertDialogContent className="border-border bg-popover text-popover-foreground shadow-lg">
+							<AlertDialogHeader>
+								<AlertDialogTitle className="text-destructive font-semibold">{t("alert.deleteTitle")}</AlertDialogTitle>
+								<AlertDialogDescription className="text-muted-foreground">
+									{t("alert.deleteConfirmMsg", { name: data.name })}
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogFooter>
+								<Button
+									variant="outline"
+									onClick={() => setIsDeleteOpen(false)}
+									className="border-border text-foreground hover:bg-accent"
+								>
+									{tCommon("cancel")}
+								</Button>
+								<Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
+									{deleteMutation.isPending ? t("alert.deleting") : tCommon("delete")}
+								</Button>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
+				</>
+			)}
 		</div>
 	);
 }

@@ -429,7 +429,8 @@
         "normalRange": "Ngưỡng bình thường",
         "acceptedValues": "Các giá trị hợp lệ",
         "booleanNotice": "Biến số chỉ nhận giá trị Đúng (True) hoặc Sai (False).",
-        "prerequisiteTitle": "Điều kiện tiên quyết"
+        "prerequisiteTitle": "Điều kiện tiên quyết",
+        "prerequisiteNull": "Không có điều kiện phụ thuộc."
       },
       "toast": {
         "createSuccess": "Thêm biến số mới thành công!",

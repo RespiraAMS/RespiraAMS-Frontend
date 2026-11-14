@@ -429,7 +429,8 @@
         "normalRange": "Normal Range",
         "acceptedValues": "Valid Values",
         "booleanNotice": "Variable only accepts True or False values.",
-        "prerequisiteTitle": "Prerequisite Condition"
+        "prerequisiteTitle": "Prerequisite Condition",
+        "prerequisiteNull": "No prerequisite conditions."
       },
       "toast": {
         "createSuccess": "New clinical variable added successfully!",
