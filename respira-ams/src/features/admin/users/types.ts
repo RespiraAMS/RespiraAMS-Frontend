@@ -1,4 +1,4 @@
-export type UserRole = "Doctor" | "Manager" | "Admin";
+export type UserRole = "Doctor" | "HeadDepartmentDoctor" | "Manager" | "Admin";
 
 export type UserStatus = "Active" | "Inactive";
 
@@ -51,7 +51,7 @@ export interface CreateUserPayload {
 	email: string;
 	password: string;
 	phone: string;
-	role: "Doctor" | "Manager";
+	role: "Doctor" | "HeadDepartmentDoctor" | "Manager";
 	firstName: string;
 	lastName: string;
 	degrees: DegreeType[];

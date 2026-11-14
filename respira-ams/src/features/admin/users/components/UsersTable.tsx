@@ -60,23 +60,23 @@ export function UsersTable({
 	// Chỉ hiện spinner toàn màn hình khi chưa có dữ liệu nào
 	if (isLoading && users.length === 0) {
 		return (
-			<div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-12 text-center">
-				<div className="inline-block w-8 h-8 border-2 border-slate-200 border-t-[#0EA5E9] rounded-full animate-spin mb-3" />
-				<p className="text-sm font-medium text-slate-500">Đang tải danh sách người dùng...</p>
+			<div className="bg-surface dark:bg-surface rounded-xl border border-border-default dark:border-border-default p-12 text-center">
+				<div className="inline-block w-8 h-8 border-2 border-border-default border-t-primary rounded-full animate-spin mb-3" />
+				<p className="text-sm font-medium text-text-secondary">Đang tải danh sách người dùng...</p>
 			</div>
 		);
 	}
 
 	if (users.length === 0 && !isLoading) {
 		return (
-			<div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-12 text-center">
-				<div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
+			<div className="bg-surface dark:bg-surface rounded-xl border border-border-default dark:border-border-default p-12 text-center">
+				<div className="w-12 h-12 rounded-full bg-surface-secondary dark:bg-surface text-text-tertiary flex items-center justify-center mx-auto mb-3">
 					<AlertCircle className="w-6 h-6" />
 				</div>
-				<h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+				<h3 className="text-sm font-bold text-text-primary dark:text-text-tertiary">
 					Không tìm thấy người dùng phù hợp
 				</h3>
-				<p className="text-xs text-slate-500 mt-1">
+				<p className="text-xs text-text-secondary mt-1">
 					Vui lòng thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc vai trò, trạng thái.
 				</p>
 			</div>
@@ -84,35 +84,35 @@ export function UsersTable({
 	}
 
 	return (
-		<div className="relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+		<div className="relative bg-surface dark:bg-surface rounded-xl border border-border-default dark:border-border-default shadow-xs overflow-hidden">
 			{/* Loading bar mảnh chạy ngầm khi tìm kiếm */}
 			{isLoading && (
-				<div className="absolute top-0 left-0 right-0 h-0.5 bg-sky-100 overflow-hidden z-10">
-					<div className="w-full h-full bg-[#0EA5E9] animate-pulse" />
+				<div className="absolute top-0 left-0 right-0 h-0.5 bg-primary/10 overflow-hidden z-10">
+					<div className="w-full h-full bg-primary animate-pulse" />
 				</div>
 			)}
 			<Table className={`transition-opacity duration-150 ${isLoading ? "opacity-60" : "opacity-100"}`}>
-				<TableHeader className="bg-slate-50/80 dark:bg-slate-950/60">
-					<TableRow className="border-b border-slate-200 dark:border-slate-800 hover:bg-transparent">
-						<TableHead className="w-[240px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+				<TableHeader className="bg-surface-secondary/80 dark:bg-background/60">
+					<TableRow className="border-b border-border-default dark:border-border-default hover:bg-transparent">
+						<TableHead className="w-[240px] font-bold text-xs uppercase tracking-wider text-text-secondary dark:text-text-tertiary py-3.5">
 							{t("colUser")}
 						</TableHead>
-						<TableHead className="w-[200px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+						<TableHead className="w-[200px] font-bold text-xs uppercase tracking-wider text-text-secondary dark:text-text-tertiary py-3.5">
 							{t("colContact")}
 						</TableHead>
-						<TableHead className="w-[130px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+						<TableHead className="w-[130px] font-bold text-xs uppercase tracking-wider text-text-secondary dark:text-text-tertiary py-3.5">
 							{t("colRole")}
 						</TableHead>
-						<TableHead className="w-[140px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+						<TableHead className="w-[140px] font-bold text-xs uppercase tracking-wider text-text-secondary dark:text-text-tertiary py-3.5">
 							{t("colPosition")}
 						</TableHead>
-						<TableHead className="w-[160px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+						<TableHead className="w-[160px] font-bold text-xs uppercase tracking-wider text-text-secondary dark:text-text-tertiary py-3.5">
 							{t("colStatus")}
 						</TableHead>
-						<TableHead className="w-[110px] font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+						<TableHead className="w-[110px] font-bold text-xs uppercase tracking-wider text-text-secondary dark:text-text-tertiary py-3.5">
 							{t("colCreatedAt")}
 						</TableHead>
-						<TableHead className="w-[80px] text-right font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 py-3.5">
+						<TableHead className="w-[80px] text-right font-bold text-xs uppercase tracking-wider text-text-secondary dark:text-text-tertiary py-3.5">
 							{t("colActions")}
 						</TableHead>
 					</TableRow>
@@ -130,22 +130,22 @@ export function UsersTable({
 						return (
 							<TableRow
 								key={user.id}
-								className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
+								className="border-b border-border-subtle dark:border-border-default/60 hover:bg-surface-secondary/60 dark:hover:bg-surface/40 transition-colors"
 							>
 								{/* Name & Avatar */}
 								<TableCell className="py-3">
 									<div className="flex items-center gap-3">
-										<Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-700">
+										<Avatar className="h-9 w-9 border border-border-default dark:border-border-default">
 											{user.avatarUrl && <AvatarImage src={user.avatarUrl} alt={displayName} />}
-											<AvatarFallback className="bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 font-bold text-xs">
+											<AvatarFallback className="bg-primary/10 text-primary dark:bg-primary/10 dark:text-primary font-bold text-xs">
 												{initials || "U"}
 											</AvatarFallback>
 										</Avatar>
 										<div className="min-w-0">
-											<div className="font-bold text-sm text-slate-900 dark:text-white truncate">
+											<div className="font-bold text-sm text-text-primary dark:text-primary-foreground truncate">
 												{displayName}
 											</div>
-											<div className="text-[11px] text-slate-400 truncate">
+											<div className="text-[11px] text-text-tertiary truncate">
 												{user.citizenIdentificationNumber ? `CCCD: ${user.citizenIdentificationNumber}` : "Hồ sơ y tế"}
 											</div>
 										</div>
@@ -155,13 +155,13 @@ export function UsersTable({
 								{/* Contact */}
 								<TableCell className="py-3">
 									<div className="space-y-0.5">
-										<div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300">
-											<Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+										<div className="flex items-center gap-1.5 text-xs text-text-primary dark:text-text-tertiary">
+											<Mail className="w-3.5 h-3.5 text-text-tertiary shrink-0" />
 											<span className="truncate">{user.email}</span>
 										</div>
 										{user.phone && (
-											<div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-												<Phone className="w-3 h-3 text-slate-400 shrink-0" />
+											<div className="flex items-center gap-1.5 text-[11px] text-text-secondary">
+												<Phone className="w-3 h-3 text-text-tertiary shrink-0" />
 												<span>{user.phone}</span>
 											</div>
 										)}
@@ -173,7 +173,7 @@ export function UsersTable({
 									{user.role === "Admin" && (
 										<Badge
 											variant="outline"
-											className="bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-900 font-bold"
+											className="bg-info/10 text-info border-info/30 dark:bg-info/10 dark:text-info dark:border-info/30 font-bold"
 										>
 											{ROLE_LABELS[user.role]}
 										</Badge>
@@ -181,7 +181,15 @@ export function UsersTable({
 									{user.role === "Manager" && (
 										<Badge
 											variant="outline"
-											className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900 font-bold"
+											className="bg-warning/10 text-warning border-warning/30 dark:bg-warning/10 dark:text-warning dark:border-warning/30 font-bold"
+										>
+											{ROLE_LABELS[user.role]}
+										</Badge>
+									)}
+									{user.role === "HeadDepartmentDoctor" && (
+										<Badge
+											variant="outline"
+											className="bg-success/10 text-success border-success/30 dark:bg-success/10 dark:text-success dark:border-success/30 font-bold"
 										>
 											{ROLE_LABELS[user.role]}
 										</Badge>
@@ -189,7 +197,7 @@ export function UsersTable({
 									{user.role === "Doctor" && (
 										<Badge
 											variant="outline"
-											className="bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900 font-bold"
+											className="bg-primary/10 text-primary border-primary/30 dark:bg-primary/10 dark:text-primary dark:border-primary/30 font-bold"
 										>
 											{ROLE_LABELS[user.role]}
 										</Badge>
@@ -198,7 +206,7 @@ export function UsersTable({
 
 								{/* Position */}
 								<TableCell className="py-3">
-									<span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+									<span className="text-xs font-medium text-text-primary dark:text-text-tertiary">
 										{POSITION_LABELS[user.position] || user.position || "—"}
 									</span>
 								</TableCell>
@@ -223,16 +231,16 @@ export function UsersTable({
 													? "Tài khoản đang hoạt động. Nhấn để khóa tài khoản"
 													: "Tài khoản đang bị khóa. Nhấn để mở khóa tài khoản"
 											}
-											className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 ${
+											className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
 												user.role === "Admin"
-													? "opacity-50 cursor-not-allowed bg-emerald-500/60"
+													? "opacity-50 cursor-not-allowed bg-success/60"
 													: user.status === "Active"
-													? "bg-emerald-500 hover:bg-emerald-600"
-													: "bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600"
+													? "bg-success hover:bg-success/90"
+													: "bg-border-strong dark:bg-surface-secondary hover:bg-text-tertiary dark:hover:bg-surface-tertiary"
 											}`}
 										>
 											<span
-												className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+												className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-surface shadow-xs ring-0 transition duration-200 ease-in-out ${
 													user.status === "Active" ? "translate-x-4.5" : "translate-x-0.5"
 												}`}
 											/>
@@ -240,8 +248,8 @@ export function UsersTable({
 
 										{user.status === "Active" ? (
 											<Badge
-												variant="success"
-												className="font-bold flex items-center gap-1 text-[11px] py-0.5 px-2 bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300"
+												variant="outline"
+												className="font-bold flex items-center gap-1 text-[11px] py-0.5 px-2 bg-success/10 text-success border-success/30 dark:bg-success/10 dark:text-success"
 											>
 												<CheckCircle className="w-3 h-3" />
 												<span>{t("active")}</span>
@@ -249,7 +257,7 @@ export function UsersTable({
 										) : (
 											<Badge
 												variant="destructive"
-												className="font-bold flex items-center gap-1 text-[11px] py-0.5 px-2 bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300"
+												className="font-bold flex items-center gap-1 text-[11px] py-0.5 px-2 bg-error/10 text-error border-error/30 dark:bg-error/10 dark:text-error"
 											>
 												<Lock className="w-3 h-3" />
 												<span>{t("locked")}</span>
@@ -260,7 +268,7 @@ export function UsersTable({
 
 								{/* Created At */}
 								<TableCell className="py-3">
-									<span className="text-xs text-slate-500 whitespace-nowrap">
+									<span className="text-xs text-text-secondary whitespace-nowrap">
 										{formatDate(user.createdAt)}
 									</span>
 								</TableCell>
@@ -273,7 +281,7 @@ export function UsersTable({
 											size="icon"
 											onClick={() => onEditUser(user)}
 											title="Chỉnh sửa toàn bộ thông tin"
-											className="h-8 w-8 rounded-lg text-slate-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/40"
+											className="h-8 w-8 rounded-lg text-text-secondary hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/10"
 										>
 											<Edit className="w-3.5 h-3.5" />
 										</Button>
@@ -283,7 +291,7 @@ export function UsersTable({
 												<Button
 													variant="ghost"
 													size="icon"
-													className="h-8 w-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+													className="h-8 w-8 rounded-lg hover:bg-surface-secondary dark:hover:bg-surface text-text-secondary"
 												>
 													<MoreVertical className="w-4 h-4" />
 												</Button>
@@ -293,7 +301,7 @@ export function UsersTable({
 													onClick={() => onViewUser(user)}
 													className="cursor-pointer text-xs font-semibold gap-2 py-2"
 												>
-													<Eye className="w-3.5 h-3.5 text-slate-500" />
+													<Eye className="w-3.5 h-3.5 text-text-secondary" />
 													<span>Xem chi tiết</span>
 												</DropdownMenuItem>
 
@@ -302,9 +310,9 @@ export function UsersTable({
 												<DropdownMenuItem
 													onClick={() => onDeleteUser(user)}
 													disabled={user.role === "Admin"}
-													className="cursor-pointer text-xs font-semibold gap-2 py-2 text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/40"
+													className="cursor-pointer text-xs font-semibold gap-2 py-2 text-error focus:text-error focus:bg-error/10 dark:focus:bg-error/10"
 												>
-													<Trash2 className="w-3.5 h-3.5 text-red-600" />
+													<Trash2 className="w-3.5 h-3.5 text-error" />
 													<span>Xóa người dùng</span>
 												</DropdownMenuItem>
 											</DropdownMenuContent>

@@ -1238,6 +1238,7 @@
       "roleAdmin": "Quản trị viên",
       "roleDoctor": "Bác sĩ điều trị",
       "roleHeadDoctor": "Trưởng khoa lâm sàng",
+      "roleManager": "Quản lý chuyên môn",
       "roleReviewer": "Duyệt quy chế",
       "colUser": "NGƯỜI DÙNG",
       "colRole": "VAI TRÒ",
