@@ -112,7 +112,7 @@ async function forwardRequest(request: NextRequest, targetPath: string, search: 
 		);
 	}
 
-	const buildHeaders = (): Record<string, string> => {
+	const buildHeaders = (isRedirectFollowUp = false): Record<string, string> => {
 		const headers: Record<string, string> = { Accept: "application/json" };
 
 		if (body !== undefined && !isFormData) {
@@ -134,12 +134,18 @@ async function forwardRequest(request: NextRequest, targetPath: string, search: 
 			// They are derived from the token actually being forwarded (including the
 			// elevated clinical token) so they survive the gateway's HTTPS redirect,
 			// which bypasses the gateway transform that normally injects them.
-			const forwardedToken = header.replace(/^Bearer\s+/i, "");
-			const decoded = parseJwt(forwardedToken);
-			if (decoded) {
-				if (decoded.id) headers["X-ID"] = decoded.id;
-				if (decoded.email) headers["X-Email"] = decoded.email;
-				if (decoded.role) headers["X-Role"] = decoded.role;
+			if (isRedirectFollowUp) {
+				const forwardedToken = header.replace(/^Bearer\s+/i, "");
+				const decoded = parseJwt(forwardedToken);
+				if (decoded) {
+					if (decoded.id) headers["X-ID"] = String(decoded.id);
+					if (decoded.email) headers["X-Email"] = String(decoded.email);
+					if (decoded.role) {
+						headers["X-Role"] = Array.isArray(decoded.role)
+							? decoded.role[0]
+							: String(decoded.role);
+					}
+				}
 			}
 		}
 

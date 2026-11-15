@@ -399,9 +399,9 @@ export function DoctorSidebar({
                 </nav>
 
                 {/* Account Section*/}
-                {/* <div className="border-t border-sidebar-border px-2 py-3 shrink-0">
+                <div className="border-t border-sidebar-border px-2 py-3 shrink-0">
                     <AccountSection collapsed={collapsed} />
-                </div> */}
+                </div>
             </aside>
         </TooltipProvider>
     );
