@@ -58,9 +58,6 @@ export function DeleteProtocolDialog({ item, isDeleting, onClose, onConfirm }: D
 							<p>
 								<strong className="text-text-primary dark:text-primary-foreground">{item.name}</strong> (v{item.version})
 							</p>
-							<div className="p-3 bg-warning/10 dark:bg-warning/10 border border-warning/30 dark:border-warning/30 rounded-lg text-warning dark:text-warning font-medium text-[11px] leading-relaxed">
-								{t("deleteWarning")}
-							</div>
 
 							<div className="pt-1 space-y-1.5">
 								<label
@@ -102,11 +99,10 @@ export function DeleteProtocolDialog({ item, isDeleting, onClose, onConfirm }: D
 							if (!isMatch || isDeleting) return;
 							onConfirm(item);
 						}}
-						className={`text-primary-foreground text-xs h-9 px-4 font-semibold rounded-lg transition-all ${
-							isMatch
-								? "bg-error hover:bg-error/90 cursor-pointer shadow-sm"
-								: "bg-error/30 dark:bg-error/20 cursor-not-allowed opacity-60"
-						}`}
+						className={`text-primary-foreground text-xs h-9 px-4 font-semibold rounded-lg transition-all ${isMatch
+							? "bg-error hover:bg-error/90 cursor-pointer shadow-sm"
+							: "bg-error/30 dark:bg-error/20 cursor-not-allowed opacity-60"
+							}`}
 					>
 						{isDeleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
 						{isDeleting ? t("deleting") : t("deleteConfirm")}

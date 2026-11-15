@@ -49,7 +49,7 @@ export function DeleteUserDialog({
 		<AlertDialog open={isOpen} onOpenChange={onClose}>
 			<AlertDialogContent style={{ borderRadius: "18px" }} className="max-w-md rounded-[18px] bg-surface dark:bg-surface p-6 sm:p-8 shadow-2xl border border-border-default dark:border-border-default">
 				<AlertDialogHeader>
-					<div className="flex items-center gap-3 mb-2">
+					<div className="flex align-items-center items-center gap-3 mb-2">
 						<div className="w-10 h-10 rounded-full bg-error/10 dark:bg-error/10 text-error flex items-center justify-center shrink-0">
 							<AlertTriangle className="w-5 h-5" />
 						</div>
@@ -59,14 +59,11 @@ export function DeleteUserDialog({
 					</div>
 
 					<AlertDialogDescription asChild>
-						<div className="text-xs text-text-secondary dark:text-text-tertiary space-y-3">
+						<div className="w-full text-xs text-text-secondary dark:text-text-tertiary space-y-3">
 							<p>
 								<strong className="text-text-primary dark:text-primary-foreground">{displayName}</strong> (
 								{user.email})
 							</p>
-							<div className="p-3 bg-warning/10 dark:bg-warning/10 border border-warning/30 dark:border-warning/30 rounded-lg text-warning dark:text-warning font-medium text-[11px] leading-relaxed">
-								{t("deleteWarning")}
-							</div>
 
 							<div className="pt-1 space-y-1.5">
 								<label
@@ -84,7 +81,7 @@ export function DeleteUserDialog({
 									value={confirmText}
 									onChange={(e) => setConfirmText(e.target.value)}
 									placeholder={t("deletePlaceholder")}
-									className="h-9 text-xs rounded-lg"
+									className="w-full h-9 text-xs rounded-lg"
 									autoFocus
 								/>
 							</div>
@@ -107,11 +104,10 @@ export function DeleteUserDialog({
 							onConfirmDelete(user);
 						}}
 						disabled={!isMatch || isDeleting}
-						className={`text-primary-foreground text-xs h-9 px-4 font-semibold rounded-lg transition-all ${
-							isMatch
-								? "bg-error hover:bg-error/90 cursor-pointer shadow-sm"
-								: "bg-error/30 dark:bg-error/20 cursor-not-allowed opacity-60"
-						}`}
+						className={`text-primary-foreground text-xs h-9 px-4 font-semibold rounded-lg transition-all ${isMatch
+							? "bg-error hover:bg-error/90 cursor-pointer shadow-sm"
+							: "bg-error/30 dark:bg-error/20 cursor-not-allowed opacity-60"
+							}`}
 					>
 						{isDeleting ? t("deleting") : t("deleteConfirm")}
 					</AlertDialogAction>

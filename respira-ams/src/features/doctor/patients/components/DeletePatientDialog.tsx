@@ -96,10 +96,6 @@ export function DeletePatientDialog({
 								{patient.code})
 							</p>
 
-							<div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-300 font-medium text-[11px] leading-relaxed">
-								{t("deleteWarning")}
-							</div>
-
 							<div className="pt-1 space-y-1.5">
 								<label
 									htmlFor="confirm-delete-patient-input"
@@ -145,11 +141,10 @@ export function DeletePatientDialog({
 						variant="destructive"
 						onClick={handleConfirm}
 						disabled={!isMatch || isDeleting}
-						className={`rounded-[10px] text-xs h-9 px-4 font-semibold transition-all ${
-							isMatch
+						className={`rounded-[10px] text-xs h-9 px-4 font-semibold transition-all ${isMatch
 								? "bg-red-600 hover:bg-red-700 cursor-pointer shadow-sm"
 								: "bg-red-300 dark:bg-red-900/40 cursor-not-allowed opacity-60"
-						}`}
+							}`}
 					>
 						{isDeleting ? t("deleting") : t("deleteConfirm")}
 					</Button>
