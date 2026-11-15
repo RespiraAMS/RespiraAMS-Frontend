@@ -66,9 +66,6 @@ export function AdminDashboardView() {
 						<h2 className="text-base font-bold text-text-primary tracking-tight">
 							{t("title")}
 						</h2>
-						<span className="rounded-[6px] bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
-							PROD READY
-						</span>
 					</div>
 					<p className="text-xs text-text-secondary mt-0.5">
 						{t("subtitle")}

@@ -203,13 +203,13 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 							<TableHead className="w-[105px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
 								{t("colService")}
 							</TableHead>
-							<TableHead className="min-w-[260px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
+							<TableHead className="min-w-[250px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
 								{t("colActionTarget")}
 							</TableHead>
 							<TableHead className="w-[125px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
 								{t("colIpDuration")}
 							</TableHead>
-							<TableHead className="w-[135px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
+							<TableHead className="w-[145px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
 								{t("colStatusSeverity")}
 							</TableHead>
 							<TableHead className="w-[70px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5 text-right pr-4">

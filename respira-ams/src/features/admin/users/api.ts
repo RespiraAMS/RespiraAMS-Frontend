@@ -349,6 +349,30 @@ async function readCreateAudit(sagaId: string): Promise<AuditOutcome> {
 	}
 }
 
+function buildAccountOnlyUser(
+	accountId: string,
+	payload: CreateUserPayload
+): UserItem {
+	return {
+		id: accountId,
+		email: payload.email,
+		phone: payload.phone,
+		role: payload.role,
+		status: "Active",
+		isEmailConfirmed: false,
+		firstName: payload.firstName || "",
+		lastName: payload.lastName || "",
+		degrees: payload.degrees || [],
+		academicTitle: payload.academicTitle || "None",
+		position: payload.position || "StaffDoctor",
+		gender: payload.gender || "Male",
+		citizenIdentificationNumber: payload.citizenIdentificationNumber || "",
+		dateOfBirth: payload.dateOfBirth,
+		address: payload.address || "",
+		createdAt: new Date().toISOString(),
+	};
+}
+
 async function waitForCreatedAccount(
 	sagaId: string,
 	payload: CreateUserPayload
@@ -357,10 +381,17 @@ async function waitForCreatedAccount(
 	const deadline = startedAt + CREATE_TIMEOUT_MS;
 	let lastFailure: string | null = null;
 	let lastAudit: AuditOutcome = { created: false, emailFailed: false };
+	let lastAccountUser: UserItem | null = null;
 
 	while (Date.now() < deadline) {
 		const status = await getCreateSagaStatus(sagaId);
 		if (status?.failureReason) lastFailure = status.failureReason;
+
+		const accountUser =
+			status?.accountId && status.accountId !== EMPTY_GUID
+				? buildAccountOnlyUser(status.accountId, payload)
+				: null;
+		if (accountUser) lastAccountUser = accountUser;
 
 		if (status?.doctorId && status.doctorId !== EMPTY_GUID) {
 			const doctor = await findDoctorById(status.doctorId);
@@ -385,16 +416,15 @@ async function waitForCreatedAccount(
 				if (doctor) {
 					return { sagaId, user: doctor, emailSent: !lastAudit.emailFailed };
 				}
-			} else {
-				return { sagaId, user: null, emailSent: !lastAudit.emailFailed };
 			}
+			return { sagaId, user: lastAccountUser, emailSent: !lastAudit.emailFailed };
 		}
 
 		if (lastFailure) {
 			await delay(700);
 			const finalAudit = await readCreateAudit(sagaId);
 			if (finalAudit.created) {
-				return { sagaId, user: null, emailSent: !finalAudit.emailFailed };
+				return { sagaId, user: lastAccountUser, emailSent: !finalAudit.emailFailed };
 			}
 			throw new Error(translateCreateError(lastFailure));
 		}
@@ -403,7 +433,7 @@ async function waitForCreatedAccount(
 	}
 
 	if (lastAudit.created) {
-		return { sagaId, user: null, emailSent: !lastAudit.emailFailed };
+		return { sagaId, user: lastAccountUser, emailSent: !lastAudit.emailFailed };
 	}
 
 	throw new Error(
@@ -623,15 +653,26 @@ export async function deleteUser(
 
 /**
  * Bật/tắt trạng thái Active / Inactive của người dùng.
- * Backend hiện chưa cung cấp endpoint đổi trạng thái tài khoản, nên hàm này
- * báo lỗi thay vì giả lập thay đổi cục bộ.
+ * Gọi PATCH /auth/accounts/{id}/status để backend khóa hoặc mở khóa tài khoản.
  */
 export async function toggleUserStatus(id: string, userToToggle?: UserItem): Promise<UserItem> {
-	void id;
-	void userToToggle;
+	if (!userToToggle) {
+		throw new Error("Không tìm thấy người dùng để cập nhật trạng thái.");
+	}
 
-	throw new Error(
-		"Backend chưa hỗ trợ thay đổi trạng thái tài khoản. Vui lòng liên hệ quản trị hệ thống."
-	);
+	const nextStatus: UserStatus = userToToggle.status === "Active" ? "Inactive" : "Active";
+
+	const account = await apiRequest<BackendAccountDto>(`/auth/accounts/${id}/status`, {
+		method: "PATCH",
+		body: { status: nextStatus },
+	});
+
+	return {
+		...userToToggle,
+		email: account.email || userToToggle.email,
+		phone: account.phone || userToToggle.phone,
+		status: account.status === "Inactive" ? "Inactive" : "Active",
+		isEmailConfirmed: account.isEmailConfirmed ?? userToToggle.isEmailConfirmed,
+	};
 }
 

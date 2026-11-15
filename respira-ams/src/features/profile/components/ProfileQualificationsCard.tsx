@@ -6,7 +6,6 @@ import {
 	Award,
 	Building2,
 	CheckCircle2,
-	BookOpen,
 	Users,
 	Search,
 	Loader2,
@@ -38,12 +37,16 @@ export function ProfileQualificationsCard({ doctor }: ProfileQualificationsCardP
 	useEffect(() => {
 		if (activeTab !== "colleagues") return;
 
+		const searchTerm = colleagueSearch.trim();
+
 		let isMounted = true;
-		setIsLoadingColleagues(true);
 
 		const timer = setTimeout(() => {
-			const fetcher = colleagueSearch.trim()
-				? searchDoctorProfiles(colleagueSearch.trim(), 1, 6)
+			if (!isMounted) return;
+			setIsLoadingColleagues(true);
+
+			const fetcher = searchTerm
+				? searchDoctorProfiles(searchTerm, 1, 6)
 				: fetchPagedDoctors({ page: 1, size: 6 });
 
 			fetcher
@@ -209,7 +212,7 @@ export function ProfileQualificationsCard({ doctor }: ProfileQualificationsCardP
 								type="text"
 								value={colleagueSearch}
 								onChange={(e) => setColleagueSearch(e.target.value)}
-								placeholder="Tìm theo tên hoặc email..."
+								placeholder="Tìm theo họ tên hoặc số CCCD..."
 								className="h-8 w-full rounded-[8px] border border-slate-200 bg-white pl-8 pr-3 text-xs placeholder:text-slate-400 focus:border-sky-500 focus:outline-hidden"
 							/>
 						</div>
@@ -267,7 +270,9 @@ export function ProfileQualificationsCard({ doctor }: ProfileQualificationsCardP
 						</div>
 					) : (
 						<div className="text-center py-8 text-xs text-slate-400">
-							Không tìm thấy bác sĩ phù hợp với từ khóa &quot;{colleagueSearch}&quot;.
+							{colleagueSearch.trim()
+								? `Không tìm thấy bác sĩ phù hợp với từ khóa "${colleagueSearch}".`
+								: "Nhập họ tên hoặc số CCCD để tra cứu đồng nghiệp."}
 						</div>
 					)}
 				</div>
