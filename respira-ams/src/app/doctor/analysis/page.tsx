@@ -1,10 +1,14 @@
-import { DoctorStatisticsView } from "@/features/doctor/analysis/components/DoctorStatisticsView";
+import { AnalysisReportsView } from "@/features/doctor/analysis/components/AnalysisReportsView";
 
 export const metadata = {
-	title: "Thống kê & Giám sát Vi sinh Lâm sàng | RespiraAMS",
-	description: "Báo cáo và phân tích chỉ số sử dụng kháng sinh, giám sát tác nhân vi sinh và dữ liệu nhạy cảm kháng sinh AMR.",
+	title: "Nhóm kháng sinh | RespiraAMS",
+	description: "Xem báo cáo và xuất file excel.",
 };
 
-export default function StatisticsPage() {
-	return <DoctorStatisticsView />;
+export default function Page() {
+	return (
+		<div className="container mx-auto px-4 py-8">
+			<AnalysisReportsView/>
+		</div>
+	);
 }
