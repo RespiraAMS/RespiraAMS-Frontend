@@ -93,8 +93,9 @@ export function UserFormDialog({
 	const [academicTitle, setAcademicTitle] = useState<AcademicTitle>("None");
 	const [position, setPosition] = useState<PositionType>("StaffDoctor");
 
-	// Tài khoản Quản lý chuyên môn (MedicalRegulationReviewer) không có hồ sơ bác sĩ.
-	const isAccountOnly = role === "Manager";
+	// Tài khoản Quản lý chuyên môn (MedicalRegulationReviewer) và Quản trị viên
+	// không có hồ sơ bác sĩ.
+	const isAccountOnly = role === "Manager" || role === "Admin";
 
 	// Avatar file & preview
 	const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -332,11 +333,13 @@ export function UserFormDialog({
 		if (isEdit && editingUser) {
 			const payload: UpdateUserPayload = {
 				accountId: editingUser.id,
-				doctorId: editingUser.doctorId || editingUser.id,
+				doctorId: isAccountOnly
+					? "00000000-0000-0000-0000-000000000000"
+					: editingUser.doctorId || editingUser.id,
 				email: email.trim(),
 				phone: phone.trim(),
 				password: password.trim() || undefined,
-				role: isAccountOnly ? "Manager" : role,
+				role: isAccountOnly ? editingUser.role : role,
 				status,
 				firstName: isAccountOnly ? "" : firstName.trim(),
 				lastName: isAccountOnly ? "" : lastName.trim(),
@@ -444,14 +447,15 @@ export function UserFormDialog({
 								</Label>
 								<Select
 									value={role}
-									onValueChange={(val: UserRole) => setRole(val)}
+									onValueChange={(val: UserRole) => handleRoleChange(val)}
 								>
 									<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="Doctor">Bác sĩ</SelectItem>
-										<SelectItem value="Manager">Trưởng khoa</SelectItem>
+										<SelectItem value="HeadDepartmentDoctor">Trưởng khoa</SelectItem>
+										<SelectItem value="Manager">Quản lý chuyên môn</SelectItem>
 										{editingUser?.role === "Admin" && (
 											<SelectItem value="Admin">Quản trị viên</SelectItem>
 										)}
