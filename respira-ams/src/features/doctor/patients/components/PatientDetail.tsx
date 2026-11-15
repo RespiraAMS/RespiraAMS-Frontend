@@ -42,11 +42,6 @@ import { PatientForm } from "./PatientForm";
 import { DischargePatientDialog } from "./DischargePatientDialog";
 import { NextOfKinFormDialog } from "./NextOfKinFormDialog";
 import {
-    CloseTreatmentPlanDialog,
-    ReviewTreatmentPlanDialog,
-    TreatmentPlanDetailDialog,
-} from "./TreatmentPlanModals";
-import {
     type UpdatePatientRequest,
     type TreatmentOutcome,
     type NextOfKinItem,
@@ -54,6 +49,7 @@ import {
     type PatientTreatmentPlanItem,
     type AdherenceState,
 } from "../types";
+import { CloseTreatmentPlanDialog, ReviewTreatmentPlanDialog, TreatmentPlanDetailDialog } from "../treatment-plans";
 
 function getInitials(name: string): string {
     return name
@@ -234,9 +230,10 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
     const treatmentPlans = patient?.treatmentPlans;
     const sortedPlans = useMemo(() => {
         if (!treatmentPlans) return [];
-        return [...treatmentPlans].sort(
-            (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        );
+        // return [...treatmentPlans].sort(
+        //     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        // );
+        return treatmentPlans;
     }, [treatmentPlans]);
 
     const inProgressCount = useMemo(
@@ -299,7 +296,7 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
         deleteMutation.mutate(id, {
             onSuccess: () => {
                 toast.success("Xóa hồ sơ bệnh nhân thành công!");
-                router.push("/manage/patients");
+                router.push("/doctor/patients");
             },
             onError: (err) => toast.error("Lỗi xóa: " + err.message),
         });
