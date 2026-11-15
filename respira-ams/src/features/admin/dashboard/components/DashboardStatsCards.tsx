@@ -29,7 +29,6 @@ export function DashboardStatsCards({ metrics }: DashboardStatsCardsProps) {
 				</p>
 				<div className="flex items-center justify-between mt-3 text-xs text-text-secondary">
 					<span>{t("realClinicalData", { defaultMessage: "Dữ liệu lâm sàng thực tế" })}</span>
-					<span className="text-primary font-medium">{t("openRecords", { defaultMessage: "Hồ sơ mở" })}</span>
 				</div>
 				<div className="h-1 w-20 bg-primary rounded-full mt-2" />
 			</div>
@@ -49,7 +48,6 @@ export function DashboardStatsCards({ metrics }: DashboardStatsCardsProps) {
 				</p>
 				<div className="flex items-center justify-between mt-3 text-xs text-text-secondary">
 					<span>{metrics.totalAntibioticGroups} {t("groupsSuffix", { defaultMessage: "nhóm kháng sinh" })}</span>
-					<span className="text-info font-medium">AWaRe WHO</span>
 				</div>
 				<div className="h-1 w-16 bg-info rounded-full mt-2" />
 			</div>
@@ -69,7 +67,6 @@ export function DashboardStatsCards({ metrics }: DashboardStatsCardsProps) {
 				</p>
 				<div className="flex items-center justify-between mt-3 text-xs text-text-secondary">
 					<span>{t("pathogensSub", { defaultMessage: "Vi khuẩn & Mầm bệnh hô hấp" })}</span>
-					<span className="text-success font-medium">{t("amrSurveillance", { defaultMessage: "Giám sát AMR" })}</span>
 				</div>
 				<div className="h-1 w-16 bg-success rounded-full mt-2" />
 			</div>
@@ -88,7 +85,7 @@ export function DashboardStatsCards({ metrics }: DashboardStatsCardsProps) {
 					{metrics.systemUptime}
 				</p>
 				<div className="flex items-center justify-between mt-3 text-xs text-text-secondary">
-					<span>{metrics.activeServicesCount}/{metrics.totalServicesCount} {t("servicesSuffix", { defaultMessage: "Vi dịch vụ" })}</span>
+					<span>{metrics.activeServicesCount}/{metrics.totalServicesCount} {t("servicesSuffix", { defaultMessage: "Dịch vụ" })}</span>
 					<span className="text-success font-semibold flex items-center gap-1">
 						<span className="h-1.5 w-1.5 rounded-full bg-success" />
 						{t("online", { defaultMessage: "Trực tuyến" })}
