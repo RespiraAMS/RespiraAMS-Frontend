@@ -128,7 +128,7 @@ export function LoginForm() {
 
 			// Nếu đăng nhập vai trò Bác sĩ, tự động đồng bộ hồ sơ thực tế từ Backend
 			if (role === "doctor" || role === "headdepartmentdoctor") {
-				await fetchCurrentDoctorProfile().catch(() => {});
+				await fetchCurrentDoctorProfile().catch(() => { });
 			}
 
 			const redirectParam = searchParams.get("redirect");
@@ -366,30 +366,6 @@ export function LoginForm() {
 								</span>
 							</div>
 
-							{/* Nút dùng mã nhân viên / thẻ bệnh viện */}
-							<button
-								type="button"
-								className="w-full h-12 rounded-[16px] border border-primary text-primary hover:bg-primary/10 text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
-							>
-								<CreditCard className="h-4 w-4 text-primary" />
-								<span>Dùng mã nhân viên / Thẻ bệnh viện</span>
-							</button>
-
-							{/* Box Phiên đăng nhập an toàn */}
-							<div className="rounded-[20px] bg-background border border-border-subtle p-4.5 flex items-start gap-3.5 mt-5">
-								<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-primary/10 text-primary">
-									<ShieldCheck className="h-4 w-4" />
-								</div>
-								<div className="space-y-0.5">
-									<h4 className="text-xs font-bold text-text-primary">
-										Phiên đăng nhập an toàn
-									</h4>
-									<p className="text-[11px] text-text-secondary leading-relaxed">
-										Tự động khóa sau 15 phút không thao tác nhằm bảo vệ bí mật y khoa và quyền hạn chỉ định dược lâm sàng.
-									</p>
-								</div>
-							</div>
-
 							{/* Tài khoản mẫu thử nghiệm phân quyền */}
 							<div className="rounded-[16px] border border-border-default/80 bg-surface-secondary/70 p-3.5 space-y-2 mt-3">
 								<div className="flex items-center justify-between">
@@ -429,7 +405,7 @@ export function LoginForm() {
 										type="button"
 										onClick={() => {
 											setEmail("manager@respira.ams");
-											setPassword("Admin@123");
+											setPassword("Manager@123");
 											setError(null);
 										}}
 										className="rounded-[10px] border border-success/30 bg-surface p-2 text-left hover:border-success hover:bg-success/10 transition-all cursor-pointer shadow-2xs"
@@ -481,9 +457,6 @@ export function LoginForm() {
 										className="h-12 pl-11 pr-4 text-xs rounded-[16px] border-border-default bg-surface shadow-2xs focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
 									/>
 								</div>
-								<p className="text-[11px] text-text-tertiary">
-									Được cấp bởi Ban Công nghệ Thông tin Bệnh viện tiếp nhận dịch vụ.
-								</p>
 							</div>
 
 							{/* Nút gửi liên kết đặt lại */}
@@ -525,7 +498,7 @@ export function LoginForm() {
 										Không nhận được email?
 									</h4>
 									<p className="text-[11px] text-text-secondary leading-relaxed">
-										Kiểm tra thư rác (Spam) hoặc liên hệ trực tiếp <span className="font-semibold text-text-primary">Quản trị viên CNTT Bệnh viện</span> để được hỗ trợ xác minh danh tính và cấp lại tài khoản nhân viên y tế khẩn cấp.
+										Kiểm tra thư rác (Spam)
 									</p>
 								</div>
 							</div>
@@ -537,12 +510,8 @@ export function LoginForm() {
 
 			{/* Footer Copyright */}
 			<div className="w-full text-center space-y-1 pt-6 text-[10.5px] text-text-tertiary">
-				<p>
-					Cần hỗ trợ? Liên hệ Quản trị viên CNTT Bệnh viện qua tổng đài nội bộ hoặc Hotline:{" "}
-					<span className="font-semibold text-text-secondary">1900 6868</span>
-				</p>
 				<p className="text-[10px] text-text-tertiary/80">
-					&copy; 2025 RespiraAMS Healthcare Technology. Bản quyền thuộc về Bộ Y tế &amp; Viện Vi sinh.
+					&copy; 2026 RespiraAMS
 				</p>
 			</div>
 		</div>
