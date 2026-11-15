@@ -127,7 +127,22 @@ async function forwardRequest(request: NextRequest, targetPath: string, search: 
 			if (elevated) header = `Bearer ${elevated}`;
 		}
 
-		if (header) headers.Authorization = header;
+		if (header) {
+			headers.Authorization = header;
+
+			// Downstream services rebuild the ClaimsPrincipal from these headers.
+			// They are derived from the token actually being forwarded (including the
+			// elevated clinical token) so they survive the gateway's HTTPS redirect,
+			// which bypasses the gateway transform that normally injects them.
+			const forwardedToken = header.replace(/^Bearer\s+/i, "");
+			const decoded = parseJwt(forwardedToken);
+			if (decoded) {
+				if (decoded.id) headers["X-ID"] = decoded.id;
+				if (decoded.email) headers["X-Email"] = decoded.email;
+				if (decoded.role) headers["X-Role"] = decoded.role;
+			}
+		}
+
 		return headers;
 	};
 
@@ -232,6 +247,13 @@ export async function POST(
 }
 
 export async function PUT(
+	request: NextRequest,
+	context: { params: Promise<{ path: string[] }> }
+) {
+	return handle(request, context);
+}
+
+export async function PATCH(
 	request: NextRequest,
 	context: { params: Promise<{ path: string[] }> }
 ) {
