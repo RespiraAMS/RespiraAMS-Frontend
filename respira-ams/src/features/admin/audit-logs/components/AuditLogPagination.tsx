@@ -27,9 +27,9 @@ export function AuditLogPagination({
 
 	return (
 		<div className="flex items-center justify-between gap-3 flex-wrap px-1">
-			<p className="text-xs text-slate-500">
-				{t("showing", { defaultMessage: "Hiển thị" })} <strong className="text-slate-700">{from}–{to}</strong> {t("of", { defaultMessage: "trên" })}{" "}
-				<strong className="text-slate-700">{totalItems}</strong> {t("events", { defaultMessage: "sự kiện kiểm toán" })}
+			<p className="text-xs text-text-secondary">
+				{t("showing", { defaultMessage: "Hiển thị" })} <strong className="text-text-primary">{from}–{to}</strong> {t("of", { defaultMessage: "trên" })}{" "}
+				<strong className="text-text-primary">{totalItems}</strong> {t("events", { defaultMessage: "sự kiện kiểm toán" })}
 			</p>
 			<div className="flex items-center gap-2">
 				<Button
@@ -42,7 +42,7 @@ export function AuditLogPagination({
 				>
 					<ChevronLeft className="w-4 h-4" /> {t("prev", { defaultMessage: "Trước" })}
 				</Button>
-				<span className="text-xs font-semibold text-slate-600 px-2">
+				<span className="text-xs font-semibold text-text-secondary px-2">
 					{t("page", { defaultMessage: "Trang" })} {page} / {Math.max(pageCount, 1)}
 				</span>
 				<Button

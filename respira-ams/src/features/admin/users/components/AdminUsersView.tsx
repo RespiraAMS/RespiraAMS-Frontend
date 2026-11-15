@@ -96,9 +96,19 @@ export function AdminUsersView() {
 	const handleCreateUser = async (payload: CreateUserPayload) => {
 		setIsSubmittingForm(true);
 		try {
-			await createUser(payload);
+			const result = await createUser(payload);
 			setIsFormDialogOpen(false);
-			showNotice(`Đã tạo tài khoản thành công cho ${payload.lastName} ${payload.firstName}`);
+
+			const displayName =
+				[payload.lastName, payload.firstName].filter(Boolean).join(" ") || payload.email;
+			showNotice(`Đã tạo tài khoản thành công cho ${displayName}`);
+
+			if (!result.emailSent) {
+				toast.warning(
+					"Tài khoản đã tạo nhưng chưa gửi được email xác thực. Vui lòng kiểm tra cấu hình email của backend."
+				);
+			}
+
 			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
@@ -134,7 +144,7 @@ export function AdminUsersView() {
 			await deleteUser(user.id, user.doctorId, user.mediaId);
 			setIsDeleteOpen(false);
 			setDeleteTargetUser(null);
-			showNotice(`Đã xóa mềm người dùng ${user.lastName} ${user.firstName}`);
+			showNotice(`Đã xóa người dùng ${user.lastName} ${user.firstName}`);
 			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
@@ -156,7 +166,10 @@ export function AdminUsersView() {
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error toggling status:", error);
-			showNotice("Không thể thay đổi trạng thái tài khoản", "error");
+			showNotice(
+				error instanceof Error ? error.message : "Không thể thay đổi trạng thái tài khoản",
+				"error"
+			);
 		}
 	};
 
@@ -166,14 +179,14 @@ export function AdminUsersView() {
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
 					<div className="flex items-center gap-2">
-						<div className="p-2 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-[#0EA5E9]">
+						<div className="p-2 rounded-xl bg-primary/10 dark:bg-primary/10 text-primary">
 							<Users className="w-5 h-5" />
 						</div>
-						<h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+						<h1 className="text-xl sm:text-2xl font-extrabold text-text-primary dark:text-primary-foreground tracking-tight">
 							Quản lý người dùng
 						</h1>
 					</div>
-					<p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+					<p className="text-xs sm:text-sm text-text-secondary dark:text-text-tertiary mt-1">
 						Quản trị danh sách tài khoản y bác sĩ, trưởng khoa và phân quyền hoạt động hệ thống Respira
 					</p>
 				</div>

@@ -1,5 +1,6 @@
 import { apiRequest, buildQuery } from "@/lib/api";
-import { getStoredAccessToken, getStoredUser } from "@/features/auth/api";
+import { getUser } from "@/lib/auth";
+import { API_V1, CLIENT_API_BASE } from "@/lib/api-base";
 import {
 	DoctorProfile,
 	ProfileFormState,
@@ -143,7 +144,7 @@ export function saveStoredDoctorProfile(profile: DoctorProfile): void {
  * Sử dụng GET /api/v1/doctors hoặc GET /api/v1/doctors/{doctorId}
  */
 export async function fetchCurrentDoctorProfile(): Promise<DoctorProfile> {
-	const currentUser = getStoredUser();
+	const currentUser = getUser();
 	const stored = getStoredDoctorProfile();
 
 	const isCacheValid = Boolean(
@@ -171,9 +172,6 @@ export async function fetchCurrentDoctorProfile(): Promise<DoctorProfile> {
 				const directFetch = await fetch("/api/backend/doctors?page=1&size=50", {
 					headers: {
 						Accept: "application/json",
-						...(typeof window !== "undefined" && window.localStorage.getItem("accessToken")
-							? { Authorization: `Bearer ${window.localStorage.getItem("accessToken")}` }
-							: {}),
 					},
 				});
 				if (directFetch.ok) {
@@ -380,7 +378,7 @@ export async function updateDoctorProfile(
 	form: ProfileFormState,
 	avatarFile?: File | null
 ): Promise<{ sagaId: string; profile: DoctorProfile }> {
-	const currentUser = getStoredUser();
+	const currentUser = getUser();
 
 	const accountId =
 		currentDoctor.accountId ||
@@ -419,21 +417,13 @@ export async function updateDoctorProfile(
 			formData.append("avatar", avatarFile);
 		}
 
-		const token = getStoredAccessToken();
-		const API_BASE =
-			typeof window !== "undefined"
-				? "/api/backend"
-				: (
-						process.env.BACKEND_API_URL ||
-						process.env.NEXT_PUBLIC_API_URL ||
-						"http://localhost:5016/api/v1"
-					).replace(/\/$/, "");
+		const API_BASE = typeof window !== "undefined" ? CLIENT_API_BASE : API_V1;
 
 		const response = await fetch(`${API_BASE}/profile/update`, {
 			method: "POST",
-			signal: AbortSignal.timeout(10000), // Cho phép 10s cho upload và saga publish
+			signal: AbortSignal.timeout(30000),
 			headers: {
-				...(token ? { Authorization: `Bearer ${token}` } : {}),
+				Accept: "application/json",
 			},
 			body: formData,
 		});

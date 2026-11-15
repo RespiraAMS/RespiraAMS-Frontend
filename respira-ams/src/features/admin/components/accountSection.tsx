@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LogOut } from "lucide-react";
-import { logout, getStoredUser, getStoredAccessToken, parseJwt } from "@/features/auth/api";
+import { logout, getUser } from "@/lib/auth";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -33,14 +33,8 @@ export interface AdminUserInfo {
 function resolveAdminAccount(customUser?: AdminUserInfo): AdminUserInfo {
 	if (customUser) return customUser;
 
-	const storedUser = getStoredUser();
-	let tokenUser = null;
-	const token = getStoredAccessToken();
-	if (token) {
-		tokenUser = parseJwt(token);
-	}
-
-	const active = storedUser || tokenUser;
+	const storedUser = getUser();
+	const active = storedUser;
 	const email = active?.email || "";
 	const role = active?.role || "Admin";
 
@@ -150,7 +144,7 @@ export function AdminAccountSection({
 							<DropdownMenuTrigger asChild>
 								<button
 									type="button"
-									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] hover:ring-2 hover:ring-sky-300 transition-all mx-auto cursor-pointer"
+									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-[11px] hover:ring-2 hover:ring-primary/30 transition-all mx-auto cursor-pointer"
 									id="admin-account-trigger-collapsed"
 								>
 									<div className="h-full w-full rounded-full overflow-hidden flex items-center justify-center">
@@ -164,7 +158,7 @@ export function AdminAccountSection({
 											<span>{currentUser.initials}</span>
 										)}
 									</div>
-									<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#22C55E] ring-2 ring-white dark:ring-slate-900 pointer-events-none z-10" />
+									<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-surface dark:ring-border-default pointer-events-none z-10" />
 								</button>
 							</DropdownMenuTrigger>
 						</TooltipTrigger>
@@ -180,7 +174,7 @@ export function AdminAccountSection({
 				<DropdownMenuContent align="end" side="right" className="w-52 text-xs">
 					<DropdownMenuLabel className="font-normal">
 						<div className="flex flex-col gap-0.5">
-							<p className="text-xs font-semibold text-slate-900">{currentUser.name}</p>
+							<p className="text-xs font-semibold text-text-primary">{currentUser.name}</p>
 							<p className="text-[10px] text-muted-foreground truncate">
 								{currentUser.email ? `${currentUser.role} • ${currentUser.email}` : currentUser.role}
 							</p>
@@ -189,9 +183,9 @@ export function AdminAccountSection({
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
 						onClick={handleLogout}
-						className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs text-red-600 focus:text-red-600"
+						className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs text-error focus:text-error"
 					>
-						<LogOut className="h-3.5 w-3.5 text-red-500" />
+						<LogOut className="h-3.5 w-3.5 text-error" />
 						<span>{t("logout")}</span>
 					</DropdownMenuItem>
 				</DropdownMenuContent>
@@ -203,7 +197,7 @@ export function AdminAccountSection({
 		<DropdownMenu>
 			<div
 				className={cn(
-					"group flex items-center justify-between gap-2 p-1.5 rounded-[12px] border border-slate-200/80 bg-white hover:border-slate-300 shadow-2xs transition-all",
+					"group flex items-center justify-between gap-2 p-1.5 rounded-[12px] border border-border-default/80 bg-surface hover:border-border-default shadow-2xs transition-all",
 					className
 				)}
 			>
@@ -216,7 +210,7 @@ export function AdminAccountSection({
 					>
 						{/* Avatar Circle with Online Dot */}
 						<div className="relative shrink-0">
-							<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] select-none overflow-hidden">
+							<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-[11px] select-none overflow-hidden">
 								{currentUser.avatarUrl ? (
 									<img
 										src={currentUser.avatarUrl}
@@ -228,17 +222,17 @@ export function AdminAccountSection({
 								)}
 							</div>
 							<span
-								className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#22C55E] ring-2 ring-white dark:ring-slate-900 z-10"
+								className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-surface dark:ring-border-default z-10"
 								title={t("online")}
 							/>
 						</div>
 
 						{/* Admin Name and Role / Email */}
 						<div className="min-w-0 flex-1">
-							<p className="truncate text-[11.5px] font-bold text-slate-800 leading-tight">
+							<p className="truncate text-[11.5px] font-bold text-text-primary leading-tight">
 								{currentUser.name}
 							</p>
-							<p className="truncate text-[9.5px] text-slate-400 font-medium leading-tight mt-0.5">
+							<p className="truncate text-[9.5px] text-text-tertiary font-medium leading-tight mt-0.5">
 								{currentUser.email || currentUser.role}
 							</p>
 						</div>
@@ -251,7 +245,7 @@ export function AdminAccountSection({
 					onClick={handleLogout}
 					title={t("logout")}
 					aria-label={t("logout")}
-					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-text-tertiary hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
 					id="admin-logout-button"
 				>
 					<LogOut className="h-3.5 w-3.5" />
@@ -261,7 +255,7 @@ export function AdminAccountSection({
 			<DropdownMenuContent align="end" className="w-52 mb-2 rounded-[12px] text-xs">
 				<DropdownMenuLabel className="font-normal">
 					<div className="flex flex-col gap-0.5">
-						<p className="text-xs font-semibold text-slate-900">{currentUser.name}</p>
+						<p className="text-xs font-semibold text-text-primary">{currentUser.name}</p>
 						<p className="text-[10px] text-muted-foreground truncate">
 							{currentUser.email ? `${currentUser.role} • ${currentUser.email}` : currentUser.role}
 						</p>
@@ -270,9 +264,9 @@ export function AdminAccountSection({
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					onClick={handleLogout}
-					className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs text-red-600 focus:text-red-600"
+					className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2 text-xs text-error focus:text-error"
 				>
-					<LogOut className="h-3.5 w-3.5 text-red-500" />
+					<LogOut className="h-3.5 w-3.5 text-error" />
 					<span>{t("logout")}</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>

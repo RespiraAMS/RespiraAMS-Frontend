@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { LogOut, Settings, User } from "lucide-react";
-import { logout, getStoredUser } from "@/features/auth/api";
+import { logout, getUser } from "@/lib/auth";
 import { getStoredDoctorProfile, fetchCurrentDoctorProfile } from "@/features/profile/api";
 import { getDoctorDisplayName, POSITION_LABELS, DoctorProfile } from "@/features/profile/types";
 import {
@@ -95,8 +95,14 @@ export function AccountSection({
 	});
 
 	const applyDoctorProfile = useCallback((profile: DoctorProfile) => {
-		const storedUser = getStoredUser();
-		const info = buildUserInfo(profile, storedUser);
+		const storedUser = getUser();
+		const authUser = storedUser
+			? {
+					name: [storedUser.firstName, storedUser.lastName].filter(Boolean).join(" "),
+					email: storedUser.email,
+			  }
+			: null;
+		const info = buildUserInfo(profile, authUser);
 		setCurrentUserInfo(info);
 	}, []);
 
@@ -106,11 +112,16 @@ export function AccountSection({
 
 		// 1. Kiểm tra cache có sẵn
 		const cached = getStoredDoctorProfile();
-		const storedUser = getStoredUser();
+		const storedUser = getUser();
 		if (cached && (cached.firstName || cached.lastName)) {
 			applyDoctorProfile(cached);
 		} else if (storedUser) {
-			setCurrentUserInfo(buildUserInfo(null, storedUser));
+			setCurrentUserInfo(
+				buildUserInfo(null, {
+					name: [storedUser.firstName, storedUser.lastName].filter(Boolean).join(" "),
+					email: storedUser.email,
+				})
+			);
 		}
 
 		// 2. Luôn chủ động fetch mới nhất từ backend

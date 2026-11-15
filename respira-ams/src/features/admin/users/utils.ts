@@ -29,7 +29,8 @@ export const POSITION_LABELS: Record<PositionType, string> = {
 
 export const ROLE_LABELS: Record<UserRole, string> = {
 	Doctor: "Bác sĩ",
-	Manager: "Trưởng khoa / Quản lý",
+	HeadDepartmentDoctor: "Trưởng khoa",
+	Manager: "Quản lý chuyên môn",
 	Admin: "Quản trị viên",
 };
 

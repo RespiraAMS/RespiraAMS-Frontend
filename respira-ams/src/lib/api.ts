@@ -1,98 +1,93 @@
 import logger from "./logger";
-import { getAccessToken, refreshSession, clearAuth } from "./auth";
+import { clearAuth } from "./auth";
 import { ApiResult } from "./models";
+import { API_V1, CLIENT_API_BASE, GATEWAY_ORIGIN, API_VERSION } from "./api-base";
 
-const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION ?? "v1";
-
-export const API_BASE = `/api/${API_VERSION}`;
-export const API_BASE_SERVER = `${process.env.GATEWAY_URL || "https://gateway-respira.dev.localhost:7283"}`;
-
-function redirectToLogin(): void {
-    if (typeof window !== "undefined") {
-        window.location.href = "/login";
-    }
+// Cho phép Node.js trên server chấp nhận chứng chỉ self-signed của ASP.NET Core dev
+if (typeof window === "undefined" && process.env.NODE_ENV !== "production") {
+	process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
 
-async function handle401(): Promise<boolean> {
-    const refreshed = await refreshSession();
-    if (!refreshed) {
-        clearAuth();
-        redirectToLogin();
-        return false;
-    }
-    return true;
+export const API_BASE = typeof window !== "undefined" ? CLIENT_API_BASE : `/api/${API_VERSION}`;
+export const API_BASE_SERVER = typeof window !== "undefined" ? "" : GATEWAY_ORIGIN;
+
+function redirectToLogin(): void {
+	if (typeof window !== "undefined") {
+		window.location.href = "/login";
+	}
+}
+
+function handleSessionExpired(): never {
+	clearAuth();
+	redirectToLogin();
+	throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
 }
 
 export async function apiFetch<T>(
-    url: string,
-    opts?: RequestInit,
-    withAuth: boolean = true
+	url: string,
+	opts?: RequestInit
 ): Promise<T | null> {
-    const isFormData = opts?.body instanceof FormData;
-    const headers = new Headers(opts?.headers);
+	const { headers: optionHeaders, ...rest } = opts ?? {};
+	const isFormData = rest.body instanceof FormData;
+	const headers = new Headers(optionHeaders);
 
-    if (withAuth) {
-        const token = getAccessToken();
-        if (token) {
-            headers.set("Authorization", `Bearer ${token}`);
-        }
-    }
+	if (!isFormData && !headers.has("Content-Type")) {
+		headers.set("Content-Type", "application/json");
+	}
 
-    if (!isFormData && !headers.has("Content-Type")) {
-        headers.set("Content-Type", "application/json");
-    }
+	const response = await fetch(url, {
+		...rest,
+		headers,
+		signal: rest.signal ?? AbortSignal.timeout(15000),
+	});
 
-    const resp = await fetch(url, {
-        headers,
-        ...opts,
-    });
+	// Handle 204 No Content for PUT/DELETE
+	if (response.status === 204) {
+		return null;
+	}
 
-    // Handle 204 No Content for PUT/DELETE
-    if (resp.status === 204) {
-        return null;
-    }
+	const raw = await response.text();
+	let result: ApiResult<T> | null = null;
 
-    const result = (await resp.json()) as ApiResult<T>;
+	if (raw) {
+		try {
+			result = JSON.parse(raw) as ApiResult<T>;
+		} catch {
+			throw new Error(`Máy chủ phản hồi trạng thái ${response.status} ${response.statusText}`);
+		}
+	}
 
-    // Check both HTTP status and the API's custom error object
-    if (!resp.ok || result.error) {
-        const errorMessage = result.error?.description || "An unexpected error occurred";
-        logger.error("Failed to make API request", { url, message: errorMessage, status: resp.status });
+	// Check both HTTP status and the API's custom error object
+	if (!response.ok || result?.error) {
+		const errorMessage = result?.error?.description || "An unexpected error occurred";
+		logger.error("Failed to make API request", {
+			url,
+			message: errorMessage,
+			status: response.status,
+		});
 
-        switch (resp.status) {
-            case 400:
-                throw new Error(errorMessage);
-            case 401: {
-                const recovered = await handle401();
-                if (recovered) {
-                    return apiFetch<T>(url, opts, withAuth);
-                }
-                throw new Error("Session expired. Please log in again.");
-            }
-            case 403:
-                throw new Error("You cannot access this resource");
-            case 404:
-                throw new Error(errorMessage);
-            case 500:
-                throw new Error("Internal server error");
-            case 503:
-                throw new Error("Service temporarily unavailable");
-            default:
-                throw new Error(errorMessage);
-        }
-    }
+		switch (response.status) {
+			case 400:
+				throw new Error(errorMessage);
+			case 401:
+				handleSessionExpired();
+			case 403:
+				throw new Error("Bạn không có quyền thực hiện thao tác này.");
+			case 404:
+				throw new Error(errorMessage);
+			case 500:
+				throw new Error("Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.");
+			case 503:
+				throw new Error("Dịch vụ tạm thời không khả dụng. Vui lòng thử lại sau.");
+			default:
+				throw new Error(errorMessage);
+		}
+	}
 
-    return result.data;
+	return (result?.data ?? null) as T | null;
 }
 
-const DOCTOR_API_URL =
-	typeof window !== "undefined"
-		? "/api/backend"
-		: (
-				process.env.BACKEND_API_URL ||
-				process.env.NEXT_PUBLIC_API_URL ||
-				"http://localhost:5016/api/v1"
-			).replace(/\/$/, "");
+const DOCTOR_API_URL = typeof window !== "undefined" ? CLIENT_API_BASE : API_V1;
 
 export class ApiError extends Error {
 	status: number;
@@ -142,21 +137,15 @@ export async function apiRequest<T = void>(
 	options: Omit<RequestInit, "body"> & { body?: unknown } = {}
 ): Promise<T> {
 	const { body, headers, ...rest } = options;
-	const token =
-		typeof window !== "undefined"
-			? window.localStorage.getItem("accessToken") ||
-				window.localStorage.getItem("respira_auth_token_v1")
-			: null;
 
 	let response: Response;
 	try {
 		response = await fetch(`${DOCTOR_API_URL}${path}`, {
-			signal: rest.signal || AbortSignal.timeout(10000),
 			...rest,
+			signal: rest.signal ?? AbortSignal.timeout(15000),
 			headers: {
 				Accept: "application/json",
 				...(body !== undefined ? { "Content-Type": "application/json" } : {}),
-				...(token ? { Authorization: `Bearer ${token}` } : {}),
 				...headers,
 			},
 			body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -176,6 +165,11 @@ export async function apiRequest<T = void>(
 	}
 
 	if (!response.ok) {
+		if (response.status === 401) {
+			clearAuth();
+			redirectToLogin();
+		}
+
 		const message =
 			payload?.error?.description ??
 			(payload as { message?: string } | null)?.message ??
