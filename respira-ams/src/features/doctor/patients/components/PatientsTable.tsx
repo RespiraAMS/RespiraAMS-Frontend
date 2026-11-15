@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Edit, Eye, ListFilter, Loader2, LogOut, Trash } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useState } from 'react';
+import { Edit, Eye, Link, ListFilter, Loader2, LogOut, Plus, Trash } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Table,
     TableBody,
@@ -14,14 +14,14 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
     Pagination,
     PaginationContent,
     PaginationItem,
     PaginationNext,
     PaginationPrevious,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -32,15 +32,15 @@ import {
     DropdownMenuSubContent,
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
-import { usePatientsList } from "../queries";
+import { usePatientsList } from '../queries';
 import {
     type PatientItem,
     type PatientFilters,
     type Gender,
     type TreatmentOutcome,
-} from "../types";
+} from '../types';
 
 const PAGE_SIZE = 10;
 
@@ -55,25 +55,25 @@ interface PatientsTableProps {
 
 export function renderOutcomeBadge(outcome: TreatmentOutcome) {
     switch (outcome) {
-        case "InTreatment":
+        case 'InTreatment':
             return (
                 <span className="inline-flex items-center rounded bg-blue-500/15 border border-blue-500/30 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
                     Đang điều trị
                 </span>
             );
-        case "Recovered":
+        case 'Recovered':
             return (
                 <span className="inline-flex items-center rounded bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                     Khỏi bệnh
                 </span>
             );
-        case "Death":
+        case 'Death':
             return (
                 <span className="inline-flex items-center rounded bg-rose-500/15 border border-rose-500/30 px-2 py-0.5 text-xs font-semibold text-rose-600 dark:text-rose-400">
                     Tử vong
                 </span>
             );
-        case "OutOfScope":
+        case 'OutOfScope':
             return (
                 <span className="inline-flex items-center rounded bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
                     Ngoài phạm vi
@@ -86,21 +86,21 @@ export function renderOutcomeBadge(outcome: TreatmentOutcome) {
 
 export function PatientsTable({
     readOnly = false,
-    searchTerm = "",
+    searchTerm = '',
     onViewDetail,
     onEdit,
     onDelete,
     onDischarge,
 }: PatientsTableProps) {
-    const tCommon = useTranslations("common");
+    const tCommon = useTranslations('common');
 
     const [page, setPage] = useState(1);
-    const [selectedGender, setSelectedGender] = useState<Gender | "">("");
-    const [minAge, setMinAge] = useState<number | "">("");
-    const [maxAge, setMaxAge] = useState<number | "">("");
+    const [selectedGender, setSelectedGender] = useState<Gender | ''>('');
+    const [minAge, setMinAge] = useState<number | ''>('');
+    const [maxAge, setMaxAge] = useState<number | ''>('');
 
-    const [draftMinAge, setDraftMinAge] = useState<string>("");
-    const [draftMaxAge, setDraftMaxAge] = useState<string>("");
+    const [draftMinAge, setDraftMinAge] = useState<string>('');
+    const [draftMaxAge, setDraftMaxAge] = useState<string>('');
 
     const [prevFilters, setPrevFilters] = useState({ searchTerm, selectedGender, minAge, maxAge });
     if (
@@ -119,30 +119,29 @@ export function PatientsTable({
         maxAge,
     };
 
-    const { data: listData, isLoading, isFetching } = usePatientsList(
-        page,
-        PAGE_SIZE,
-        searchTerm,
-        filters
-    );
+    const {
+        data: listData,
+        isLoading,
+        isFetching,
+    } = usePatientsList(page, PAGE_SIZE, searchTerm, filters);
 
     const items = listData?.items || [];
     const totalPages = listData?.metadata?.pageCount || 1;
 
     const activeFilterCount =
-        (selectedGender ? 1 : 0) + (minAge !== "" ? 1 : 0) + (maxAge !== "" ? 1 : 0);
+        (selectedGender ? 1 : 0) + (minAge !== '' ? 1 : 0) + (maxAge !== '' ? 1 : 0);
 
     const applyAgeFilter = () => {
-        setMinAge(draftMinAge === "" ? "" : Number(draftMinAge));
-        setMaxAge(draftMaxAge === "" ? "" : Number(draftMaxAge));
+        setMinAge(draftMinAge === '' ? '' : Number(draftMinAge));
+        setMaxAge(draftMaxAge === '' ? '' : Number(draftMaxAge));
     };
 
     const clearAllFilters = () => {
-        setSelectedGender("");
-        setMinAge("");
-        setMaxAge("");
-        setDraftMinAge("");
-        setDraftMaxAge("");
+        setSelectedGender('');
+        setMinAge('');
+        setMaxAge('');
+        setDraftMinAge('');
+        setDraftMaxAge('');
     };
 
     const filterDropdown = (
@@ -170,24 +169,25 @@ export function PatientsTable({
 
                 <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
-                        Giới tính {selectedGender ? `(${selectedGender === "Male" ? "Nam" : "Nữ"})` : ""}
+                        Giới tính{' '}
+                        {selectedGender ? `(${selectedGender === 'Male' ? 'Nam' : 'Nữ'})` : ''}
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="bg-popover text-popover-foreground border-border">
                         <DropdownMenuItem
-                            onClick={() => setSelectedGender("")}
-                            className={selectedGender === "" ? "bg-accent font-semibold" : ""}
+                            onClick={() => setSelectedGender('')}
+                            className={selectedGender === '' ? 'bg-accent font-semibold' : ''}
                         >
                             Tất cả
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            onClick={() => setSelectedGender("Male")}
-                            className={selectedGender === "Male" ? "bg-accent font-semibold" : ""}
+                            onClick={() => setSelectedGender('Male')}
+                            className={selectedGender === 'Male' ? 'bg-accent font-semibold' : ''}
                         >
                             Nam (Male)
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            onClick={() => setSelectedGender("Female")}
-                            className={selectedGender === "Female" ? "bg-accent font-semibold" : ""}
+                            onClick={() => setSelectedGender('Female')}
+                            className={selectedGender === 'Female' ? 'bg-accent font-semibold' : ''}
                         >
                             Nữ (Female)
                         </DropdownMenuItem>
@@ -196,11 +196,10 @@ export function PatientsTable({
 
                 <DropdownMenuSeparator />
 
-                <div
-                    className="p-2 space-y-2"
-                    onKeyDown={(e) => e.stopPropagation()}
-                >
-                    <Label className="text-xs font-semibold text-muted-foreground">Độ tuổi (Min - Max)</Label>
+                <div className="p-2 space-y-2" onKeyDown={(e) => e.stopPropagation()}>
+                    <Label className="text-xs font-semibold text-muted-foreground">
+                        Độ tuổi (Min - Max)
+                    </Label>
                     <div className="flex items-center gap-2">
                         <Input
                             type="number"
@@ -232,7 +231,10 @@ export function PatientsTable({
                 </div>
 
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={clearAllFilters} className="text-destructive focus:text-destructive">
+                <DropdownMenuItem
+                    onClick={clearAllFilters}
+                    className="text-destructive focus:text-destructive"
+                >
                     Xóa tất cả bộ lọc
                 </DropdownMenuItem>
             </DropdownMenuContent>
@@ -250,14 +252,24 @@ export function PatientsTable({
             <Table className="border-border">
                 <TableHeader>
                     <TableRow className="border-border hover:bg-transparent">
-                        <TableHead className="text-muted-foreground font-semibold w-44">Mã bệnh án</TableHead>
-                        <TableHead className="text-muted-foreground font-semibold">Họ và tên</TableHead>
-                        <TableHead className="text-muted-foreground font-semibold">Ngày sinh / Tuổi</TableHead>
-                        <TableHead className="text-muted-foreground font-semibold text-center">Giới tính</TableHead>
-                        <TableHead className="text-muted-foreground font-semibold text-center">Trạng thái</TableHead>
+                        <TableHead className="text-muted-foreground font-semibold w-44">
+                            Mã bệnh án
+                        </TableHead>
+                        <TableHead className="text-muted-foreground font-semibold">
+                            Họ và tên
+                        </TableHead>
+                        <TableHead className="text-muted-foreground font-semibold">
+                            Ngày sinh / Tuổi
+                        </TableHead>
+                        <TableHead className="text-muted-foreground font-semibold text-center">
+                            Giới tính
+                        </TableHead>
+                        <TableHead className="text-muted-foreground font-semibold text-center">
+                            Trạng thái
+                        </TableHead>
                         <TableHead className="text-muted-foreground text-right font-semibold">
                             <div className="flex items-center justify-end gap-2">
-                                {tCommon("actions")}
+                                {tCommon('actions')}
                                 {filterDropdown}
                             </div>
                         </TableHead>
@@ -266,13 +278,19 @@ export function PatientsTable({
                 <TableBody>
                     {isLoading ? (
                         <TableRow className="border-border">
-                            <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                            <TableCell
+                                colSpan={6}
+                                className="h-32 text-center text-muted-foreground"
+                            >
                                 <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
                             </TableCell>
                         </TableRow>
                     ) : items.length === 0 ? (
                         <TableRow className="border-border">
-                            <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+                            <TableCell
+                                colSpan={6}
+                                className="text-center text-muted-foreground py-10"
+                            >
                                 Không tìm thấy dữ liệu bệnh nhân.
                             </TableCell>
                         </TableRow>
@@ -290,10 +308,13 @@ export function PatientsTable({
                                     {item.fullName}
                                 </TableCell>
                                 <TableCell className="text-sm text-muted-foreground">
-                                    {item.dateOfBirth} <span className="font-medium text-foreground">({item.age} tuổi)</span>
+                                    {item.dateOfBirth}{' '}
+                                    <span className="font-medium text-foreground">
+                                        ({item.age} tuổi)
+                                    </span>
                                 </TableCell>
                                 <TableCell className="text-center text-sm">
-                                    {item.gender === "Male" ? "Nam" : "Nữ"}
+                                    {item.gender === 'Male' ? 'Nam' : 'Nữ'}
                                 </TableCell>
                                 <TableCell className="text-center">
                                     {renderOutcomeBadge(item.treatmentOutcome)}
@@ -315,8 +336,10 @@ export function PatientsTable({
                                                 size="icon"
                                                 onClick={() => onDischarge(item)}
                                                 className="hover:bg-accent text-emerald-600 h-8 w-8"
-                                                title="Xuất viện / Kết quả điều trị"
-                                                disabled={!(item.treatmentOutcome==="InTreatment")}
+                                                title="Xuất viện"
+                                                disabled={
+                                                    !(item.treatmentOutcome === 'InTreatment')
+                                                }
                                             >
                                                 <LogOut className="h-4 w-4" />
                                             </Button>
@@ -356,16 +379,24 @@ export function PatientsTable({
                     <PaginationContent>
                         <PaginationItem>
                             <PaginationPrevious
-                                className={page > 1 ? "cursor-pointer hover:bg-accent" : "pointer-events-none opacity-50"}
+                                className={
+                                    page > 1
+                                        ? 'cursor-pointer hover:bg-accent'
+                                        : 'pointer-events-none opacity-50'
+                                }
                                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                             />
                         </PaginationItem>
                         <span className="text-sm text-muted-foreground px-2">
-                            {tCommon("pageOf", { page, totalPages })}
+                            {tCommon('pageOf', { page, totalPages })}
                         </span>
                         <PaginationItem>
                             <PaginationNext
-                                className={page < totalPages ? "cursor-pointer hover:bg-accent" : "pointer-events-none opacity-50"}
+                                className={
+                                    page < totalPages
+                                        ? 'cursor-pointer hover:bg-accent'
+                                        : 'pointer-events-none opacity-50'
+                                }
                                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                             />
                         </PaginationItem>

@@ -117,7 +117,6 @@ export function formatSeverity(severity?: string): string {
 	return severity;
 }
 
-/** Giá trị mặc định cho trường Boolean / Categorical khi mở form hoặc đặt lại. */
 export function buildInitialValues(
 	variables: import("./types").ClinicalVariable[]
 ): Record<string, string> {

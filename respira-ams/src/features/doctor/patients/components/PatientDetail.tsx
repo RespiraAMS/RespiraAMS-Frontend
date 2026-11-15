@@ -50,6 +50,7 @@ import {
     type AdherenceState,
 } from "../types";
 import { CloseTreatmentPlanDialog, ReviewTreatmentPlanDialog, TreatmentPlanDetailDialog } from "../treatment-plans";
+import Link from "next/link";
 
 function getInitials(name: string): string {
     return name
@@ -394,7 +395,7 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
                         <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => router.back()}
+                            onClick={() => router.push("/doctor/patients")}
                             className="hover:bg-accent rounded-full shrink-0"
                             title="Quay lại"
                         >
@@ -423,6 +424,15 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
                             className="border-emerald-600/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10"
                         >
                             <LogOut className="w-4 h-4 mr-1.5" /> Xuất viện
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                        >
+                            <Link href={`/doctor/diagnose?patientId=${patient.id}`}>
+                                <Plus className="w-4 h-4 mr-1.5 text-amber-600" /> Điều trị
+                            </Link>
                         </Button>
                         <Button
                             variant="outline"

@@ -7,7 +7,6 @@ interface ResultCardProps {
 	headingClassName?: string;
 }
 
-/** Thẻ kết quả có tiêu đề đánh số bước, dùng chung cho các khối trong trang kết quả. */
 export function ResultCard({ step, title, children, headingClassName = "mb-4" }: ResultCardProps) {
 	return (
 		<div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs">
