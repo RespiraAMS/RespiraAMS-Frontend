@@ -119,13 +119,16 @@ export function UsersTable({
 				</TableHeader>
 				<TableBody>
 					{users.map((user) => {
-						const initials = `${user.lastName[0] || ""}${user.firstName[0] || ""}`.toUpperCase();
-						const displayName = formatFullNameWithTitle(
-							user.lastName,
-							user.firstName,
-							user.academicTitle,
-							user.degrees
-						);
+						const initials =
+							`${user.lastName[0] || ""}${user.firstName[0] || ""}`.toUpperCase() ||
+							user.email.slice(0, 2).toUpperCase();
+						const displayName =
+							formatFullNameWithTitle(
+								user.lastName,
+								user.firstName,
+								user.academicTitle,
+								user.degrees
+							) || user.email;
 
 						return (
 							<TableRow

@@ -1,5 +1,4 @@
 import { apiRequest, buildQuery } from "@/lib/api";
-import { getUser } from "@/lib/auth";
 import { API_V1, CLIENT_API_BASE } from "@/lib/api-base";
 import {
 	UserItem,
@@ -15,11 +14,11 @@ import {
 	PositionType,
 } from "./types";
 
-const USERS_STORAGE_KEY = "respira_admin_users_v1";
-const DELETED_USERS_STORAGE_KEY = "respira_admin_deleted_users_v1";
 const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 const CREATE_POLL_INTERVAL_MS = 1200;
 const CREATE_TIMEOUT_MS = 30000;
+const LIST_PAGE_SIZE = 100;
+const LIST_MAX_PAGES = 10;
 
 export interface CreateUserResult {
 	sagaId: string;
@@ -50,51 +49,27 @@ interface AuditOutcome {
 	emailFailed: boolean;
 }
 
-function getStoredDeletedUserIds(): string[] {
-	if (typeof window === "undefined") return [];
-	try {
-		const raw = localStorage.getItem(DELETED_USERS_STORAGE_KEY);
-		if (!raw) return [];
-		const parsed = JSON.parse(raw);
-		return Array.isArray(parsed) ? parsed : [];
-	} catch {
-		return [];
-	}
+interface BackendPaginationMetadata {
+	totalItemCount?: number;
+	pageCount?: number;
 }
 
-function addStoredDeletedUserIds(ids: string[]): void {
-	if (typeof window === "undefined") return;
-	try {
-		const current = new Set(getStoredDeletedUserIds());
-		ids.forEach((id) => {
-			if (id) current.add(id);
-		});
-		localStorage.setItem(DELETED_USERS_STORAGE_KEY, JSON.stringify(Array.from(current)));
-	} catch (e) {
-		console.error("Failed to save deleted users to localStorage:", e);
-	}
+interface BackendAccountDto {
+	id: string;
+	email: string;
+	phone?: string | null;
+	role?: string | null;
+	isEmailConfirmed?: boolean;
+	status?: string | null;
 }
 
-function getStoredLocalUsers(): UserItem[] {
-	if (typeof window === "undefined") return [];
-	try {
-		const raw = localStorage.getItem(USERS_STORAGE_KEY);
-		if (!raw) return [];
-		const parsed = JSON.parse(raw);
-		return Array.isArray(parsed) ? parsed : [];
-	} catch {
-		return [];
-	}
-}
-
-function saveStoredLocalUsers(users: UserItem[]): void {
-	if (typeof window === "undefined") return;
-	try {
-		localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-	} catch (e) {
-		console.error("Failed to save users to localStorage:", e);
-	}
-}
+const ACCOUNT_ROLE_TO_USER_ROLE: Record<string, UserRole> = {
+	Doctor: "Doctor",
+	HeadDepartmentDoctor: "HeadDepartmentDoctor",
+	MedicalRegulationReviewer: "Manager",
+	Manager: "Manager",
+	Admin: "Admin",
+};
 
 interface BackendDoctorDto {
 	id: string;
@@ -149,176 +124,128 @@ function mapBackendDoctorToUser(doc: BackendDoctorDto): UserItem {
 		position: (doc.position as PositionType | undefined) || "StaffDoctor",
 		gender: (doc.gender as GenderType | undefined) || "Male",
 		citizenIdentificationNumber: doc.citizenIdentificationNumber || "",
-		dateOfBirth: doc.dateOfBirth
-			? String(doc.dateOfBirth)
-			: undefined,
+		dateOfBirth: doc.dateOfBirth ? String(doc.dateOfBirth) : undefined,
 		address: doc.address || "",
 		avatarUrl: doc.avatarUrl || undefined,
-		createdAt: doc.createdAt
-			? String(doc.createdAt)
-			: new Date().toISOString(),
+		createdAt: doc.createdAt ? String(doc.createdAt) : "",
 	};
 }
 
+function mapBackendAccountToUser(
+	account: BackendAccountDto,
+	doctor?: BackendDoctorDto
+): UserItem {
+	const role = ACCOUNT_ROLE_TO_USER_ROLE[account.role || ""] || "Doctor";
+	const profile = doctor ? mapBackendDoctorToUser(doctor) : null;
+
+	return {
+		id: account.id,
+		doctorId: doctor?.id,
+		mediaId: doctor?.mediaId || undefined,
+		email: account.email || profile?.email || "",
+		phone: account.phone || profile?.phone || "",
+		role,
+		status: account.status === "Inactive" ? "Inactive" : "Active",
+		isEmailConfirmed: account.isEmailConfirmed ?? profile?.isEmailConfirmed ?? false,
+		firstName: profile?.firstName || "",
+		lastName: profile?.lastName || "",
+		degrees: profile?.degrees || [],
+		academicTitle: profile?.academicTitle || "None",
+		position: profile?.position || "StaffDoctor",
+		gender: profile?.gender || "Male",
+		citizenIdentificationNumber: profile?.citizenIdentificationNumber || "",
+		dateOfBirth: profile?.dateOfBirth,
+		address: profile?.address || "",
+		avatarUrl: profile?.avatarUrl,
+		createdAt: profile?.createdAt || "",
+	};
+}
+
+async function fetchAllAccounts(): Promise<BackendAccountDto[]> {
+	const accounts: BackendAccountDto[] = [];
+
+	for (let page = 1; page <= LIST_MAX_PAGES; page += 1) {
+		const res = await apiRequest<{
+			items?: BackendAccountDto[];
+			metadata?: BackendPaginationMetadata;
+		}>(`/auth/accounts${buildQuery({ Page: page, Size: LIST_PAGE_SIZE })}`);
+
+		const items = res?.items ?? [];
+		accounts.push(...items);
+
+		const total = res?.metadata?.totalItemCount ?? accounts.length;
+		if (items.length < LIST_PAGE_SIZE || accounts.length >= total) break;
+	}
+
+	return accounts;
+}
+
+async function fetchAllDoctorProfiles(): Promise<Map<string, BackendDoctorDto>> {
+	const profiles = new Map<string, BackendDoctorDto>();
+
+	for (let page = 1; page <= LIST_MAX_PAGES; page += 1) {
+		const res = await apiRequest<{
+			items?: BackendDoctorDto[];
+			metadata?: BackendPaginationMetadata;
+		}>(`/doctors${buildQuery({ Page: page, Size: LIST_PAGE_SIZE })}`);
+
+		const items = res?.items ?? [];
+		for (const item of items) {
+			if (item.accountId) profiles.set(item.accountId, item);
+		}
+
+		const total = res?.metadata?.totalItemCount ?? profiles.size;
+		if (items.length < LIST_PAGE_SIZE || profiles.size >= total) break;
+	}
+
+	return profiles;
+}
+
 /**
- * Lấy danh sách người dùng thật từ Backend (/doctors & /doctors/search),
- * phản ánh chính xác 100% dữ liệu thực tế từ cơ sở dữ liệu.
+ * Lấy danh sách người dùng thật từ Backend: tài khoản lấy từ /auth/accounts
+ * (bao gồm MedicalRegulationReviewer), hồ sơ bác sĩ lấy từ /doctors để bổ sung
+ * họ tên, học vị và ảnh đại diện.
  */
 export async function fetchUsers(
 	filters?: UserFilters,
 	page: number = 1,
 	pageSize: number = 10
 ): Promise<{ items: UserItem[]; total: number; stats: UserStats }> {
-	let remoteUsers: UserItem[] = [];
+	let accounts: BackendAccountDto[] = [];
+	let doctorProfiles = new Map<string, BackendDoctorDto>();
 
-	// 1. Gọi trực tiếp API Backend qua Gateway
 	try {
-		const query: Record<string, string | number | undefined> = {
-			Page: page,
-			Size: Math.max(pageSize, 50),
-		};
-
-		if (
-			filters?.role &&
-			filters.role !== "ALL" &&
-			(filters.role === "Doctor" || filters.role === "HeadDepartmentDoctor")
-		) {
-			query.Role = filters.role;
-		}
-
-		let endpoint = "/doctors";
-		const searchTrim = filters?.search?.trim();
-		if (searchTrim && searchTrim.length >= 2) {
-			endpoint = "/doctors/search";
-			query.SearchTerm = searchTrim;
-		}
-
-		const res = await apiRequest<{
-			items?: BackendDoctorDto[];
-			metadata?: { totalItemCount?: number; totalCount?: number };
-		}>(`${endpoint}${buildQuery(query)}`);
-
-		if (res?.items && Array.isArray(res.items)) {
-			remoteUsers = res.items.map(mapBackendDoctorToUser);
-		}
+		[accounts, doctorProfiles] = await Promise.all([
+			fetchAllAccounts(),
+			fetchAllDoctorProfiles().catch(() => new Map<string, BackendDoctorDto>()),
+		]);
 	} catch (e) {
-		console.warn("[AdminUsersAPI] Không thể tải /doctors từ Backend, kiểm tra bộ nhớ đệm:", e);
+		console.warn("[AdminUsersAPI] Không thể tải danh sách tài khoản từ Backend:", e);
 	}
 
-	// Lọc bỏ các tài khoản đã được đánh dấu xóa mềm
-	const deletedIds = new Set(getStoredDeletedUserIds());
-	remoteUsers = remoteUsers.filter(
-		(u) =>
-			!deletedIds.has(u.id) &&
-			(!u.doctorId || !deletedIds.has(u.doctorId)) &&
-			!deletedIds.has(u.email.toLowerCase())
+	const allUsers: UserItem[] = accounts.map((account) =>
+		mapBackendAccountToUser(account, doctorProfiles.get(account.id))
 	);
 
-	// 2. Bổ sung tài khoản Admin đang đăng nhập thực tế (nếu role cho phép)
-	const activeAccount = getUser();
+	const searchTerm = filters?.search?.trim().toLowerCase() || "";
 
-	// Nạp các cập nhật cục bộ của Admin lên ưu tiên hàng đầu để không bị đè mất
-	const localStored = getStoredLocalUsers();
-	const localMap = new Map<string, UserItem>();
-	for (const lu of localStored) {
-		if (lu.id) localMap.set(lu.id, lu);
-		if (lu.doctorId) localMap.set(lu.doctorId, lu);
-		if (lu.email) localMap.set(lu.email.toLowerCase(), lu);
-	}
-
-	// Áp dụng các thay đổi của Admin (tên, vai trò, trạng thái...) lên dữ liệu backend
-	const mergedRemoteUsers = remoteUsers.map((ru) => {
-		const lu =
-			localMap.get(ru.id) ||
-			(ru.doctorId ? localMap.get(ru.doctorId) : undefined) ||
-			(ru.email ? localMap.get(ru.email.toLowerCase()) : undefined);
-
-		if (lu) {
-			return {
-				...ru,
-				...lu,
-				id: ru.id || lu.id,
-				doctorId: ru.doctorId || lu.doctorId,
-				email: lu.email || ru.email,
-				firstName: lu.firstName || ru.firstName,
-				lastName: lu.lastName || ru.lastName,
-				role: ru.role,
-				status: lu.status || ru.status,
-				phone: lu.phone || ru.phone,
-				citizenIdentificationNumber:
-					lu.citizenIdentificationNumber || ru.citizenIdentificationNumber,
-				address: lu.address || ru.address,
-				degrees: lu.degrees?.length ? lu.degrees : ru.degrees,
-				academicTitle: lu.academicTitle || ru.academicTitle,
-				position: lu.position || ru.position,
-				avatarUrl: lu.avatarUrl || ru.avatarUrl,
-			};
+	const filtered = allUsers.filter((user) => {
+		if (filters?.role && filters.role !== "ALL" && user.role !== filters.role) {
+			return false;
 		}
-		return ru;
+		if (filters?.status && filters.status !== "ALL" && user.status !== filters.status) {
+			return false;
+		}
+		if (!searchTerm) return true;
+
+		return (
+			user.email.toLowerCase().includes(searchTerm) ||
+			user.phone.toLowerCase().includes(searchTerm) ||
+			`${user.lastName} ${user.firstName}`.toLowerCase().includes(searchTerm) ||
+			user.citizenIdentificationNumber.toLowerCase().includes(searchTerm) ||
+			user.address.toLowerCase().includes(searchTerm)
+		);
 	});
-
-	const mergedMap = new Map<string, UserItem>();
-	for (const u of mergedRemoteUsers) {
-		const key = u.id || u.email.toLowerCase();
-		mergedMap.set(key, u);
-	}
-
-	// Bổ sung tài khoản Admin đang hoạt động nếu chưa có trong danh sách
-	if (activeAccount?.email && activeAccount.role === "Admin") {
-		const exists = Array.from(mergedMap.values()).some(
-			(u) =>
-				u.role === "Admin" ||
-				u.email.toLowerCase() === activeAccount.email.toLowerCase()
-		);
-		if (!exists) {
-			const adminName =
-				[activeAccount.firstName, activeAccount.lastName].filter(Boolean).join(" ") ||
-				"Quản trị viên";
-			const adminUser: UserItem = {
-				id: activeAccount.id || "admin-account-id",
-				email: activeAccount.email,
-				phone: activeAccount.phoneNumber || "",
-				role: "Admin",
-				status: "Active",
-				isEmailConfirmed: true,
-				firstName: adminName,
-				lastName: "Hệ Thống",
-				degrees: ["Master", "Bachelor"],
-				academicTitle: "None",
-				position: "Director",
-				gender: "Male",
-				citizenIdentificationNumber: "",
-				address: "Cổng Quản trị Hệ thống Respira AMS",
-				createdAt: new Date().toISOString(),
-			};
-			mergedMap.set(adminUser.id, adminUser);
-		}
-	}
-
-	const allUsers = Array.from(mergedMap.values());
-
-	// Áp dụng bộ lọc tìm kiếm cục bộ nếu có
-	let filtered = [...allUsers];
-
-	if (filters?.search && filters.search.trim()) {
-		const q = filters.search.trim().toLowerCase();
-		filtered = filtered.filter(
-			(u) =>
-				u.email.toLowerCase().includes(q) ||
-				u.phone.toLowerCase().includes(q) ||
-				`${u.lastName} ${u.firstName}`.toLowerCase().includes(q) ||
-				u.citizenIdentificationNumber.toLowerCase().includes(q) ||
-				u.address.toLowerCase().includes(q)
-		);
-	}
-
-	if (filters?.role && filters.role !== "ALL") {
-		filtered = filtered.filter((u) => u.role === filters.role);
-	}
-
-	if (filters?.status && filters.status !== "ALL") {
-		filtered = filtered.filter((u) => u.status === filters.status);
-	}
 
 	const stats: UserStats = {
 		total: allUsers.length,
@@ -334,11 +261,7 @@ export async function fetchUsers(
 	const startIndex = (page - 1) * pageSize;
 	const items = filtered.slice(startIndex, startIndex + pageSize);
 
-	return {
-		items,
-		total: filtered.length,
-		stats,
-	};
+	return { items, total: filtered.length, stats };
 }
 
 /**
@@ -349,11 +272,10 @@ export async function fetchUserById(id: string): Promise<UserItem | null> {
 		const res = await apiRequest<BackendDoctorDto>(`/doctors/${id}`);
 		if (res) return mapBackendDoctorToUser(res);
 	} catch {
-		// Fallback local store
+		return null;
 	}
 
-	const local = getStoredLocalUsers();
-	return local.find((u) => u.id === id || u.doctorId === id) || null;
+	return null;
 }
 
 function delay(ms: number): Promise<void> {
@@ -391,7 +313,7 @@ async function findDoctorById(doctorId: string): Promise<UserItem | null> {
 async function findDoctorByEmail(email: string): Promise<UserItem | null> {
 	try {
 		const res = await apiRequest<{ items?: BackendDoctorDto[] }>(
-			`/doctors${buildQuery({ Page: 1, Size: 200 })}`
+			`/doctors${buildQuery({ Page: 1, Size: LIST_PAGE_SIZE })}`
 		);
 		const normalizedEmail = email.trim().toLowerCase();
 		const match = res?.items?.find(
@@ -627,27 +549,14 @@ export async function updateUser(
 		throw new Error("Không thể kết nối tới máy chủ. Vui lòng thử lại.");
 	}
 
-	const currentUsers = getStoredLocalUsers();
-	const existing = currentUsers.find(
-		(u) =>
-			u.id === payload.accountId ||
-			(payload.doctorId && u.doctorId === payload.doctorId) ||
-			(payload.email && u.email.toLowerCase() === payload.email.toLowerCase())
-	);
-
 	const updatedUser: UserItem = {
-		...(existing || {
-			id: payload.accountId,
-			doctorId: payload.doctorId,
-			role: payload.role || "Doctor",
-			status: payload.status || "Active",
-			isEmailConfirmed: true,
-			createdAt: new Date().toISOString(),
-		}),
+		id: payload.accountId,
+		doctorId: payload.doctorId,
+		role: payload.role || "Doctor",
+		status: payload.status || "Active",
+		isEmailConfirmed: true,
 		email: payload.email,
 		phone: payload.phone,
-		role: payload.role || existing?.role || "Doctor",
-		status: payload.status || existing?.status || "Active",
 		firstName: payload.firstName,
 		lastName: payload.lastName,
 		degrees: payload.degrees,
@@ -657,19 +566,9 @@ export async function updateUser(
 		citizenIdentificationNumber: payload.citizenIdentificationNumber,
 		dateOfBirth: payload.dateOfBirth,
 		address: payload.address,
-		avatarUrl: payload.avatarFile ? URL.createObjectURL(payload.avatarFile) : existing?.avatarUrl,
+		avatarUrl: payload.avatarFile ? URL.createObjectURL(payload.avatarFile) : undefined,
+		createdAt: new Date().toISOString(),
 	};
-
-	if (existing) {
-		const updatedList = currentUsers.map((u) =>
-			u.id === existing.id || (existing.doctorId && u.doctorId === existing.doctorId)
-				? updatedUser
-				: u
-		);
-		saveStoredLocalUsers(updatedList);
-	} else {
-		saveStoredLocalUsers([updatedUser, ...currentUsers]);
-	}
 
 	return {
 		sagaId: backendSagaId || `saga-update-${Date.now()}`,
@@ -719,44 +618,20 @@ export async function deleteUser(
 
 	backendSagaId = json?.data || json?.id || null;
 
-	// Đánh dấu xóa mềm cục bộ để ẩn ngay lập tức khỏi giao diện
-	addStoredDeletedUserIds([accountId, doctorId || ""]);
-
-	const currentUsers = getStoredLocalUsers();
-	const remaining = currentUsers.filter((u) => u.id !== accountId && u.doctorId !== doctorId);
-	saveStoredLocalUsers(remaining);
-
 	return { sagaId: backendSagaId || `saga-delete-${Date.now()}` };
 }
 
 /**
- * Bật/tắt trạng thái Active / Inactive của người dùng
+ * Bật/tắt trạng thái Active / Inactive của người dùng.
+ * Backend hiện chưa cung cấp endpoint đổi trạng thái tài khoản, nên hàm này
+ * báo lỗi thay vì giả lập thay đổi cục bộ.
  */
 export async function toggleUserStatus(id: string, userToToggle?: UserItem): Promise<UserItem> {
-	const currentUsers = getStoredLocalUsers();
-	let user = currentUsers.find((u) => u.id === id || u.doctorId === id);
-	if (!user && userToToggle) {
-		user = userToToggle;
-	}
-	if (!user) {
-		const fetched = await fetchUserById(id);
-		if (fetched) user = fetched;
-	}
-	if (!user) throw new Error("Không tìm thấy người dùng");
+	void id;
+	void userToToggle;
 
-	const newStatus: UserStatus = user.status === "Active" ? "Inactive" : "Active";
-	const updated: UserItem = { ...user, status: newStatus };
-
-	const existsInCurrent = currentUsers.some(
-		(u) => u.id === user!.id || (user!.doctorId && u.doctorId === user!.doctorId)
+	throw new Error(
+		"Backend chưa hỗ trợ thay đổi trạng thái tài khoản. Vui lòng liên hệ quản trị hệ thống."
 	);
-	const updatedList = existsInCurrent
-		? currentUsers.map((u) =>
-				u.id === user!.id || (user!.doctorId && u.doctorId === user!.doctorId) ? updated : u
-		  )
-		: [updated, ...currentUsers];
-	saveStoredLocalUsers(updatedList);
-
-	return updated;
 }
 

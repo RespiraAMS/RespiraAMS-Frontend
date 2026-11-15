@@ -40,13 +40,16 @@ interface UserDetailDialogProps {
 export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProps) {
 	if (!user) return null;
 
-	const initials = `${user.lastName[0] || ""}${user.firstName[0] || ""}`.toUpperCase();
-	const displayName = formatFullNameWithTitle(
-		user.lastName,
-		user.firstName,
-		user.academicTitle,
-		user.degrees
-	);
+	const initials =
+		`${user.lastName[0] || ""}${user.firstName[0] || ""}`.toUpperCase() ||
+		user.email.slice(0, 2).toUpperCase();
+	const displayName =
+		formatFullNameWithTitle(
+			user.lastName,
+			user.firstName,
+			user.academicTitle,
+			user.degrees
+		) || user.email;
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>

@@ -109,12 +109,6 @@ export function AdminUsersView() {
 				);
 			}
 
-			if (payload.role === "Manager") {
-				toast.info(
-					"Tài khoản Quản lý chuyên môn không có hồ sơ bác sĩ nên không hiển thị trong danh sách này."
-				);
-			}
-
 			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
@@ -150,7 +144,7 @@ export function AdminUsersView() {
 			await deleteUser(user.id, user.doctorId, user.mediaId);
 			setIsDeleteOpen(false);
 			setDeleteTargetUser(null);
-			showNotice(`Đã xóa mềm người dùng ${user.lastName} ${user.firstName}`);
+			showNotice(`Đã xóa người dùng ${user.lastName} ${user.firstName}`);
 			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
@@ -172,7 +166,10 @@ export function AdminUsersView() {
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error toggling status:", error);
-			showNotice("Không thể thay đổi trạng thái tài khoản", "error");
+			showNotice(
+				error instanceof Error ? error.message : "Không thể thay đổi trạng thái tài khoản",
+				"error"
+			);
 		}
 	};
 
@@ -208,14 +205,6 @@ export function AdminUsersView() {
 				}}
 				isLoading={isLoading}
 			/>
-
-			{filters.role === "Manager" && (
-				<div className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-xs font-medium text-warning dark:border-warning/30 dark:bg-warning/10 dark:text-warning">
-					Tài khoản Quản lý chuyên môn (MedicalRegulationReviewer) không có hồ sơ bác sĩ nên
-					không hiển thị trong danh sách này. Sự kiện tạo tài khoản vẫn được ghi nhận trong
-					Nhật ký kiểm toán.
-				</div>
-			)}
 
 			{/* Users Table */}
 			<UsersTable
