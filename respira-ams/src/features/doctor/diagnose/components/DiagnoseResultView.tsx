@@ -159,9 +159,19 @@ export function DiagnoseResultView({
     return (
         <div className="space-y-4">
             <Tabs defaultValue="protocol" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="protocol">Theo phác đồ khuyến cáo</TabsTrigger>
-                    <TabsTrigger value="custom">Bác sĩ tự chọn kháng sinh</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 h-auto! items-stretch bg-blue-100 p-0 rounded-lg overflow-hidden">
+                    <TabsTrigger 
+                        value="protocol" 
+                        className="text-primary hover:text-blue-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm transition-all h-full py-3"
+                    >
+                        Theo phác đồ khuyến cáo
+                    </TabsTrigger>
+                    <TabsTrigger 
+                        value="custom" 
+                        className="text-primary hover:text-blue-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm transition-all h-full py-3"
+                    >
+                        Bác sĩ tự chọn kháng sinh
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="protocol" className="mt-4 space-y-4">

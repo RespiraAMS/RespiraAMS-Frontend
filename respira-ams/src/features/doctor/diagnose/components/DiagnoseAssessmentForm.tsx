@@ -490,10 +490,10 @@ export function DiagnoseAssessmentForm({
                         {groupedVariables.map(([category, vars]) => (
                             <div key={category} className="space-y-3">
                                 <div className="flex items-center gap-2 border-b border-dashed border-border pb-1.5">
-                                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                    <span className="text-xs font-bold uppercase tracking-wider text-primary">
                                         {CATEGORY_LABELS[category]}
                                     </span>
-                                    <Badge variant="secondary">{vars.length}</Badge>
+                                    <Badge variant="secondary" className="border-primary bg-primary/10 text-primary shadow-sm">{vars.length}</Badge>
                                 </div>
 
                                 <div className="space-y-2.5">
