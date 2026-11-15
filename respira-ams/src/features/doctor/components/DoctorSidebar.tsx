@@ -44,7 +44,7 @@ export interface NavItemConfig {
 
 export const NAV_CONFIGS: NavItemConfig[] = [
     {
-        key: 'managePatient',
+        key: 'patients',
         icon: Users,
         href: '/doctor/patients',
         roles: ['Doctor', 'HeadDepartmentDoctor'],
@@ -62,9 +62,9 @@ export const NAV_CONFIGS: NavItemConfig[] = [
         roles: ['HeadDepartmentDoctor'],
     },
     {
-        key: 'statistics',
+        key: 'analysis',
         icon: BarChart3,
-        href: '/doctor/statistics',
+        href: '/doctor/analysis',
         roles: ['HeadDepartmentDoctor'],
     },
     {

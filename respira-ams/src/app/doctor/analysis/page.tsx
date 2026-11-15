@@ -1,4 +1,4 @@
-import { DoctorStatisticsView } from "@/features/doctor/statistics/components/DoctorStatisticsView";
+import { DoctorStatisticsView } from "@/features/doctor/analysis/components/DoctorStatisticsView";
 
 export const metadata = {
 	title: "Thống kê & Giám sát Vi sinh Lâm sàng | RespiraAMS",
