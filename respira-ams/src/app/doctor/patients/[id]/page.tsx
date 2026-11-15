@@ -1,15 +1,13 @@
-import { PatientDetailsView } from "@/features/doctor/patients/components/PatientDetailsView";
+import { PatientDetail } from "@/features/doctor/patients/components/PatientDetail";
+import { use } from "react";
 
-export const metadata = {
-	title: "Chi tiết bệnh nhân | RespiraAMS",
-	description: "Hồ sơ chi tiết và tiến trình điều trị bệnh nhân.",
-};
+export default function ClinicalVariableDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const unwrappedParams = use(params);
+    const cleanId = decodeURIComponent(unwrappedParams.id);
 
-export default async function PatientDetailPage({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}) {
-	const resolvedParams = await params;
-	return <PatientDetailsView patientId={resolvedParams.id} />;
+    return (
+        <div className="p-6">
+			<PatientDetail id={cleanId} isHeadDepartmentDoctor/>
+        </div>
+    );
 }
