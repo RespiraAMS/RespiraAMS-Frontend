@@ -431,7 +431,7 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
                             asChild
                         >
                             <Link href={`/doctor/diagnose?patientId=${patient.id}`}>
-                                <Plus className="w-4 h-4 mr-1.5 text-amber-600" /> Điều trị
+                                <Plus className="w-4 h-4 mr-1.5 text-amber-600" /> Thêm điều trị
                             </Link>
                         </Button>
                         <Button
