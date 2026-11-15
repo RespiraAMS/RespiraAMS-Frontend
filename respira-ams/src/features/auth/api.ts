@@ -1,6 +1,6 @@
 import { deleteCookie, getCookie, setCookie } from "@/lib/cookies";
 import { API_V1, CLIENT_API_BASE } from "@/lib/api-base";
-import { ApiResponse, SendVerifyRequest, VerifyEmailRequest } from "./types";
+import { ApiResponse, ResetPasswordRequest, SendVerifyRequest, VerifyEmailRequest } from "./types";
 
 // Cho phép Node.js trên server chấp nhận chứng chỉ self-signed của ASP.NET Core dev
 if (typeof window === "undefined" && process.env.NODE_ENV !== "production") {
@@ -86,6 +86,81 @@ export async function confirmEmailVerification(token: string): Promise<boolean> 
 		throw new Error(
 			payload?.error?.description ||
 				"Liên kết xác thực không hợp lệ hoặc đã hết hạn."
+		);
+	}
+
+	return true;
+}
+
+/**
+ * Chuyển các thông báo lỗi tiếng Anh của backend sang tiếng Việt.
+ */
+function translateAuthError(message: string | undefined, fallback: string): string {
+	if (!message) return fallback;
+	if (/account not found/i.test(message)) {
+		return "Không tìm thấy tài khoản với email này.";
+	}
+	if (/could not be sent/i.test(message)) {
+		return "Không thể gửi email. Vui lòng kiểm tra cấu hình email của hệ thống hoặc thử lại sau.";
+	}
+	if (/invalid|expired|not found/i.test(message)) {
+		return "Liên kết không hợp lệ hoặc đã hết hạn.";
+	}
+	return message;
+}
+
+/**
+ * API: POST /api/v1/auth/forgot-password
+ * Gửi liên kết đặt lại mật khẩu tới email của tài khoản.
+ */
+export async function forgotPassword(email: string): Promise<boolean> {
+	const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+		method: "POST",
+		signal: AbortSignal.timeout(20000),
+		headers: {
+			"Content-Type": "application/json",
+			Accept: "application/json",
+		},
+		body: JSON.stringify({ email: email.trim().toLowerCase() }),
+	});
+
+	const payload = (await response.json().catch(() => null)) as ApiResponse<boolean> | null;
+
+	if (!response.ok || payload?.error) {
+		throw new Error(
+			translateAuthError(
+				payload?.error?.description,
+				"Không thể gửi liên kết đặt lại mật khẩu. Vui lòng thử lại sau."
+			)
+		);
+	}
+
+	return true;
+}
+
+/**
+ * API: POST /api/v1/auth/forgot-password/confirm
+ * Đặt mật khẩu mới bằng token lấy từ liên kết trong email.
+ */
+export async function resetPassword(request: ResetPasswordRequest): Promise<boolean> {
+	const response = await fetch(`${API_BASE_URL}/auth/forgot-password/confirm`, {
+		method: "POST",
+		signal: AbortSignal.timeout(20000),
+		headers: {
+			"Content-Type": "application/json",
+			Accept: "application/json",
+		},
+		body: JSON.stringify(request),
+	});
+
+	const payload = (await response.json().catch(() => null)) as ApiResponse<boolean> | null;
+
+	if (!response.ok || payload?.error) {
+		throw new Error(
+			translateAuthError(
+				payload?.error?.description,
+				"Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn."
+			)
 		);
 	}
 

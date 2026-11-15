@@ -19,7 +19,9 @@ const ROLE_CLAIM = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role
 function isPublicPath(targetPath: string): boolean {
 	return (
 		targetPath === "auth/email-verification" ||
-		targetPath.startsWith("auth/email-verification/")
+		targetPath.startsWith("auth/email-verification/") ||
+		targetPath === "auth/forgot-password" ||
+		targetPath.startsWith("auth/forgot-password/")
 	);
 }
 
