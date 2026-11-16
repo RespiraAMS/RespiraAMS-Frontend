@@ -6,6 +6,7 @@ import { getLocale, getMessages } from 'next-intl/server';
 import { ThemeProvider } from '@/components/theme-provider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { Toaster } from '@/components/ui/sonner';
+import { AuthBootstrap } from '@/components/AuthBootstrap';
 
 const inter = Inter({
     subsets: ['latin'],
@@ -37,6 +38,7 @@ export default async function RootLayout({
         >
           <NextIntlClientProvider messages={messages}>
             <QueryProvider>
+                    <AuthBootstrap />
                     {children}
                     <Toaster richColors position="top-center" duration={3000} closeButton />
             </QueryProvider>

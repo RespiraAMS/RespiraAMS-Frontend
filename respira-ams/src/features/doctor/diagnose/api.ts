@@ -1,75 +1,102 @@
-import { apiRequest } from "@/lib/api";
-import {
-	AntibioticItem,
-	ConfirmTreatmentRequest,
-	DiagnoseRequest,
-	DiagnoseResponse,
-	DiagnosisFormResponse,
-	WarnAntibioticCombinationResult,
+import { apiFetch, API_BASE, API_BASE_SERVER } from "@/lib/api";
+import type {
+    ConfirmTreatmentRequest,
+    DiagnoseFormResponse,
+    DiagnosisResultDto,
+    PatientDetailWithPlans,
+    SubmitDiagnosisRequest,
+    TreatmentPlanDetailResponse,
+    WarnCombinationResponse,
 } from "./types";
 
-export async function fetchDiagnosisForm(): Promise<DiagnosisFormResponse> {
-	const res = await apiRequest<any>("/diagnose");
-	const vars =
-		res?.clinicalVariables ??
-		res?.ClinicalVariables ??
-		res?.variables ??
-		res?.Variables ??
-		[];
-	const antibiotics = res?.antibiotics ?? res?.Antibiotics ?? [];
-	const pathogens = res?.pathogens ?? res?.Pathogens ?? [];
+const TREATMENT_PLAN_TOLERATED_ERROR = "failed to create patient's treatment plan";
 
-	return {
-		variables: vars,
-		Variables: vars,
-		clinicalVariables: vars,
-		ClinicalVariables: vars,
-		antibiotics,
-		Antibiotics: antibiotics,
-		pathogens,
-		Pathogens: pathogens,
-	};
+export async function getFormMetadata(): Promise<DiagnoseFormResponse> {
+    const result = await apiFetch<DiagnoseFormResponse>(
+        `${API_BASE_SERVER}${API_BASE}/diagnose`,
+        {
+            method: "GET",
+            cache: "no-store",
+        }
+    );
+    if (!result) throw new Error("Failed to fetch diagnose form metadata");
+    return result;
 }
 
-export async function diagnose(request: DiagnoseRequest): Promise<DiagnoseResponse> {
-	const allergyList = request.allergies || [];
-	const allergyPayload = request.allergy ?? {
-		type: allergyList.length > 0 ? "Yes" : "No",
-		allergicAntibioticIds: allergyList,
-		otherAllergy: null,
-	};
+export async function getPatientDetail(patientId: string): Promise<PatientDetailWithPlans> {
+    const result = await apiFetch<PatientDetailWithPlans>(
+        `${API_BASE_SERVER}${API_BASE}/patients/${patientId}`,
+        {
+            method: "GET",
+            cache: "no-store",
+        }
+    );
+    if (!result) throw new Error("Failed to fetch patient detail");
+    return result;
+}
 
-	const payload = {
-		observations: request.observations,
-		allergy: allergyPayload,
-		specialMedicalHistory: request.specialMedicalHistory ?? [],
-		otherInfections: request.otherInfections ?? [],
-		microbialSamples: request.microbialSamples ?? [],
-	};
+export async function getTreatmentPlanDetail(
+    treatmentPlanId: string
+): Promise<TreatmentPlanDetailResponse> {
+    const result = await apiFetch<TreatmentPlanDetailResponse>(
+        `${API_BASE_SERVER}${API_BASE}/treatment-plans/${treatmentPlanId}`,
+        {
+            method: "GET",
+            cache: "no-store",
+        }
+    );
+    if (!result) throw new Error("Failed to fetch treatment plan detail");
+    return result;
+}
 
-	return await apiRequest<DiagnoseResponse>("/diagnose", {
-		method: "POST",
-		body: payload,
-	});
+export async function submitDiagnosis(
+    payload: SubmitDiagnosisRequest
+): Promise<DiagnosisResultDto> {
+    const result = await apiFetch<DiagnosisResultDto>(
+        `${API_BASE_SERVER}${API_BASE}/diagnose`,
+        {
+            method: "POST",
+            body: JSON.stringify(payload),
+        }
+    );
+    if (!result) throw new Error("Failed to submit diagnosis");
+    return result;
 }
 
 export async function warnAntibioticCombination(
-	antibioticIds: string[]
-): Promise<WarnAntibioticCombinationResult> {
-	return apiRequest<WarnAntibioticCombinationResult>(
-		"/diagnose/warn-antibiotic-combination",
-		{
-			method: "POST",
-			body: { antibioticIds },
-		}
-	);
+    antibioticIds: string[]
+): Promise<WarnCombinationResponse> {
+    const result = await apiFetch<WarnCombinationResponse>(
+        `${API_BASE_SERVER}${API_BASE}/diagnose/warn-antibiotic-combination`,
+        {
+            method: "POST",
+            body: JSON.stringify({ antibioticIds }),
+        }
+    );
+    if (!result) throw new Error("Failed to warn antibiotic combination");
+    return result;
 }
 
-export async function confirmTreatment(
-	request: ConfirmTreatmentRequest
-): Promise<void> {
-	await apiRequest<void>("/diagnose/confirm-treatment", {
-		method: "POST",
-		body: request,
-	});
+export async function confirmTreatment(payload: ConfirmTreatmentRequest): Promise<void> {
+    try {
+        await apiFetch(`${API_BASE_SERVER}${API_BASE}/diagnose/confirm-treatment`, {
+            method: "POST",
+            body: JSON.stringify(payload),
+        });
+    } catch (error) {
+        const msg = error instanceof Error ? error.message.toLowerCase() : "";
+        if (msg.includes(TREATMENT_PLAN_TOLERATED_ERROR)) {
+            return;
+        }
+        throw error;
+    }
 }
+
+export const diagnoseApi = {
+    getFormMetadata,
+    getPatientDetail,
+    getTreatmentPlanDetail,
+    submitDiagnosis,
+    warnAntibioticCombination,
+    confirmTreatment,
+};

@@ -1,5 +1,5 @@
 import { apiRequest, buildQuery } from "@/lib/api";
-import { getStoredUser, parseJwt, getStoredAccessToken } from "@/features/auth/api";
+import { API_V1, CLIENT_API_BASE } from "@/lib/api-base";
 import {
 	UserItem,
 	CreateUserPayload,
@@ -7,56 +7,69 @@ import {
 	UserFilters,
 	UserStats,
 	UserStatus,
+	UserRole,
+	AcademicTitle,
+	DegreeType,
+	GenderType,
+	PositionType,
 } from "./types";
 
-const USERS_STORAGE_KEY = "respira_admin_users_v1";
-const DELETED_USERS_STORAGE_KEY = "respira_admin_deleted_users_v1";
+const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+const CREATE_POLL_INTERVAL_MS = 1200;
+const CREATE_TIMEOUT_MS = 30000;
+const LIST_PAGE_SIZE = 100;
+const LIST_MAX_PAGES = 10;
 
-function getStoredDeletedUserIds(): string[] {
-	if (typeof window === "undefined") return [];
-	try {
-		const raw = localStorage.getItem(DELETED_USERS_STORAGE_KEY);
-		if (!raw) return [];
-		const parsed = JSON.parse(raw);
-		return Array.isArray(parsed) ? parsed : [];
-	} catch {
-		return [];
-	}
+export interface CreateUserResult {
+	sagaId: string;
+	user: UserItem | null;
+	emailSent: boolean;
 }
 
-function addStoredDeletedUserIds(ids: string[]): void {
-	if (typeof window === "undefined") return;
-	try {
-		const current = new Set(getStoredDeletedUserIds());
-		ids.forEach((id) => {
-			if (id) current.add(id);
-		});
-		localStorage.setItem(DELETED_USERS_STORAGE_KEY, JSON.stringify(Array.from(current)));
-	} catch (e) {
-		console.error("Failed to save deleted users to localStorage:", e);
-	}
+interface CreateSagaStatus {
+	sagaId?: string;
+	step?: string;
+	accountId?: string;
+	doctorId?: string;
+	failureReason?: string | null;
 }
 
-function getStoredLocalUsers(): UserItem[] {
-	if (typeof window === "undefined") return [];
-	try {
-		const raw = localStorage.getItem(USERS_STORAGE_KEY);
-		if (!raw) return [];
-		const parsed = JSON.parse(raw);
-		return Array.isArray(parsed) ? parsed : [];
-	} catch {
-		return [];
-	}
+interface BackendAuditLogEntry {
+	id: string;
+	action: string;
+	correlationId?: string | null;
 }
 
-function saveStoredLocalUsers(users: UserItem[]): void {
-	if (typeof window === "undefined") return;
-	try {
-		localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-	} catch (e) {
-		console.error("Failed to save users to localStorage:", e);
-	}
+interface BackendAuditLogPagination {
+	items?: BackendAuditLogEntry[];
 }
+
+interface AuditOutcome {
+	created: boolean;
+	emailFailed: boolean;
+}
+
+interface BackendPaginationMetadata {
+	totalItemCount?: number;
+	pageCount?: number;
+}
+
+interface BackendAccountDto {
+	id: string;
+	email: string;
+	phone?: string | null;
+	role?: string | null;
+	isEmailConfirmed?: boolean;
+	status?: string | null;
+}
+
+const ACCOUNT_ROLE_TO_USER_ROLE: Record<string, UserRole> = {
+	Doctor: "Doctor",
+	HeadDepartmentDoctor: "HeadDepartmentDoctor",
+	MedicalRegulationReviewer: "Manager",
+	Manager: "Manager",
+	Admin: "Admin",
+};
 
 interface BackendDoctorDto {
 	id: string;
@@ -82,18 +95,18 @@ interface BackendDoctorDto {
 }
 
 function mapBackendDoctorToUser(doc: BackendDoctorDto): UserItem {
-	const roleStr =
-		doc.accountRole ||
-		(doc.role === "HeadDepartmentDoctor" ? "Manager" : "Doctor");
-	const role: "Doctor" | "Manager" | "Admin" =
-		roleStr === "Admin"
-			? "Admin"
-			: roleStr === "HeadDepartmentDoctor" || roleStr === "Manager"
-			? "Manager"
-			: "Doctor";
+	const roleStr = doc.accountRole || doc.role || "Doctor";
+	let role: UserRole = "Doctor";
 
-	const status: UserStatus =
-		doc.accountStatus === "Inactive" ? "Inactive" : "Active";
+	if (roleStr === "Admin") {
+		role = "Admin";
+	} else if (roleStr === "MedicalRegulationReviewer") {
+		role = "Manager";
+	} else if (roleStr === "HeadDepartmentDoctor") {
+		role = "HeadDepartmentDoctor";
+	}
+
+	const status: UserStatus = doc.accountStatus === "Inactive" ? "Inactive" : "Active";
 
 	return {
 		id: doc.accountId || doc.id,
@@ -106,208 +119,140 @@ function mapBackendDoctorToUser(doc: BackendDoctorDto): UserItem {
 		isEmailConfirmed: doc.isEmailConfirmed ?? true,
 		firstName: doc.firstName || "",
 		lastName: doc.lastName || "",
-		degrees: (doc.degrees as any) || [],
-		academicTitle: (doc.academicTitle as any) || "None",
-		position: (doc.position as any) || "StaffDoctor",
-		gender: (doc.gender as any) || "Male",
+		degrees: (doc.degrees as DegreeType[] | undefined) || [],
+		academicTitle: (doc.academicTitle as AcademicTitle | undefined) || "None",
+		position: (doc.position as PositionType | undefined) || "StaffDoctor",
+		gender: (doc.gender as GenderType | undefined) || "Male",
 		citizenIdentificationNumber: doc.citizenIdentificationNumber || "",
-		dateOfBirth: doc.dateOfBirth
-			? String(doc.dateOfBirth)
-			: undefined,
+		dateOfBirth: doc.dateOfBirth ? String(doc.dateOfBirth) : undefined,
 		address: doc.address || "",
 		avatarUrl: doc.avatarUrl || undefined,
-		createdAt: doc.createdAt
-			? String(doc.createdAt)
-			: new Date().toISOString(),
+		createdAt: doc.createdAt ? String(doc.createdAt) : "",
 	};
 }
 
+function mapBackendAccountToUser(
+	account: BackendAccountDto,
+	doctor?: BackendDoctorDto
+): UserItem {
+	const role = ACCOUNT_ROLE_TO_USER_ROLE[account.role || ""] || "Doctor";
+	const profile = doctor ? mapBackendDoctorToUser(doctor) : null;
+
+	return {
+		id: account.id,
+		doctorId: doctor?.id,
+		mediaId: doctor?.mediaId || undefined,
+		email: account.email || profile?.email || "",
+		phone: account.phone || profile?.phone || "",
+		role,
+		status: account.status === "Inactive" ? "Inactive" : "Active",
+		isEmailConfirmed: account.isEmailConfirmed ?? profile?.isEmailConfirmed ?? false,
+		firstName: profile?.firstName || "",
+		lastName: profile?.lastName || "",
+		degrees: profile?.degrees || [],
+		academicTitle: profile?.academicTitle || "None",
+		position: profile?.position || "StaffDoctor",
+		gender: profile?.gender || "Male",
+		citizenIdentificationNumber: profile?.citizenIdentificationNumber || "",
+		dateOfBirth: profile?.dateOfBirth,
+		address: profile?.address || "",
+		avatarUrl: profile?.avatarUrl,
+		createdAt: profile?.createdAt || "",
+	};
+}
+
+async function fetchAllAccounts(): Promise<BackendAccountDto[]> {
+	const accounts: BackendAccountDto[] = [];
+
+	for (let page = 1; page <= LIST_MAX_PAGES; page += 1) {
+		const res = await apiRequest<{
+			items?: BackendAccountDto[];
+			metadata?: BackendPaginationMetadata;
+		}>(`/auth/accounts${buildQuery({ Page: page, Size: LIST_PAGE_SIZE })}`);
+
+		const items = res?.items ?? [];
+		accounts.push(...items);
+
+		const total = res?.metadata?.totalItemCount ?? accounts.length;
+		if (items.length < LIST_PAGE_SIZE || accounts.length >= total) break;
+	}
+
+	return accounts;
+}
+
+async function fetchAllDoctorProfiles(): Promise<Map<string, BackendDoctorDto>> {
+	const profiles = new Map<string, BackendDoctorDto>();
+
+	for (let page = 1; page <= LIST_MAX_PAGES; page += 1) {
+		const res = await apiRequest<{
+			items?: BackendDoctorDto[];
+			metadata?: BackendPaginationMetadata;
+		}>(`/doctors${buildQuery({ Page: page, Size: LIST_PAGE_SIZE })}`);
+
+		const items = res?.items ?? [];
+		for (const item of items) {
+			if (item.accountId) profiles.set(item.accountId, item);
+		}
+
+		const total = res?.metadata?.totalItemCount ?? profiles.size;
+		if (items.length < LIST_PAGE_SIZE || profiles.size >= total) break;
+	}
+
+	return profiles;
+}
+
 /**
- * Lấy danh sách người dùng thật từ Backend (/doctors & /doctors/search),
- * phản ánh chính xác 100% dữ liệu thực tế từ cơ sở dữ liệu.
+ * Lấy danh sách người dùng thật từ Backend: tài khoản lấy từ /auth/accounts
+ * (bao gồm MedicalRegulationReviewer), hồ sơ bác sĩ lấy từ /doctors để bổ sung
+ * họ tên, học vị và ảnh đại diện.
  */
 export async function fetchUsers(
 	filters?: UserFilters,
 	page: number = 1,
 	pageSize: number = 10
 ): Promise<{ items: UserItem[]; total: number; stats: UserStats }> {
-	let remoteUsers: UserItem[] = [];
-	let backendTotal = 0;
+	let accounts: BackendAccountDto[] = [];
+	let doctorProfiles = new Map<string, BackendDoctorDto>();
 
-	// 1. Gọi trực tiếp API Backend qua Gateway
 	try {
-		const query: Record<string, string | number | undefined> = {
-			Page: page,
-			Size: Math.max(pageSize, 50),
-		};
-
-		if (filters?.role && filters.role !== "ALL") {
-			query["Filter.Role"] =
-				filters.role === "Manager" ? "HeadDepartmentDoctor" : filters.role;
-		}
-
-		let endpoint = "/doctors";
-		const searchTrim = filters?.search?.trim();
-		if (searchTrim && searchTrim.length >= 2) {
-			endpoint = "/doctors/search";
-			query.SearchTerm = searchTrim;
-		}
-
-		const res = await apiRequest<{
-			items?: BackendDoctorDto[];
-			metadata?: { totalItemCount?: number; totalCount?: number };
-		}>(`${endpoint}${buildQuery(query)}`);
-
-		if (res?.items && Array.isArray(res.items)) {
-			remoteUsers = res.items.map(mapBackendDoctorToUser);
-			backendTotal =
-				res.metadata?.totalItemCount ??
-				res.metadata?.totalCount ??
-				remoteUsers.length;
-		}
+		[accounts, doctorProfiles] = await Promise.all([
+			fetchAllAccounts(),
+			fetchAllDoctorProfiles().catch(() => new Map<string, BackendDoctorDto>()),
+		]);
 	} catch (e) {
-		console.warn("[AdminUsersAPI] Không thể tải /doctors từ Backend, kiểm tra bộ nhớ đệm:", e);
+		console.warn("[AdminUsersAPI] Không thể tải danh sách tài khoản từ Backend:", e);
 	}
 
-	// Lọc bỏ các tài khoản đã được đánh dấu xóa mềm
-	const deletedIds = new Set(getStoredDeletedUserIds());
-	remoteUsers = remoteUsers.filter(
-		(u) =>
-			!deletedIds.has(u.id) &&
-			(!u.doctorId || !deletedIds.has(u.doctorId)) &&
-			!deletedIds.has(u.email.toLowerCase())
+	const allUsers: UserItem[] = accounts.map((account) =>
+		mapBackendAccountToUser(account, doctorProfiles.get(account.id))
 	);
 
-	// 2. Bổ sung tài khoản Admin đang đăng nhập thực tế (nếu role cho phép)
-	const currentAuthUser = getStoredUser();
-	let currentTokenUser = null;
-	const token = getStoredAccessToken();
-	if (token) {
-		currentTokenUser = parseJwt(token);
-	}
-	const activeAccount = currentAuthUser || currentTokenUser;
+	const searchTerm = filters?.search?.trim().toLowerCase() || "";
 
-	// Nạp các cập nhật cục bộ của Admin lên ưu tiên hàng đầu để không bị đè mất
-	const localStored = getStoredLocalUsers();
-	const localMap = new Map<string, UserItem>();
-	for (const lu of localStored) {
-		if (lu.id) localMap.set(lu.id, lu);
-		if (lu.doctorId) localMap.set(lu.doctorId, lu);
-		if (lu.email) localMap.set(lu.email.toLowerCase(), lu);
-	}
-
-	// Áp dụng các thay đổi của Admin (tên, vai trò, trạng thái...) lên dữ liệu backend
-	const mergedRemoteUsers = remoteUsers.map((ru) => {
-		const lu =
-			localMap.get(ru.id) ||
-			(ru.doctorId ? localMap.get(ru.doctorId) : undefined) ||
-			(ru.email ? localMap.get(ru.email.toLowerCase()) : undefined);
-
-		if (lu) {
-			return {
-				...ru,
-				...lu,
-				id: ru.id || lu.id,
-				doctorId: ru.doctorId || lu.doctorId,
-				email: lu.email || ru.email,
-				firstName: lu.firstName || ru.firstName,
-				lastName: lu.lastName || ru.lastName,
-				role: lu.role || ru.role,
-				status: lu.status || ru.status,
-				phone: lu.phone || ru.phone,
-				citizenIdentificationNumber:
-					lu.citizenIdentificationNumber || ru.citizenIdentificationNumber,
-				address: lu.address || ru.address,
-				degrees: lu.degrees?.length ? lu.degrees : ru.degrees,
-				academicTitle: lu.academicTitle || ru.academicTitle,
-				position: lu.position || ru.position,
-				avatarUrl: lu.avatarUrl || ru.avatarUrl,
-			};
+	const filtered = allUsers.filter((user) => {
+		if (filters?.role && filters.role !== "ALL" && user.role !== filters.role) {
+			return false;
 		}
-		return ru;
+		if (filters?.status && filters.status !== "ALL" && user.status !== filters.status) {
+			return false;
+		}
+		if (!searchTerm) return true;
+
+		return (
+			user.email.toLowerCase().includes(searchTerm) ||
+			user.phone.toLowerCase().includes(searchTerm) ||
+			`${user.lastName} ${user.firstName}`.toLowerCase().includes(searchTerm) ||
+			user.citizenIdentificationNumber.toLowerCase().includes(searchTerm) ||
+			user.address.toLowerCase().includes(searchTerm)
+		);
 	});
-
-	const mergedMap = new Map<string, UserItem>();
-	for (const u of mergedRemoteUsers) {
-		const key = u.id || u.email.toLowerCase();
-		mergedMap.set(key, u);
-	}
-
-	// Thêm các tài khoản tạo mới cục bộ chưa có trong backend
-	for (const lu of localStored) {
-		const key = lu.id || lu.email.toLowerCase();
-		if (!mergedMap.has(key)) {
-			const existsByEmail = Array.from(mergedMap.values()).some(
-				(item) => item.email.toLowerCase() === lu.email.toLowerCase()
-			);
-			if (!existsByEmail) {
-				mergedMap.set(key, lu);
-			}
-		}
-	}
-
-	// Bổ sung tài khoản Admin đang hoạt động nếu chưa có trong danh sách
-	if (
-		activeAccount?.email &&
-		(activeAccount.role === "Admin" || (activeAccount as any).role === "Admin")
-	) {
-		const exists = Array.from(mergedMap.values()).some(
-			(u) =>
-				u.role === "Admin" ||
-				u.email.toLowerCase() === activeAccount.email.toLowerCase()
-		);
-		if (!exists) {
-			const adminName = (activeAccount as any).name || "Quản trị viên";
-			const adminUser: UserItem = {
-				id: activeAccount.id || "admin-account-id",
-				email: activeAccount.email,
-				phone: (activeAccount as any).phone || "",
-				role: "Admin",
-				status: "Active",
-				isEmailConfirmed: true,
-				firstName: adminName,
-				lastName: "Hệ Thống",
-				degrees: ["Master", "Bachelor"],
-				academicTitle: "None",
-				position: "Director",
-				gender: "Male",
-				citizenIdentificationNumber: "",
-				address: "Cổng Quản trị Hệ thống Respira AMS",
-				createdAt: new Date().toISOString(),
-			};
-			mergedMap.set(adminUser.id, adminUser);
-		}
-	}
-
-	const allUsers = Array.from(mergedMap.values());
-
-	// Áp dụng bộ lọc tìm kiếm cục bộ nếu có
-	let filtered = [...allUsers];
-
-	if (filters?.search && filters.search.trim()) {
-		const q = filters.search.trim().toLowerCase();
-		filtered = filtered.filter(
-			(u) =>
-				u.email.toLowerCase().includes(q) ||
-				u.phone.toLowerCase().includes(q) ||
-				`${u.lastName} ${u.firstName}`.toLowerCase().includes(q) ||
-				u.citizenIdentificationNumber.toLowerCase().includes(q) ||
-				u.address.toLowerCase().includes(q)
-		);
-	}
-
-	if (filters?.role && filters.role !== "ALL") {
-		filtered = filtered.filter((u) => u.role === filters.role);
-	}
-
-	if (filters?.status && filters.status !== "ALL") {
-		filtered = filtered.filter((u) => u.status === filters.status);
-	}
 
 	const stats: UserStats = {
 		total: allUsers.length,
 		doctors: allUsers.filter((u) => u.role === "Doctor").length,
-		managers: allUsers.filter((u) => u.role === "Manager").length,
+		managers: allUsers.filter(
+			(u) => u.role === "Manager" || u.role === "HeadDepartmentDoctor"
+		).length,
 		admins: allUsers.filter((u) => u.role === "Admin").length,
 		active: allUsers.filter((u) => u.status === "Active").length,
 		inactive: allUsers.filter((u) => u.status === "Inactive").length,
@@ -316,11 +261,7 @@ export async function fetchUsers(
 	const startIndex = (page - 1) * pageSize;
 	const items = filtered.slice(startIndex, startIndex + pageSize);
 
-	return {
-		items,
-		total: filtered.length,
-		stats,
-	};
+	return { items, total: filtered.length, stats };
 }
 
 /**
@@ -331,92 +272,250 @@ export async function fetchUserById(id: string): Promise<UserItem | null> {
 		const res = await apiRequest<BackendDoctorDto>(`/doctors/${id}`);
 		if (res) return mapBackendDoctorToUser(res);
 	} catch {
-		// Fallback local store
+		return null;
 	}
 
-	const local = getStoredLocalUsers();
-	return local.find((u) => u.id === id || u.doctorId === id) || null;
+	return null;
 }
 
-/**
- * Tạo người dùng mới qua Saga ProfileCreate
- */
-export async function createUser(
-	payload: CreateUserPayload
-): Promise<{ sagaId: string; user: UserItem }> {
-	let backendSagaId: string | null = null;
+function delay(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-	const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-	const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5016/api/v1").replace(/\/$/, "");
-
-	try {
-		const formData = new FormData();
-		const requestBody = {
-			email: payload.email,
-			password: payload.password,
-			phone: payload.phone,
-			role: payload.role === "Manager" ? "HeadDepartmentDoctor" : "Doctor",
-			firstName: payload.firstName,
-			lastName: payload.lastName,
-			degrees: payload.degrees,
-			academicTitle: payload.academicTitle,
-			position: payload.position,
-			gender: payload.gender,
-			citizenIdentificationNumber: payload.citizenIdentificationNumber,
-			dateOfBirth: payload.dateOfBirth,
-			address: payload.address,
-		};
-
-		formData.append("request", JSON.stringify(requestBody));
-		if (payload.avatarFile) {
-			formData.append("avatar", payload.avatarFile);
-		}
-
-		const response = await fetch(`${API_BASE}/profile/create`, {
-			method: "POST",
-			headers: {
-				...(token ? { Authorization: `Bearer ${token}` } : {}),
-			},
-			body: formData,
-		});
-
-		if (response.ok) {
-			const json = await response.json();
-			backendSagaId = json?.data || json?.id;
-		}
-	} catch (e) {
-		console.warn("Lỗi khi kết nối tới Saga ProfileCreate:", e);
+function translateCreateError(message: string): string {
+	if (/already exists/i.test(message)) return "Email này đã được sử dụng.";
+	if (/avatar.*required/i.test(message)) {
+		return "Ảnh đại diện là bắt buộc với tài khoản bác sĩ.";
 	}
+	if (/cannot create/i.test(message)) {
+		return "Bạn không có quyền tạo tài khoản với vai trò này.";
+	}
+	return message;
+}
 
-	const sagaId = backendSagaId || `saga-create-${Date.now()}`;
-	const newId = `usr-${Date.now()}`;
-	const newDoctorId = `doc-${Date.now()}`;
+async function getCreateSagaStatus(sagaId: string): Promise<CreateSagaStatus | null> {
+	try {
+		return await apiRequest<CreateSagaStatus>(`/profile/create/${sagaId}`);
+	} catch {
+		return null;
+	}
+}
 
-	const newUser: UserItem = {
-		id: newId,
-		doctorId: newDoctorId,
+async function findDoctorById(doctorId: string): Promise<UserItem | null> {
+	try {
+		const res = await apiRequest<BackendDoctorDto>(`/doctors/${doctorId}`);
+		return res ? mapBackendDoctorToUser(res) : null;
+	} catch {
+		return null;
+	}
+}
+
+async function findDoctorByEmail(email: string): Promise<UserItem | null> {
+	try {
+		const res = await apiRequest<{ items?: BackendDoctorDto[] }>(
+			`/doctors${buildQuery({ Page: 1, Size: LIST_PAGE_SIZE })}`
+		);
+		const normalizedEmail = email.trim().toLowerCase();
+		const match = res?.items?.find(
+			(item) => (item.email || "").trim().toLowerCase() === normalizedEmail
+		);
+		return match ? mapBackendDoctorToUser(match) : null;
+	} catch {
+		return null;
+	}
+}
+
+async function readCreateAudit(sagaId: string): Promise<AuditOutcome> {
+	try {
+		const res = await apiRequest<BackendAuditLogPagination>(
+			`/audit-logs${buildQuery({ page: 1, pageSize: 100 })}`
+		);
+		const items = res?.items ?? [];
+
+		return {
+			created: items.some(
+				(entry) =>
+					entry.correlationId === sagaId &&
+					entry.action === "Authentication.AccountCreated"
+			),
+			emailFailed: items.some(
+				(entry) =>
+					entry.correlationId === sagaId &&
+					entry.action === "Authentication.VerificationEmailFailed"
+			),
+		};
+	} catch {
+		return { created: false, emailFailed: false };
+	}
+}
+
+function buildAccountOnlyUser(
+	accountId: string,
+	payload: CreateUserPayload
+): UserItem {
+	return {
+		id: accountId,
 		email: payload.email,
 		phone: payload.phone,
 		role: payload.role,
 		status: "Active",
-		isEmailConfirmed: true,
-		firstName: payload.firstName,
-		lastName: payload.lastName,
-		degrees: payload.degrees,
-		academicTitle: payload.academicTitle,
-		position: payload.position,
-		gender: payload.gender,
-		citizenIdentificationNumber: payload.citizenIdentificationNumber,
+		isEmailConfirmed: false,
+		firstName: payload.firstName || "",
+		lastName: payload.lastName || "",
+		degrees: payload.degrees || [],
+		academicTitle: payload.academicTitle || "None",
+		position: payload.position || "StaffDoctor",
+		gender: payload.gender || "Male",
+		citizenIdentificationNumber: payload.citizenIdentificationNumber || "",
 		dateOfBirth: payload.dateOfBirth,
-		address: payload.address,
-		avatarUrl: payload.avatarFile ? URL.createObjectURL(payload.avatarFile) : undefined,
+		address: payload.address || "",
 		createdAt: new Date().toISOString(),
 	};
+}
 
-	const currentUsers = getStoredLocalUsers();
-	saveStoredLocalUsers([newUser, ...currentUsers]);
+async function waitForCreatedAccount(
+	sagaId: string,
+	payload: CreateUserPayload
+): Promise<CreateUserResult> {
+	const startedAt = Date.now();
+	const deadline = startedAt + CREATE_TIMEOUT_MS;
+	let lastFailure: string | null = null;
+	let lastAudit: AuditOutcome = { created: false, emailFailed: false };
+	let lastAccountUser: UserItem | null = null;
 
-	return { sagaId, user: newUser };
+	while (Date.now() < deadline) {
+		const status = await getCreateSagaStatus(sagaId);
+		if (status?.failureReason) lastFailure = status.failureReason;
+
+		const accountUser =
+			status?.accountId && status.accountId !== EMPTY_GUID
+				? buildAccountOnlyUser(status.accountId, payload)
+				: null;
+		if (accountUser) lastAccountUser = accountUser;
+
+		if (status?.doctorId && status.doctorId !== EMPTY_GUID) {
+			const doctor = await findDoctorById(status.doctorId);
+			if (doctor) {
+				const audit = await readCreateAudit(sagaId);
+				return { sagaId, user: doctor, emailSent: !audit.emailFailed };
+			}
+		}
+
+		lastAudit = await readCreateAudit(sagaId);
+
+		if (payload.role !== "Manager") {
+			const doctor = await findDoctorByEmail(payload.email);
+			if (doctor) {
+				return { sagaId, user: doctor, emailSent: !lastAudit.emailFailed };
+			}
+		}
+
+		if (lastAudit.created) {
+			if (payload.role !== "Manager") {
+				const doctor = await findDoctorByEmail(payload.email);
+				if (doctor) {
+					return { sagaId, user: doctor, emailSent: !lastAudit.emailFailed };
+				}
+			}
+			return { sagaId, user: lastAccountUser, emailSent: !lastAudit.emailFailed };
+		}
+
+		if (lastFailure) {
+			await delay(700);
+			const finalAudit = await readCreateAudit(sagaId);
+			if (finalAudit.created) {
+				return { sagaId, user: lastAccountUser, emailSent: !finalAudit.emailFailed };
+			}
+			throw new Error(translateCreateError(lastFailure));
+		}
+
+		await delay(Date.now() - startedAt < 5000 ? 500 : CREATE_POLL_INTERVAL_MS);
+	}
+
+	if (lastAudit.created) {
+		return { sagaId, user: lastAccountUser, emailSent: !lastAudit.emailFailed };
+	}
+
+	throw new Error(
+		"Tạo tài khoản chưa hoàn tất. Vui lòng kiểm tra lại danh sách hoặc nhật ký hệ thống."
+	);
+}
+
+/**
+ * Tạo người dùng mới qua Saga ProfileCreate.
+ * Manager được tạo với role MedicalRegulationReviewer (account-only).
+ */
+export async function createUser(payload: CreateUserPayload): Promise<CreateUserResult> {
+	const isManager = payload.role === "Manager";
+
+	const existingDoctor = await findDoctorByEmail(payload.email);
+	if (existingDoctor) {
+		throw new Error("Email này đã được sử dụng.");
+	}
+
+	const formData = new FormData();
+	const requestBody = isManager
+		? {
+				email: payload.email,
+				password: payload.password,
+				phone: payload.phone,
+				role: "MedicalRegulationReviewer",
+		  }
+		: {
+				email: payload.email,
+				password: payload.password,
+				phone: payload.phone,
+				role: payload.role,
+				firstName: payload.firstName,
+				lastName: payload.lastName,
+				degrees: payload.degrees,
+				academicTitle: payload.academicTitle,
+				position: payload.position,
+				gender: payload.gender,
+				citizenIdentificationNumber: payload.citizenIdentificationNumber,
+				dateOfBirth: payload.dateOfBirth,
+				address: payload.address,
+		  };
+
+	formData.append("request", JSON.stringify(requestBody));
+	if (!isManager && payload.avatarFile) {
+		formData.append("avatar", payload.avatarFile);
+	}
+
+	const createUrl = typeof window !== "undefined" ? CLIENT_API_BASE : API_V1;
+
+	let response: Response;
+	try {
+		response = await fetch(`${createUrl}/profile/create`, {
+			method: "POST",
+			headers: { Accept: "application/json" },
+			body: formData,
+			signal: AbortSignal.timeout(45000),
+		});
+	} catch {
+		throw new Error("Không thể kết nối tới máy chủ. Vui lòng thử lại.");
+	}
+
+	const json = (await response.json().catch(() => null)) as {
+		data?: string;
+		error?: { description?: string } | null;
+	} | null;
+
+	if (!response.ok) {
+		throw new Error(
+			translateCreateError(
+				json?.error?.description || `Tạo tài khoản thất bại (${response.status}).`
+			)
+		);
+	}
+
+	const sagaId = typeof json?.data === "string" ? json.data : "";
+
+	if (!sagaId) {
+		throw new Error("Máy chủ không trả về mã Saga. Vui lòng thử lại.");
+	}
+
+	return waitForCreatedAccount(sagaId, payload);
 }
 
 /**
@@ -426,11 +525,6 @@ export async function updateUser(
 	payload: UpdateUserPayload
 ): Promise<{ sagaId: string; user: UserItem }> {
 	let backendSagaId: string | null = null;
-	const token =
-		typeof window !== "undefined"
-			? localStorage.getItem("accessToken") || localStorage.getItem("respira_auth_token_v1")
-			: null;
-	const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5016/api/v1").replace(/\/$/, "");
 
 	try {
 		const formData = new FormData();
@@ -456,45 +550,43 @@ export async function updateUser(
 			formData.append("avatar", payload.avatarFile);
 		}
 
-		// Gọi qua Next.js proxy route để hỗ trợ cookies, SSL, CORS
-		const updateUrl = typeof window !== "undefined" ? "/api/backend/profile/update" : `${API_BASE}/profile/update`;
-		const response = await fetch(updateUrl, {
+		const updateBase = typeof window !== "undefined" ? CLIENT_API_BASE : API_V1;
+		const response = await fetch(`${updateBase}/profile/update`, {
 			method: "POST",
-			headers: {
-				...(token ? { Authorization: `Bearer ${token}` } : {}),
-			},
+			headers: { Accept: "application/json" },
 			body: formData,
+			signal: AbortSignal.timeout(45000),
 		});
 
-		if (response.ok) {
-			const json = await response.json();
-			backendSagaId = json?.data || json?.id;
+		const json = (await response.json().catch(() => null)) as {
+			data?: string;
+			id?: string;
+			error?: { description?: string } | null;
+			message?: string;
+		} | null;
+
+		if (!response.ok) {
+			throw new Error(
+				json?.error?.description ||
+					json?.message ||
+					`Cập nhật hồ sơ thất bại (${response.status}).`
+			);
 		}
+
+		backendSagaId = json?.data || json?.id || null;
 	} catch (e) {
-		console.warn("Lỗi khi kết nối tới Saga ProfileUpdate:", e);
+		if (e instanceof Error) throw e;
+		throw new Error("Không thể kết nối tới máy chủ. Vui lòng thử lại.");
 	}
 
-	const currentUsers = getStoredLocalUsers();
-	const existing = currentUsers.find(
-		(u) =>
-			u.id === payload.accountId ||
-			(payload.doctorId && u.doctorId === payload.doctorId) ||
-			(payload.email && u.email.toLowerCase() === payload.email.toLowerCase())
-	);
-
 	const updatedUser: UserItem = {
-		...(existing || {
-			id: payload.accountId,
-			doctorId: payload.doctorId,
-			role: payload.role || "Doctor",
-			status: payload.status || "Active",
-			isEmailConfirmed: true,
-			createdAt: new Date().toISOString(),
-		}),
+		id: payload.accountId,
+		doctorId: payload.doctorId,
+		role: payload.role || "Doctor",
+		status: payload.status || "Active",
+		isEmailConfirmed: true,
 		email: payload.email,
 		phone: payload.phone,
-		role: payload.role || existing?.role || "Doctor",
-		status: payload.status || existing?.status || "Active",
 		firstName: payload.firstName,
 		lastName: payload.lastName,
 		degrees: payload.degrees,
@@ -504,19 +596,9 @@ export async function updateUser(
 		citizenIdentificationNumber: payload.citizenIdentificationNumber,
 		dateOfBirth: payload.dateOfBirth,
 		address: payload.address,
-		avatarUrl: payload.avatarFile ? URL.createObjectURL(payload.avatarFile) : existing?.avatarUrl,
+		avatarUrl: payload.avatarFile ? URL.createObjectURL(payload.avatarFile) : undefined,
+		createdAt: new Date().toISOString(),
 	};
-
-	if (existing) {
-		const updatedList = currentUsers.map((u) =>
-			u.id === existing.id || (existing.doctorId && u.doctorId === existing.doctorId)
-				? updatedUser
-				: u
-		);
-		saveStoredLocalUsers(updatedList);
-	} else {
-		saveStoredLocalUsers([updatedUser, ...currentUsers]);
-	}
 
 	return {
 		sagaId: backendSagaId || `saga-update-${Date.now()}`,
@@ -533,73 +615,64 @@ export async function deleteUser(
 	mediaId?: string
 ): Promise<{ sagaId: string }> {
 	let backendSagaId: string | null = null;
-	const token =
-		typeof window !== "undefined"
-			? localStorage.getItem("accessToken") || localStorage.getItem("respira_auth_token_v1")
-			: null;
-	const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5016/api/v1").replace(/\/$/, "");
 
-	try {
-		const deleteUrl = typeof window !== "undefined" ? "/api/backend/profile/delete" : `${API_BASE}/profile/delete`;
-		const response = await fetch(deleteUrl, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				...(token ? { Authorization: `Bearer ${token}` } : {}),
-			},
-			body: JSON.stringify({
-				accountId,
-				doctorId: doctorId || "00000000-0000-0000-0000-000000000000",
-				mediaId: mediaId || "00000000-0000-0000-0000-000000000000",
-			}),
-		});
+	const deleteBase = typeof window !== "undefined" ? CLIENT_API_BASE : API_V1;
+	const response = await fetch(`${deleteBase}/profile/delete`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Accept: "application/json",
+		},
+		body: JSON.stringify({
+			accountId,
+			doctorId: doctorId || EMPTY_GUID,
+			mediaId: mediaId || EMPTY_GUID,
+		}),
+		signal: AbortSignal.timeout(30000),
+	});
 
-		if (response.ok) {
-			const json = await response.json();
-			backendSagaId = json?.data || json?.id;
-		}
-	} catch (e) {
-		console.warn("Lỗi khi kết nối tới Saga ProfileDelete:", e);
+	const json = (await response.json().catch(() => null)) as {
+		data?: string;
+		id?: string;
+		error?: { description?: string } | null;
+		message?: string;
+	} | null;
+
+	if (!response.ok) {
+		throw new Error(
+			json?.error?.description ||
+				json?.message ||
+				`Xóa người dùng thất bại (${response.status}).`
+		);
 	}
 
-	// Đánh dấu xóa mềm cục bộ để ẩn ngay lập tức khỏi giao diện
-	addStoredDeletedUserIds([accountId, doctorId || ""]);
-
-	const currentUsers = getStoredLocalUsers();
-	const remaining = currentUsers.filter((u) => u.id !== accountId && u.doctorId !== doctorId);
-	saveStoredLocalUsers(remaining);
+	backendSagaId = json?.data || json?.id || null;
 
 	return { sagaId: backendSagaId || `saga-delete-${Date.now()}` };
 }
 
 /**
- * Bật/tắt trạng thái Active / Inactive của người dùng
+ * Bật/tắt trạng thái Active / Inactive của người dùng.
+ * Gọi PATCH /auth/accounts/{id}/status để backend khóa hoặc mở khóa tài khoản.
  */
 export async function toggleUserStatus(id: string, userToToggle?: UserItem): Promise<UserItem> {
-	const currentUsers = getStoredLocalUsers();
-	let user = currentUsers.find((u) => u.id === id || u.doctorId === id);
-	if (!user && userToToggle) {
-		user = userToToggle;
+	if (!userToToggle) {
+		throw new Error("Không tìm thấy người dùng để cập nhật trạng thái.");
 	}
-	if (!user) {
-		const fetched = await fetchUserById(id);
-		if (fetched) user = fetched;
-	}
-	if (!user) throw new Error("Không tìm thấy người dùng");
 
-	const newStatus: UserStatus = user.status === "Active" ? "Inactive" : "Active";
-	const updated: UserItem = { ...user, status: newStatus };
+	const nextStatus: UserStatus = userToToggle.status === "Active" ? "Inactive" : "Active";
 
-	const existsInCurrent = currentUsers.some(
-		(u) => u.id === user!.id || (user!.doctorId && u.doctorId === user!.doctorId)
-	);
-	const updatedList = existsInCurrent
-		? currentUsers.map((u) =>
-				u.id === user!.id || (user!.doctorId && u.doctorId === user!.doctorId) ? updated : u
-		  )
-		: [updated, ...currentUsers];
-	saveStoredLocalUsers(updatedList);
+	const account = await apiRequest<BackendAccountDto>(`/auth/accounts/${id}/status`, {
+		method: "PATCH",
+		body: { status: nextStatus },
+	});
 
-	return updated;
+	return {
+		...userToToggle,
+		email: account.email || userToToggle.email,
+		phone: account.phone || userToToggle.phone,
+		status: account.status === "Inactive" ? "Inactive" : "Active",
+		isEmailConfirmed: account.isEmailConfirmed ?? userToToggle.isEmailConfirmed,
+	};
 }
 

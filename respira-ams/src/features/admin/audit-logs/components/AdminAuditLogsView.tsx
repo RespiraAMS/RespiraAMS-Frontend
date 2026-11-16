@@ -117,14 +117,14 @@ export function AdminAuditLogsView() {
 			{/* Page Header */}
 			<div>
 				<div className="flex items-center gap-2">
-					<div className="p-2 rounded-xl bg-sky-50 text-[#0EA5E9]">
+					<div className="p-2 rounded-xl bg-primary/10 text-primary">
 						<ShieldCheck className="w-5 h-5" />
 					</div>
-					<h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+					<h1 className="text-xl sm:text-2xl font-extrabold text-text-primary tracking-tight">
 						Nhật ký kiểm toán &amp; Bảo mật
 					</h1>
 				</div>
-				<p className="text-xs sm:text-sm text-slate-500 mt-1">
+				<p className="text-xs sm:text-sm text-text-secondary mt-1">
 					Theo dõi toàn diện các giao dịch phân tán, hoạt động đăng nhập, chỉnh sửa phác đồ và truy cập dữ liệu y tế trong hệ thống Respira
 				</p>
 			</div>

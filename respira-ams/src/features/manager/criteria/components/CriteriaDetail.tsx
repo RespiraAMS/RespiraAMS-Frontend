@@ -21,7 +21,17 @@ import { type UpdateCriteriaRequest } from "../types";
 import { PrerequisiteFormatter } from "../../components/PrerequisiteFormatter";
 import { CriteriaDeleteAlert } from "./CriteriaDeleteAlert";
 
-export function CriteriaDetail({ id }: { id: string }) {
+interface CriteriaDetailProps {
+	id: string;
+	readOnly?: boolean;
+	listPath?: string;
+}
+
+export function CriteriaDetail({
+	id,
+	readOnly = false,
+	listPath = "/manage/criteria",
+}: CriteriaDetailProps) {
 	const router = useRouter();
 	const tDetail = useTranslations("manager.criteria.detail");
 	const tCommon = useTranslations("common");
@@ -83,21 +93,23 @@ export function CriteriaDetail({ id }: { id: string }) {
 					</Button>
 					<h2 className="text-2xl font-bold tracking-tight text-foreground">{criteriaData.name}</h2>
 				</div>
-				<div className="flex gap-2">
-					<Button
-						variant="outline"
-						onClick={() => setIsUpdateOpen(true)}
-						className="text-foreground border-border hover:bg-accent"
-					>
-						<Edit className="h-4 w-4 mr-2" /> {tCommon("update")}
-					</Button>
-					<Button
-						variant="destructive"
-						onClick={() => setIsDeleteOpen(true)}
-					> 
-						<Trash className="h-4 w-4 mr-2" /> {tCommon("delete")}
-					</Button>
-				</div>
+				{!readOnly && (
+					<div className="flex gap-2">
+						<Button
+							variant="outline"
+							onClick={() => setIsUpdateOpen(true)}
+							className="text-foreground border-border hover:bg-accent"
+						>
+							<Edit className="h-4 w-4 mr-2" /> {tCommon("update")}
+						</Button>
+						<Button
+							variant="destructive"
+							onClick={() => setIsDeleteOpen(true)}
+						>
+							<Trash className="h-4 w-4 mr-2" /> {tCommon("delete")}
+						</Button>
+					</div>
+				)}
 			</div>
 
 			{/* Formula Section */}
@@ -159,34 +171,38 @@ export function CriteriaDetail({ id }: { id: string }) {
 				)}
 			</div>
 
-			{/* Update Dialog */}
-			<Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
-				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
-					<DialogHeader>
-						<DialogTitle className="text-xl text-foreground">{tDetail("dialogUpdateTitle")}</DialogTitle>
-					</DialogHeader>
-					{isUpdateOpen && (
-						<CriteriaForm
-							initialData={criteriaData}
-							onSubmit={handleUpdateSubmit}
-							onCancel={() => setIsUpdateOpen(false)}
-							isPending={updateMutation.isPending}
+			{!readOnly && (
+				<>
+					{/* Update Dialog */}
+					<Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
+						<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
+							<DialogHeader>
+								<DialogTitle className="text-xl text-foreground">{tDetail("dialogUpdateTitle")}</DialogTitle>
+							</DialogHeader>
+							{isUpdateOpen && (
+								<CriteriaForm
+									initialData={criteriaData}
+									onSubmit={handleUpdateSubmit}
+									onCancel={() => setIsUpdateOpen(false)}
+									isPending={updateMutation.isPending}
+								/>
+							)}
+						</DialogContent>
+					</Dialog>
+
+					{/* Delete Alert */}
+					{isDeleteOpen && (
+						<CriteriaDeleteAlert
+							criteriaItem={{ id, name: criteriaData.name, formula: criteriaData.formulaString }}
+							isOpen={isDeleteOpen}
+							onClose={() => setIsDeleteOpen(false)}
+							onSuccess={() => {
+								setIsDeleteOpen(false);
+								router.push(listPath);
+							}}
 						/>
 					)}
-				</DialogContent>
-			</Dialog>
-
-			{/* Delete Alert */}
-			{isDeleteOpen && (
-				<CriteriaDeleteAlert
-					criteriaItem={{ id, name: criteriaData.name, formula: criteriaData.formulaString }}
-					isOpen={isDeleteOpen}
-					onClose={() => setIsDeleteOpen(false)}
-					onSuccess={() => {
-						setIsDeleteOpen(false);
-						router.push("/manage/criteria");
-					}}
-				/>
+				</>
 			)}
 		</div>
 	);

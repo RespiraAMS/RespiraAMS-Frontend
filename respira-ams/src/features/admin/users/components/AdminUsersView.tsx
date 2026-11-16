@@ -25,6 +25,45 @@ import {
 	updateUser,
 } from "../api";
 
+type UsersQueryData = {
+	items: UserItem[];
+	total: number;
+	stats: UserStats;
+};
+
+function applyUserStatsDelta(stats: UserStats, user: UserItem, direction: 1 | -1): UserStats {
+	return {
+		total: stats.total + direction,
+		doctors: stats.doctors + direction * (user.role === "Doctor" ? 1 : 0),
+		managers:
+			stats.managers +
+			direction * (user.role === "Manager" || user.role === "HeadDepartmentDoctor" ? 1 : 0),
+		admins: stats.admins + direction * (user.role === "Admin" ? 1 : 0),
+		active: stats.active + direction * (user.status === "Active" ? 1 : 0),
+		inactive: stats.inactive + direction * (user.status === "Inactive" ? 1 : 0),
+	};
+}
+
+function matchesUserFilters(
+	user: UserItem,
+	filters: UserFilters,
+	search: string
+): boolean {
+	if (filters.role !== "ALL" && user.role !== filters.role) return false;
+	if (filters.status !== "ALL" && user.status !== filters.status) return false;
+
+	const q = search.trim().toLowerCase();
+	if (!q) return true;
+
+	return (
+		user.email.toLowerCase().includes(q) ||
+		user.phone.toLowerCase().includes(q) ||
+		`${user.lastName} ${user.firstName}`.toLowerCase().includes(q) ||
+		user.citizenIdentificationNumber.toLowerCase().includes(q) ||
+		user.address.toLowerCase().includes(q)
+	);
+}
+
 export function AdminUsersView() {
 	const queryClient = useQueryClient();
 
@@ -43,16 +82,17 @@ export function AdminUsersView() {
 		return () => clearTimeout(timer);
 	}, [filters.search]);
 
+	const usersQueryKey = [
+		"admin",
+		"users",
+		{ search: debouncedSearch, role: filters.role, status: filters.status },
+	] as const;
+
 	const {
 		data,
 		isLoading,
-		refetch,
 	} = useQuery({
-		queryKey: [
-			"admin",
-			"users",
-			{ search: debouncedSearch, role: filters.role, status: filters.status },
-		],
+		queryKey: usersQueryKey,
 		queryFn: () =>
 			fetchUsers({
 				search: debouncedSearch,
@@ -62,7 +102,6 @@ export function AdminUsersView() {
 	});
 
 	const users = data?.items || [];
-	const total = data?.total || 0;
 	const stats: UserStats = data?.stats || {
 		total: 0,
 		doctors: 0,
@@ -92,14 +131,50 @@ export function AdminUsersView() {
 		}
 	};
 
+	const updateUsersCache = (updater: (current: UsersQueryData) => UsersQueryData) => {
+		queryClient.setQueryData<UsersQueryData>(usersQueryKey, (current) =>
+			current ? updater(current) : current
+		);
+	};
+
+	// Account list của backend được cache 2 phút; hẹn đồng bộ lại sau khi cache hết hạn
+	// để không ghi đè các cập nhật lạc quan bằng dữ liệu cũ.
+	const refreshUsersAfterCacheTtl = () => {
+		if (typeof window === "undefined") return;
+		window.setTimeout(() => {
+			void queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+		}, 125_000);
+	};
+
 	// Create user
 	const handleCreateUser = async (payload: CreateUserPayload) => {
 		setIsSubmittingForm(true);
 		try {
-			await createUser(payload);
+			const result = await createUser(payload);
 			setIsFormDialogOpen(false);
-			showNotice(`Đã tạo tài khoản thành công cho ${payload.lastName} ${payload.firstName}`);
-			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+
+			const displayName =
+				[payload.lastName, payload.firstName].filter(Boolean).join(" ") || payload.email;
+			showNotice(`Đã tạo tài khoản thành công cho ${displayName}`);
+
+			if (!result.emailSent) {
+				toast.warning(
+					"Tài khoản đã tạo nhưng chưa gửi được email xác thực. Vui lòng kiểm tra cấu hình email của backend."
+				);
+			}
+
+			if (result.user && matchesUserFilters(result.user, filters, debouncedSearch)) {
+				updateUsersCache((current) => {
+					if (current.items.some((u) => u.id === result.user!.id)) return current;
+					return {
+						items: [result.user!, ...current.items],
+						total: current.total + 1,
+						stats: applyUserStatsDelta(current.stats, result.user!, 1),
+					};
+				});
+			}
+
+			refreshUsersAfterCacheTtl();
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error creating user:", error);
@@ -113,11 +188,25 @@ export function AdminUsersView() {
 	const handleUpdateUser = async (payload: UpdateUserPayload) => {
 		setIsSubmittingForm(true);
 		try {
-			await updateUser(payload);
+			const result = await updateUser(payload);
 			setIsFormDialogOpen(false);
 			setEditingUser(null);
 			showNotice(`Đã cập nhật hồ sơ thành công`);
-			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+
+			updateUsersCache((current) => {
+				const previous = current.items.find((u) => u.id === result.user.id);
+				if (!previous) return current;
+
+				const items = current.items.map((u) => (u.id === result.user.id ? result.user : u));
+				const stats = applyUserStatsDelta(
+					applyUserStatsDelta(current.stats, previous, -1),
+					result.user,
+					1
+				);
+				return { ...current, items, stats };
+			});
+
+			refreshUsersAfterCacheTtl();
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error updating user:", error);
@@ -134,8 +223,19 @@ export function AdminUsersView() {
 			await deleteUser(user.id, user.doctorId, user.mediaId);
 			setIsDeleteOpen(false);
 			setDeleteTargetUser(null);
-			showNotice(`Đã xóa mềm người dùng ${user.lastName} ${user.firstName}`);
-			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+			showNotice(`Đã xóa người dùng ${user.lastName} ${user.firstName}`);
+
+			updateUsersCache((current) => {
+				const removed = current.items.find((u) => u.id === user.id);
+				if (!removed) return current;
+				return {
+					items: current.items.filter((u) => u.id !== user.id),
+					total: Math.max(0, current.total - 1),
+					stats: applyUserStatsDelta(current.stats, removed, -1),
+				};
+			});
+
+			refreshUsersAfterCacheTtl();
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error deleting user:", error);
@@ -152,11 +252,28 @@ export function AdminUsersView() {
 			showNotice(
 				`Đã ${updated.status === "Active" ? "mở khóa" : "khóa"} tài khoản ${user.lastName} ${user.firstName} (${user.email})`
 			);
-			await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+
+			updateUsersCache((current) => {
+				const previous = current.items.find((u) => u.id === updated.id);
+				if (!previous) return current;
+
+				const items = current.items.map((u) => (u.id === updated.id ? updated : u));
+				const stats = applyUserStatsDelta(
+					applyUserStatsDelta(current.stats, previous, -1),
+					updated,
+					1
+				);
+				return { ...current, items, stats };
+			});
+
+			refreshUsersAfterCacheTtl();
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error toggling status:", error);
-			showNotice("Không thể thay đổi trạng thái tài khoản", "error");
+			showNotice(
+				error instanceof Error ? error.message : "Không thể thay đổi trạng thái tài khoản",
+				"error"
+			);
 		}
 	};
 
@@ -166,15 +283,15 @@ export function AdminUsersView() {
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
 					<div className="flex items-center gap-2">
-						<div className="p-2 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-[#0EA5E9]">
+						<div className="p-2 rounded-xl bg-primary/10 dark:bg-primary/10 text-primary">
 							<Users className="w-5 h-5" />
 						</div>
-						<h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+						<h1 className="text-xl sm:text-2xl font-extrabold text-text-primary dark:text-primary-foreground tracking-tight">
 							Quản lý người dùng
 						</h1>
 					</div>
-					<p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-						Quản trị danh sách tài khoản y bác sĩ, trưởng khoa và phân quyền hoạt động hệ thống Respira
+					<p className="text-xs sm:text-sm text-text-secondary dark:text-text-tertiary mt-1">
+						Quản trị danh sách tài khoản y bác sĩ, trưởng khoa, quản lý chuyên môn và phân quyền hoạt động hệ thống Respira
 					</p>
 				</div>
 			</div>

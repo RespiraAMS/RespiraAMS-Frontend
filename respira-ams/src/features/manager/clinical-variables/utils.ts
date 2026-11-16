@@ -1,5 +1,3 @@
-// src/features/manager/clinical-variables/utils.ts
-
 import { RangeRule } from "./types";
 
 const DECIMAL_MAX_THRESHOLD = 79228162514264337593543950335;
@@ -20,7 +18,7 @@ export function formatRangeDisplay(range?: RangeRule | null) {
     const hasMax = !isInfiniteMax(range.max);
     const unit = range.unit ? ` ${range.unit}` : "";
 
-    if (!hasMin && !hasMax) return `Mọi giá trị${unit}`;
+    if (!hasMin && !hasMax) return `- ${unit}`;
     
     if (!hasMin && hasMax) {
         const sign = range.isMaxExclusive ? "<" : "≤";
@@ -32,7 +30,7 @@ export function formatRangeDisplay(range?: RangeRule | null) {
         return `${sign} ${range.min}${unit}`;
     }
 
-    const minSign = range.isMinExclusive ? ">" : "≥";
-    const maxSign = range.isMaxExclusive ? "<" : "≤";
-    return `${minSign} ${range.min} và ${maxSign} ${range.max}${unit}`;
+    const minSign = range.isMinExclusive ? "(" : "[";
+    const maxSign = range.isMaxExclusive ? ")" : "]";
+    return `${minSign}${range.min} - ${range.max}${maxSign}${unit}`;
 }

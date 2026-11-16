@@ -1,5 +1,6 @@
 import { apiRequest, buildQuery } from "@/lib/api";
-import { getStoredAccessToken, getStoredUser } from "@/features/auth/api";
+import { getUser } from "@/lib/auth";
+import { API_V1, CLIENT_API_BASE } from "@/lib/api-base";
 import {
 	DoctorProfile,
 	ProfileFormState,
@@ -140,10 +141,10 @@ export function saveStoredDoctorProfile(profile: DoctorProfile): void {
 
 /**
  * API: Lấy thông tin hồ sơ của Bác sĩ hiện tại đang đăng nhập
- * Sử dụng GET /api/v1/doctors hoặc GET /api/v1/doctors/{doctorId}
+ * Sử dụng GET /api/v1/doctors/me
  */
 export async function fetchCurrentDoctorProfile(): Promise<DoctorProfile> {
-	const currentUser = getStoredUser();
+	const currentUser = getUser();
 	const stored = getStoredDoctorProfile();
 
 	const isCacheValid = Boolean(
@@ -151,82 +152,53 @@ export async function fetchCurrentDoctorProfile(): Promise<DoctorProfile> {
 		stored &&
 		(stored.firstName || stored.lastName) &&
 		((stored.accountId && stored.accountId === currentUser.id) ||
-		 (stored.email && currentUser.email && stored.email.toLowerCase() === currentUser.email.toLowerCase()))
+			(stored.email &&
+				currentUser.email &&
+				stored.email.toLowerCase() === currentUser.email.toLowerCase()))
 	);
 
-	// 1. Luôn ưu tiên truy vấn Backend thực tế để đồng bộ chính xác dữ liệu
+	// 1. Backend: load the profile bound to the authenticated account.
 	if (currentUser?.id || currentUser?.email) {
 		try {
-			let doctorList: BackendDoctorProfileDto[] = [];
-
-			try {
-				const pagedRes = await apiRequest<{ items?: BackendDoctorProfileDto[] }>(
-					`/doctors${buildQuery({ page: 1, size: 50 })}`
-				);
-				if (pagedRes?.items) {
-					doctorList = pagedRes.items;
+			const me = await apiRequest<BackendDoctorProfileDto>("/doctors/me");
+			if (me?.id) {
+				const mapped = mapBackendDtoToDoctorProfile(me);
+				fillProfileFromSession(mapped, currentUser);
+				if (!mapped.avatarUrl && isCacheValid) {
+					mapped.avatarUrl = stored.avatarUrl;
+					mapped.mediaUrl = stored.mediaUrl;
 				}
-			} catch (apiErr) {
-				console.warn("[Profile] apiRequest failed, trying direct proxy fetch:", apiErr);
-				const directFetch = await fetch("/api/backend/doctors?page=1&size=50", {
-					headers: {
-						Accept: "application/json",
-						...(typeof window !== "undefined" && window.localStorage.getItem("accessToken")
-							? { Authorization: `Bearer ${window.localStorage.getItem("accessToken")}` }
-							: {}),
-					},
-				});
-				if (directFetch.ok) {
-					const json = await directFetch.json();
-					doctorList = json?.data?.items || json?.items || [];
-				}
+				saveStoredDoctorProfile(mapped);
+				return mapped;
 			}
+		} catch (err) {
+			console.warn("[Profile] Could not fetch /doctors/me:", err);
 
-			if (doctorList.length > 0) {
-				// Tìm bác sĩ khớp với tài khoản đang đăng nhập
-				const matched =
-					doctorList.find(
-						(d) =>
-							(currentUser.id && d.accountId === currentUser.id) ||
-							(currentUser.email && d.email && d.email.toLowerCase() === currentUser.email.toLowerCase())
-					) ||
-					(doctorList.length === 1 ? doctorList[0] : undefined);
-
-				if (matched) {
-					const mapped = mapBackendDtoToDoctorProfile(matched);
-					if (currentUser.email && !mapped.email) mapped.email = currentUser.email;
-					saveStoredDoctorProfile(mapped);
-					return mapped;
-				}
-			}
-
-			// Thử tìm theo direct doctorId nếu có trong cache
+			// Fallback for accounts that already cached their doctorId.
 			if (isCacheValid && stored.doctorId && !stored.doctorId.startsWith("pat-")) {
 				try {
-					const directRes = await apiRequest<BackendDoctorProfileDto>(`/doctors/${stored.doctorId}`);
-					if (directRes && directRes.id) {
+					const directRes = await apiRequest<BackendDoctorProfileDto>(
+						`/doctors/${stored.doctorId}`
+					);
+					if (directRes?.id) {
 						const mapped = mapBackendDtoToDoctorProfile(directRes);
-						if (currentUser.email && !mapped.email) mapped.email = currentUser.email;
+						fillProfileFromSession(mapped, currentUser);
 						saveStoredDoctorProfile(mapped);
 						return mapped;
 					}
 				} catch {
-					// Bỏ qua lỗi direct
+					// Ignore direct lookup errors.
 				}
 			}
-		} catch (err) {
-			console.warn("[Profile] Could not fetch doctor profile from backend:", err);
 		}
 	}
 
-	// 2. Nếu có cache hợp lệ mang dữ liệu thực của user, trả về cache
 	if (isCacheValid) {
 		return stored;
 	}
 
-	// 3. Fallback khi chưa có thông tin bác sĩ trên Backend
 	if (currentUser?.email) {
-		const fallbackUser: DoctorProfile = {
+		return {
 			...defaultDoctor,
 			id: currentUser.id || undefined,
 			doctorId: currentUser.id || undefined,
@@ -236,10 +208,22 @@ export async function fetchCurrentDoctorProfile(): Promise<DoctorProfile> {
 			lastName: "",
 			specialty: "Khoa Hồi sức Tích cực & Hô hấp",
 		};
-		return fallbackUser;
 	}
 
 	return defaultDoctor;
+}
+
+function fillProfileFromSession(
+	profile: DoctorProfile,
+	currentUser: ReturnType<typeof getUser>
+): void {
+	if (!currentUser) return;
+	if (currentUser.email && !profile.email) profile.email = currentUser.email;
+	if (currentUser.phoneNumber && !profile.phoneNumber) {
+		profile.phoneNumber = currentUser.phoneNumber;
+	}
+	if (!profile.accountRole) profile.accountRole = currentUser.role || profile.role;
+	if (!profile.accountStatus) profile.accountStatus = "Active";
 }
 
 /**
@@ -273,6 +257,13 @@ export async function fetchPagedDoctors(params?: {
 	try {
 		const res = await apiRequest<{
 			items?: BackendDoctorProfileDto[];
+			metadata?: {
+				totalItemCount?: number;
+				pageCount?: number;
+				currentPage?: number;
+				hasPreviousPage?: boolean;
+				hasNextPage?: boolean;
+			};
 			pageIndex?: number;
 			totalPages?: number;
 			totalCount?: number;
@@ -292,21 +283,23 @@ export async function fetchPagedDoctors(params?: {
 		if (res?.items) {
 			return {
 				items: res.items.map(mapBackendDtoToDoctorProfile),
-				totalCount: res.totalCount ?? res.items.length,
-				totalPages: res.totalPages ?? 1,
-				pageIndex: res.pageIndex ?? 1,
-				hasPreviousPage: res.hasPreviousPage ?? false,
-				hasNextPage: res.hasNextPage ?? false,
+				totalCount: res.metadata?.totalItemCount ?? res.totalCount ?? res.items.length,
+				totalPages: res.metadata?.pageCount ?? res.totalPages ?? 1,
+				pageIndex: res.metadata?.currentPage ?? res.pageIndex ?? 1,
+				hasPreviousPage:
+					res.metadata?.hasPreviousPage ?? res.hasPreviousPage ?? false,
+				hasNextPage: res.metadata?.hasNextPage ?? res.hasNextPage ?? false,
 			};
 		}
 	} catch {
-		// Fallback
+		// /doctors chỉ dành cho Admin; các vai trò khác nhận danh sách rỗng
+		// và dùng tìm kiếm (/doctors/search) để tra cứu đồng nghiệp.
 	}
 
 	return {
-		items: [defaultDoctor],
-		totalCount: 1,
-		totalPages: 1,
+		items: [],
+		totalCount: 0,
+		totalPages: 0,
 		pageIndex: 1,
 		hasPreviousPage: false,
 		hasNextPage: false,
@@ -380,7 +373,7 @@ export async function updateDoctorProfile(
 	form: ProfileFormState,
 	avatarFile?: File | null
 ): Promise<{ sagaId: string; profile: DoctorProfile }> {
-	const currentUser = getStoredUser();
+	const currentUser = getUser();
 
 	const accountId =
 		currentDoctor.accountId ||
@@ -419,21 +412,13 @@ export async function updateDoctorProfile(
 			formData.append("avatar", avatarFile);
 		}
 
-		const token = getStoredAccessToken();
-		const API_BASE =
-			typeof window !== "undefined"
-				? "/api/backend"
-				: (
-						process.env.BACKEND_API_URL ||
-						process.env.NEXT_PUBLIC_API_URL ||
-						"http://localhost:5016/api/v1"
-					).replace(/\/$/, "");
+		const API_BASE = typeof window !== "undefined" ? CLIENT_API_BASE : API_V1;
 
 		const response = await fetch(`${API_BASE}/profile/update`, {
 			method: "POST",
-			signal: AbortSignal.timeout(10000), // Cho phép 10s cho upload và saga publish
+			signal: AbortSignal.timeout(30000),
 			headers: {
-				...(token ? { Authorization: `Bearer ${token}` } : {}),
+				Accept: "application/json",
 			},
 			body: formData,
 		});

@@ -79,16 +79,16 @@ function NavItemLink({ item, collapsed, active }: AdminNavItemProps) {
 			className={cn(
 				"flex items-center gap-3 px-3.5 py-2.5 transition-all group relative select-none",
 				active
-					? "rounded-[12px] bg-[#F0F7FF] text-[#0EA5E9] font-semibold shadow-[0_1px_4px_rgba(14,165,233,0.12)]"
-					: "rounded-[10px] text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium"
+					? "rounded-[12px] bg-primary/5 text-primary font-semibold shadow-sm shadow-primary/10"
+					: "rounded-[10px] text-text-secondary hover:text-text-primary hover:bg-surface-secondary font-medium"
 			)}
 		>
 			<Icon
 				className={cn(
 					"shrink-0 h-4 w-4 transition-colors",
 					active
-						? "text-[#0EA5E9]"
-						: "text-slate-400 group-hover:text-slate-600"
+						? "text-primary"
+						: "text-text-tertiary group-hover:text-text-secondary"
 				)}
 			/>
 
@@ -99,20 +99,20 @@ function NavItemLink({ item, collapsed, active }: AdminNavItemProps) {
 			)}
 
 			{!collapsed && active && (
-				<span className="h-1.5 w-1.5 rounded-full bg-[#0EA5E9] shrink-0 self-center ml-2" />
+				<span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 self-center ml-2" />
 			)}
 
 			{!collapsed && !active && badge != null && (
-				<span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-100 px-1 text-[10px] font-semibold text-slate-600">
+				<span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-surface-secondary px-1 text-[10px] font-semibold text-text-secondary">
 					{badge}
 				</span>
 			)}
 
 			{collapsed && (
 				active ? (
-					<span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-[#0EA5E9]" />
+					<span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-primary" />
 				) : badge != null ? (
-					<span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-slate-400" />
+					<span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-text-tertiary" />
 				) : null
 			)}
 		</Link>
@@ -125,7 +125,7 @@ function NavItemLink({ item, collapsed, active }: AdminNavItemProps) {
 				<TooltipContent side="right" className="flex items-center gap-2 font-medium rounded-[6px] text-xs">
 					{label}
 					{badge != null && (
-						<span className="flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-sky-100 px-1 text-[9px] font-bold text-[#0EA5E9]">
+						<span className="flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-primary/10 px-1 text-[9px] font-bold text-primary">
 							{badge}
 						</span>
 					)}
@@ -146,7 +146,7 @@ export function AdminSidebar() {
 		<TooltipProvider delayDuration={0}>
 			<aside
 				className={cn(
-					"sticky top-0 flex flex-col h-screen border-r border-slate-100 bg-white z-30 select-none",
+					"sticky top-0 flex flex-col h-screen border-r border-border-subtle bg-surface z-30 select-none",
 					"transition-[width] duration-300 ease-in-out shrink-0",
 					collapsed ? "w-16" : "w-[245px]"
 				)}
@@ -154,7 +154,7 @@ export function AdminSidebar() {
 				{/* Top Logo / Brand with horizontal divider border-b */}
 				<div
 					className={cn(
-						"flex items-center h-16 px-4 border-b border-slate-100 shrink-0",
+						"flex items-center h-16 px-4 border-b border-border-subtle shrink-0",
 						collapsed ? "justify-center" : "justify-start"
 					)}
 				>
@@ -164,7 +164,7 @@ export function AdminSidebar() {
 						id="admin-brand-link"
 					>
 						{/* App Icon */}
-						<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-[#0EA5E9] text-white font-bold text-base shadow-[0_3px_10px_rgba(14,165,233,0.25)]">
+						<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-primary text-primary-foreground font-bold text-base shadow-md shadow-primary/25">
 							R.
 						</div>
 
@@ -172,14 +172,14 @@ export function AdminSidebar() {
 						{!collapsed && (
 							<div className="min-w-0 flex-1">
 								<div className="flex items-center text-base leading-tight">
-									<span className="font-bold text-slate-900 tracking-tight">
+									<span className="font-bold text-text-primary tracking-tight">
 										Respira
 									</span>
-									<span className="font-bold text-[#0EA5E9] tracking-tight">
+									<span className="font-bold text-primary tracking-tight">
 										AMS
 									</span>
 								</div>
-								<span className="text-[9px] font-semibold text-slate-400 tracking-wider uppercase block mt-0.5 leading-none">
+								<span className="text-[9px] font-semibold text-text-tertiary tracking-wider uppercase block mt-0.5 leading-none">
 									{t("brandSubtitle")}
 								</span>
 							</div>
@@ -190,7 +190,7 @@ export function AdminSidebar() {
 				{/* Category Section Header */}
 				{!collapsed ? (
 					<div className="px-4 pt-4 pb-4">
-						<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+						<span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider block">
 							{t("categoryTitle")}
 						</span>
 					</div>
@@ -220,7 +220,7 @@ export function AdminSidebar() {
 				</nav>
 
 				{/* Footer Account Section */}
-				<div className="p-2.5 shrink-0 border-t border-slate-100">
+				<div className="p-2.5 shrink-0 border-t border-border-subtle">
 					<AdminAccountSection collapsed={collapsed} />
 				</div>
 			</aside>

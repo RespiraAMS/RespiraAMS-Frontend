@@ -15,7 +15,15 @@ import { CriteriaDeleteAlert } from "./CriteriaDeleteAlert";
 import { useCriteriaMutations, useCriteriaDetail } from "../queries";
 import { type CriteriaItem, type CreateCriteriaRequest, type UpdateCriteriaRequest } from "../types";
 
-export function CriteriaView() {
+interface CriteriaViewProps {
+	readOnly?: boolean;
+	detailBasePath?: string;
+}
+
+export function CriteriaView({
+	readOnly = false,
+	detailBasePath = "/manage/criteria",
+}: CriteriaViewProps) {
 	const t = useTranslations("manager.criteria");
 	const router = useRouter();
 
@@ -30,7 +38,7 @@ export function CriteriaView() {
 	});
 
 	const openDetail = (id: string) => {
-		router.push(`/manage/criteria/${id}`);
+		router.push(`${detailBasePath}/${id}`);
 	};
 
 	const openCreate = () => {
@@ -83,51 +91,62 @@ export function CriteriaView() {
 					<h2 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h2>
 					<p className="text-muted-foreground mt-1">{t("description")}</p>
 				</div>
-				<Button onClick={openCreate} className="bg-primary text-primary-foreground hover:bg-primary/90">
-					<Plus className="mr-2 h-4 w-4" />
-					{t("addButton")}
-				</Button>
+				{!readOnly && (
+					<Button onClick={openCreate} className="bg-primary text-primary-foreground hover:bg-primary/90">
+						<Plus className="mr-2 h-4 w-4" />
+						{t("addButton")}
+					</Button>
+				)}
 			</div>
 
 			{/* Table Card */}
 			<div className="rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto text-card-foreground">
-				<CriteriaTable onViewDetail={openDetail} onEdit={openUpdate} onDelete={openDelete} />
+				<CriteriaTable
+					readOnly={readOnly}
+					onViewDetail={openDetail}
+					onEdit={readOnly ? undefined : openUpdate}
+					onDelete={readOnly ? undefined : openDelete}
+				/>
 			</div>
 
-			{/* Form Dialog */}
-			<Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
-				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
-					<DialogHeader>
-						<DialogTitle className="text-xl text-foreground">
-							{modalMode === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}
-						</DialogTitle>
-					</DialogHeader>
+			{!readOnly && (
+				<>
+					{/* Form Dialog */}
+					<Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
+						<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
+							<DialogHeader>
+								<DialogTitle className="text-xl text-foreground">
+									{modalMode === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}
+								</DialogTitle>
+							</DialogHeader>
 
-					{modalMode === "update" && isFetchingDetail ? (
-						<div className="flex justify-center p-10">
-							<Loader2 className="animate-spin text-primary w-8 h-8" />
-						</div>
-					) : (
-						modalMode && (
-							<CriteriaForm
-								initialData={modalMode === "update" ? detailData : null}
-								onSubmit={handleFormSubmit}
-								onCancel={closeModal}
-								isPending={createMutation.isPending || updateMutation.isPending}
-							/>
-						)
+							{modalMode === "update" && isFetchingDetail ? (
+								<div className="flex justify-center p-10">
+									<Loader2 className="animate-spin text-primary w-8 h-8" />
+								</div>
+							) : (
+								modalMode && (
+									<CriteriaForm
+										initialData={modalMode === "update" ? detailData : null}
+										onSubmit={handleFormSubmit}
+										onCancel={closeModal}
+										isPending={createMutation.isPending || updateMutation.isPending}
+									/>
+								)
+							)}
+						</DialogContent>
+					</Dialog>
+
+					{/* Delete Confirmation Alert */}
+					{itemToDelete && (
+						<CriteriaDeleteAlert
+							criteriaItem={itemToDelete}
+							isOpen={!!itemToDelete}
+							onClose={() => setItemToDelete(null)}
+							onSuccess={() => setItemToDelete(null)}
+						/>
 					)}
-				</DialogContent>
-			</Dialog>
-
-			{/* Delete Confirmation Alert */}
-			{itemToDelete && (
-				<CriteriaDeleteAlert
-					criteriaItem={itemToDelete}
-					isOpen={!!itemToDelete}
-					onClose={() => setItemToDelete(null)}
-					onSuccess={() => setItemToDelete(null)}
-				/>
+				</>
 			)}
 		</div>
 	);
