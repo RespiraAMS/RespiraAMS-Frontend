@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, JetBrains_Mono, Merriweather } from 'next/font/google';
 import './globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
@@ -8,16 +8,39 @@ import { FontSizeProvider } from '@/components/font-size-provider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthBootstrap } from '@/components/AuthBootstrap';
+import { FontProvider } from '@/providers/FontContext';
 
 const inter = Inter({
-    subsets: ['latin'],
-    variable: '--font-sans',
-    display: 'swap',
+  subsets: ['latin', 'vietnamese'],
+  variable: '--font-inter',
+  display: 'swap',
 });
 
+const merriweather = Merriweather({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '700'],
+  variable: '--font-merriweather',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin', 'vietnamese'],
+  variable: '--font-mono',
+  display: 'swap',
+});
+
+const fontInitScript = `
+  (function() {
+    try {
+      var savedFont = localStorage.getItem('user-font') || 'sans';
+      document.documentElement.setAttribute('data-font', savedFont);
+    } catch (e) {}
+  })();
+`;
+
 export const metadata: Metadata = {
-    title: 'RespiraAMS',
-    description: 'Respiratory Airway Management System',
+  title: 'RespiraAMS',
+  description: 'Respiratory Airway Management System',
 };
 
 export default async function RootLayout({
@@ -29,14 +52,9 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning className={inter.variable}>
+    <html lang={locale} suppressHydrationWarning className={`${inter.variable} ${merriweather.variable} ${jetbrainsMono.variable}`}>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "(function(){try{var s=localStorage.getItem('respira_font_scale');var px=s==='large'?18:s==='small'?14:16;document.documentElement.style.fontSize=px+'px';}catch(e){}})();",
-          }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: fontInitScript }} />
       </head>
       <body>
         <ThemeProvider
@@ -45,7 +63,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <FontSizeProvider>
+          <FontProvider>
             <NextIntlClientProvider messages={messages}>
               <QueryProvider>
                 <AuthBootstrap />
@@ -53,7 +71,7 @@ export default async function RootLayout({
                 <Toaster richColors position="top-center" duration={3000} closeButton />
               </QueryProvider>
             </NextIntlClientProvider>
-          </FontSizeProvider>
+          </FontProvider>
         </ThemeProvider>
       </body>
     </html>

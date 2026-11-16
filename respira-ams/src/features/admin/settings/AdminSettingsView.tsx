@@ -8,6 +8,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useFontScale } from "@/components/font-size-provider";
 import { FONT_SCALE_OPTIONS } from "@/lib/font-size";
 import { cn } from "@/lib/utils";
+import { FontSelector } from "@/components/FontSelector";
 
 const THEME_OPTIONS = [
 	{ value: "light", icon: Sun, labelKey: "themeLight" },
@@ -122,6 +123,18 @@ export function AdminSettingsView() {
 					</div>
 				</div>
 				<LanguageSwitcher />
+			</div>
+			<div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+				<div className="flex items-start gap-2">
+					<div className="rounded-lg bg-slate-100 p-2 text-slate-600">
+						<Type className="h-4 w-4" />
+					</div>
+					<div>
+						<h2 className="text-sm font-bold text-slate-900">{t("fontTitle")}</h2>
+						<p className="text-xs text-slate-500">{t("fontDescription")}</p>
+					</div>
+				</div>
+				<FontSelector/>
 			</div>
 		</div>
 	);

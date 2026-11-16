@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Globe, Monitor, Moon, Palette, Settings, Sun } from "lucide-react";
+import { Globe, Monitor, Moon, Palette, Settings, Sun, Type } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
+import { FontSelector } from "@/components/FontSelector";
 
 const THEME_OPTIONS = [
 	{ value: "light", icon: Sun, labelKey: "themeLight" },
@@ -80,6 +81,18 @@ export function DoctorSettingsView() {
 					</div>
 				</div>
 				<LanguageSwitcher />
+			</div>
+			<div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+				<div className="flex items-start gap-2">
+					<div className="rounded-lg bg-slate-100 p-2 text-slate-600">
+						<Type className="h-4 w-4" />
+					</div>
+					<div>
+						<h2 className="text-sm font-bold text-slate-900">{t("fontTitle")}</h2>
+						<p className="text-xs text-slate-500">{t("fontDescription")}</p>
+					</div>
+				</div>
+				<FontSelector/>
 			</div>
 		</div>
 	);
