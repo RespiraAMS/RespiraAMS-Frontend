@@ -1,7 +1,5 @@
 export type AuditLogStatus = "success" | "warning" | "error";
 
-export type AuditLogSeverity = "low" | "medium" | "high" | "critical";
-
 export type AuditServiceType =
 	| "Clinical"
 	| "Auth"
@@ -23,31 +21,18 @@ export type AuditActionCategory =
 export interface AuditLogItem {
 	id: string;
 	timestamp: string; // ISO 8601
-	timeDisplay?: string;
 	actor: string;
 	actorName: string;
 	role: "Admin" | "Doctor" | "Manager" | "System" | "Gateway" | string;
 	action: string;
+	rawAction: string;
 	category: AuditActionCategory;
 	target: string;
 	service: AuditServiceType;
 	status: AuditLogStatus;
-	severity: AuditLogSeverity;
-	ipAddress: string;
-	userAgent?: string;
 	correlationId: string;
-	durationMs: number;
 	requestPayload?: Record<string, unknown> | string;
-	responseSummary?: string;
 	errorMessage?: string;
-}
-
-export interface AuditLogFilters {
-	search: string;
-	service: string; // "ALL" | AuditServiceType
-	status: string; // "ALL" | AuditLogStatus
-	severity: string; // "ALL" | AuditLogSeverity
-	timeRange: string; // "ALL" | "today" | "24h" | "7d" | "30d"
 }
 
 export interface AuditLogStats {

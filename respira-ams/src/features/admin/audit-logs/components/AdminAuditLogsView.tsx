@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { AuditLogFilters, AuditLogItem, AuditLogStats } from "../types";
+import { AuditLogItem, AuditLogStats } from "../types";
 import {
 	fetchAuditLogs,
 	exportAuditLogsToCsv,
@@ -17,16 +17,8 @@ import { AuditLogDetailDialog } from "./AuditLogDetailDialog";
 
 const PAGE_SIZE = 10;
 
-const DEFAULT_FILTERS: AuditLogFilters = {
-	search: "",
-	service: "ALL",
-	status: "ALL",
-	severity: "ALL",
-	timeRange: "ALL",
-};
-
 export function AdminAuditLogsView() {
-	const [filters, setFilters] = useState<AuditLogFilters>(DEFAULT_FILTERS);
+	const [timeRange, setTimeRange] = useState("ALL");
 	const [page, setPage] = useState(1);
 
 	const [logs, setLogs] = useState<AuditLogItem[]>([]);
@@ -42,49 +34,54 @@ export function AdminAuditLogsView() {
 
 	const [isLoading, setIsLoading] = useState(true);
 	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [reloadKey, setReloadKey] = useState(0);
 
 	// Detail dialog state
 	const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null);
 	const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-	// Tìm kiếm và lọc tức thì (0ms latency giống như quản lý người dùng)
-	const loadData = useCallback(async () => {
-		try {
-			const result = await fetchAuditLogs(filters, page, PAGE_SIZE);
-			setLogs(result.items);
-			setTotal(result.total);
-			setStats(result.stats);
-		} catch (err) {
-			console.error("[AdminAuditLogsView] Failed to load audit logs:", err);
-			toast.error("Không thể tải nhật ký kiểm toán. Vui lòng thử lại.");
-		} finally {
-			setIsLoading(false);
-			setIsRefreshing(false);
-		}
-	}, [filters, page]);
-
+	// Chỉ tải đúng trang hiện tại; thời gian do backend lọc qua `from`.
 	useEffect(() => {
-		loadData();
-	}, [loadData]);
+		let cancelled = false;
+
+		const load = async () => {
+			try {
+				const result = await fetchAuditLogs(page, PAGE_SIZE, timeRange);
+				if (cancelled) return;
+				setLogs(result.items);
+				setTotal(result.total);
+				setStats(result.stats);
+			} catch (err) {
+				if (cancelled) return;
+				console.error("[AdminAuditLogsView] Failed to load audit logs:", err);
+				toast.error("Không thể tải nhật ký kiểm toán. Vui lòng thử lại.");
+			} finally {
+				if (!cancelled) {
+					setIsLoading(false);
+					setIsRefreshing(false);
+				}
+			}
+		};
+
+		void load();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [page, timeRange, reloadKey]);
+
+	const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+	const currentPage = Math.min(page, pageCount);
 
 	const handleRefresh = () => {
 		setIsRefreshing(true);
-		loadData();
+		setReloadKey((value) => value + 1);
 		toast.info("Đang làm mới nhật ký kiểm toán...");
 	};
 
-	const handleFiltersChange = (updater: (prev: AuditLogFilters) => AuditLogFilters) => {
-		setFilters((prev) => {
-			const updated = updater(prev);
-			return updated;
-		});
+	const handleTimeRangeChange = (value: string) => {
+		setTimeRange(value);
 		setPage(1);
-	};
-
-	const handleResetFilters = () => {
-		setFilters(DEFAULT_FILTERS);
-		setPage(1);
-		toast.success("Đã đặt lại bộ lọc nhật ký");
 	};
 
 	const handleExportCsv = () => {
@@ -110,8 +107,6 @@ export function AdminAuditLogsView() {
 		setIsDetailOpen(true);
 	};
 
-	const pageCount = Math.ceil(total / PAGE_SIZE);
-
 	return (
 		<div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 			{/* Page Header */}
@@ -131,13 +126,15 @@ export function AdminAuditLogsView() {
 
 			{/* Stats Cards */}
 			<AuditLogStatsCards stats={stats} isLoading={isLoading} />
+			<p className="text-[11px] text-text-tertiary -mt-3">
+				Tổng sự kiện là toàn hệ thống; thành công / cảnh báo / lỗi được tính trên trang hiện tại.
+			</p>
 
-			{/* Toolbar (Search, Filter, Export, Refresh) */}
+			{/* Toolbar (Time range, Export, Refresh) */}
 			<AuditLogToolbar
-				filters={filters}
-				onFiltersChange={handleFiltersChange}
+				timeRange={timeRange}
+				onTimeRangeChange={handleTimeRangeChange}
 				onRefresh={handleRefresh}
-				onResetFilters={handleResetFilters}
 				onExportCsv={handleExportCsv}
 				onExportJson={handleExportJson}
 				isRefreshing={isRefreshing}
@@ -154,11 +151,14 @@ export function AdminAuditLogsView() {
 
 			{/* Pagination */}
 			<AuditLogPagination
-				page={page}
+				page={currentPage}
 				pageCount={pageCount}
 				totalItems={total}
 				pageSize={PAGE_SIZE}
-				onPageChange={setPage}
+				onPageChange={(nextPage) => {
+					setIsRefreshing(true);
+					setPage(nextPage);
+				}}
 			/>
 
 			{/* Detail Dialog */}
@@ -166,7 +166,7 @@ export function AdminAuditLogsView() {
 				item={selectedLog}
 				open={isDetailOpen}
 				onOpenChange={setIsDetailOpen}
-				onRollbackSuccess={loadData}
+				onRollbackSuccess={() => setReloadKey((value) => value + 1)}
 			/>
 		</div>
 	);

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
+import { ExpandableText } from "@/components/ui/expandable-text";
 import {
 	Table,
 	TableBody,
@@ -18,11 +19,8 @@ import {
 	Eye,
 	Shield,
 	Clock,
-	Layers,
-	Globe,
-	User,
 } from "lucide-react";
-import { AuditLogItem, AuditLogStatus, AuditServiceType, AuditLogSeverity } from "../types";
+import { AuditLogItem, AuditLogStatus, AuditServiceType } from "../types";
 
 interface AuditLogsTableProps {
 	logs: AuditLogItem[];
@@ -31,7 +29,7 @@ interface AuditLogsTableProps {
 	onViewDetail: (item: AuditLogItem) => void;
 }
 
-export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDetail }: AuditLogsTableProps) {
+export function AuditLogsTable({ logs, isLoading, onViewDetail }: AuditLogsTableProps) {
 	const t = useTranslations("admin.auditLogs");
 
 	const formatDateTime = (isoString: string) => {
@@ -98,36 +96,6 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 				{service}
 			</span>
 		);
-	};
-
-	const renderSeverityBadge = (severity: AuditLogSeverity) => {
-		switch (severity) {
-			case "critical":
-				return (
-					<span className="text-[10px] font-extrabold uppercase tracking-wider text-error bg-error/10 px-1.5 py-0.2 rounded">
-						{t("sevCritical")}
-					</span>
-				);
-			case "high":
-				return (
-					<span className="text-[10px] font-bold uppercase tracking-wider text-warning bg-warning/10 px-1.5 py-0.2 rounded">
-						{t("sevHigh")}
-					</span>
-				);
-			case "medium":
-				return (
-					<span className="text-[10px] font-bold uppercase tracking-wider text-warning bg-warning/10 px-1.5 py-0.2 rounded">
-						{t("sevMedium")}
-					</span>
-				);
-			case "low":
-			default:
-				return (
-					<span className="text-[10px] font-medium uppercase tracking-wider text-text-secondary bg-surface-secondary px-1.5 py-0.2 rounded">
-						{t("sevLow")}
-					</span>
-				);
-		}
 	};
 
 	const renderRoleBadge = (role: string) => {
@@ -206,11 +174,8 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 							<TableHead className="min-w-[250px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
 								{t("colActionTarget")}
 							</TableHead>
-							<TableHead className="w-[125px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
-								{t("colIpDuration")}
-							</TableHead>
 							<TableHead className="w-[145px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
-								{t("colStatusSeverity")}
+								{t("colStatus", { defaultMessage: "Trạng thái" })}
 							</TableHead>
 							<TableHead className="w-[70px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5 text-right pr-4">
 								{t("colDetail")}
@@ -266,31 +231,17 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 												<span className="text-[10px] font-semibold text-text-secondary bg-surface-secondary px-1.5 py-0.2 rounded font-mono">
 													{log.category}
 												</span>
-												<span className="text-[11px] text-text-secondary font-mono truncate max-w-[220px]">
-													{log.target}
-												</span>
 											</div>
+											<ExpandableText
+												text={log.target}
+												className="text-[11px] text-text-secondary font-mono"
+											/>
 										</div>
 									</TableCell>
 
-									{/* IP & Latency */}
+									{/* Status */}
 									<TableCell className="py-3 align-top">
-										<div className="flex flex-col">
-											<span className="font-mono text-xs text-text-primary">
-												{log.ipAddress}
-											</span>
-											<span className="text-[10.5px] text-text-tertiary font-mono mt-0.5">
-												{log.durationMs}ms
-											</span>
-										</div>
-									</TableCell>
-
-									{/* Status & Severity */}
-									<TableCell className="py-3 align-top">
-										<div className="flex flex-col gap-1">
-											<div>{renderStatusBadge(log.status)}</div>
-											<div>{renderSeverityBadge(log.severity)}</div>
-										</div>
+										<div>{renderStatusBadge(log.status)}</div>
 									</TableCell>
 
 									{/* Action Button */}

@@ -4,22 +4,21 @@ import React, { useState, useEffect } from "react";
 import { Dialog } from "radix-ui";
 import { AdminDialogContent } from "@/features/admin/components/AdminDialogContent";
 import { Button } from "@/components/ui/button";
+import { SnapshotDiff } from "@/components/ui/snapshot-diff";
 import {
 	RotateCcw,
 	CheckCircle2,
 	AlertCircle,
 	AlertTriangle,
 	Loader2,
-	Layers,
-	ArrowRight,
 	History,
-	FileText,
 	ShieldAlert,
 	Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
 	AuditLogItem,
+	ClinicalRollbackChange,
 	ClinicalRollbackPreview,
 	ClinicalRollbackResult,
 } from "../types";
@@ -35,6 +34,39 @@ interface AuditLogRollbackDialogProps {
 	onSuccess?: () => void;
 }
 
+function RollbackChangeDiff({ change }: { change: ClinicalRollbackChange }) {
+	return (
+		<div className="rounded-xl border border-border-default bg-surface overflow-hidden shadow-2xs">
+			{/* Change Header */}
+			<div className="px-3.5 py-2.5 bg-surface-secondary border-b border-border-default flex items-center justify-between flex-wrap gap-2">
+				<div className="flex items-center gap-2 min-w-0">
+					<span
+						className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold ${
+							change.operation === "Insert"
+								? "bg-success/10 text-success"
+								: change.operation === "Delete"
+								? "bg-error/10 text-error"
+								: "bg-info/10 text-info"
+						}`}
+					>
+						{change.operation}
+					</span>
+					<span className="font-bold text-text-primary text-xs truncate">
+						{change.entityType}
+					</span>
+				</div>
+				<span className="text-text-secondary text-[11px]">{change.description}</span>
+			</div>
+
+			<SnapshotDiff
+				before={change.currentJson}
+				after={change.targetJson}
+				hideIdFields
+			/>
+		</div>
+	);
+}
+
 export function AuditLogRollbackDialog({
 	item,
 	open,
@@ -44,34 +76,51 @@ export function AuditLogRollbackDialog({
 	const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 	const [preview, setPreview] = useState<ClinicalRollbackPreview | null>(null);
 	const [previewError, setPreviewError] = useState<string | null>(null);
+	const [visibleChanges, setVisibleChanges] = useState(20);
 
 	const [isApplying, setIsApplying] = useState(false);
 	const [result, setResult] = useState<ClinicalRollbackResult | null>(null);
 
 	// Tải preview khi mở dialog
 	useEffect(() => {
-		if (open && item) {
+		if (!open || !item) return;
+
+		let cancelled = false;
+
+		const load = async () => {
+			// Reset state after the current render pass.
+			await Promise.resolve();
+			if (cancelled) return;
+
 			setResult(null);
 			setPreview(null);
 			setPreviewError(null);
+			setVisibleChanges(20);
 			setIsLoadingPreview(true);
 
-			previewClinicalRollback(item.id)
-				.then((res) => {
-					setPreview(res);
-				})
-				.catch((err) => {
-					console.error("Lỗi khi tải rollback preview:", err);
-					setPreviewError(
-						err instanceof Error
-							? err.message
-							: "Không thể tải bản xem trước hoàn tác."
-					);
-				})
-				.finally(() => {
-					setIsLoadingPreview(false);
-				});
-		}
+			try {
+				const res = await previewClinicalRollback(item.id);
+				if (cancelled) return;
+				setPreview(res);
+				setVisibleChanges(20);
+			} catch (err) {
+				if (cancelled) return;
+				console.error("Lỗi khi tải rollback preview:", err);
+				setPreviewError(
+					err instanceof Error
+						? err.message
+						: "Không thể tải bản xem trước hoàn tác."
+				);
+			} finally {
+				if (!cancelled) setIsLoadingPreview(false);
+			}
+		};
+
+		void load();
+
+		return () => {
+			cancelled = true;
+		};
 	}, [open, item]);
 
 	if (!item) return null;
@@ -233,58 +282,27 @@ export function AuditLogRollbackDialog({
 									</span>
 								</div>
 
-								{preview.changes.map((change, idx) => (
-									<div
-										key={idx}
-										className="rounded-xl border border-border-default bg-surface overflow-hidden shadow-2xs"
-									>
-										{/* Change Header */}
-										<div className="px-3.5 py-2.5 bg-surface-secondary border-b border-border-default flex items-center justify-between flex-wrap gap-2">
-											<div className="flex items-center gap-2">
-												<span
-													className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold ${
-														change.operation === "Insert"
-															? "bg-success/10 text-success"
-															: change.operation === "Delete"
-															? "bg-error/10 text-error"
-															: "bg-info/10 text-info"
-													}`}
-												>
-													{change.operation}
-												</span>
-												<span className="font-bold text-text-primary text-xs">
-													{change.entityType}
-												</span>
-											</div>
-											<span className="text-text-secondary text-xs">{change.description}</span>
-										</div>
-
-										{/* Side-by-side Diff */}
-										<div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border-default bg-surface text-[11px] font-mono">
-											{/* Cột 1: Giá trị hiện tại */}
-											<div className="p-3 overflow-x-auto">
-												<div className="text-error font-bold mb-1.5 flex items-center gap-1.5">
-													<span className="w-2 h-2 rounded-full bg-error" />
-													<span>Giá trị hiện tại trong hệ thống</span>
-												</div>
-												<pre className="text-text-tertiary max-h-40 overflow-y-auto whitespace-pre-wrap">
-													{change.currentJson || "(Không có)"}
-												</pre>
-											</div>
-
-											{/* Cột 2: Giá trị sau hoàn tác */}
-											<div className="p-3 overflow-x-auto bg-background/50">
-												<div className="text-success font-bold mb-1.5 flex items-center gap-1.5">
-													<span className="w-2 h-2 rounded-full bg-success" />
-													<span>Giá trị phục hồi sau Hoàn tác</span>
-												</div>
-												<pre className="text-success max-h-40 overflow-y-auto whitespace-pre-wrap">
-													{change.targetJson || "(Sẽ bị thu hồi / xóa)"}
-												</pre>
-											</div>
-										</div>
-									</div>
+								{preview.changes.slice(0, visibleChanges).map((change, idx) => (
+									<RollbackChangeDiff key={idx} change={change} />
 								))}
+
+								{preview.changes.length > visibleChanges && (
+									<div className="flex justify-center pt-1">
+										<Button
+											type="button"
+											variant="outline"
+											onClick={() =>
+												setVisibleChanges((value) =>
+													Math.min(value + 20, preview.changes.length)
+												)
+											}
+											className="h-8 px-4 rounded-lg border-border-default text-text-primary hover:bg-surface-secondary text-xs font-semibold cursor-pointer"
+										>
+											Xem thêm{" "}
+											{Math.min(20, preview.changes.length - visibleChanges)} thay đổi
+										</Button>
+									</div>
+								)}
 							</div>
 
 							{/* Warning Message */}
