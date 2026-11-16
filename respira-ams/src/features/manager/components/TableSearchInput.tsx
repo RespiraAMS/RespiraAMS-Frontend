@@ -63,8 +63,8 @@ export function TableSearchInput({
     };
 
     return (
-        <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto text-card-foreground w-full max-w-sm">
-            <div className="w-full max-w-sm space-y-1.5">
+        <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto text-card-foreground w-full max-w-xl">
+            <div className="w-full max-w-xl space-y-1.5">
                 <div className="relative">
                     <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
