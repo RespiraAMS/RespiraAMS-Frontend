@@ -50,7 +50,7 @@ export function ProtocolsTable({
 		return (
 			<div className="bg-surface rounded-xl border border-border-default p-12 text-center">
 				<div className="inline-block w-8 h-8 border-2 border-border-default border-t-primary rounded-full animate-spin mb-3" />
-				<p className="text-sm font-medium text-text-secondary">{t("loading", { defaultMessage: "Đang tải danh sách phác đồ..." })}</p>
+				<p className="text-sm font-medium text-text-secondary">{t("loading", { defaultMessage: "Đang tải danh sách thang điểm..." })}</p>
 			</div>
 		);
 	}
@@ -60,7 +60,7 @@ export function ProtocolsTable({
 			<div className="bg-surface rounded-xl border border-border-default p-12 text-center">
 				<h3 className="text-sm font-bold text-text-primary">{t("empty")}</h3>
 				<p className="text-xs text-text-secondary mt-1">
-					{t("emptyDesc", { defaultMessage: "Thử đổi từ khóa tìm kiếm, bộ lọc trạng thái hoặc thêm phác đồ mới." })}
+					{t("emptyDesc", { defaultMessage: "Thử đổi từ khóa tìm kiếm, bộ lọc trạng thái hoặc thêm thang điểm mới." })}
 				</p>
 			</div>
 		);
@@ -185,7 +185,7 @@ export function ProtocolsTable({
 												className="cursor-pointer text-xs font-semibold gap-2 py-2 text-error focus:text-error focus:bg-error/10"
 											>
 												<Trash2 className="w-3.5 h-3.5 text-error" />
-												<span>{t("actionDelete", { defaultMessage: "Xóa phác đồ" })}</span>
+												<span>{t("actionDelete", { defaultMessage: "Xóa thang điểm" })}</span>
 											</DropdownMenuItem>
 										</DropdownMenuContent>
 									</DropdownMenu>
