@@ -1352,6 +1352,288 @@
           "invalidRange": "Thời điểm bắt đầu phải nhỏ hơn hoặc bằng thời điểm kết thúc"
         }
       }
+    },
+    "diagnose": {
+      "categories": {
+        "PersonalInformation": "Thông tin bệnh nhân",
+        "MedicalHistory": "Tiền sử bệnh lý & dùng thuốc",
+        "Paraclinical": "Cận lâm sàng",
+        "Clinical": "Lâm sàng",
+        "Other": "Chỉ số khác"
+      },
+      "allergyTypes": {
+        "No": "Không dị ứng",
+        "Yes": "Có dị ứng kháng sinh",
+        "NonRegisteredAntibiotic": "Kháng sinh ngoài danh mục",
+        "Unknown": "Không rõ"
+      },
+      "micCategories": {
+        "Susceptible": "Nhạy cảm (Susceptible)",
+        "Intermediate": "Trung gian (Intermediate)",
+        "Resistant": "Đề kháng (Resistant)"
+      },
+      "awareClassifications": {
+        "Access": "Access",
+        "AccessWatch": "Access-Watch",
+        "Watch": "Watch",
+        "Reserve": "Reserve",
+        "Others": "Others",
+        "Unclassified": "Unclassified"
+      },
+      "severity": {
+        "Mild": "Nhẹ (Mild)",
+        "Moderate": "Trung bình (Moderate)",
+        "Severe": "Nặng (Severe)"
+      },
+      "treatmentSite": {
+        "Outpatient": "Ngoại trú (Outpatient)",
+        "Inpatient": "Nội trú (Inpatient)",
+        "IntensiveCareUnit": "Hồi sức tích cực (ICU)"
+      },
+      "sampleTypes": {
+        "Unknown": "Không rõ",
+        "Sputum": "Đàm (Sputum)",
+        "BronchoalveolarLavageFluid": "Dịch rửa phế quản phế nang (BAL)",
+        "PleuralFluid": "Dịch màng phổi",
+        "Urine": "Nước tiểu",
+        "Blood": "Máu",
+        "AbdominalFluid": "Dịch ổ bụng",
+        "CerebrospinalFluid": "Dịch não tủy",
+        "WoundExudate": "Dịch vết thương / mủ",
+        "Other": "Mẫu bệnh phẩm khác"
+      },
+      "infectionTypes": {
+        "SkinAndSoftTissueInfection": "Nhiễm khuẩn da/mô dưới da",
+        "SepticArthritis": "Viêm khớp nhiễm khuẩn",
+        "Osteomyelitis": "Viêm tủy xương nhiễm khuẩn",
+        "BacterialMyositisOrMuscleAbscess": "Viêm cơ/áp xe cơ nhiễm khuẩn",
+        "InfectedGoutyTophus": "Nhiễm khuẩn hạt tophi",
+        "PyelonephritisOrRenalAbscess": "Viêm/áp xe thận - bể thận",
+        "AcuteCystitis": "Viêm bàng quang cấp",
+        "AcuteNonGonococcalUrethritis": "Viêm niệu đạo cấp không do lậu",
+        "BacterialVaginourethritis": "Viêm âm đạo niệu đạo do vi khuẩn",
+        "BacterialEndometritis": "Viêm tử cung do vi khuẩn",
+        "PurulentMeningitis": "Viêm màng não mủ",
+        "BacterialEncephalitis": "Viêm não do vi khuẩn",
+        "PleuralEmpyema": "Tràn mủ màng phổi",
+        "MediastinalAbscess": "Áp xe trung thất",
+        "InfectiveEndocarditis": "Viêm nội tâm mạc nhiễm khuẩn",
+        "BacterialMyocarditis": "Viêm cơ tim do vi khuẩn",
+        "BacterialPericarditis": "Viêm màng ngoài tim do vi khuẩn",
+        "PulmonaryTuberculosis": "Lao phổi",
+        "ExtrapulmonaryTuberculosis": "Lao ngoài phổi",
+        "BiliaryTractInfection": "Nhiễm trùng đường mật",
+        "BacterialLiverAbscess": "Áp xe gan do vi khuẩn",
+        "InfectedAcutePancreatitis": "Viêm tụy cấp nhiễm khuẩn",
+        "BacterialPeritonitis": "Viêm phúc mạc nhiễm khuẩn",
+        "BacterialDiarrhea": "Tiêu chảy do vi khuẩn",
+        "HelicobacterPyloriInfection": "Nhiễm Helicobacter pylori",
+        "Sepsis": "Nhiễm trùng huyết",
+        "OrbitalCellulitis": "Viêm tổ chức hốc mắt",
+        "Conjunctivitis": "Viêm kết mạc mắt",
+        "Keratitis": "Viêm giác mạc mắt",
+        "Dacryocystitis": "Viêm túi lệ mắt",
+        "MaxillofacialAbscess": "Áp xe vùng hàm-mặt",
+        "Other": "Nhiễm khuẩn khác"
+      },
+      "range": {
+        "and": "và",
+        "placeholderDefault": "Nhập giá trị...",
+        "placeholderBetween": "Bình thường: {min} – {max}",
+        "placeholderMin": "Bình thường: ≥ {min}",
+        "placeholderMax": "Bình thường: ≤ {max}"
+      },
+      "validation": {
+        "required": "Vui lòng nhập \"{name}\".",
+        "invalidNumber": "Giá trị phải là một số hợp lệ.",
+        "outOfAcceptedRange": "Giá trị nằm ngoài ngưỡng cho phép ({range}).",
+        "outOfNormalRange": "Ngoài khoảng bình thường ({range}). Hệ thống vẫn chấp nhận."
+      },
+      "patientHeader": {
+        "sectionTitle": "Hồ sơ bệnh nhân điều trị",
+        "previousDiagnosisRef": "Đã tham chiếu chỉ số từ lần điều trị gần nhất",
+        "loading": "Đang tải thông tin bệnh nhân...",
+        "fallbackId": "Mã bệnh nhân: {id}",
+        "age": "{age} tuổi",
+        "gender": {
+          "male": "Nam",
+          "female": "Nữ"
+        },
+        "measurements": "{height} cm • {weight} kg",
+        "viewProfile": "Xem hồ sơ bệnh nhân"
+      },
+      "workspace": {
+        "title": "Chẩn đoán & Gợi ý điều trị viêm phổi cộng đồng (CAP)",
+        "subtitle": "Hoàn tất 5 bước đánh giá lâm sàng để hệ thống phân tầng nguy cơ và đề xuất phác đồ kháng sinh kinh nghiệm.",
+        "loading": "Đang tải thông tin bệnh nhân và danh mục biến lâm sàng...",
+        "noPatient": {
+          "title": "Vui lòng tạo hồ sơ bệnh nhân trước khi chẩn đoán",
+          "description": "Vui lòng nhập thông tin hành chính và sức khỏe của bệnh nhân để hệ thống tự động điền các chỉ số nền hồ sơ chẩn đoán.",
+          "backToList": "Quay lại danh sách bệnh nhân",
+          "createButton": "Tạo hồ sơ bệnh nhân"
+        },
+        "errors": {
+          "loadPatientFallback": "Không thể tải thông tin hồ sơ bệnh nhân.",
+          "loadMetaFallback": "Không thể tải dữ liệu biểu mẫu chẩn đoán.",
+          "submitFallback": "Lỗi khi gửi yêu cầu chẩn đoán.",
+          "patientLoadPrefix": "Lỗi tải hồ sơ bệnh nhân: {error}",
+          "dataLoadPrefix": "Lỗi tải dữ liệu: {error}"
+        }
+      },
+      "createPatientModal": {
+        "title": "Thêm hồ sơ bệnh nhân mới",
+        "description": "Tạo hồ sơ bệnh nhân mới để gắn vào phiên chẩn đoán và lưu phác đồ điều trị.",
+        "errorFallback": "Không thể tạo hồ sơ bệnh nhân mới."
+      },
+      "assessmentForm": {
+        "json": {
+          "import": "Import JSON",
+          "export": "Export JSON"
+        },
+        "steps": {
+          "step1": "Đánh giá lâm sàng",
+          "step2": "Dị ứng kháng sinh",
+          "step3": "Tiền sử đặc biệt",
+          "step4": "Nhiễm khuẩn khác",
+          "step5": "Mẫu vi sinh"
+        },
+        "navigation": {
+          "back": "← Quay lại"
+        },
+        "step1": {
+          "title": "1. Đánh giá chỉ số lâm sàng",
+          "description": "Các trường có dấu <required>*</required> là bắt buộc. Giá trị ngoài ngưỡng bình thường sẽ hiển thị cảnh báo vàng; ngoài ngưỡng cho phép sẽ bị từ chối.",
+          "searchPlaceholder": "Tìm theo tên biến, mã code (VD: CURB, RR, SPO2, AGE)...",
+          "booleanYes": "Có",
+          "booleanNo": "Không",
+          "nextButton": "Tiếp theo: Dị ứng kháng sinh →"
+        },
+        "step2": {
+          "title": "2. Tiền sử dị ứng kháng sinh",
+          "description": "Ghi nhận trạng thái dị ứng kháng sinh của bệnh nhân để loại trừ phác đồ không an toàn.",
+          "otherGroup": "Khác",
+          "otherAllergyLabel": "Mô tả chi tiết dị ứng",
+          "otherAllergyPlaceholder": "VD: Nổi mề đay khi dùng thuốc nhóm Beta-lactam...",
+          "searchPlaceholder": "Tìm kháng sinh hoặc nhóm kháng sinh...",
+          "selectAllVisible": "Chọn tất cả hiển thị",
+          "clearAll": "Xóa tất cả",
+          "quickSelectByGroup": "Chọn nhanh theo nhóm kháng sinh",
+          "selectedCount": "Đã chọn ({count})",
+          "nextButton": "Tiếp theo: Tiền sử đặc biệt →"
+        },
+        "step3": {
+          "title": "3. Tiền sử bệnh lý đặc biệt",
+          "description": "Nhập các ghi chú tiền sử bổ sung ngoài danh mục biến lâm sàng (không bắt buộc).",
+          "placeholder": "VD: Tiền sử lao phổi cũ, hóa trị gần đây...",
+          "addButton": "Thêm",
+          "empty": "Chưa có ghi nhận tiền sử đặc biệt nào.",
+          "nextButton": "Tiếp theo: Nhiễm khuẩn khác →"
+        },
+        "step4": {
+          "title": "4. Nhiễm khuẩn hoạt động khác đi kèm",
+          "description": "Chọn các ổ nhiễm khuẩn phối hợp ngoài viêm phổi (có thể chọn nhiều hoặc bỏ qua).",
+          "nextButton": "Tiếp theo: Mẫu vi sinh →"
+        },
+        "step5": {
+          "title": "5. Kết quả mẫu bệnh phẩm vi sinh",
+          "description": "Thêm kết quả phân lập vi sinh và kháng sinh đồ nếu có. Bỏ trống nếu chưa có kết quả xét nghiệm.",
+          "sampleHeader": "Mẫu bệnh phẩm #{index}",
+          "deleteSample": "Xóa",
+          "sampleTypeLabel": "Loại bệnh phẩm",
+          "micLabel": "Mức độ nhạy cảm (MIC)",
+          "pathogenLabel": "Tác nhân gây bệnh",
+          "pathogenPlaceholder": "-- Chọn tác nhân --",
+          "addSampleButton": "Thêm mẫu bệnh phẩm",
+          "submitting": "Đang phân tích chẩn đoán...",
+          "submitButton": "Chẩn đoán & Gợi ý phác đồ"
+        },
+        "validation": {
+          "selectAllergyAntibiotic": "Vui lòng chọn ít nhất một kháng sinh bệnh nhân bị dị ứng.",
+          "describeOtherAllergy": "Vui lòng mô tả thông tin dị ứng của bệnh nhân.",
+          "samplePathogenRequired": "Mẫu bệnh phẩm #{index}: Vui lòng chọn tác nhân gây bệnh.",
+          "invalidJsonFile": "File JSON không đúng định dạng payload chẩn đoán."
+        }
+      },
+      "result": {
+        "resetButton": "Chỉnh sửa dữ liệu / Thực hiện chẩn đoán mới",
+        "tabs": {
+          "protocol": "Theo phác đồ khuyến cáo",
+          "custom": "Bác sĩ tự chọn kháng sinh"
+        },
+        "stratification": {
+          "title": "Kết quả phân tầng mức độ nặng & nơi điều trị",
+          "severityLabel": "Mức độ nặng",
+          "treatmentSiteLabel": "Nơi điều trị",
+          "egfrLabel": "eGFR (mL/phút/1.73m²)",
+          "pregnancyLabel": "Thai kỳ / Cho con bú",
+          "pregnancyYes": "Có (Lưu ý chống chỉ định)",
+          "pregnancyNo": "Không",
+          "allergyLabel": "Dị ứng kháng sinh",
+          "noAllergy": "Không dị ứng",
+          "otherInfectionsLabel": "Nhiễm khuẩn đi kèm",
+          "noOtherInfections": "Không có",
+          "scoringMetricsTitle": "Chi tiết thang điểm đánh giá",
+          "totalScore": "Tổng điểm: {score}"
+        },
+        "missingVariables": {
+          "title": "Biến lâm sàng/cận lâm sàng chưa nhập"
+        },
+        "pathogens": {
+          "title": "Tác nhân gây bệnh nghi ngờ",
+          "heavySuspectedTitle": "Nguy cơ cao (Heavy suspected) ({count})",
+          "heavySuspectedEmpty": "Không ghi nhận yếu tố nguy cơ đặc hiệu vượt ngưỡng cảnh báo cao.",
+          "worthSuspectedTitle": "Tác nhân cần cân nhắc (Worth suspected) ({count})"
+        },
+        "protocols": {
+          "title": "Phác đồ kháng sinh khuyến cáo",
+          "subtitle": "Chọn 1 phương án phối hợp hoàn chỉnh để xác nhận điều trị.",
+          "count": "{count} phác đồ",
+          "empty": "Không có phác đồ tự động phù hợp. Vui lòng chuyển sang tab \"Bác sĩ tự chọn kháng sinh\".",
+          "defaultName": "Phác đồ #{index}",
+          "optionLabel": "Lựa chọn #{index}",
+          "selected": "● Đã chọn",
+          "selectThis": "○ Chọn phác đồ này",
+          "selectedSummary": "Đã chọn tổ hợp gồm {count} kháng sinh.",
+          "selectPrompt": "Chọn một lựa chọn phác đồ ở trên để xác nhận.",
+          "saving": "Đang lưu phác đồ...",
+          "confirmButton": "Xác nhận phác đồ đã chọn"
+        },
+        "cdss": {
+          "title": "Chi tiết lập luận hệ thống (CDSS)",
+          "evidencesButton": "Bằng chứng đánh giá ({count})",
+          "resultLabel": "Kết quả:",
+          "missingData": "Thiếu dữ liệu",
+          "met": "Đạt",
+          "notMet": "Không đạt",
+          "scorePoints": "(+{score} điểm)",
+          "microbialButton": "Kết quả vi sinh ({count})",
+          "microbialEmpty": "Không có mẫu vi sinh."
+        },
+        "custom": {
+          "title": "Bác sĩ tự chọn phác đồ kháng sinh",
+          "subtitle": "Bắt buộc ghi rõ lý do chỉ định. Hệ thống sẽ tự động kiểm tra cảnh báo nếu chọn nhiều thuốc cùng nhóm kháng sinh.",
+          "searchPlaceholder": "Tìm theo tên thuốc, nhóm kháng sinh hoặc phân loại AWaRe...",
+          "selectedLabel": "Kháng sinh đã chọn ({count})",
+          "reserveWarning": "Lưu ý: Bạn đang chọn kháng sinh thuộc nhóm <bold>Reserve</bold> (kháng sinh dự trữ ưu tiên quản lý nghiêm ngặt).",
+          "reasonLabel": "Lý do không sử dụng phác đồ khuyến cáo",
+          "reasonPlaceholder": "VD: Nghi ngờ vi khuẩn đa kháng, tiền sử thất bại điều trị trước đó...",
+          "helperText": "Cần chọn ít nhất 1 kháng sinh và nhập đầy đủ lý do.",
+          "saving": "Đang kiểm tra & lưu...",
+          "confirmButton": "Xác nhận điều trị tự chọn"
+        },
+        "errors": {
+          "confirmFailed": "Xác nhận phác đồ thất bại.",
+          "selectAtLeastOne": "Vui lòng chọn ít nhất một kháng sinh.",
+          "reasonRequired": "Bắt buộc nhập lý do khi bác sĩ tự chọn phác đồ kháng sinh.",
+          "warnCheckFailed": "Không thể kiểm tra cảnh báo phối hợp kháng sinh."
+        },
+        "groupWarningModal": {
+          "title": "Cảnh báo phối hợp kháng sinh cùng nhóm",
+          "description": "Các kháng sinh bạn vừa chọn có thuốc thuộc <bold>cùng một nhóm kháng sinh</bold>. Việc phối hợp cùng nhóm thường không làm tăng phổ tác dụng mà có thể tăng độc tính. Bạn có chắc chắn muốn tiếp tục xác nhận không?",
+          "cancelButton": "Hủy & chọn lại",
+          "confirmButton": "Vẫn tiếp tục xác nhận"
+        }
+      }
     }
   },
   "admin": {

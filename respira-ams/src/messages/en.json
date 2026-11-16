@@ -1352,6 +1352,288 @@
           "invalidRange": "Start time must be earlier than or equal to end time"
         }
       }
+    },
+    "diagnose": {
+      "categories": {
+        "PersonalInformation": "Patient Information",
+        "MedicalHistory": "Medical & Medication History",
+        "Paraclinical": "Paraclinical",
+        "Clinical": "Clinical",
+        "Other": "Other Indicators"
+      },
+      "allergyTypes": {
+        "No": "No known drug allergies",
+        "Yes": "Antibiotic allergy",
+        "NonRegisteredAntibiotic": "Unlisted antibiotic allergy",
+        "Unknown": "Unknown"
+      },
+      "micCategories": {
+        "Susceptible": "Susceptible (S)",
+        "Intermediate": "Intermediate (I)",
+        "Resistant": "Resistant (R)"
+      },
+      "awareClassifications": {
+        "Access": "Access",
+        "AccessWatch": "Access-Watch",
+        "Watch": "Watch",
+        "Reserve": "Reserve",
+        "Others": "Others",
+        "Unclassified": "Unclassified"
+      },
+      "severity": {
+        "Mild": "Mild",
+        "Moderate": "Moderate",
+        "Severe": "Severe"
+      },
+      "treatmentSite": {
+        "Outpatient": "Outpatient",
+        "Inpatient": "Inpatient",
+        "IntensiveCareUnit": "Intensive Care Unit (ICU)"
+      },
+      "sampleTypes": {
+        "Unknown": "Unknown",
+        "Sputum": "Sputum",
+        "BronchoalveolarLavageFluid": "Bronchoalveolar Lavage Fluid (BAL)",
+        "PleuralFluid": "Pleural Fluid",
+        "Urine": "Urine",
+        "Blood": "Blood",
+        "AbdominalFluid": "Abdominal Fluid",
+        "CerebrospinalFluid": "Cerebrospinal Fluid (CSF)",
+        "WoundExudate": "Wound Exudate / Pus",
+        "Other": "Other Specimen"
+      },
+      "infectionTypes": {
+        "SkinAndSoftTissueInfection": "Skin and Soft Tissue Infection",
+        "SepticArthritis": "Septic Arthritis",
+        "Osteomyelitis": "Osteomyelitis",
+        "BacterialMyositisOrMuscleAbscess": "Bacterial Myositis / Muscle Abscess",
+        "InfectedGoutyTophus": "Infected Gouty Tophus",
+        "PyelonephritisOrRenalAbscess": "Pyelonephritis / Renal Abscess",
+        "AcuteCystitis": "Acute Cystitis",
+        "AcuteNonGonococcalUrethritis": "Acute Non-Gonococcal Urethritis",
+        "BacterialVaginourethritis": "Bacterial Vaginourethritis",
+        "BacterialEndometritis": "Bacterial Endometritis",
+        "PurulentMeningitis": "Purulent Meningitis",
+        "BacterialEncephalitis": "Bacterial Encephalitis",
+        "PleuralEmpyema": "Pleural Empyema",
+        "MediastinalAbscess": "Mediastinal Abscess",
+        "InfectiveEndocarditis": "Infective Endocarditis",
+        "BacterialMyocarditis": "Bacterial Myocarditis",
+        "BacterialPericarditis": "Bacterial Pericarditis",
+        "PulmonaryTuberculosis": "Pulmonary Tuberculosis",
+        "ExtrapulmonaryTuberculosis": "Extrapulmonary Tuberculosis",
+        "BiliaryTractInfection": "Biliary Tract Infection",
+        "BacterialLiverAbscess": "Bacterial Liver Abscess",
+        "InfectedAcutePancreatitis": "Infected Acute Pancreatitis",
+        "BacterialPeritonitis": "Bacterial Peritonitis",
+        "BacterialDiarrhea": "Bacterial Diarrhea",
+        "HelicobacterPyloriInfection": "Helicobacter pylori Infection",
+        "Sepsis": "Sepsis",
+        "OrbitalCellulitis": "Orbital Cellulitis",
+        "Conjunctivitis": "Conjunctivitis",
+        "Keratitis": "Keratitis",
+        "Dacryocystitis": "Dacryocystitis",
+        "MaxillofacialAbscess": "Maxillofacial Abscess",
+        "Other": "Other Infection"
+      },
+      "range": {
+        "and": "and",
+        "placeholderDefault": "Enter value...",
+        "placeholderBetween": "Normal: {min} – {max}",
+        "placeholderMin": "Normal: ≥ {min}",
+        "placeholderMax": "Normal: ≤ {max}"
+      },
+      "validation": {
+        "required": "Please enter \"{name}\".",
+        "invalidNumber": "Value must be a valid number.",
+        "outOfAcceptedRange": "Value is outside the accepted range ({range}).",
+        "outOfNormalRange": "Outside normal range ({range}). Still accepted by the system."
+      },
+      "patientHeader": {
+        "sectionTitle": "Treating Patient Profile",
+        "previousDiagnosisRef": "Referenced clinical metrics from the most recent treatment",
+        "loading": "Loading patient information...",
+        "fallbackId": "Patient ID: {id}",
+        "age": "{age} yrs",
+        "gender": {
+          "male": "Male",
+          "female": "Female"
+        },
+        "measurements": "{height} cm • {weight} kg",
+        "viewProfile": "View Patient Profile"
+      },
+      "workspace": {
+        "title": "Community-Acquired Pneumonia (CAP) Diagnosis & Treatment Guidance",
+        "subtitle": "Complete the 5-step clinical assessment to stratify risk and generate empirical antibiotic regimen recommendations.",
+        "loading": "Loading patient profile and clinical variable catalog...",
+        "noPatient": {
+          "title": "Please create a patient profile before diagnosing",
+          "description": "Enter the patient's demographic and baseline health information so the system can pre-fill baseline metrics for the diagnostic form.",
+          "backToList": "Back to Patient List",
+          "createButton": "Create Patient Profile"
+        },
+        "errors": {
+          "loadPatientFallback": "Unable to load patient profile information.",
+          "loadMetaFallback": "Unable to load diagnostic form metadata.",
+          "submitFallback": "Error submitting diagnosis request.",
+          "patientLoadPrefix": "Error loading patient profile: {error}",
+          "dataLoadPrefix": "Error loading data: {error}"
+        }
+      },
+      "createPatientModal": {
+        "title": "Add New Patient Profile",
+        "description": "Create a new patient profile to attach to this diagnostic session and save treatment plans.",
+        "errorFallback": "Unable to create a new patient profile."
+      },
+      "assessmentForm": {
+        "json": {
+          "import": "Import JSON",
+          "export": "Export JSON"
+        },
+        "steps": {
+          "step1": "Clinical Assessment",
+          "step2": "Antibiotic Allergy",
+          "step3": "Special History",
+          "step4": "Other Infections",
+          "step5": "Microbiology"
+        },
+        "navigation": {
+          "back": "← Back"
+        },
+        "step1": {
+          "title": "1. Clinical & Paraclinical Assessment",
+          "description": "Fields marked with <required>*</required> are required. Values outside the normal range show a yellow warning; values outside the accepted range will be rejected.",
+          "searchPlaceholder": "Search by variable name or code (e.g., CURB, RR, SPO2, AGE)...",
+          "booleanYes": "Yes",
+          "booleanNo": "No",
+          "nextButton": "Next: Antibiotic Allergy →"
+        },
+        "step2": {
+          "title": "2. Antibiotic Allergy History",
+          "description": "Record the patient's antibiotic allergy status to exclude unsafe treatment regimens.",
+          "otherGroup": "Other",
+          "otherAllergyLabel": "Detailed Allergy Description",
+          "otherAllergyPlaceholder": "e.g., Urticaria when taking Beta-lactam antibiotics...",
+          "searchPlaceholder": "Search antibiotic or antibiotic class...",
+          "selectAllVisible": "Select All Visible",
+          "clearAll": "Clear All",
+          "quickSelectByGroup": "Quick Select by Antibiotic Class",
+          "selectedCount": "Selected ({count})",
+          "nextButton": "Next: Special History →"
+        },
+        "step3": {
+          "title": "3. Special Medical History",
+          "description": "Enter additional medical history notes beyond the clinical variable list (optional).",
+          "placeholder": "e.g., History of prior pulmonary tuberculosis, recent chemotherapy...",
+          "addButton": "Add",
+          "empty": "No special medical history recorded yet.",
+          "nextButton": "Next: Other Infections →"
+        },
+        "step4": {
+          "title": "4. Concomitant Active Infections",
+          "description": "Select co-existing sites of infection outside pneumonia (select multiple or skip).",
+          "nextButton": "Next: Microbiology →"
+        },
+        "step5": {
+          "title": "5. Microbiology Specimen Results",
+          "description": "Add microbiological culture and susceptibility results if available. Leave empty if test results are pending.",
+          "sampleHeader": "Specimen #{index}",
+          "deleteSample": "Remove",
+          "sampleTypeLabel": "Specimen Type",
+          "micLabel": "Susceptibility (MIC)",
+          "pathogenLabel": "Pathogen",
+          "pathogenPlaceholder": "-- Select pathogen --",
+          "addSampleButton": "Add Specimen",
+          "submitting": "Analyzing diagnosis...",
+          "submitButton": "Diagnose & Recommend Regimen"
+        },
+        "validation": {
+          "selectAllergyAntibiotic": "Please select at least one antibiotic the patient is allergic to.",
+          "describeOtherAllergy": "Please describe the patient's allergy details.",
+          "samplePathogenRequired": "Specimen #{index}: Please select a causative pathogen.",
+          "invalidJsonFile": "The JSON file does not match the expected diagnosis payload format."
+        }
+      },
+      "result": {
+        "resetButton": "Edit Clinical Data / Perform New Diagnosis",
+        "tabs": {
+          "protocol": "Recommended Regimens",
+          "custom": "Custom Antibiotic Selection"
+        },
+        "stratification": {
+          "title": "Severity Stratification & Care Setting Results",
+          "severityLabel": "Severity Level",
+          "treatmentSiteLabel": "Treatment Setting",
+          "egfrLabel": "eGFR (mL/min/1.73m²)",
+          "pregnancyLabel": "Pregnancy / Lactation",
+          "pregnancyYes": "Yes (Check contraindications)",
+          "pregnancyNo": "No",
+          "allergyLabel": "Antibiotic Allergy",
+          "noAllergy": "No known drug allergies",
+          "otherInfectionsLabel": "Concomitant Infections",
+          "noOtherInfections": "None",
+          "scoringMetricsTitle": "Severity Scoring Breakdown",
+          "totalScore": "Total score: {score}"
+        },
+        "missingVariables": {
+          "title": "Unentered Clinical / Paraclinical Variables"
+        },
+        "pathogens": {
+          "title": "Suspected Pathogens",
+          "heavySuspectedTitle": "High Risk (Heavy Suspected) ({count})",
+          "heavySuspectedEmpty": "No specific risk factors exceeded the high-alert threshold.",
+          "worthSuspectedTitle": "Pathogens to Consider (Worth Suspected) ({count})"
+        },
+        "protocols": {
+          "title": "Recommended Antibiotic Regimens",
+          "subtitle": "Select one complete combination option to confirm treatment.",
+          "count": "{count} regimens",
+          "empty": "No automated regimen matched. Please switch to the \"Custom Antibiotic Selection\" tab.",
+          "defaultName": "Regimen #{index}",
+          "optionLabel": "Option #{index}",
+          "selected": "● Selected",
+          "selectThis": "○ Select this regimen",
+          "selectedSummary": "Selected combination of {count} antibiotic(s).",
+          "selectPrompt": "Select a regimen option above to confirm.",
+          "saving": "Saving regimen...",
+          "confirmButton": "Confirm Selected Regimen"
+        },
+        "cdss": {
+          "title": "Clinical Decision Support (CDSS) Reasoning",
+          "evidencesButton": "Evaluation Evidence ({count})",
+          "resultLabel": "Result:",
+          "missingData": "Missing data",
+          "met": "Met",
+          "notMet": "Not met",
+          "scorePoints": "(+{score} pts)",
+          "microbialButton": "Microbiology Results ({count})",
+          "microbialEmpty": "No microbiology specimens recorded."
+        },
+        "custom": {
+          "title": "Custom Antibiotic Regimen Selection",
+          "subtitle": "A clinical rationale is required. The system will automatically warn if multiple agents from the same antibiotic class are selected.",
+          "searchPlaceholder": "Search by drug name, antibiotic class, or AWaRe classification...",
+          "selectedLabel": "Selected Antibiotics ({count})",
+          "reserveWarning": "Note: You have selected an antibiotic in the <bold>Reserve</bold> group (strictly monitored reserve antibiotics).",
+          "reasonLabel": "Rationale for overriding recommended regimens",
+          "reasonPlaceholder": "e.g., Suspected multidrug-resistant pathogen, history of prior treatment failure...",
+          "helperText": "Select at least 1 antibiotic and provide a complete clinical rationale.",
+          "saving": "Validating & saving...",
+          "confirmButton": "Confirm Custom Treatment"
+        },
+        "errors": {
+          "confirmFailed": "Failed to confirm treatment regimen.",
+          "selectAtLeastOne": "Please select at least one antibiotic.",
+          "reasonRequired": "A clinical rationale is required when selecting a custom antibiotic regimen.",
+          "warnCheckFailed": "Unable to check antibiotic combination warnings."
+        },
+        "groupWarningModal": {
+          "title": "Same-Class Antibiotic Combination Warning",
+          "description": "Your selected antibiotics include drugs from the <bold>same antibiotic class</bold>. Combining agents from the same class usually does not broaden spectrum coverage and may increase toxicity. Are you sure you want to proceed?",
+          "cancelButton": "Cancel & Reselect",
+          "confirmButton": "Proceed Anyway"
+        }
+      }
     }
   },
   
