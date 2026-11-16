@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Globe, Monitor, Moon, Palette, Settings, Sun, Type } from "lucide-react";
+import { Globe, Monitor, Moon, Palette, Settings, Sun } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -13,36 +13,14 @@ const THEME_OPTIONS = [
 	{ value: "system", icon: Monitor, labelKey: "themeSystem" },
 ] as const;
 
-const FONT_OPTIONS = [
-	{ value: "small", label: "Nhỏ (90%)", size: "14px" },
-	{ value: "normal", label: "Tiêu chuẩn", size: "16px" },
-	{ value: "large", label: "Lớn (110%)", size: "18px" },
-] as const;
-
 export function AdminSettingsView() {
 	const t = useTranslations("admin.settings");
 	const { theme, setTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
-	const [fontSize, setFontSize] = useState<string>("normal");
 
 	useEffect(() => {
 		setMounted(true);
-		const saved = localStorage.getItem("respira_admin_font_size") || "normal";
-		setFontSize(saved);
-		const option = FONT_OPTIONS.find((o) => o.value === saved);
-		if (option) {
-			document.documentElement.style.fontSize = option.size;
-		}
 	}, []);
-
-	const handleFontSizeChange = (size: string) => {
-		setFontSize(size);
-		localStorage.setItem("respira_admin_font_size", size);
-		const option = FONT_OPTIONS.find((o) => o.value === size);
-		if (option) {
-			document.documentElement.style.fontSize = option.size;
-		}
-	};
 
 	return (
 		<div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6 lg:p-8">
@@ -58,7 +36,6 @@ export function AdminSettingsView() {
 				<p className="mt-1 text-xs text-slate-500 sm:text-sm">{t("description")}</p>
 			</div>
 
-			{/* Giao diện & Chế độ màu (UC-04.2) */}
 			<div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
 				<div className="flex items-start gap-3">
 					<div className="rounded-lg bg-slate-100 p-2 text-slate-600">
@@ -92,40 +69,6 @@ export function AdminSettingsView() {
 				</div>
 			</div>
 
-			{/* Cỡ chữ & Hiển thị Font (UC-04.2) */}
-			<div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-				<div className="flex items-start gap-3">
-					<div className="rounded-lg bg-slate-100 p-2 text-slate-600">
-						<Type className="h-4 w-4" />
-					</div>
-					<div>
-						<h2 className="text-sm font-bold text-slate-900">Cỡ chữ & Phông hiển thị</h2>
-						<p className="text-xs text-slate-500">Điều chỉnh kích thước phông chữ toàn giao diện quản trị</p>
-					</div>
-				</div>
-				<div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
-					{FONT_OPTIONS.map(({ value, label }) => {
-						const active = mounted && fontSize === value;
-						return (
-							<button
-								key={value}
-								type="button"
-								onClick={() => handleFontSizeChange(value)}
-								className={cn(
-									"flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
-									active
-										? "bg-[#0EA5E9] text-white shadow-sm"
-										: "text-slate-600 hover:bg-slate-100"
-								)}
-							>
-								{label}
-							</button>
-						);
-					})}
-				</div>
-			</div>
-
-			{/* Ngôn ngữ hiển thị (UC-04.1) */}
 			<div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
 				<div className="flex items-start gap-3">
 					<div className="rounded-lg bg-slate-100 p-2 text-slate-600">

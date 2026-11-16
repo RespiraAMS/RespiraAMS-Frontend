@@ -56,18 +56,19 @@ export function UserSearchBar({
 
 			{/* Filter dropdowns & Actions */}
 			<div className="flex items-center gap-2 flex-wrap">
-				{/* Role Filter (UC-22 Manage Doctor: Doctor & HeadDepartmentDoctor) */}
+				{/* Role Filter */}
 				<Select
 					value={filters.role}
 					onValueChange={(val) => onFiltersChange({ ...filters, role: val })}
 				>
-					<SelectTrigger className="w-[180px] h-9.5 text-xs font-semibold rounded-lg bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800">
-						<SelectValue placeholder="Phân loại bác sĩ" />
+					<SelectTrigger className="w-[145px] h-9.5 text-xs font-semibold rounded-lg bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800">
+						<SelectValue placeholder={t("roleFilter")} />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="ALL">Tất cả bác sĩ</SelectItem>
-						<SelectItem value="Doctor">Bác sĩ điều trị (Doctor)</SelectItem>
-						<SelectItem value="HeadDepartmentDoctor">Bác sĩ Trưởng khoa (Head Doctor)</SelectItem>
+						<SelectItem value="ALL">{t("allRoles")}</SelectItem>
+						<SelectItem value="Doctor">{t("roleDoctor")}</SelectItem>
+						<SelectItem value="Manager">{t("roleHeadDoctor")}</SelectItem>
+						<SelectItem value="Admin">{t("roleAdmin")}</SelectItem>
 					</SelectContent>
 				</Select>
 
@@ -86,15 +87,14 @@ export function UserSearchBar({
 					</SelectContent>
 				</Select>
 
-				{/* Create Doctor Button */}
+				{/* Create User Button */}
 				<Button
 					type="button"
 					onClick={onOpenCreateDialog}
 					className="h-9.5 px-4 rounded-lg bg-[#0EA5E9] hover:bg-[#0284C7] text-white font-semibold text-xs gap-1.5 shadow-sm transition-colors cursor-pointer"
-					id="btn-add-doctor"
 				>
 					<UserPlus className="w-4 h-4" />
-					<span>Thêm bác sĩ</span>
+					<span>{t("addUser")}</span>
 				</Button>
 			</div>
 		</div>

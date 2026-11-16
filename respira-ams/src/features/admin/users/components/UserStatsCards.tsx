@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Stethoscope, Briefcase, UserCheck, UserX, Users } from "lucide-react";
+import { Users, Stethoscope, Briefcase, ShieldAlert, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserStats } from "../types";
 
@@ -9,52 +9,52 @@ interface UserStatsCardsProps {
 	stats: UserStats;
 }
 
-export const UserStatsCards = React.memo(function UserStatsCards({ stats }: UserStatsCardsProps) {
+export function UserStatsCards({ stats }: UserStatsCardsProps) {
 	const cards = [
 		{
-			title: "Tổng số Bác sĩ",
+			title: "Tổng người dùng",
 			value: stats.total,
-			subtitle: "Hồ sơ y tế trong DB",
+			subtitle: "Tài khoản trong hệ thống",
 			icon: Users,
 			color: "text-[#0EA5E9]",
 			bgColor: "bg-sky-50 dark:bg-sky-950/40",
 			borderColor: "border-sky-100 dark:border-sky-900/40",
 		},
 		{
-			title: "Bác sĩ điều trị",
+			title: "Bác sĩ lâm sàng",
 			value: stats.doctors,
-			subtitle: "Bác sĩ lâm sàng (Doctor)",
+			subtitle: "Khoa phòng điều trị",
 			icon: Stethoscope,
 			color: "text-emerald-600",
 			bgColor: "bg-emerald-50 dark:bg-emerald-950/40",
 			borderColor: "border-emerald-100 dark:border-emerald-900/40",
 		},
 		{
-			title: "Bác sĩ Trưởng khoa",
-			value: stats.headDoctors,
-			subtitle: "Quản lý (HeadDepartment)",
+			title: "Trưởng khoa & Quản lý",
+			value: stats.managers,
+			subtitle: "Phê duyệt & giám sát",
 			icon: Briefcase,
 			color: "text-purple-600",
 			bgColor: "bg-purple-50 dark:bg-purple-950/40",
 			borderColor: "border-purple-100 dark:border-purple-900/40",
 		},
 		{
+			title: "Quản trị viên",
+			value: stats.admins,
+			subtitle: "Toàn quyền hệ thống",
+			icon: ShieldAlert,
+			color: "text-indigo-600",
+			bgColor: "bg-indigo-50 dark:bg-indigo-950/40",
+			borderColor: "border-indigo-100 dark:border-indigo-900/40",
+		},
+		{
 			title: "Đang hoạt động",
 			value: stats.active,
-			subtitle: "Sẵn sàng nhận bệnh",
-			icon: UserCheck,
+			subtitle: `${stats.inactive} tài khoản tạm khóa`,
+			icon: CheckCircle2,
 			color: "text-teal-600",
 			bgColor: "bg-teal-50 dark:bg-teal-950/40",
 			borderColor: "border-teal-100 dark:border-teal-900/40",
-		},
-		{
-			title: "Đã tạm khóa",
-			value: stats.inactive,
-			subtitle: "Tạm dừng quyền truy cập",
-			icon: UserX,
-			color: "text-rose-600",
-			bgColor: "bg-rose-50 dark:bg-rose-950/40",
-			borderColor: "border-rose-100 dark:border-rose-900/40",
 		},
 	];
 
@@ -90,5 +90,5 @@ export const UserStatsCards = React.memo(function UserStatsCards({ stats }: User
 			})}
 		</div>
 	);
-});
+}
 

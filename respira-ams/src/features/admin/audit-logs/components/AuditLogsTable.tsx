@@ -21,7 +21,6 @@ import {
 	Layers,
 	Globe,
 	User,
-	RotateCcw,
 } from "lucide-react";
 import { AuditLogItem, AuditLogStatus, AuditServiceType, AuditLogSeverity } from "../types";
 
@@ -30,16 +29,9 @@ interface AuditLogsTableProps {
 	isLoading: boolean;
 	isSearching?: boolean;
 	onViewDetail: (item: AuditLogItem) => void;
-	onRollback?: (item: AuditLogItem) => void;
 }
 
-export function AuditLogsTable({
-	logs,
-	isLoading,
-	isSearching = false,
-	onViewDetail,
-	onRollback,
-}: AuditLogsTableProps) {
+export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDetail }: AuditLogsTableProps) {
 	const t = useTranslations("admin.auditLogs");
 
 	const formatDateTime = (isoString: string) => {
@@ -202,25 +194,25 @@ export function AuditLogsTable({
 				<Table className="table-fixed w-full">
 					<TableHeader className="bg-slate-50/80">
 						<TableRow className="border-b border-slate-200 hover:bg-transparent">
-							<TableHead className="w-[120px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 pl-4 whitespace-nowrap">
+							<TableHead className="w-[130px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 pl-4">
 								{t("colTime")}
 							</TableHead>
-							<TableHead className="w-[190px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 whitespace-nowrap">
+							<TableHead className="w-[210px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
 								{t("colActor")}
 							</TableHead>
-							<TableHead className="w-[90px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 whitespace-nowrap">
+							<TableHead className="w-[105px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
 								{t("colService")}
 							</TableHead>
-							<TableHead className="w-[190px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 whitespace-nowrap">
+							<TableHead className="min-w-[260px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
 								{t("colActionTarget")}
 							</TableHead>
-							<TableHead className="w-[150px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 whitespace-nowrap">
+							<TableHead className="w-[125px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
 								{t("colIpDuration")}
 							</TableHead>
-							<TableHead className="w-[185px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 whitespace-nowrap">
+							<TableHead className="w-[135px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5">
 								{t("colStatusSeverity")}
 							</TableHead>
-							<TableHead className="w-[75px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 text-right pr-4 whitespace-nowrap">
+							<TableHead className="w-[70px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3.5 text-right pr-4">
 								{t("colDetail")}
 							</TableHead>
 						</TableRow>
@@ -235,7 +227,7 @@ export function AuditLogsTable({
 									onClick={() => onViewDetail(log)}
 								>
 									{/* Timestamp */}
-									<TableCell className="py-3 pl-4 align-top whitespace-nowrap">
+									<TableCell className="py-3 pl-4 align-top">
 										<div className="flex flex-col">
 											<span className="font-semibold text-xs text-slate-800">{timeStr}</span>
 											<span className="text-[11px] text-slate-400 font-mono mt-0.5">
@@ -246,7 +238,7 @@ export function AuditLogsTable({
 
 									{/* Actor */}
 									<TableCell className="py-3 align-top">
-										<div className="flex flex-col gap-1 min-w-0">
+										<div className="flex flex-col gap-1">
 											<div className="flex items-center gap-1.5 flex-wrap">
 												<span className="font-semibold text-xs text-slate-900 leading-tight">
 													{log.actorName}
@@ -260,27 +252,21 @@ export function AuditLogsTable({
 									</TableCell>
 
 									{/* Service */}
-									<TableCell className="py-3 align-top whitespace-nowrap">
+									<TableCell className="py-3 align-top">
 										{renderServiceBadge(log.service)}
 									</TableCell>
 
 									{/* Action & Target */}
-									<TableCell className="py-3 align-top max-w-[190px] overflow-hidden">
-										<div className="flex flex-col gap-1 min-w-0 w-full overflow-hidden">
-											<span
-												className="font-semibold text-xs text-slate-900 truncate block leading-snug"
-												title={log.action}
-											>
+									<TableCell className="py-3 align-top">
+										<div className="flex flex-col gap-1">
+											<span className="font-semibold text-xs text-slate-900 line-clamp-2 leading-snug">
 												{log.action}
 											</span>
-											<div className="flex items-center gap-1.5 min-w-0 w-full">
-												<span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded font-mono shrink-0">
+											<div className="flex items-center gap-1.5 flex-wrap">
+												<span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded font-mono">
 													{log.category}
 												</span>
-												<span
-													className="text-[11px] text-slate-500 font-mono truncate flex-1 min-w-0"
-													title={log.target}
-												>
+												<span className="text-[11px] text-slate-500 font-mono truncate max-w-[220px]">
 													{log.target}
 												</span>
 											</div>
@@ -288,7 +274,7 @@ export function AuditLogsTable({
 									</TableCell>
 
 									{/* IP & Latency */}
-									<TableCell className="py-3 align-top whitespace-nowrap">
+									<TableCell className="py-3 align-top">
 										<div className="flex flex-col">
 											<span className="font-mono text-xs text-slate-700">
 												{log.ipAddress}
@@ -300,8 +286,8 @@ export function AuditLogsTable({
 									</TableCell>
 
 									{/* Status & Severity */}
-									<TableCell className="py-3 align-top whitespace-nowrap">
-										<div className="flex flex-col gap-1 items-start">
+									<TableCell className="py-3 align-top">
+										<div className="flex flex-col gap-1">
 											<div>{renderStatusBadge(log.status)}</div>
 											<div>{renderSeverityBadge(log.severity)}</div>
 										</div>
@@ -310,37 +296,20 @@ export function AuditLogsTable({
 									{/* Action Button */}
 									<TableCell
 										className="py-3 pr-4 text-right align-top"
+										onClick={(e) => {
+											e.stopPropagation();
+											onViewDetail(log);
+										}}
 									>
-										<div className="flex items-center justify-end gap-1">
-											{onRollback && (
-												<Button
-													type="button"
-													variant="ghost"
-													size="icon"
-													onClick={(e) => {
-														e.stopPropagation();
-														onRollback(log);
-													}}
-													className="h-8 w-8 rounded-lg text-amber-600 hover:text-amber-800 hover:bg-amber-50 cursor-pointer"
-													title="Hoàn tác sự kiện này (Rollback)"
-												>
-													<RotateCcw className="w-4 h-4" />
-												</Button>
-											)}
-											<Button
-												type="button"
-												variant="ghost"
-												size="icon"
-												onClick={(e) => {
-													e.stopPropagation();
-													onViewDetail(log);
-												}}
-												className="h-8 w-8 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 cursor-pointer"
-												title="Xem chi tiết sự kiện"
-											>
-												<Eye className="w-4 h-4" />
-											</Button>
-										</div>
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon"
+											className="h-8 w-8 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 cursor-pointer"
+											title="Xem chi tiết sự kiện"
+										>
+											<Eye className="w-4 h-4" />
+										</Button>
 									</TableCell>
 								</TableRow>
 							);

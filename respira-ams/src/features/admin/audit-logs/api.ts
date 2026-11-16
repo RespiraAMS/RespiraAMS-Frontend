@@ -54,10 +54,6 @@ function mapActionTitle(action: string): string {
 		"Authentication.LogoutSucceeded": "Đăng xuất khỏi hệ thống",
 		"Authentication.AccountCreated": "Khởi tạo tài khoản người dùng mới",
 		"Authentication.AccountUpdated": "Cập nhật thông tin / trạng thái tài khoản",
-		"Authentication.AccountLocked": "Khóa tài khoản người dùng",
-		"Authentication.AccountUnlocked": "Mở khóa tài khoản người dùng",
-		"Authentication.AccountSoftDeleted": "Xóa tài khoản người dùng",
-		"Authentication.VerificationEmailSent": "Gửi email xác thực tài khoản",
 		"Authentication.VerificationEmailFailed": "Gửi email xác thực tài khoản thất bại",
 		"Doctor.ProfileCreated": "Khởi tạo hồ sơ bác sĩ lâm sàng",
 		"Doctor.ProfileUpdated": "Cập nhật thông tin hồ sơ bác sĩ",
@@ -266,14 +262,9 @@ export async function fetchAuditLogs(
 	page: number = 1,
 	pageSize: number = 10
 ): Promise<{ items: AuditLogItem[]; total: number; stats: AuditLogStats }> {
-	const hasClientFilter =
-		Boolean(filters?.search && filters.search.trim().length > 0) ||
-		Boolean(filters?.service && filters.service !== "ALL") ||
-		Boolean(filters?.status && filters.status !== "ALL");
-
 	const params: Record<string, string | number> = {
-		page: hasClientFilter ? 1 : page,
-		pageSize: hasClientFilter ? 100 : Math.min(Math.max(pageSize, 1), 100),
+		page: 1,
+		pageSize: 100, // Tải tối đa 100 sự kiện kiểm toán mới nhất từ cơ sở dữ liệu thật
 	};
 
 	if (filters?.timeRange) {
@@ -286,29 +277,9 @@ export async function fetchAuditLogs(
 		}
 	}
 
-	let res: BackendAuditLogPagination | null = null;
-	try {
-		res = await apiRequest<BackendAuditLogPagination>(
-			`/audit-logs${buildQuery(params)}`
-		);
-	} catch (err: unknown) {
-		const apiErr = err as { status?: number };
-		if (apiErr?.status === 404) {
-			return {
-				items: [],
-				total: 0,
-				stats: {
-					total: 0,
-					successCount: 0,
-					warningCount: 0,
-					errorCount: 0,
-					uniqueActorsCount: 0,
-					successRatePercent: 100,
-				},
-			};
-		}
-		throw err;
-	}
+	const res = await apiRequest<BackendAuditLogPagination>(
+		`/audit-logs${buildQuery(params)}`
+	);
 
 	const rawItems = res?.items ?? [];
 	const allLogs: AuditLogItem[] = rawItems.map(transformBackendEntryToAuditLogItem);
@@ -331,43 +302,38 @@ export async function fetchAuditLogs(
 		successRatePercent,
 	};
 
-	// Lọc client mượt mà theo dịch vụ, trạng thái và từ khóa tìm kiếm khi có bộ lọc
-	if (hasClientFilter) {
-		let filtered = allLogs;
-		if (filters?.service && filters.service !== "ALL") {
-			filtered = filtered.filter((l) => l.service.toLowerCase() === filters.service.toLowerCase());
-		}
-		if (filters?.status && filters.status !== "ALL") {
-			filtered = filtered.filter((l) => l.status.toLowerCase() === filters.status.toLowerCase());
-		}
-		if (filters?.search && filters.search.trim().length > 0) {
-			const q = filters.search.trim().toLowerCase();
-			filtered = filtered.filter(
-				(l) =>
-					l.action.toLowerCase().includes(q) ||
-					l.actor.toLowerCase().includes(q) ||
-					l.actorName.toLowerCase().includes(q) ||
-					l.target.toLowerCase().includes(q) ||
-					l.service.toLowerCase().includes(q) ||
-					l.ipAddress.toLowerCase().includes(q) ||
-					l.correlationId.toLowerCase().includes(q)
-			);
-		}
-
-		const filteredTotal = filtered.length;
-		const start = (page - 1) * pageSize;
-		const paginatedItems = filtered.slice(start, start + pageSize);
-
-		return {
-			items: paginatedItems,
-			total: filteredTotal,
-			stats,
-		};
+	// Lọc client mượt mà theo dịch vụ, trạng thái và từ khóa tìm kiếm
+	let filtered = allLogs;
+	if (filters?.service && filters.service !== "ALL") {
+		filtered = filtered.filter((l) => l.service.toLowerCase() === filters.service.toLowerCase());
+	}
+	if (filters?.status && filters.status !== "ALL") {
+		filtered = filtered.filter((l) => l.status.toLowerCase() === filters.status.toLowerCase());
+	}
+	if (filters?.search && filters.search.trim().length > 0) {
+		const q = filters.search.trim().toLowerCase();
+		filtered = filtered.filter(
+			(l) =>
+				l.action.toLowerCase().includes(q) ||
+				l.actor.toLowerCase().includes(q) ||
+				l.actorName.toLowerCase().includes(q) ||
+				l.target.toLowerCase().includes(q) ||
+				l.service.toLowerCase().includes(q) ||
+				l.ipAddress.toLowerCase().includes(q) ||
+				l.correlationId.toLowerCase().includes(q)
+		);
 	}
 
+	const filteredTotal = filtered.length;
+	const start = (page - 1) * pageSize;
+	const paginatedItems = filtered.slice(start, start + pageSize);
+
 	return {
-		items: allLogs,
-		total: totalCount,
+		items: paginatedItems,
+		total:
+			filters?.search || filters?.service !== "ALL" || filters?.status !== "ALL"
+				? filteredTotal
+				: totalCount,
 		stats,
 	};
 }

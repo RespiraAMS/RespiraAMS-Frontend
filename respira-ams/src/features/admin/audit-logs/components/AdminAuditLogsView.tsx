@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { ShieldCheck, RotateCcw } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { AuditLogFilters, AuditLogItem, AuditLogStats } from "../types";
 import {
 	fetchAuditLogs,
@@ -15,7 +14,6 @@ import { AuditLogToolbar } from "./AuditLogToolbar";
 import { AuditLogsTable } from "./AuditLogsTable";
 import { AuditLogPagination } from "./AuditLogPagination";
 import { AuditLogDetailDialog } from "./AuditLogDetailDialog";
-import { AuditLogRollbackDialog } from "./AuditLogRollbackDialog";
 
 const PAGE_SIZE = 10;
 
@@ -45,16 +43,9 @@ export function AdminAuditLogsView() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 
-	// Detail & Rollback dialog state
+	// Detail dialog state
 	const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null);
 	const [isDetailOpen, setIsDetailOpen] = useState(false);
-	const [rollbackLog, setRollbackLog] = useState<AuditLogItem | null>(null);
-	const [isRollbackOpen, setIsRollbackOpen] = useState(false);
-
-	const handleOpenRollback = (item?: AuditLogItem) => {
-		setRollbackLog(item || selectedLog || (logs.length > 0 ? logs[0] : null));
-		setIsRollbackOpen(true);
-	};
 
 	// Tìm kiếm và lọc tức thì (0ms latency giống như quản lý người dùng)
 	const loadData = useCallback(async () => {
@@ -64,7 +55,7 @@ export function AdminAuditLogsView() {
 			setTotal(result.total);
 			setStats(result.stats);
 		} catch (err) {
-			console.warn("[AdminAuditLogsView] Failed to load audit logs:", err);
+			console.error("[AdminAuditLogsView] Failed to load audit logs:", err);
 			toast.error("Không thể tải nhật ký kiểm toán. Vui lòng thử lại.");
 		} finally {
 			setIsLoading(false);
@@ -124,31 +115,18 @@ export function AdminAuditLogsView() {
 	return (
 		<div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 			{/* Page Header */}
-			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-				<div>
-					<div className="flex items-center gap-2">
-						<div className="p-2 rounded-xl bg-sky-50 text-[#0EA5E9]">
-							<ShieldCheck className="w-5 h-5" />
-						</div>
-						<h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-							Nhật ký kiểm toán
-						</h1>
+			<div>
+				<div className="flex items-center gap-2">
+					<div className="p-2 rounded-xl bg-sky-50 text-[#0EA5E9]">
+						<ShieldCheck className="w-5 h-5" />
 					</div>
-					<p className="text-xs sm:text-sm text-slate-500 mt-1">
-						Theo dõi toàn diện các giao dịch phân tán, hoạt động đăng nhập, chỉnh sửa phác đồ và truy cập dữ liệu y tế trong hệ thống Respira
-					</p>
+					<h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+						Nhật ký kiểm toán &amp; Bảo mật
+					</h1>
 				</div>
-
-				{/* Nút Rollback ở bên trên bên phải */}
-				<Button
-					onClick={() => handleOpenRollback()}
-					className="h-9 px-4 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs flex items-center gap-2 rounded-xl shadow-xs cursor-pointer transition-all hover:shadow-md active:scale-95 shrink-0"
-					id="btn-audit-rollback"
-					title="Mở bảng hoàn tác dữ liệu (Clinical Rollback)"
-				>
-					<RotateCcw className="w-4 h-4" />
-					<span>Hoàn tác dữ liệu (Rollback)</span>
-				</Button>
+				<p className="text-xs sm:text-sm text-slate-500 mt-1">
+					Theo dõi toàn diện các giao dịch phân tán, hoạt động đăng nhập, chỉnh sửa phác đồ và truy cập dữ liệu y tế trong hệ thống Respira
+				</p>
 			</div>
 
 			{/* Stats Cards */}
@@ -172,7 +150,6 @@ export function AdminAuditLogsView() {
 				isLoading={isLoading}
 				isSearching={isRefreshing}
 				onViewDetail={handleViewDetail}
-				onRollback={handleOpenRollback}
 			/>
 
 			{/* Pagination */}
@@ -190,15 +167,6 @@ export function AdminAuditLogsView() {
 				open={isDetailOpen}
 				onOpenChange={setIsDetailOpen}
 				onRollbackSuccess={loadData}
-			/>
-
-			{/* Rollback Dialog */}
-			<AuditLogRollbackDialog
-				item={rollbackLog}
-				availableItems={logs}
-				open={isRollbackOpen}
-				onOpenChange={setIsRollbackOpen}
-				onSuccess={loadData}
 			/>
 		</div>
 	);

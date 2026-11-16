@@ -161,7 +161,7 @@ export function AdminAccountSection({
 												className="h-full w-full object-cover"
 											/>
 										) : (
-											<span suppressHydrationWarning>{currentUser.initials}</span>
+											<span>{currentUser.initials}</span>
 										)}
 									</div>
 									<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#22C55E] ring-2 ring-white dark:ring-slate-900 pointer-events-none z-10" />
@@ -169,8 +169,8 @@ export function AdminAccountSection({
 							</DropdownMenuTrigger>
 						</TooltipTrigger>
 						<TooltipContent side="right">
-							<p suppressHydrationWarning className="font-semibold text-xs">{currentUser.name}</p>
-							<p suppressHydrationWarning className="text-[10px] text-muted-foreground">
+							<p className="font-semibold text-xs">{currentUser.name}</p>
+							<p className="text-[10px] text-muted-foreground">
 								{currentUser.email || currentUser.role}
 							</p>
 						</TooltipContent>
@@ -224,7 +224,7 @@ export function AdminAccountSection({
 										className="h-full w-full object-cover"
 									/>
 								) : (
-									<span suppressHydrationWarning>{currentUser.initials}</span>
+									<span>{currentUser.initials}</span>
 								)}
 							</div>
 							<span
@@ -235,10 +235,10 @@ export function AdminAccountSection({
 
 						{/* Admin Name and Role / Email */}
 						<div className="min-w-0 flex-1">
-							<p suppressHydrationWarning className="truncate text-[11.5px] font-bold text-slate-800 leading-tight">
+							<p className="truncate text-[11.5px] font-bold text-slate-800 leading-tight">
 								{currentUser.name}
 							</p>
-							<p suppressHydrationWarning className="truncate text-[9.5px] text-slate-400 font-medium leading-tight mt-0.5">
+							<p className="truncate text-[9.5px] text-slate-400 font-medium leading-tight mt-0.5">
 								{currentUser.email || currentUser.role}
 							</p>
 						</div>

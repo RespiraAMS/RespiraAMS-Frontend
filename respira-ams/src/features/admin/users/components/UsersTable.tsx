@@ -2,6 +2,8 @@
 
 import React from "react";
 import {
+	MoreVertical,
+	Eye,
 	Edit,
 	Trash2,
 	Lock,
@@ -18,6 +20,13 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -123,21 +132,17 @@ export function UsersTable({
 								key={user.id}
 								className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
 							>
-								{/* Name & Avatar (Nhấn vào để xem chi tiết) */}
+								{/* Name & Avatar */}
 								<TableCell className="py-3">
-									<div
-										onClick={() => onViewUser(user)}
-										className="flex items-center gap-3 cursor-pointer group select-none"
-										title="Nhấn để xem chi tiết hồ sơ bác sĩ"
-									>
-										<Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-700 transition-transform group-hover:scale-105 shrink-0">
+									<div className="flex items-center gap-3">
+										<Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-700">
 											{user.avatarUrl && <AvatarImage src={user.avatarUrl} alt={displayName} />}
-											<AvatarFallback className="bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 font-bold text-xs group-hover:bg-sky-200">
+											<AvatarFallback className="bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 font-bold text-xs">
 												{initials || "U"}
 											</AvatarFallback>
 										</Avatar>
 										<div className="min-w-0">
-											<div className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-[#0EA5E9] transition-colors">
+											<div className="font-bold text-sm text-slate-900 dark:text-white truncate">
 												{displayName}
 											</div>
 											<div className="text-[11px] text-slate-400 truncate">
@@ -170,23 +175,15 @@ export function UsersTable({
 											variant="outline"
 											className="bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-900 font-bold"
 										>
-											{ROLE_LABELS[user.role] || "Quản trị viên"}
+											{ROLE_LABELS[user.role]}
 										</Badge>
 									)}
-									{user.role === "HeadDepartmentDoctor" && (
+									{user.role === "Manager" && (
 										<Badge
 											variant="outline"
 											className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900 font-bold"
 										>
-											{ROLE_LABELS[user.role] || "Trưởng khoa"}
-										</Badge>
-									)}
-									{user.role === "MedicalRegulationReviewer" && (
-										<Badge
-											variant="outline"
-											className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900 font-bold"
-										>
-											{ROLE_LABELS[user.role] || "Thẩm định quy chế"}
+											{ROLE_LABELS[user.role]}
 										</Badge>
 									)}
 									{user.role === "Doctor" && (
@@ -194,7 +191,7 @@ export function UsersTable({
 											variant="outline"
 											className="bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900 font-bold"
 										>
-											{ROLE_LABELS[user.role] || "Bác sĩ"}
+											{ROLE_LABELS[user.role]}
 										</Badge>
 									)}
 								</TableCell>
@@ -268,7 +265,7 @@ export function UsersTable({
 									</span>
 								</TableCell>
 
-								{/* Action Menu (Sửa và Thùng rác xóa trực tiếp) */}
+								{/* Action Menu */}
 								<TableCell className="py-3 text-right">
 									<div className="flex items-center justify-end gap-1">
 										<Button
@@ -281,16 +278,37 @@ export function UsersTable({
 											<Edit className="w-3.5 h-3.5" />
 										</Button>
 
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => onDeleteUser(user)}
-											disabled={user.role === "Admin"}
-											title={user.role === "Admin" ? "Không thể xóa tài khoản Quản trị viên" : "Xóa bác sĩ"}
-											className="h-8 w-8 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 disabled:opacity-40 disabled:cursor-not-allowed"
-										>
-											<Trash2 className="w-3.5 h-3.5" />
-										</Button>
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<Button
+													variant="ghost"
+													size="icon"
+													className="h-8 w-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+												>
+													<MoreVertical className="w-4 h-4" />
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent align="end" className="w-44">
+												<DropdownMenuItem
+													onClick={() => onViewUser(user)}
+													className="cursor-pointer text-xs font-semibold gap-2 py-2"
+												>
+													<Eye className="w-3.5 h-3.5 text-slate-500" />
+													<span>Xem chi tiết</span>
+												</DropdownMenuItem>
+
+												<DropdownMenuSeparator />
+
+												<DropdownMenuItem
+													onClick={() => onDeleteUser(user)}
+													disabled={user.role === "Admin"}
+													className="cursor-pointer text-xs font-semibold gap-2 py-2 text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/40"
+												>
+													<Trash2 className="w-3.5 h-3.5 text-red-600" />
+													<span>Xóa người dùng</span>
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
 									</div>
 								</TableCell>
 							</TableRow>

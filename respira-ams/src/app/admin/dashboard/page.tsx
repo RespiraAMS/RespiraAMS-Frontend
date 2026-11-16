@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { AdminDashboardView } from "@/features/admin/dashboard/components/AdminDashboardView";
 
 export default function AdminDashboardPage() {
-	redirect("/admin/audit-logs");
+	return <AdminDashboardView />;
 }
