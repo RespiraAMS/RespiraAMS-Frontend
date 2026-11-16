@@ -35,6 +35,5 @@ export interface AuditLogItem {
 	target: string;
 	service: string;
 	status: AuditLogStatus;
-	ipAddress: string;
 }
 

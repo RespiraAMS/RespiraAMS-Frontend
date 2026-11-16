@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Users, Pill, Bug, Server } from "lucide-react";
+import { Pill, Bug, Server, ClipboardList } from "lucide-react";
 import { DashboardMetrics } from "../types";
 
 interface DashboardStatsCardsProps {
@@ -14,21 +14,25 @@ export function DashboardStatsCards({ metrics }: DashboardStatsCardsProps) {
 
 	return (
 		<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-			{/* Card 1: Tổng hồ sơ bệnh nhân */}
+			{/* Card 1: Tổng phác đồ điều trị */}
 			<div className="bg-surface rounded-[12px] p-5 border border-border-subtle shadow-2xs hover:shadow-xs transition-all relative overflow-hidden group">
 				<div className="flex items-center justify-between">
 					<p className="text-[10.5px] font-bold text-text-secondary uppercase tracking-wider">
-						{t("cardPatients", { defaultMessage: "Bệnh nhân & Hồ sơ EMR" })}
+						{t("cardTreatments", { defaultMessage: "Phác đồ điều trị" })}
 					</p>
 					<div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-primary/10 text-primary">
-						<Users className="h-4 w-4" />
+						<ClipboardList className="h-4 w-4" />
 					</div>
 				</div>
 				<p className="text-2xl font-bold text-text-primary mt-2 tracking-tight">
-					{formatCount(metrics.totalPatients)}
+					{formatCount(metrics.totalTreatments)}
 				</p>
 				<div className="flex items-center justify-between mt-3 text-xs text-text-secondary">
-					<span>{t("realClinicalData", { defaultMessage: "Dữ liệu lâm sàng thực tế" })}</span>
+					<span>
+						{t("protocolsSubtitle", {
+							defaultMessage: "Quy trình & phác đồ lâm sàng",
+						})}
+					</span>
 				</div>
 				<div className="h-1 w-20 bg-primary rounded-full mt-2" />
 			</div>

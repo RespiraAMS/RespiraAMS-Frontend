@@ -26,7 +26,7 @@ function isPublicPath(targetPath: string): boolean {
 }
 
 function isClinicalRoute(targetPath: string): boolean {
-	return /clinical-metrics|clinical-variables|treatment-protocols|criteria|pathogens|antibiotics|suspected-causes|risk-factors|antibiograms/i.test(
+	return /antibiotic-groups|antibiotics|clinical-metrics|clinical-variables|treatment-protocols|criteria|pathogens|suspected-causes|risk-factors|antibiograms/i.test(
 		targetPath
 	);
 }

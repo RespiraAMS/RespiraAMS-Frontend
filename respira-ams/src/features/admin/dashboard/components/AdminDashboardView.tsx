@@ -48,9 +48,19 @@ export function AdminDashboardView() {
 		},
 	});
 
-	const metrics = data?.metrics || null;
 	const services = useMemo(() => data?.services || [], [data?.services]);
 	const logs = useMemo(() => data?.logs || [], [data?.logs]);
+	const metrics = useMemo(() => {
+		const base = data?.metrics;
+		if (!base) return null;
+
+		const activeServices = services.filter((service) => service.status === "operational").length;
+		return {
+			...base,
+			activeServicesCount: activeServices,
+			totalServicesCount: services.length || base.totalServicesCount,
+		};
+	}, [data?.metrics, services]);
 
 	const handleRefresh = async () => {
 		await queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });

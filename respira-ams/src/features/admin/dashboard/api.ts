@@ -153,7 +153,7 @@ function formatRelativeTime(dateStr: string): string {
  * Lấy dữ liệu tổng hợp metrics từ các endpoints thật của Backend (100% dữ liệu thật, không fallback số giả)
  */
 export async function fetchAdminDashboardMetrics(): Promise<DashboardMetrics> {
-	let totalPatients = 0;
+	const totalPatients = 0;
 	let totalAntibiotics = 0;
 	let totalPathogens = 0;
 	let totalAntibioticGroups = 0;
@@ -161,23 +161,14 @@ export async function fetchAdminDashboardMetrics(): Promise<DashboardMetrics> {
 	let totalUsers = 0;
 
 	// Gọi song song các API thống kê từ Backend
-	const [patientsRes, antibioticsRes, pathogensRes, groupsRes, protocolsRes, doctorsRes] =
+	const [antibioticsRes, pathogensRes, groupsRes, protocolsRes, accountsRes] =
 		await Promise.allSettled([
-			apiRequest<GenericPaginationResult<unknown>>("/patients?page=1&size=1"),
 			apiRequest<GenericPaginationResult<unknown>>("/antibiotics?page=1&size=1"),
 			apiRequest<GenericPaginationResult<unknown>>("/pathogens?page=1&size=1"),
 			apiRequest<GenericPaginationResult<unknown>>("/antibiotic-groups?page=1&size=1"),
-			apiRequest<GenericPaginationResult<unknown>>("/clinical-metrics?page=1&size=1"),
-			apiRequest<GenericPaginationResult<unknown>>("/doctors?page=1&size=1"),
+			apiRequest<GenericPaginationResult<unknown>>("/treatment-protocols?page=1&size=1"),
+			apiRequest<GenericPaginationResult<unknown>>("/auth/accounts?Page=1&Size=1"),
 		]);
-
-	if (patientsRes.status === "fulfilled" && patientsRes.value) {
-		totalPatients =
-			patientsRes.value.metadata?.totalItemCount ??
-			patientsRes.value.totalRecords ??
-			patientsRes.value.totalCount ??
-			(Array.isArray(patientsRes.value) ? patientsRes.value.length : 0);
-	}
 
 	if (antibioticsRes.status === "fulfilled" && antibioticsRes.value) {
 		totalAntibiotics =
@@ -211,23 +202,12 @@ export async function fetchAdminDashboardMetrics(): Promise<DashboardMetrics> {
 			(Array.isArray(protocolsRes.value) ? protocolsRes.value.length : 0);
 	}
 
-	if (doctorsRes.status === "fulfilled" && doctorsRes.value) {
+	if (accountsRes.status === "fulfilled" && accountsRes.value) {
 		totalUsers =
-			doctorsRes.value.metadata?.totalItemCount ??
-			doctorsRes.value.totalRecords ??
-			doctorsRes.value.totalCount ??
-			(Array.isArray(doctorsRes.value) ? doctorsRes.value.length : 0);
-	}
-
-	// Đếm người dùng thực tế từ hệ thống quản trị nếu /doctors chưa trả số liệu
-	if (totalUsers === 0 && typeof window !== "undefined") {
-		try {
-			const raw = localStorage.getItem("respira_admin_users_v1");
-			if (raw) {
-				const users = JSON.parse(raw);
-				if (Array.isArray(users)) totalUsers = users.length;
-			}
-		} catch {}
+			accountsRes.value.metadata?.totalItemCount ??
+			accountsRes.value.totalRecords ??
+			accountsRes.value.totalCount ??
+			(Array.isArray(accountsRes.value) ? accountsRes.value.length : 0);
 	}
 
 	return {
@@ -366,7 +346,7 @@ export async function fetchMicroservicesStatus(): Promise<MicroserviceStatus[]> 
  */
 export async function fetchRecentAuditLogs(): Promise<AuditLogItem[]> {
 	try {
-		const res = await fetchAuditLogs(undefined, 1, 5);
+		const res = await fetchAuditLogs(1, 5);
 		if (res?.items && res.items.length > 0) {
 			return res.items.map((log) => ({
 				id: log.id,
@@ -377,7 +357,6 @@ export async function fetchRecentAuditLogs(): Promise<AuditLogItem[]> {
 				target: log.target,
 				service: log.service,
 				status: log.status,
-				ipAddress: log.ipAddress || "127.0.0.1",
 			}));
 		}
 	} catch (e) {

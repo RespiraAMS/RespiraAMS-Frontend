@@ -89,9 +89,6 @@ export function RecentAuditLogsCard({ logs }: RecentAuditLogsCardProps) {
 							<span className="text-[11px] text-text-tertiary block font-medium">
 								{log.timestamp}
 							</span>
-							<span className="text-[10px] font-mono text-text-tertiary">
-								{log.ipAddress}
-							</span>
 						</div>
 					</div>
 				))}
