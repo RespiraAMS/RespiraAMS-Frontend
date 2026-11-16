@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Eye, FileBarChart2, ListFilter, Loader2, RotateCcw } from "lucide-react";
+import { Eye, FileBarChart2, FileSpreadsheet, ListFilter, Loader2, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -377,9 +377,9 @@ export function DoctorsTable({ onViewDetail, onCreateReport }: DoctorsTableProps
                                             size="icon"
                                             title="Tạo báo cáo phân tích"
                                             onClick={() => onCreateReport(item)}
-                                            className="hover:bg-primary/10 text-primary h-8 w-8"
+                                            className="hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 h-8 w-8"
                                         >
-                                            <FileBarChart2 className="h-4 w-4" />
+                                            <FileSpreadsheet className="h-4 w-4" />
                                         </Button>
                                         <Button
                                             variant="ghost"

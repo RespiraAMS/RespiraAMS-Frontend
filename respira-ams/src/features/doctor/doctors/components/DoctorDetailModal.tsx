@@ -142,7 +142,7 @@ export function DoctorDetailModal({
                                         onClose();
                                         onCreateReport(doctorItem);
                                     }}
-                                    className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 self-start sm:self-center"
+                                    className="gap-1.5 bg-emerald-200/30 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald/90 self-start sm:self-center"
                                 >
                                     <FileBarChart2 className="h-4 w-4" />
                                     Tạo báo cáo
