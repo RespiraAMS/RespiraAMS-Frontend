@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Edit, ListFilter, Trash, Loader2, Eye } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useSearchStore } from "@/features/manager/stores/searchStore";
 import { AwareCategory, type AntibioticItem } from "../types";
 import { useAntibiotics, useAntibioticGroups } from "../queries";
 
@@ -20,7 +19,7 @@ function CategoryBadge({ category }: { category: string }) {
         [AwareCategory.Reserve.toLowerCase()]:      { color: "bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20",           label: "Reserve" },
         [AwareCategory.AccessWatch.toLowerCase()]:  { color: "bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20", label: "Access-Watch" },
         [AwareCategory.Others.toLowerCase()]:       { color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20", label: "Others" },
-        [AwareCategory.Unclassified.toLowerCase()]: { color: "bg-muted text-muted-foreground border border-border",                          label: "Unclassified" },
+        [AwareCategory.Unclassified.toLowerCase()]: { color: "bg-muted text-muted-foreground border border-border",                         label: "Unclassified" },
     };
     const entry = map[category.toLowerCase()] ?? { color: "bg-muted text-muted-foreground border border-border", label: category };
 
@@ -32,23 +31,26 @@ function CategoryBadge({ category }: { category: string }) {
 }
 
 interface AntibioticsTableProps {
-    onViewDetail: (id: string) => void; 
-    onEdit: (item: AntibioticItem) => void;
-    onDelete: (item: AntibioticItem) => void;
+    readOnly?: boolean;
+    searchName?: string;
+    onViewDetail: (id: string) => void;
+    onEdit?: (item: AntibioticItem) => void;
+    onDelete?: (item: AntibioticItem) => void;
 }
 
-export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: AntibioticsTableProps) {
+export function AntibioticsTable({
+    readOnly = false,
+    searchName = "",
+    onViewDetail,
+    onEdit,
+    onDelete,
+}: AntibioticsTableProps) {
     const t = useTranslations("manager.antibiotics");
     const tCommon = useTranslations("common");
 
     const [page, setPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedGroupId, setSelectedGroupId] = useState("");
-
-    const searchName = useSearchStore((s) => s.value);
-    const clearSearch = useSearchStore((s) => s.clear);
-
-    useEffect(() => { clearSearch(); }, [clearSearch]);
 
     const [prevFilters, setPrevFilters] = useState({ searchName, selectedCategory, selectedGroupId });
     if (
@@ -57,11 +59,11 @@ export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: Antibiotics
         selectedGroupId !== prevFilters.selectedGroupId
     ) {
         setPrevFilters({ searchName, selectedCategory, selectedGroupId });
-        setPage(1); 
+        setPage(1);
     }
 
     const { data: listData, isLoading, isFetching } = useAntibiotics(page, PAGE_SIZE, searchName, selectedCategory, selectedGroupId);
-    
+
     const { data: groupsData } = useAntibioticGroups();
     const antibioticGroups = groupsData?.antibioticGroups || [];
 
@@ -78,11 +80,11 @@ export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: Antibiotics
             )}
             <Table className="border-border">
                 <TableHeader>
-                    <TableRow className="border-border hover:bg-transparent">
-                        <TableHead className="text-muted-foreground">{t("table.colName")}</TableHead>
-                        <TableHead className="text-muted-foreground">{t("table.colCategory")}</TableHead>
-                        <TableHead className="text-muted-foreground">{t("table.colGroup")}</TableHead>
-                        <TableHead className="overflow-visible py-3 text-muted-foreground">
+                    <TableRow className="border-border hover:bg-transparent ">
+                        <TableHead className="text-muted-foreground font-semibold">{t("table.colName")}</TableHead>
+                        <TableHead className="text-muted-foreground font-semibold">{t("table.colCategory")}</TableHead>
+                        <TableHead className="text-muted-foreground font-semibold">{t("table.colGroup")}</TableHead>
+                        <TableHead className="overflow-visible text-muted-foreground text-right font-semibold">
                             <div className="flex items-center justify-end gap-2">
                                 {tCommon("actions")}
                                 <DropdownMenu>
@@ -90,7 +92,7 @@ export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: Antibiotics
                                         <Button variant="ghost" size="icon" className="relative hover:bg-accent">
                                             <ListFilter className="h-4 w-4" />
                                             {activeFilterCount > 0 && (
-                                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
                                                     {activeFilterCount}
                                                 </span>
                                             )}
@@ -99,7 +101,7 @@ export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: Antibiotics
                                     <DropdownMenuContent align="end" className="w-56 bg-popover text-popover-foreground border-border">
                                         <DropdownMenuLabel>{t("table.filterBy")}</DropdownMenuLabel>
                                         <DropdownMenuSeparator />
-                                        
+
                                         <DropdownMenuSub>
                                             <DropdownMenuSubTrigger>{t("table.colCategory")}</DropdownMenuSubTrigger>
                                             <DropdownMenuSubContent>
@@ -137,15 +139,15 @@ export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: Antibiotics
                 <TableBody>
                     {isLoading ? (
                         <TableRow>
-                            <TableCell colSpan={5} className="h-32 text-center text-muted-foreground"><Loader2 className="mx-auto h-6 w-6 animate-spin" /></TableCell>
+                            <TableCell colSpan={4} className="h-32 text-center text-muted-foreground"><Loader2 className="mx-auto h-6 w-6 animate-spin" /></TableCell>
                         </TableRow>
                     ) : items.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={5} className="text-center text-muted-foreground py-10">{t("table.empty")}</TableCell>
+                            <TableCell colSpan={4} className="text-center text-muted-foreground py-10">{t("table.empty")}</TableCell>
                         </TableRow>
                     ) : (
                         items.map((item) => (
-                            <TableRow key={item.id} className="border-border hover:bg-accent/50">
+                            <TableRow key={item.id} className="border-border hover:bg-accent/50 cursor-pointer" onClick={() => onViewDetail(item.id)}>
                                 <TableCell className="font-medium align-middle">
                                     <span className="text-primary font-semibold">{item.name}</span>
                                 </TableCell>
@@ -157,15 +159,43 @@ export function AntibioticsTable({ onViewDetail, onEdit, onDelete }: Antibiotics
                                 </TableCell>
                                 <TableCell className="align-middle whitespace-normal">
                                     <div className="flex gap-1 justify-end">
-                                        <Button variant="ghost" size="icon" onClick={() => onViewDetail(item.id)} className="hover:bg-accent text-foreground">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onViewDetail(item.id);
+                                            }}
+                                            className="hover:bg-accent text-foreground"
+                                        >
                                             <Eye className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => onEdit(item)} className="hover:bg-accent text-foreground">
-                                            <Edit className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => onDelete(item)} className="hover:bg-destructive/10">
-                                            <Trash className="h-4 w-4 text-destructive" />
-                                        </Button>
+                                        {!readOnly && onEdit && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onEdit(item);
+                                                }}
+                                                className="hover:bg-accent text-foreground"
+                                            >
+                                                <Edit className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                        {!readOnly && onDelete && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onDelete(item);
+                                                }}
+                                                className="hover:bg-destructive/10"
+                                            >
+                                                <Trash className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                        )}
                                     </div>
                                 </TableCell>
                             </TableRow>

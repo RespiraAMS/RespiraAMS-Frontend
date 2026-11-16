@@ -1,4 +1,4 @@
-import { DashboardView } from "@/features/manager/dashboard/components/DashboardView";
+import { ManagerDashboardView } from "@/features/manager/dashboard/components/DashboardView";
 
 export const metadata = {
 	title: "Bảng Thống kê | RespiraAMS",
@@ -8,7 +8,7 @@ export const metadata = {
 export default function Page() {
 	return (
 		<div className="container mx-auto px-4 py-8">
-			<DashboardView />
+			<ManagerDashboardView />
 		</div>
 	);
 }

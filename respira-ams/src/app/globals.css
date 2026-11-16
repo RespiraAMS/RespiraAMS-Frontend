@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./doctor-dark.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -58,8 +59,9 @@
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar: var(--sidebar);
 
+    --font-active: var(--font-inter);
     --font-sans: 'Inter', sans-serif;
-    --font-mono: var(--font-geist-mono);
+    --font-mono: var(--font-jetbrains-mono);
     --font-heading: var(--font-sans);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
@@ -168,6 +170,26 @@
     --overlay: rgba(255, 255, 255, 0.08);
     --divider-overlay: rgba(255, 255, 255, 0.16);
 
+}
+
+[data-font='sans'] {
+  --font-active: var(--font-inter);
+}
+
+[data-font='serif'] {
+  --font-active: var(--font-merriweather);
+}
+
+[data-font='mono'] {
+  --font-active: var(--font-jetbrains-mono);
+}
+
+@theme inline {
+  --font-sans: var(--font-active), sans-serif;
+}
+
+body {
+  font-family: var(--font-active), sans-serif;
 }
 
 @layer base {

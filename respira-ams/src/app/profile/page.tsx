@@ -1,4 +1,4 @@
-import { ProfileView } from "@/features/profile/components/ProfileView";
+import { redirect } from "next/navigation";
 
 export const metadata = {
 	title: "Hồ sơ Bác sĩ | RespiraAMS",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function ProfilePage() {
-	return <ProfileView />;
+	redirect("/doctor/profile");
 }
