@@ -25,7 +25,16 @@ export type GenderTypeValue = "Male" | "Female";
 
 export type ProfileRoleValue = "Doctor" | "HeadDepartmentDoctor";
 
-export const degreeOptions: Array<{ value: DegreeTypeValue; label: string; short: string }> = [
+export type ProfileTranslateFn = (
+	key: string,
+	values?: Record<string, string | number>
+) => string;
+
+export const degreeOptions: Array<{
+	value: DegreeTypeValue;
+	label: string;
+	short: string;
+}> = [
 	{ value: "Doctor", label: "Bác sĩ (Doctor)", short: "BS" },
 	{ value: "Master", label: "Thạc sĩ Y khoa (Master)", short: "ThS" },
 	{ value: "PhD", label: "Tiến sĩ Y khoa (PhD)", short: "TS" },
@@ -37,22 +46,38 @@ export const degreeOptions: Array<{ value: DegreeTypeValue; label: string; short
 	{ value: "Undergraduate", label: "Đại học (Undergraduate)", short: "ĐH" },
 ];
 
-export const academicTitleOptions: Array<{ value: AcademicTitleValue; label: string; prefix: string }> = [
+export const academicTitleOptions: Array<{
+	value: AcademicTitleValue;
+	label: string;
+	prefix: string;
+}> = [
 	{ value: "None", label: "Không có", prefix: "" },
 	{ value: "AssociateProfessor", label: "Phó Giáo sư (PGS)", prefix: "PGS." },
 	{ value: "Professor", label: "Giáo sư (GS)", prefix: "GS." },
 ];
 
-export const positionOptions: Array<{ value: PositionTypeValue; label: string; badgeColor: string }> = [
+export const positionOptions: Array<{
+	value: PositionTypeValue;
+	label: string;
+	badgeColor: string;
+}> = [
 	{ value: "StaffDoctor", label: "Bác sĩ điều trị", badgeColor: "sky" },
 	{ value: "SeniorDoctor", label: "Bác sĩ cao cấp", badgeColor: "blue" },
-	{ value: "DepartmentDeputyHead", label: "Phó Trưởng khoa", badgeColor: "indigo" },
+	{
+		value: "DepartmentDeputyHead",
+		label: "Phó Trưởng khoa",
+		badgeColor: "indigo",
+	},
 	{ value: "HeadOfDepartment", label: "Trưởng khoa", badgeColor: "emerald" },
-	{ value: "DeputyDirector", label: "Phó Giám đốc Bệnh viện", badgeColor: "amber" },
+	{
+		value: "DeputyDirector",
+		label: "Phó Giám đốc Bệnh viện",
+		badgeColor: "amber",
+	},
 	{ value: "Director", label: "Giám đốc Bệnh viện", badgeColor: "rose" },
 ];
 
-// Helper labels
+// Helper labels (fallback defaults)
 export const DEGREE_LABELS: Record<string, string> = {
 	Doctor: "Bác sĩ",
 	Master: "Thạc sĩ",
@@ -177,6 +202,45 @@ export const defaultFormState: ProfileFormState = {
 	confirmPassword: "",
 };
 
+// ─── Localized Label Helpers ──────────────────────────────────────────────────
+
+export const getDegreeLabel = (
+	degree: string,
+	t?: ProfileTranslateFn
+): string => {
+	if (degree in DEGREE_LABELS) {
+		return t ? t(`degrees.${degree}`) : DEGREE_LABELS[degree];
+	}
+	return degree;
+};
+
+export const getAcademicTitleLabel = (
+	title: string,
+	t?: ProfileTranslateFn
+): string => {
+	if (title in ACADEMIC_TITLE_LABELS) {
+		return t ? t(`academicTitles.${title}`) : ACADEMIC_TITLE_LABELS[title];
+	}
+	return title;
+};
+
+export const getPositionLabel = (
+	position: string,
+	t?: ProfileTranslateFn
+): string => {
+	if (position in POSITION_LABELS) {
+		return t ? t(`positions.${position}`) : POSITION_LABELS[position];
+	}
+	return position;
+};
+
+export const getRoleLabel = (role: string, t?: ProfileTranslateFn): string => {
+	if (role in ROLE_LABELS) {
+		return t ? t(`roles.${role}`) : ROLE_LABELS[role];
+	}
+	return role;
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export const parseIsoToLocalDate = (value?: string | null): string => {
@@ -196,8 +260,11 @@ export const parseIsoToLocalDate = (value?: string | null): string => {
 	}
 };
 
-export const formatDate = (value?: string | null): string => {
-	if (!value) return "Chưa cập nhật";
+export const formatDate = (
+	value?: string | null,
+	t?: ProfileTranslateFn
+): string => {
+	if (!value) return t ? t("notUpdated") : "Chưa cập nhật";
 	const localDateStr = parseIsoToLocalDate(value);
 	if (/^\d{4}-\d{2}-\d{2}$/.test(localDateStr)) {
 		const [year, month, day] = localDateStr.split("-");
@@ -206,39 +273,56 @@ export const formatDate = (value?: string | null): string => {
 	return localDateStr;
 };
 
-export const maskValue = (value?: string | null): string => {
-	if (!value) return "Chưa cập nhật";
+export const maskValue = (
+	value?: string | null,
+	t?: ProfileTranslateFn
+): string => {
+	if (!value) return t ? t("notUpdated") : "Chưa cập nhật";
 	if (value.length <= 4) return "****";
 	const visible = value.slice(-4);
 	return `${"*".repeat(Math.max(4, value.length - 4))}${visible}`;
 };
 
-export const getDoctorDisplayName = (doctor: DoctorProfile): string => {
+export const getDoctorDisplayName = (
+	doctor: DoctorProfile,
+	t?: ProfileTranslateFn
+): string => {
 	const firstName = (doctor.firstName || "").trim();
 	const lastName = (doctor.lastName || "").trim();
 	const fullName = [lastName, firstName].filter(Boolean).join(" ").trim();
+
 	if (!fullName) {
 		if (doctor.email) {
-			return `Bác sĩ (${doctor.email})`;
+			return t
+				? t("fallbackWithEmail", { email: doctor.email })
+				: `Bác sĩ (${doctor.email})`;
 		}
-		return "Bác sĩ";
+		return t ? t("fallbackDoctor") : "Bác sĩ";
 	}
 
-	const titlePrefix =
+	const rawTitlePrefix =
 		doctor.academicTitle === "Professor"
-			? "GS. "
+			? t
+				? t("prefixes.professor")
+				: "GS."
 			: doctor.academicTitle === "AssociateProfessor"
-				? "PGS. "
+				? t
+					? t("prefixes.associateProfessor")
+					: "PGS."
 				: "";
 
-	let degreePrefix = "BS. ";
+	const titlePrefix = rawTitlePrefix ? `${rawTitlePrefix.trim()} ` : "";
+
+	let rawDegreePrefix = t ? t("prefixes.doctor") : "BS.";
 	if (doctor.degrees?.includes("PhD")) {
-		degreePrefix = "TS. ";
+		rawDegreePrefix = t ? t("prefixes.phd") : "TS.";
 	} else if (doctor.degrees?.includes("Master")) {
-		degreePrefix = "ThS. ";
+		rawDegreePrefix = t ? t("prefixes.master") : "ThS.";
 	} else if (doctor.degrees?.includes("Doctor")) {
-		degreePrefix = "BS. ";
+		rawDegreePrefix = t ? t("prefixes.doctor") : "BS.";
 	}
+
+	const degreePrefix = rawDegreePrefix ? `${rawDegreePrefix.trim()} ` : "";
 
 	return `${titlePrefix}${degreePrefix}${fullName}`;
 };

@@ -899,7 +899,211 @@
       "profile": "Thông tin cá nhân",
       "settings": "Cài đặt",
       "logout": "Đăng xuất",
-      "online": "Đang trực tuyến"
+      "online": "Đang trực tuyến",
+      "attendingDoctor": "Bác sĩ điều trị",
+      "doctor": "Bác sĩ",
+      "doctorPrefix": "BS.",
+      "initialsFallback": "BS"
+    },
+    "profile": {
+      "notUpdated": "Chưa cập nhật",
+      "fallbackDoctor": "Bác sĩ",
+      "fallbackWithEmail": "Bác sĩ ({email})",
+      "prefixes": {
+        "professor": "GS.",
+        "associateProfessor": "PGS.",
+        "phd": "TS.",
+        "master": "ThS.",
+        "doctor": "BS."
+      },
+      "degrees": {
+        "Doctor": "Bác sĩ",
+        "Master": "Thạc sĩ",
+        "PhD": "Tiến sĩ",
+        "Bachelor": "Cử nhân",
+        "Professor": "Giáo sư",
+        "PostDoc": "Sau Tiến sĩ",
+        "Associate": "Liên kết",
+        "Graduate": "Sau đại học",
+        "Undergraduate": "Đại học"
+      },
+      "degreeOptions": {
+        "Doctor": "Bác sĩ (Doctor)",
+        "Master": "Thạc sĩ Y khoa (Master)",
+        "PhD": "Tiến sĩ Y khoa (PhD)",
+        "Bachelor": "Cử nhân Y khoa (Bachelor)",
+        "Professor": "Học vị Giáo sư (Professor)",
+        "PostDoc": "Sau Tiến sĩ (Post-Doctorate)",
+        "Associate": "Bằng liên kết (Associate)",
+        "Graduate": "Sau đại học (Graduate)",
+        "Undergraduate": "Đại học (Undergraduate)"
+      },
+      "academicTitles": {
+        "None": "Không có",
+        "AssociateProfessor": "Phó Giáo sư (PGS)",
+        "Professor": "Giáo sư (GS)"
+      },
+      "positions": {
+        "StaffDoctor": "Bác sĩ điều trị",
+        "SeniorDoctor": "Bác sĩ cao cấp",
+        "DepartmentDeputyHead": "Phó Trưởng khoa",
+        "HeadOfDepartment": "Trưởng khoa",
+        "DeputyDirector": "Phó Giám đốc Bệnh viện",
+        "Director": "Giám đốc Bệnh viện"
+      },
+      "roles": {
+        "Doctor": "Bác sĩ chuyên môn",
+        "HeadDepartmentDoctor": "Bác sĩ Trưởng khoa",
+        "Admin": "Quản trị viên",
+        "Manager": "Quản lý"
+      },
+      "view": {
+        "backToHome": "Quay lại trang chính",
+        "title": "Hồ sơ Bác sĩ & Thông tin cá nhân",
+        "subtitle": "Quản lý thông tin định danh y khoa, chức vụ lâm sàng và chứng chỉ hành nghề",
+        "refreshTooltip": "Làm mới dữ liệu từ máy chủ",
+        "refreshButton": "Làm mới",
+        "editButton": "Chỉnh sửa hồ sơ",
+        "loading": "Đang đồng bộ hồ sơ bác sĩ từ hệ thống...",
+        "toast": {
+          "refreshSuccess": "Đã làm mới thông tin hồ sơ bác sĩ thành công!",
+          "refreshErrorFallback": "Không thể kết nối đến máy chủ để tải thông tin hồ sơ bác sĩ.",
+          "invalidImageType": "Vui lòng chọn tệp hình ảnh hợp lệ (PNG, JPG, WEBP).",
+          "imageTooLarge": "Kích thước ảnh đại diện không được vượt quá 5MB.",
+          "avatarSuccess": "Đổi ảnh đại diện thành công!",
+          "avatarError": "Không thể tải ảnh đại diện lên máy chủ. Vui lòng thử lại.",
+          "updateSuccess": "Cập nhật thông tin hồ sơ bác sĩ thành công!",
+          "updateErrorFallback": "Đã xảy ra lỗi khi cập nhật hồ sơ bác sĩ. Vui lòng thử lại."
+        }
+      },
+      "initialsFallback": "BS",
+      "avatarCard": {
+        "uploading": "Đang tải...",
+        "online": "Đang trực tuyến",
+        "uploadTooltip": "Tải ảnh đại diện mới",
+        "personalInfoTitle": "Thông tin cá nhân",
+        "fullName": "Họ và tên:",
+        "dob": "Ngày sinh:",
+        "gender": "Giới tính:",
+        "male": "Nam",
+        "female": "Nữ",
+        "cccd": "Số CCCD/CMND:",
+        "hideCccd": "Ẩn số CCCD",
+        "showCccd": "Xem số CCCD",
+        "phone": "Số điện thoại:",
+        "email": "Email:",
+        "hideEmail": "Ẩn email",
+        "showEmail": "Xem email đầy đủ",
+        "address": "Địa chỉ thường trú:",
+        "profileId": "Mã hồ sơ:",
+        "accountId": "Mã tài khoản:",
+        "createdAt": "Ngày tạo:",
+        "accountStatus": "Trạng thái tài khoản:",
+        "activeStatus": "Đang hoạt động"
+      },
+      "qualificationsCard": {
+        "tabs": {
+          "qualifications": "Trình độ chuyên môn & Đào tạo",
+          "colleagues": "Danh bạ Bác sĩ đồng nghiệp"
+        },
+        "summary": {
+          "positionLabel": "Chức vụ chuyên môn",
+          "positionSub": "Vị trí công tác",
+          "academicTitleLabel": "Học hàm khoa học",
+          "academicTitleSub": "Hội đồng chức danh",
+          "roleLabel": "Vai trò hệ thống",
+          "statusPrefix": "Trạng thái: {status}"
+        },
+        "degrees": {
+          "title": "Học vị & Văn bằng y khoa đã đạt được",
+          "verified": "Đã xác minh",
+          "empty": "Chưa cập nhật học vị hoặc bằng cấp y khoa."
+        },
+        "colleagues": {
+          "title": "Danh bạ Bác sĩ nội bộ ({count})",
+          "subtitle": "Tra cứu thông tin đồng nghiệp trong hệ thống Respira AMS",
+          "searchPlaceholder": "Tìm theo họ tên hoặc số CCCD...",
+          "loading": "Đang tải danh bạ bác sĩ...",
+          "emptySearch": "Không tìm thấy bác sĩ phù hợp với từ khóa \"{query}\".",
+          "emptyDefault": "Nhập họ tên hoặc số CCCD để tra cứu đồng nghiệp."
+        }
+      },
+      "statsCards": {
+        "positionTitle": "Vị trí công tác",
+        "educationTitle": "Học hàm & Bằng cấp",
+        "degreesRecorded": "{count} Văn bằng y khoa đã ghi nhận",
+        "statusTitle": "Trạng thái hồ sơ",
+        "activeWithStatus": "Đang hoạt động ({status})",
+        "accountLabel": "Tài khoản: {account}",
+        "ssoLinked": "Đã liên kết SSO"
+      },
+      "editModal": {
+        "title": "Cập nhật Hồ sơ Bác sĩ",
+        "badge": "Hồ sơ y tế",
+        "subtitle": "Chỉnh sửa thông tin cá nhân, học vị và thiết lập bảo mật tài khoản",
+        "close": "Đóng",
+        "tabs": {
+          "general": "Thông tin cá nhân",
+          "academic": "Chuyên môn & Chức danh",
+          "security": "Bảo mật & Đổi mật khẩu"
+        },
+        "validation": {
+          "lastNameRequired": "Vui lòng nhập họ và tên đệm của bác sĩ.",
+          "firstNameRequired": "Vui lòng nhập tên của bác sĩ.",
+          "phoneRequired": "Vui lòng nhập số điện thoại liên hệ.",
+          "phoneInvalid": "Số điện thoại không hợp lệ (10 số, bắt đầu 03, 05, 07, 08, 09).",
+          "dobRequired": "Vui lòng chọn hoặc nhập ngày sinh.",
+          "dobInvalid": "Ngày sinh không đúng định dạng.",
+          "dobFuture": "Ngày sinh không được ở tương lai.",
+          "dobUnderage": "Bác sĩ phải từ 18 tuổi trở lên.",
+          "cccdRequired": "Vui lòng nhập số CCCD/CMND.",
+          "cccdInvalid": "Số CCCD/CMND phải gồm 9 hoặc 12 chữ số.",
+          "addressRequired": "Vui lòng nhập địa chỉ thường trú.",
+          "passwordMinLength": "Mật khẩu mới phải có ít nhất 6 ký tự.",
+          "passwordMismatch": "Xác nhận mật khẩu mới không trùng khớp.",
+          "invalidImageType": "Vui lòng chọn tệp hình ảnh hợp lệ (PNG, JPG, WEBP).",
+          "imageTooLarge": "Kích thước ảnh không được vượt quá 5MB."
+        },
+        "general": {
+          "chooseNewAvatar": "Chọn ảnh mới",
+          "avatarTitle": "Ảnh đại diện bác sĩ",
+          "avatarHint": "Hỗ trợ tệp PNG, JPG, WEBP. Dung lượng tối đa 5MB.",
+          "uploadFromComputer": "Tải ảnh mới từ máy tính",
+          "lastNameLabel": "Họ & Tên đệm",
+          "lastNamePlaceholder": "Ví dụ: Lê Hoàng",
+          "firstNameLabel": "Tên",
+          "firstNamePlaceholder": "Ví dụ: Minh",
+          "phoneLabel": "Số điện thoại liên hệ",
+          "phonePlaceholder": "Ví dụ: 0901234567",
+          "genderLabel": "Giới tính",
+          "dobLabel": "Ngày sinh",
+          "cccdLabel": "Số CCCD/CMND",
+          "cccdPlaceholder": "12 chữ số",
+          "addressLabel": "Địa chỉ thường trú",
+          "addressPlaceholder": "Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố",
+          "accountEmailTitle": "Email tài khoản:",
+          "systemIdentityNote": "Tài khoản định danh hệ thống"
+        },
+        "academic": {
+          "positionLabel": "Chức vụ bệnh viện",
+          "academicTitleLabel": "Học hàm khoa học",
+          "degreesLabel": "Học vị & Văn bằng y khoa đã cấp",
+          "degreesHint": "Bác sĩ có thể chọn nhiều văn bằng hoặc học vị y khoa phù hợp."
+        },
+        "security": {
+          "bannerTitle": "Đổi mật khẩu tài khoản bác sĩ",
+          "bannerDescription": "Để giữ nguyên mật khẩu hiện tại, vui lòng để trống hai ô mật khẩu dưới đây.",
+          "newPasswordLabel": "Mật khẩu mới",
+          "newPasswordPlaceholder": "Nhập ít nhất 6 ký tự...",
+          "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+          "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới..."
+        },
+        "footer": {
+          "cancel": "Hủy bỏ",
+          "saving": "Đang lưu thông tin...",
+          "save": "Lưu thay đổi"
+        }
+      }
     },
     "settings": {
       "title": "Cài đặt",
@@ -937,147 +1141,769 @@
       "riskFactors": "Yếu tố nguy cơ"
     },
     "patients": {
-      "title": "Danh sách bệnh nhân",
-      "totalPatients": "TẤT CẢ CA BỆNH",
-      "malePatients": "BỆNH NHÂN NAM",
-      "femalePatients": "BỆNH NHÂN NỮ",
-      "searchPlaceholder": "Tìm theo họ tên, mã bệnh án (BA-2026-...)",
-      "addPatient": "Thêm bệnh nhân",
-      "colPatient": "BỆNH NHÂN & MÃ B/A",
-      "colAgeGender": "TUỔI / GIỚI TÍNH",
-      "colStatus": "TÌNH TRẠNG ĐIỀU TRỊ",
-      "colActions": "THAO TÁC",
-      "statusOutOfScope": "Ngoài phạm vi",
-      "statusDeceased": "Tử vong",
-      "statusTreating": "Đang điều trị",
-      "statusRecovered": "Hồi Phục",
-      "statusOther": "Khác",
-      "yearsOld": "tuổi",
-      "male": "Nam",
-      "female": "Nữ",
-      "showing": "Hiển thị",
-      "of": "trong tổng số",
-      "prev": "Trước",
-      "next": "Sau",
-      "empty": "Không tìm thấy bệnh nhân nào.",
-      "deleteTitle": "Xác nhận xóa bệnh nhân",
-      "deleteWarning": "Lưu ý: Hệ thống chỉ thực hiện xóa mềm (soft-delete). Toàn bộ dữ liệu bệnh án và lịch sử chỉ định thuốc vẫn được bảo toàn nguyên vẹn trong cơ sở dữ liệu.",
-      "deletePrompt": "Để xác nhận, vui lòng nhập chữ",
-      "deleteInputPlaceholder": "Nhập 'delete' để xác nhận",
-      "deleteCancel": "Hủy bỏ",
-      "deleteConfirm": "Xác nhận xóa",
-      "deleting": "Đang xử lý...",
-      "editPatient": "Chỉnh sửa bệnh nhân",
-      "newPatient": "Thêm bệnh nhân mới",
-      "fullName": "Họ và tên",
-      "patientCode": "Mã bệnh án",
-      "gender": "Giới tính",
-      "birthDate": "Ngày sinh",
-      "admissionDate": "Ngày nhập viện",
-      "diagnosis": "Chẩn đoán ban đầu",
-      "notes": "Ghi chú lâm sàng",
-      "save": "Lưu thông tin",
-      "cancel": "Hủy",
-      "updateStatus": "Cập nhật trạng thái",
-      "phoneLabel": "Số điện thoại",
-      "bhytLabel": "Số thẻ BHYT",
-      "addressLabel": "Địa chỉ",
-      "physiqueLabel": "Thể trạng",
-      "nextOfKin": "Người thân",
-      "noNextOfKin": "Chưa có thông tin người thân.",
-      "treatmentTimeline": "Tiến trình điều trị",
-      "timelineSubtitle": "Danh sách mốc thời gian và trạng thái",
-      "milestonesRecorded": "mốc ghi nhận",
-      "updateStatusModalTitle": "Cập nhật trạng thái bệnh nhân",
-      "dischargeOutcome": "Kết quả điều trị (xuất viện)",
-      "dischargeNotice": "Thao tác này sẽ ghi nhận xuất viện và không thể thay đổi sau đó.",
-      "saving": "Đang lưu...",
-      "saveChanges": "Lưu thay đổi",
-      "updateProfileBadge": "Cập nhật hồ sơ",
-      "newProfileBadge": "Hồ sơ mới",
-      "patientDialogSubtitle": "Thông tin hành chính & thể trạng bệnh nhân",
-      "identityGroup": "Thông tin định danh",
-      "lastNameLabel": "Họ và tên đệm",
-      "firstNameLabel": "Tên",
-      "clinicalInfoGroup": "Mã bệnh án & Thể trạng",
-      "heightLabel": "Chiều cao (cm)",
-      "weightLabel": "Cân nặng (kg)",
-      "contactGroup": "Thông tin liên hệ & Cư trú",
-      "cityLabel": "Tỉnh / Thành phố",
-      "saveRecord": "Lưu hồ sơ",
-      "btnAddKin": "Thêm",
-      "btnEdit": "Chỉnh sửa",
-      "btnDelete": "Xóa",
-      "addNextOfKinTitle": "Thêm người thân",
-      "editNextOfKinTitle": "Chỉnh sửa người thân",
-      "kinDialogSubtitle": "Thông tin liên hệ khẩn cấp của bệnh nhân",
-      "kinFullName": "Họ và tên người thân",
-      "kinFullNamePlaceholder": "VD: Nguyễn Văn A",
-      "kinRelationship": "Mối quan hệ với bệnh nhân",
-      "kinRelationshipPlaceholder": "VD: Vợ, Chồng, Cha, Mẹ, Con, v.v.",
-      "kinPhoneNumber": "Số điện thoại liên hệ",
-      "kinPhonePlaceholder": "VD: 0912345678",
-      "kinNameRequired": "Vui lòng nhập họ và tên người thân.",
-      "kinRelationshipRequired": "Vui lòng nhập quan hệ với bệnh nhân.",
-      "kinPhoneRequired": "Vui lòng nhập số điện thoại người thân.",
-      "kinPhoneInvalid": "Số điện thoại không đúng định dạng (VD: 0912345678).",
-      "kinInvalidSpouseMale": "Bệnh nhân là Nam, mối quan hệ vợ/chồng phải là 'Vợ' (không thể là 'Chồng').",
-      "kinInvalidSpouseFemale": "Bệnh nhân là Nữ, mối quan hệ vợ/chồng phải là 'Chồng' (không thể là 'Vợ').",
-      "kinSaveFailed": "Không thể lưu thông tin người thân.",
-      "btnCancel": "Hủy",
-      "btnSaving": "Đang lưu...",
-      "btnUpdate": "Cập nhật",
-      "btnAdd": "Thêm mới",
-      "deleteKinTitle": "Xác nhận xóa người thân",
-      "deleteKinPrompt": "Bạn có chắc chắn muốn xóa thông tin người thân này không?",
-      "deleteKinFailed": "Không thể xóa người thân.",
-      "btnDeleting": "Đang xóa...",
-      "treatmentPlansSection": "Phác đồ điều trị",
-      "treatmentPlansSectionSubtitle": "Danh sách phác đồ kháng sinh của bệnh nhân",
-      "plansRecorded": "phác đồ",
-      "noTreatmentPlans": "Chưa ghi nhận phác đồ điều trị nào.",
-      "planDetailTitle": "Chi tiết phác đồ điều trị",
-      "planStatusInProgress": "Đang thực hiện",
-      "planStatusClosed": "Đã đóng",
-      "adherenceAdhereShort": "Tuân thủ",
-      "adherenceValidShort": "Không tuân thủ (Hợp lệ)",
-      "adherenceInvalidShort": "Không tuân thủ (Từ chối)",
-      "adherencePendingShort": "Chờ phê duyệt",
-      "loadingPlanDetail": "Đang tải thông tin phác đồ...",
-      "loadPlanError": "Không thể tải chi tiết phác đồ.",
-      "btnRetry": "Thử lại",
-      "colDoctor": "Bác sĩ chỉ định",
-      "diagnosisLabel": "Chẩn đoán bệnh",
-      "noDiagnosis": "Chưa ghi nhận chẩn đoán.",
-      "prescribedMedicines": "Kháng sinh chỉ định",
-      "itemsUnit": "loại thuốc",
-      "classificationLabel": "Phân loại",
-      "noMedicinesInPlan": "Chưa có thuốc kháng sinh nào được kê trong phác đồ.",
-      "medicineChoiceReason": "Lý do lựa chọn thuốc / Giải trình lâm sàng",
-      "closedReasonTitle": "Lý do đóng phác đồ",
-      "noCloseReason": "Không có ghi chú lý do.",
-      "btnReviewPlan": "Duyệt phác đồ",
-      "btnClosePlan": "Đóng phác đồ",
-      "btnCloseModal": "Đóng",
-      "closePlanTitle": "Đóng phác đồ điều trị",
-      "closePlanSubtitle": "Xác nhận kết thúc và ghi nhận lý do đóng phác đồ này",
-      "closeReasonLabel": "Lý do đóng phác đồ",
-      "closeReasonPlaceholder": "VD: Bệnh nhân đã khỏi bệnh, chuyển phác đồ khác, v.v.",
-      "closeReasonRequired": "Vui lòng nhập lý do đóng phác đồ.",
-      "closePlanFailed": "Không thể đóng phác đồ điều trị.",
-      "btnSubmitting": "Đang xử lý...",
-      "btnClosePlanConfirm": "Đóng phác đồ",
-      "reviewPlanTitle": "Đánh giá & Duyệt phác đồ",
-      "reviewPlanSubtitle": "Trưởng khoa hoặc người có thẩm quyền phê duyệt tính tuân thủ của phác đồ",
-      "reviewPlanFailed": "Không thể phê duyệt phác đồ điều trị.",
-      "adherenceAdhere": "Tuân thủ phác đồ",
-      "adherenceAdhereDesc": "Kháng sinh và liều dùng hoàn toàn tuân thủ theo hướng dẫn điều trị chuẩn.",
-      "adherenceNotAdhereValid": "Không tuân thủ - Hợp lệ (Chấp nhận)",
-      "adherenceNotAdhereValidDesc": "Khác biệt so với hướng dẫn chuẩn nhưng có căn cứ lâm sàng giải trình hợp lý.",
-      "adherenceNotAdhereInvalid": "Không tuân thủ - Không hợp lệ (Từ chối)",
-      "adherenceNotAdhereInvalidDesc": "Lựa chọn kháng sinh không phù hợp hoặc lý do giải trình không thỏa đáng.",
-      "btnSaveReview": "Lưu kết quả duyệt",
-      "btnDetail": "Chi tiết"
+      "title": "Quản lý Bệnh nhân",
+      "description": "Danh sách hồ sơ bệnh nhân, theo dõi điều trị và xuất viện.",
+      "addButton": "Thêm bệnh nhân",
+      "dialog": {
+        "createTitle": "Thêm Hồ Sơ Bệnh Nhân",
+        "updateTitle": "Cập Nhật Hồ Sơ Bệnh Nhân",
+        "deleteTitle": "Xác nhận xóa bệnh nhân",
+        "deleteDescription": "Bạn có chắc chắn muốn xóa hồ sơ bệnh nhân <bold>\"{name}\"</bold> không? Hành động này không thể hoàn tác."
+      },
+      "outcomes": {
+        "InTreatment": "Đang điều trị",
+        "Recovered": "Khỏi bệnh",
+        "Death": "Tử vong",
+        "OutOfScope": "Ngoài phạm vi"
+      },
+      "gender": {
+        "Male": "Nam",
+        "Female": "Nữ"
+      },
+      "table": {
+        "colMedicalRecordCode": "Mã bệnh án",
+        "colFullName": "Họ và tên",
+        "colDobAge": "Ngày sinh / Tuổi",
+        "colGender": "Giới tính",
+        "colStatus": "Trạng thái",
+        "ageYears": "({age} tuổi)",
+        "empty": "Không tìm thấy dữ liệu bệnh nhân.",
+        "filterTitle": "Bộ lọc bệnh nhân",
+        "filterGender": "Giới tính",
+        "filterAgeRange": "Độ tuổi (Min - Max)",
+        "ageFromPlaceholder": "Từ",
+        "ageToPlaceholder": "Đến",
+        "applyAgeButton": "Áp dụng tuổi",
+        "clearAllFilters": "Xóa tất cả bộ lọc",
+        "actionViewDetail": "Xem chi tiết",
+        "actionDischarge": "Xuất viện",
+        "actionEdit": "Chỉnh sửa",
+        "actionDelete": "Xóa"
+      },
+      "toast": {
+        "createSuccess": "Thêm bệnh nhân thành công!",
+        "createError": "Lỗi thêm mới: {error}",
+        "updateSuccess": "Cập nhật thông tin bệnh nhân thành công!",
+        "updateError": "Lỗi cập nhật: {error}",
+        "deleteSuccess": "Đã xóa bệnh nhân \"{name}\" thành công!",
+        "deleteError": "Không thể xóa: {error}",
+        "dischargeSuccess": "Cập nhật trạng thái xuất viện thành công!",
+        "dischargeError": "Lỗi cập nhật xuất viện: {error}"
+      },
+      "form": {
+        "lastNameLabel": "Họ",
+        "lastNamePlaceholder": "Ví dụ: Nguyễn",
+        "firstNameLabel": "Tên đệm & Tên",
+        "firstNamePlaceholder": "Ví dụ: Văn An",
+        "medicalRecordCodeLabel": "Mã bệnh án",
+        "medicalRecordCodePlaceholder": "Ví dụ: BA-12345-122",
+        "healthInsuranceCardLabel": "Số thẻ BHYT",
+        "healthInsuranceCardPlaceholder": "0123456789",
+        "dateOfBirthLabel": "Ngày sinh",
+        "phoneNumberLabel": "Số điện thoại",
+        "phoneNumberPlaceholder": "0912345678",
+        "genderLabel": "Giới tính",
+        "heightLabel": "Chiều cao (cm)",
+        "weightLabel": "Cân nặng (kg)",
+        "addressLabel": "Địa chỉ",
+        "addressPlaceholder": "Ví dụ: Cái Răng",
+        "cityLabel": "Tỉnh / Thành phố",
+        "cityPlaceholder": "Ví dụ: Cần Thơ",
+        "createButton": "Thêm bệnh nhân",
+        "updateButton": "Cập nhật bệnh nhân"
+      },
+      "validation": {
+        "lastNameRequired": "Bắt buộc nhập họ",
+        "firstNameRequired": "Bắt buộc nhập tên",
+        "phoneRequired": "Bắt buộc nhập số điện thoại",
+        "phoneInvalid": "Số điện thoại Việt Nam không hợp lệ (vd: 0912345678)",
+        "dobRequired": "Bắt buộc chọn ngày sinh",
+        "dobInvalid": "Ngày sinh sai định dạng",
+        "heightNumber": "Chiều cao phải là số",
+        "heightMin": "Chiều cao phải lớn hơn 0",
+        "heightMax": "Chiều cao không hợp lệ",
+        "weightNumber": "Cân nặng phải là số",
+        "weightMin": "Cân nặng phải lớn hơn 0",
+        "weightMax": "Cân nặng không hợp lệ",
+        "medicalRecordCodeRequired": "Bắt buộc nhập mã bệnh án",
+        "insuranceCardInvalid": "Mã thẻ BHYT phải bao gồm đúng 10 chữ số",
+        "addressRequired": "Bắt buộc nhập địa chỉ",
+        "cityRequired": "Bắt buộc nhập tỉnh/thành phố"
+      },
+      "discharge": {
+        "title": "Cập nhật Xuất viện",
+        "description": "Chọn kết quả cho bệnh nhân <bold>{name}</bold>.",
+        "confirmButton": "Xác nhận",
+        "descriptions": {
+          "Recovered": "Bệnh nhân hồi phục và xuất viện",
+          "Death": "Bệnh nhân tử vong trong quá trình điều trị",
+          "OutOfScope": "Chuyển cơ sở y tế khác hoặc ngừng theo dõi"
+        }
+      },
+      "nextOfKin": {
+        "createTitle": "Thêm Người thân liên hệ",
+        "updateTitle": "Cập nhật Người thân liên hệ",
+        "fullNameLabel": "Họ và tên",
+        "fullNamePlaceholder": "Ví dụ: Nguyễn Văn An",
+        "phoneLabel": "Số điện thoại",
+        "phonePlaceholder": "Ví dụ: 0789456123",
+        "relationshipLabel": "Mối quan hệ",
+        "relationshipPlaceholder": "Ví dụ: Con cả, Vợ/Chồng, Cha/Mẹ...",
+        "createButton": "Thêm người thân",
+        "updateButton": "Lưu thay đổi",
+        "validation": {
+          "fullNameRequired": "Bắt buộc nhập họ và tên người thân",
+          "phoneRequired": "Bắt buộc nhập số điện thoại",
+          "phoneInvalid": "Số điện thoại Việt Nam không hợp lệ (vd: 0789456123)",
+          "phoneDuplicate": "Số điện thoại này đã được đăng ký cho người thân khác của bệnh nhân",
+          "relationshipRequired": "Bắt buộc nhập mối quan hệ"
+        }
+      },
+      "treatmentPlan": {
+        "severity": {
+          "Mild": "Nhẹ",
+          "Moderate": "Trung bình",
+          "Severe": "Nặng",
+          "Critical": "Nguy kịch"
+        },
+        "treatmentSite": {
+          "Outpatient": "Ngoại trú",
+          "Inpatient": "Nội trú",
+          "ICU": "Hồi sức tích cực (ICU)"
+        },
+        "classification": {
+          "title": "Phân loại",
+          "severityLabel": "Mức độ nặng",
+          "treatmentSiteLabel": "Nơi điều trị",
+          "antibioticAllergyLabel": "Dị ứng kháng sinh:",
+          "otherInfectionsLabel": "Nhiễm trùng kèm theo:"
+        },
+        "medicines": {
+          "title": "Kháng sinh đã chỉ định",
+          "empty": "Không có kháng sinh được chỉ định.",
+          "choiceReasonLabel": "Lý do lựa chọn thuốc:",
+          "closeReasonLabel": "Lý do đóng phác đồ:"
+        },
+        "pathogens": {
+          "title": "Tác nhân gây bệnh nghi ngờ",
+          "highRiskLabel": "Nguy cơ cao:",
+          "worthSuspectedLabel": "Tác nhân nghi ngờ khác (Worth Suspected):"
+        },
+        "protocols": {
+          "title": "Phác đồ hệ thống khuyến cáo ({count})",
+          "groupHeader": "Nhóm phác đồ #{index} - {severity} ({site})",
+          "criteriaLabel": "Tiêu chí: {criteria}"
+        },
+        "metrics": {
+          "title": "Thang điểm đánh giá mức độ nặng",
+          "scoreBadge": "{score} điểm",
+          "conclusionLabel": "Kết luận:"
+        },
+        "closeDialog": {
+          "title": "Đóng kế hoạch điều trị",
+          "description": "Kế hoạch <mono>#{planId}</mono> sẽ chuyển sang trạng thái đã đóng và không thể hoàn tác.",
+          "reasonLabel": "Lý do đóng phác đồ",
+          "reasonPlaceholder": "Nhập lý do kết thúc / thay đổi phác đồ điều trị...",
+          "reasonRequired": "Vui lòng nhập lý do đóng kế hoạch điều trị.",
+          "confirmButton": "Xác nhận đóng"
+        },
+        "reviewDialog": {
+          "title": "Đánh giá tuân thủ phác đồ",
+          "description": "Phân loại mức độ hợp lệ cho điều trị <mono>#{planId}</mono>.",
+          "confirmButton": "Lưu đánh giá",
+          "options": {
+            "NotAdhereValid": {
+              "label": "Không tuân thủ hợp lệ",
+              "description": "Bác sĩ chỉ định khác phác đồ nhưng có lý do hợp lý."
+            },
+            "NotAdhereInvalid": {
+              "label": "Không tuân thủ không hợp lệ",
+              "description": "Bác sĩ chỉ định khác phác đồ có lý do không hợp lý."
+            }
+          }
+        },
+        "detailDialog": {
+          "title": "Chi tiết Kế hoạch điều trị",
+          "loadError": "Không thể tải dữ liệu chi tiết kế hoạch điều trị."
+        }
+      },
+      "detail": {
+        "notFound": "Không tìm thấy thông tin bệnh nhân.",
+        "backButton": "Quay lại",
+        "genderAge": "{gender} • {age} tuổi",
+        "dob": "Ngày sinh: {date}",
+        "notDischarged": "Chưa xuất viện",
+        "actions": {
+          "discharge": "Xuất viện",
+          "addTreatment": "Thêm điều trị",
+          "edit": "Chỉnh sửa",
+          "delete": "Xóa"
+        },
+        "meta": {
+          "medicalRecordCode": "Mã bệnh án:",
+          "medicalRecordCodeShort": "Mã BA",
+          "copyMedicalRecordCode": "Sao chép mã bệnh án",
+          "healthInsuranceCard": "Thẻ BHYT:",
+          "healthInsuranceCardShort": "Số BHYT",
+          "copyHealthInsuranceCard": "Sao chép số thẻ BHYT",
+          "admission": "Nhập viện:",
+          "discharge": "Xuất viện:"
+        },
+        "biometrics": {
+          "title": "Chỉ số sinh trắc",
+          "height": "Chiều cao",
+          "weight": "Cân nặng",
+          "bmi": "Chỉ số BMI"
+        },
+        "bmi": {
+          "unknown": "Chưa xác định",
+          "underweight": "Thiếu cân",
+          "normal": "Bình thường",
+          "overweight": "Thừa cân"
+        },
+        "contact": {
+          "title": "Thông tin liên hệ",
+          "phone": "Điện thoại",
+          "address": "Địa chỉ"
+        },
+        "nextOfKinSection": {
+          "title": "Người thân liên hệ",
+          "addButton": "Thêm",
+          "empty": "Chưa có thông tin người thân liên hệ.",
+          "callTitle": "Gọi cho {name}",
+          "editTitle": "Chỉnh sửa",
+          "deleteTitle": "Xóa"
+        },
+        "adherence": {
+          "Adhere": "Tuân thủ",
+          "NotAdhere": "Không tuân thủ",
+          "NotAdhereValid": "Không tuân thủ hợp lệ",
+          "NotAdhereInvalid": "Không tuân thủ không hợp lệ"
+        },
+        "plansSection": {
+          "title": "Kế hoạch điều trị",
+          "subtitle": "Sắp xếp theo thời gian cập nhật gần nhất",
+          "filterAll": "Tất cả ({count})",
+          "filterInProgress": "Đang tiến hành ({count})",
+          "filterNotAdhere": "Không tuân thủ ({count})",
+          "empty": "Không có kế hoạch điều trị nào phù hợp với bộ lọc hiện tại.",
+          "statusInProgress": "Đang tiến hành",
+          "statusClosed": "Đã đóng",
+          "reviewAdherenceTitle": "Đánh giá tuân thủ phác đồ",
+          "updatedAt": "Cập nhật lúc: <strong>{time}</strong>",
+          "closePlanButton": "Đóng phác đồ",
+          "viewDetailButton": "Xem chi tiết phác đồ →"
+        },
+        "deleteKinDialog": {
+          "title": "Xác nhận xóa người thân",
+          "description": "Bạn có chắc chắn muốn xóa thông tin liên hệ của <bold>\"{name}\"</bold> không?"
+        },
+        "toast": {
+          "copied": "Đã sao chép {label}: {text}",
+          "deleteSuccess": "Xóa hồ sơ bệnh nhân thành công!",
+          "kinUpdateSuccess": "Cập nhật người thân thành công!",
+          "kinUpdateError": "Lỗi cập nhật người thân: {error}",
+          "kinCreateSuccess": "Thêm người thân liên hệ thành công!",
+          "kinCreateError": "Lỗi thêm người thân: {error}",
+          "kinDeleteSuccess": "Đã xóa người thân liên hệ!",
+          "kinDeleteError": "Lỗi xóa người thân: {error}",
+          "planCloseSuccess": "Đã đóng kế hoạch điều trị!",
+          "planCloseError": "Lỗi đóng phác đồ: {error}",
+          "planReviewSuccess": "Cập nhật đánh giá tuân thủ thành công!",
+          "planReviewError": "Lỗi đánh giá phác đồ: {error}"
+        }
+      }
+    },
+    "doctors": {
+      "title": "Danh sách Bác sĩ trực thuộc",
+      "subtitle": "Quản lý đội ngũ bác sĩ trong khoa, xem thông tin hồ sơ chuyên môn và xuất báo cáo đánh giá kê đơn cá nhân.",
+      "prefixes": {
+        "Professor": "GS.",
+        "AssociateProfessor": "PGS.",
+        "Default": "BS."
+      },
+      "gender": {
+        "Male": "Nam",
+        "Female": "Nữ"
+      },
+      "academicTitle": {
+        "None": "Không",
+        "AssociateProfessor": "Phó Giáo sư (PGS)",
+        "Professor": "Giáo sư (GS)"
+      },
+      "position": {
+        "StaffDoctor": "Bác sĩ điều trị",
+        "SeniorDoctor": "Bác sĩ cao cấp",
+        "DepartmentDeputyHead": "Phó Trưởng khoa",
+        "HeadOfDepartment": "Trưởng khoa",
+        "DeputyDirector": "Phó Giám đốc",
+        "Director": "Giám đốc"
+      },
+      "role": {
+        "HeadDepartmentDoctor": "Trưởng khoa (Quản lý)",
+        "Doctor": "Bác sĩ"
+      },
+      "accountStatus": {
+        "Active": "Đang hoạt động",
+        "InActive": "Ngừng hoạt động"
+      },
+      "degree": {
+        "Professor": "Giáo sư",
+        "Doctor": "Bác sĩ",
+        "Master": "Thạc sĩ",
+        "Bachelor": "Cử nhân",
+        "Associate": "Cao đẳng",
+        "Undergraduate": "Đại học",
+        "Graduate": "Sau đại học",
+        "PhD": "Tiến sĩ",
+        "PostDoc": "Sau tiến sĩ"
+      },
+      "table": {
+        "doctor": "Bác sĩ",
+        "academicAndDegree": "Học hàm / Học vị",
+        "positionAndRole": "Chức vụ & Vai trò",
+        "gender": "Giới tính",
+        "status": "Trạng thái",
+        "empty": "Không tìm thấy bác sĩ nào phù hợp."
+      },
+      "filter": {
+        "buttonTitle": "Bộ lọc bác sĩ",
+        "title": "Lọc danh sách",
+        "reset": "Đặt lại",
+        "genderLabel": "Giới tính",
+        "allGenders": "Tất cả giới tính",
+        "academicTitleLabel": "Học hàm",
+        "allAcademicTitles": "Tất cả học hàm",
+        "positionLabel": "Chức vụ",
+        "allPositions": "Tất cả chức vụ"
+      },
+      "actions": {
+        "createReportTitle": "Tạo báo cáo phân tích",
+        "viewDetailTitle": "Xem chi tiết bác sĩ"
+      },
+      "createReportDialog": {
+        "title": "Tạo Báo Cáo Phân Tích Cá Nhân"
+      },
+      "toast": {
+        "defaultDoctorName": "bác sĩ",
+        "createReportSuccess": "Đã tạo báo cáo phân tích cho {name}!",
+        "createReportError": "Lỗi khi tạo báo cáo: {error}"
+      },
+      "detailModal": {
+        "title": "Thông tin chi tiết Bác sĩ",
+        "loadError": "Không thể tải thông tin bác sĩ.",
+        "notUpdated": "Chưa cập nhật",
+        "createReportButton": "Tạo báo cáo",
+        "degreesTitle": "Bằng cấp / Học vị",
+        "noDegrees": "Chưa cập nhật học vị",
+        "position": "Chức vụ",
+        "academicTitle": "Học hàm",
+        "gender": "Giới tính",
+        "dateOfBirth": "Ngày sinh",
+        "citizenId": "Số CCCD / CMND",
+        "joinedDate": "Ngày tham gia hệ thống",
+        "email": "Email",
+        "phone": "Số điện thoại",
+        "address": "Địa chỉ"
+      }
+    },
+    "analysis": {
+      "title": "Báo cáo Phân tích Kháng sinh",
+      "subtitle": "Thống kê mức độ tuân thủ phác đồ điều trị, phân nhóm thuốc AWaRe và kết quả điều trị.",
+      "createButton": "Tạo báo cáo mới",
+      "doctorBadge": {
+        "generalReport": "Báo cáo tổng quát",
+        "general": "Tổng quát",
+        "loading": "Đang tải thông tin BS...",
+        "fallbackName": "BS ({id}...)",
+        "prefixes": {
+          "Professor": "GS.",
+          "AssociateProfessor": "PGS.",
+          "Default": "BS."
+        }
+      },
+      "table": {
+        "doctor": "Bác sĩ phụ trách",
+        "period": "Khoảng thời gian",
+        "total": "Tổng số",
+        "adherence": "Tuân thủ phác đồ",
+        "outcomes": "Kết quả điều trị",
+        "createdAt": "Ngày tạo",
+        "empty": "Chưa có báo cáo phân tích nào.",
+        "plansCount": "{count} phác đồ",
+        "patientsCount": "{count} bệnh nhân",
+        "adherentCount": "Tuân thủ: {count} ({rate}%)",
+        "nonAdherentCount": "Không tuân thủ: {count}",
+        "pendingReviewCount": "Chờ duyệt: {count}",
+        "recoveredCount": "Hồi phục: {count}",
+        "deceasedCount": "Tử vong: {count}",
+        "otherOutcomeCount": "Khác: {count}"
+      },
+      "actions": {
+        "viewDetailTitle": "Xem chi tiết",
+        "downloadExcelTitle": "Tải xuống Excel",
+        "deleteTitle": "Xóa báo cáo"
+      },
+      "createDialog": {
+        "title": "Tạo Báo Cáo Phân Tích Mới"
+      },
+      "deleteDialog": {
+        "title": "Xác nhận xóa báo cáo",
+        "description": "Bạn có chắc chắn muốn xóa báo cáo phân tích kỳ <bold>{period}</bold> không? Hành động này không thể hoàn tác."
+      },
+      "toast": {
+        "createSuccess": "Đã tạo báo cáo phân tích thành công!",
+        "createError": "Lỗi khi tạo báo cáo: {error}",
+        "deleteSuccess": "Đã xóa báo cáo phân tích thành công!",
+        "deleteError": "Không thể xóa báo cáo: {error}",
+        "downloadExcelSuccess": "Đã tải xuống báo cáo Excel!",
+        "downloadExcelError": "Lỗi khi tải file Excel: {error}"
+      },
+      "detail": {
+        "notFound": "Không tìm thấy dữ liệu báo cáo phân tích.",
+        "title": "Chi tiết Báo cáo Phân tích",
+        "periodRange": "Kỳ thống kê: <bold>{start}</bold> → <bold>{end}</bold>",
+        "exportExcel": "Xuất file Excel (.xlsx)",
+        "deleteReport": "Xóa báo cáo",
+        "deleteConfirmDescription": "Bạn có chắc chắn muốn xóa báo cáo phân tích này không? Hành động này không thể hoàn tác.",
+        "cards": {
+          "treatmentScale": {
+            "title": "Quy mô điều trị",
+            "plans": "{count} <unit>phác đồ</unit>",
+            "patients": "Trên tổng số <bold>{count}</bold> bệnh nhân"
+          },
+          "adherence": {
+            "title": "Tuân thủ phác đồ"
+          },
+          "attention": {
+            "title": "Cần lưu ý",
+            "nonAdherent": "Không tuân thủ",
+            "pendingReview": "Chờ duyệt"
+          },
+          "outcomes": {
+            "title": "Kết quả điều trị",
+            "recovered": "Khỏi bệnh",
+            "deceased": "Tử vong",
+            "other": "Khác"
+          }
+        },
+        "doctorsSection": {
+          "title": "Thống kê chi tiết theo Bác sĩ điều trị ({count})",
+          "empty": "Không có dữ liệu kê đơn của bác sĩ trong khoảng thời gian này.",
+          "doctorSummary": "Quản lý <bold>{patients}</bold> bệnh nhân • Tổng <bold>{plans}</bold> phác đồ",
+          "table": {
+            "antibioticName": "Tên kháng sinh",
+            "awareClassification": "Phân loại AWaRe",
+            "totalPrescriptions": "Tổng lượt kê",
+            "adherent": "Tuân thủ",
+            "nonAdherent": "Không tuân thủ",
+            "pendingReview": "Chờ duyệt",
+            "empty": "Chưa ghi nhận dữ liệu kháng sinh."
+          }
+        }
+      },
+      "createForm": {
+        "defaultDoctorName": "bác sĩ đã chọn",
+        "doctorBanner": "Tạo báo cáo phân tích kê đơn kháng sinh và mức độ tuân thủ phác đồ cho <bold>{name}</bold>.",
+        "generalBanner": "Hệ thống sẽ tổng hợp dữ liệu kê đơn kháng sinh và mức độ tuân thủ phác đồ của <bold>toàn bộ bác sĩ</bold> trong khoảng thời gian đã chọn.",
+        "quickSelect": "Chọn nhanh:",
+        "presets": {
+          "today": "Hôm nay",
+          "last7Days": "7 ngày qua",
+          "last30Days": "30 ngày qua",
+          "last90Days": "90 ngày qua"
+        },
+        "startLabel": "Từ thời điểm",
+        "endLabel": "Đến thời điểm",
+        "submit": "Tạo báo cáo",
+        "validation": {
+          "startRequired": "Vui lòng chọn thời điểm bắt đầu",
+          "endRequired": "Vui lòng chọn thời điểm kết thúc",
+          "invalidRange": "Thời điểm bắt đầu phải nhỏ hơn hoặc bằng thời điểm kết thúc"
+        }
+      }
+    },
+    "diagnose": {
+      "categories": {
+        "PersonalInformation": "Thông tin bệnh nhân",
+        "MedicalHistory": "Tiền sử bệnh lý & dùng thuốc",
+        "Paraclinical": "Cận lâm sàng",
+        "Clinical": "Lâm sàng",
+        "Other": "Chỉ số khác"
+      },
+      "allergyTypes": {
+        "No": "Không dị ứng",
+        "Yes": "Có dị ứng kháng sinh",
+        "NonRegisteredAntibiotic": "Kháng sinh ngoài danh mục",
+        "Unknown": "Không rõ"
+      },
+      "micCategories": {
+        "Susceptible": "Nhạy cảm (Susceptible)",
+        "Intermediate": "Trung gian (Intermediate)",
+        "Resistant": "Đề kháng (Resistant)"
+      },
+      "awareClassifications": {
+        "Access": "Access",
+        "AccessWatch": "Access-Watch",
+        "Watch": "Watch",
+        "Reserve": "Reserve",
+        "Others": "Others",
+        "Unclassified": "Unclassified"
+      },
+      "severity": {
+        "Mild": "Nhẹ (Mild)",
+        "Moderate": "Trung bình (Moderate)",
+        "Severe": "Nặng (Severe)"
+      },
+      "treatmentSite": {
+        "Outpatient": "Ngoại trú (Outpatient)",
+        "Inpatient": "Nội trú (Inpatient)",
+        "IntensiveCareUnit": "Hồi sức tích cực (ICU)"
+      },
+      "sampleTypes": {
+        "Unknown": "Không rõ",
+        "Sputum": "Đàm (Sputum)",
+        "BronchoalveolarLavageFluid": "Dịch rửa phế quản phế nang (BAL)",
+        "PleuralFluid": "Dịch màng phổi",
+        "Urine": "Nước tiểu",
+        "Blood": "Máu",
+        "AbdominalFluid": "Dịch ổ bụng",
+        "CerebrospinalFluid": "Dịch não tủy",
+        "WoundExudate": "Dịch vết thương / mủ",
+        "Other": "Mẫu bệnh phẩm khác"
+      },
+      "infectionTypes": {
+        "SkinAndSoftTissueInfection": "Nhiễm khuẩn da/mô dưới da",
+        "SepticArthritis": "Viêm khớp nhiễm khuẩn",
+        "Osteomyelitis": "Viêm tủy xương nhiễm khuẩn",
+        "BacterialMyositisOrMuscleAbscess": "Viêm cơ/áp xe cơ nhiễm khuẩn",
+        "InfectedGoutyTophus": "Nhiễm khuẩn hạt tophi",
+        "PyelonephritisOrRenalAbscess": "Viêm/áp xe thận - bể thận",
+        "AcuteCystitis": "Viêm bàng quang cấp",
+        "AcuteNonGonococcalUrethritis": "Viêm niệu đạo cấp không do lậu",
+        "BacterialVaginourethritis": "Viêm âm đạo niệu đạo do vi khuẩn",
+        "BacterialEndometritis": "Viêm tử cung do vi khuẩn",
+        "PurulentMeningitis": "Viêm màng não mủ",
+        "BacterialEncephalitis": "Viêm não do vi khuẩn",
+        "PleuralEmpyema": "Tràn mủ màng phổi",
+        "MediastinalAbscess": "Áp xe trung thất",
+        "InfectiveEndocarditis": "Viêm nội tâm mạc nhiễm khuẩn",
+        "BacterialMyocarditis": "Viêm cơ tim do vi khuẩn",
+        "BacterialPericarditis": "Viêm màng ngoài tim do vi khuẩn",
+        "PulmonaryTuberculosis": "Lao phổi",
+        "ExtrapulmonaryTuberculosis": "Lao ngoài phổi",
+        "BiliaryTractInfection": "Nhiễm trùng đường mật",
+        "BacterialLiverAbscess": "Áp xe gan do vi khuẩn",
+        "InfectedAcutePancreatitis": "Viêm tụy cấp nhiễm khuẩn",
+        "BacterialPeritonitis": "Viêm phúc mạc nhiễm khuẩn",
+        "BacterialDiarrhea": "Tiêu chảy do vi khuẩn",
+        "HelicobacterPyloriInfection": "Nhiễm Helicobacter pylori",
+        "Sepsis": "Nhiễm trùng huyết",
+        "OrbitalCellulitis": "Viêm tổ chức hốc mắt",
+        "Conjunctivitis": "Viêm kết mạc mắt",
+        "Keratitis": "Viêm giác mạc mắt",
+        "Dacryocystitis": "Viêm túi lệ mắt",
+        "MaxillofacialAbscess": "Áp xe vùng hàm-mặt",
+        "Other": "Nhiễm khuẩn khác"
+      },
+      "range": {
+        "and": "và",
+        "placeholderDefault": "Nhập giá trị...",
+        "placeholderBetween": "Bình thường: {min} – {max}",
+        "placeholderMin": "Bình thường: ≥ {min}",
+        "placeholderMax": "Bình thường: ≤ {max}"
+      },
+      "validation": {
+        "required": "Vui lòng nhập \"{name}\".",
+        "invalidNumber": "Giá trị phải là một số hợp lệ.",
+        "outOfAcceptedRange": "Giá trị nằm ngoài ngưỡng cho phép ({range}).",
+        "outOfNormalRange": "Ngoài khoảng bình thường ({range}). Hệ thống vẫn chấp nhận."
+      },
+      "patientHeader": {
+        "sectionTitle": "Hồ sơ bệnh nhân điều trị",
+        "previousDiagnosisRef": "Đã tham chiếu chỉ số từ lần điều trị gần nhất",
+        "loading": "Đang tải thông tin bệnh nhân...",
+        "fallbackId": "Mã bệnh nhân: {id}",
+        "age": "{age} tuổi",
+        "gender": {
+          "male": "Nam",
+          "female": "Nữ"
+        },
+        "measurements": "{height} cm • {weight} kg",
+        "viewProfile": "Xem hồ sơ bệnh nhân"
+      },
+      "workspace": {
+        "title": "Chẩn đoán & Gợi ý điều trị viêm phổi cộng đồng (CAP)",
+        "subtitle": "Hoàn tất 5 bước đánh giá lâm sàng để hệ thống phân tầng nguy cơ và đề xuất phác đồ kháng sinh kinh nghiệm.",
+        "loading": "Đang tải thông tin bệnh nhân và danh mục biến lâm sàng...",
+        "noPatient": {
+          "title": "Vui lòng tạo hồ sơ bệnh nhân trước khi chẩn đoán",
+          "description": "Vui lòng nhập thông tin hành chính và sức khỏe của bệnh nhân để hệ thống tự động điền các chỉ số nền hồ sơ chẩn đoán.",
+          "backToList": "Quay lại danh sách bệnh nhân",
+          "createButton": "Tạo hồ sơ bệnh nhân"
+        },
+        "errors": {
+          "loadPatientFallback": "Không thể tải thông tin hồ sơ bệnh nhân.",
+          "loadMetaFallback": "Không thể tải dữ liệu biểu mẫu chẩn đoán.",
+          "submitFallback": "Lỗi khi gửi yêu cầu chẩn đoán.",
+          "patientLoadPrefix": "Lỗi tải hồ sơ bệnh nhân: {error}",
+          "dataLoadPrefix": "Lỗi tải dữ liệu: {error}"
+        }
+      },
+      "createPatientModal": {
+        "title": "Thêm hồ sơ bệnh nhân mới",
+        "description": "Tạo hồ sơ bệnh nhân mới để gắn vào phiên chẩn đoán và lưu phác đồ điều trị.",
+        "errorFallback": "Không thể tạo hồ sơ bệnh nhân mới."
+      },
+      "assessmentForm": {
+        "json": {
+          "import": "Import JSON",
+          "export": "Export JSON"
+        },
+        "steps": {
+          "step1": "Đánh giá lâm sàng",
+          "step2": "Dị ứng kháng sinh",
+          "step3": "Tiền sử đặc biệt",
+          "step4": "Nhiễm khuẩn khác",
+          "step5": "Mẫu vi sinh"
+        },
+        "navigation": {
+          "back": "← Quay lại"
+        },
+        "step1": {
+          "title": "1. Đánh giá chỉ số lâm sàng",
+          "description": "Các trường có dấu <required>*</required> là bắt buộc. Giá trị ngoài ngưỡng bình thường sẽ hiển thị cảnh báo vàng; ngoài ngưỡng cho phép sẽ bị từ chối.",
+          "searchPlaceholder": "Tìm theo tên biến, mã code (VD: CURB, RR, SPO2, AGE)...",
+          "booleanYes": "Có",
+          "booleanNo": "Không",
+          "nextButton": "Tiếp theo: Dị ứng kháng sinh →"
+        },
+        "step2": {
+          "title": "2. Tiền sử dị ứng kháng sinh",
+          "description": "Ghi nhận trạng thái dị ứng kháng sinh của bệnh nhân để loại trừ phác đồ không an toàn.",
+          "otherGroup": "Khác",
+          "otherAllergyLabel": "Mô tả chi tiết dị ứng",
+          "otherAllergyPlaceholder": "VD: Nổi mề đay khi dùng thuốc nhóm Beta-lactam...",
+          "searchPlaceholder": "Tìm kháng sinh hoặc nhóm kháng sinh...",
+          "selectAllVisible": "Chọn tất cả hiển thị",
+          "clearAll": "Xóa tất cả",
+          "quickSelectByGroup": "Chọn nhanh theo nhóm kháng sinh",
+          "selectedCount": "Đã chọn ({count})",
+          "nextButton": "Tiếp theo: Tiền sử đặc biệt →"
+        },
+        "step3": {
+          "title": "3. Tiền sử bệnh lý đặc biệt",
+          "description": "Nhập các ghi chú tiền sử bổ sung ngoài danh mục biến lâm sàng (không bắt buộc).",
+          "placeholder": "VD: Tiền sử lao phổi cũ, hóa trị gần đây...",
+          "addButton": "Thêm",
+          "empty": "Chưa có ghi nhận tiền sử đặc biệt nào.",
+          "nextButton": "Tiếp theo: Nhiễm khuẩn khác →"
+        },
+        "step4": {
+          "title": "4. Nhiễm khuẩn hoạt động khác đi kèm",
+          "description": "Chọn các ổ nhiễm khuẩn phối hợp ngoài viêm phổi (có thể chọn nhiều hoặc bỏ qua).",
+          "nextButton": "Tiếp theo: Mẫu vi sinh →"
+        },
+        "step5": {
+          "title": "5. Kết quả mẫu bệnh phẩm vi sinh",
+          "description": "Thêm kết quả phân lập vi sinh và kháng sinh đồ nếu có. Bỏ trống nếu chưa có kết quả xét nghiệm.",
+          "sampleHeader": "Mẫu bệnh phẩm #{index}",
+          "deleteSample": "Xóa",
+          "sampleTypeLabel": "Loại bệnh phẩm",
+          "micLabel": "Mức độ nhạy cảm (MIC)",
+          "pathogenLabel": "Tác nhân gây bệnh",
+          "pathogenPlaceholder": "-- Chọn tác nhân --",
+          "addSampleButton": "Thêm mẫu bệnh phẩm",
+          "submitting": "Đang phân tích chẩn đoán...",
+          "submitButton": "Chẩn đoán & Gợi ý phác đồ"
+        },
+        "validation": {
+          "selectAllergyAntibiotic": "Vui lòng chọn ít nhất một kháng sinh bệnh nhân bị dị ứng.",
+          "describeOtherAllergy": "Vui lòng mô tả thông tin dị ứng của bệnh nhân.",
+          "samplePathogenRequired": "Mẫu bệnh phẩm #{index}: Vui lòng chọn tác nhân gây bệnh.",
+          "invalidJsonFile": "File JSON không đúng định dạng payload chẩn đoán."
+        }
+      },
+      "result": {
+        "resetButton": "Chỉnh sửa dữ liệu / Thực hiện chẩn đoán mới",
+        "tabs": {
+          "protocol": "Theo phác đồ khuyến cáo",
+          "custom": "Bác sĩ tự chọn kháng sinh"
+        },
+        "stratification": {
+          "title": "Kết quả phân tầng mức độ nặng & nơi điều trị",
+          "severityLabel": "Mức độ nặng",
+          "treatmentSiteLabel": "Nơi điều trị",
+          "egfrLabel": "eGFR (mL/phút/1.73m²)",
+          "pregnancyLabel": "Thai kỳ / Cho con bú",
+          "pregnancyYes": "Có (Lưu ý chống chỉ định)",
+          "pregnancyNo": "Không",
+          "allergyLabel": "Dị ứng kháng sinh",
+          "noAllergy": "Không dị ứng",
+          "otherInfectionsLabel": "Nhiễm khuẩn đi kèm",
+          "noOtherInfections": "Không có",
+          "scoringMetricsTitle": "Chi tiết thang điểm đánh giá",
+          "totalScore": "Tổng điểm: {score}"
+        },
+        "missingVariables": {
+          "title": "Biến lâm sàng/cận lâm sàng chưa nhập"
+        },
+        "pathogens": {
+          "title": "Tác nhân gây bệnh nghi ngờ",
+          "heavySuspectedTitle": "Nguy cơ cao (Heavy suspected) ({count})",
+          "heavySuspectedEmpty": "Không ghi nhận yếu tố nguy cơ đặc hiệu vượt ngưỡng cảnh báo cao.",
+          "worthSuspectedTitle": "Tác nhân cần cân nhắc (Worth suspected) ({count})"
+        },
+        "protocols": {
+          "title": "Phác đồ kháng sinh khuyến cáo",
+          "subtitle": "Chọn 1 phương án phối hợp hoàn chỉnh để xác nhận điều trị.",
+          "count": "{count} phác đồ",
+          "empty": "Không có phác đồ tự động phù hợp. Vui lòng chuyển sang tab \"Bác sĩ tự chọn kháng sinh\".",
+          "defaultName": "Phác đồ #{index}",
+          "optionLabel": "Lựa chọn #{index}",
+          "selected": "● Đã chọn",
+          "selectThis": "○ Chọn phác đồ này",
+          "selectedSummary": "Đã chọn tổ hợp gồm {count} kháng sinh.",
+          "selectPrompt": "Chọn một lựa chọn phác đồ ở trên để xác nhận.",
+          "saving": "Đang lưu phác đồ...",
+          "confirmButton": "Xác nhận phác đồ đã chọn"
+        },
+        "cdss": {
+          "title": "Chi tiết lập luận hệ thống (CDSS)",
+          "evidencesButton": "Bằng chứng đánh giá ({count})",
+          "resultLabel": "Kết quả:",
+          "missingData": "Thiếu dữ liệu",
+          "met": "Đạt",
+          "notMet": "Không đạt",
+          "scorePoints": "(+{score} điểm)",
+          "microbialButton": "Kết quả vi sinh ({count})",
+          "microbialEmpty": "Không có mẫu vi sinh."
+        },
+        "custom": {
+          "title": "Bác sĩ tự chọn phác đồ kháng sinh",
+          "subtitle": "Bắt buộc ghi rõ lý do chỉ định. Hệ thống sẽ tự động kiểm tra cảnh báo nếu chọn nhiều thuốc cùng nhóm kháng sinh.",
+          "searchPlaceholder": "Tìm theo tên thuốc, nhóm kháng sinh hoặc phân loại AWaRe...",
+          "selectedLabel": "Kháng sinh đã chọn ({count})",
+          "reserveWarning": "Lưu ý: Bạn đang chọn kháng sinh thuộc nhóm <bold>Reserve</bold> (kháng sinh dự trữ ưu tiên quản lý nghiêm ngặt).",
+          "reasonLabel": "Lý do không sử dụng phác đồ khuyến cáo",
+          "reasonPlaceholder": "VD: Nghi ngờ vi khuẩn đa kháng, tiền sử thất bại điều trị trước đó...",
+          "helperText": "Cần chọn ít nhất 1 kháng sinh và nhập đầy đủ lý do.",
+          "saving": "Đang kiểm tra & lưu...",
+          "confirmButton": "Xác nhận điều trị tự chọn"
+        },
+        "errors": {
+          "confirmFailed": "Xác nhận phác đồ thất bại.",
+          "selectAtLeastOne": "Vui lòng chọn ít nhất một kháng sinh.",
+          "reasonRequired": "Bắt buộc nhập lý do khi bác sĩ tự chọn phác đồ kháng sinh.",
+          "warnCheckFailed": "Không thể kiểm tra cảnh báo phối hợp kháng sinh."
+        },
+        "groupWarningModal": {
+          "title": "Cảnh báo phối hợp kháng sinh cùng nhóm",
+          "description": "Các kháng sinh bạn vừa chọn có thuốc thuộc <bold>cùng một nhóm kháng sinh</bold>. Việc phối hợp cùng nhóm thường không làm tăng phổ tác dụng mà có thể tăng độc tính. Bạn có chắc chắn muốn tiếp tục xác nhận không?",
+          "cancelButton": "Hủy & chọn lại",
+          "confirmButton": "Vẫn tiếp tục xác nhận"
+        }
+      }
     }
   },
   "admin": {

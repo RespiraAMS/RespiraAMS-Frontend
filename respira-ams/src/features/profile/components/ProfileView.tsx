@@ -1,14 +1,10 @@
 "use client";
 
-import { type FormEvent, useEffect, useState, useCallback } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import {
-	Pencil,
-	RefreshCw,
-	ArrowLeft,
-	Loader2,
-} from "lucide-react";
+import { Pencil, RefreshCw, ArrowLeft, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
@@ -29,12 +25,10 @@ import { ProfileQualificationsCard } from "./ProfileQualificationsCard";
 import { ProfileEditModal } from "./ProfileEditModal";
 
 export function ProfileView() {
+	const t = useTranslations("doctor.profile");
 	const queryClient = useQueryClient();
 
-	const {
-		data: profileData,
-		isLoading,
-	} = useQuery({
+	const { data: profileData, isLoading } = useQuery({
 		queryKey: ["doctor", "profile"],
 		queryFn: fetchCurrentDoctorProfile,
 	});
@@ -64,12 +58,12 @@ export function ProfileView() {
 		}
 		try {
 			await queryClient.invalidateQueries({ queryKey: ["doctor", "profile"] });
-			toast.success("Đã làm mới thông tin hồ sơ bác sĩ thành công!");
+			toast.success(t("view.toast.refreshSuccess"));
 		} catch (err) {
 			toast.error(
 				err instanceof Error
 					? err.message
-					: "Không thể kết nối đến máy chủ để tải thông tin hồ sơ bác sĩ."
+					: t("view.toast.refreshErrorFallback")
 			);
 		} finally {
 			setIsRefreshing(false);
@@ -124,24 +118,24 @@ export function ProfileView() {
 	};
 
 	// Đổi avatar trực tiếp ngay tại chỗ khi click icon máy ảnh
-	const handleAvatarDirectChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleAvatarDirectChange = async (
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
 		const file = e.target.files?.[0];
-		// Reset giá trị input để có thể chọn lại cùng file nếu muốn
 		e.target.value = "";
 		if (!file) return;
 
 		if (!file.type.startsWith("image/")) {
-			toast.error("Vui lòng chọn tệp hình ảnh hợp lệ (PNG, JPG, WEBP).");
+			toast.error(t("view.toast.invalidImageType"));
 			return;
 		}
 		if (file.size > 5 * 1024 * 1024) {
-			toast.error("Kích thước ảnh đại diện không được vượt quá 5MB.");
+			toast.error(t("view.toast.imageTooLarge"));
 			return;
 		}
 
 		setIsUploadingAvatar(true);
 		const previousProfile = { ...doctor };
-		// Preview ngay lập tức trên UI
 		const previewUrl = URL.createObjectURL(file);
 		setDoctor((prev) => ({
 			...prev,
@@ -168,12 +162,11 @@ export function ProfileView() {
 			setDoctor(res.profile);
 			saveStoredDoctorProfile(res.profile);
 			queryClient.invalidateQueries({ queryKey: ["doctor", "profile"] });
-			toast.success("Đổi ảnh đại diện thành công!");
+			toast.success(t("view.toast.avatarSuccess"));
 		} catch (err) {
-			console.error("Lỗi khi tải ảnh đại diện:", err);
-			// Rollback nếu có lỗi
+			console.error("Error uploading avatar:", err);
 			setDoctor(previousProfile);
-			toast.error("Không thể tải ảnh đại diện lên máy chủ. Vui lòng thử lại.");
+			toast.error(t("view.toast.avatarError"));
 		} finally {
 			setIsUploadingAvatar(false);
 		}
@@ -190,12 +183,12 @@ export function ProfileView() {
 			setAvatarFile(null);
 			setIsEditOpen(false);
 			queryClient.invalidateQueries({ queryKey: ["doctor", "profile"] });
-			toast.success("Cập nhật thông tin hồ sơ bác sĩ thành công!");
+			toast.success(t("view.toast.updateSuccess"));
 		} catch (err) {
 			toast.error(
 				err instanceof Error
 					? err.message
-					: "Đã xảy ra lỗi khi cập nhật hồ sơ bác sĩ. Vui lòng thử lại."
+					: t("view.toast.updateErrorFallback")
 			);
 		} finally {
 			setIsSaving(false);
@@ -204,22 +197,22 @@ export function ProfileView() {
 
 	// ── Render ───────────────────────────────────────────────────────────────
 	return (
-		<div className="min-h-full bg-[#F8FAFC] p-6 lg:p-8 space-y-5 max-w-[1300px] mx-auto">
+		<div className="min-h-full bg-background text-foreground p-6 lg:p-8 space-y-5 max-w-[1300px] mx-auto">
 			{/* Breadcrumb & Action Bar */}
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div className="space-y-1">
 					<Link
 						href="/doctor/patients"
-						className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#0EA5E9] hover:text-[#25B4F8] transition-colors"
+						className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-primary hover:text-primary/80 transition-colors"
 					>
 						<ArrowLeft className="h-4 w-4" />
-						<span>Quay lại trang chính</span>
+						<span>{t("view.backToHome")}</span>
 					</Link>
-					<h1 className="text-xl font-bold tracking-tight text-slate-900">
-						Hồ sơ Bác sĩ &amp; Thông tin cá nhân
+					<h1 className="text-xl font-bold tracking-tight text-foreground">
+						{t("view.title")}
 					</h1>
-					<p className="text-xs text-slate-500">
-						Quản lý thông tin định danh y khoa, chức vụ lâm sàng và chứng chỉ hành nghề
+					<p className="text-xs text-muted-foreground">
+						{t("view.subtitle")}
 					</p>
 				</div>
 
@@ -229,13 +222,13 @@ export function ProfileView() {
 						type="button"
 						onClick={handleRefresh}
 						disabled={isLoading || isRefreshing}
-						className="inline-flex items-center gap-1.5 rounded-[10px] border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-2xs transition-all cursor-pointer disabled:opacity-50"
-						title="Làm mới dữ liệu từ máy chủ"
+						className="inline-flex items-center gap-1.5 rounded-[10px] border border-border bg-card px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-accent hover:text-accent-foreground shadow-2xs transition-all cursor-pointer disabled:opacity-50"
+						title={t("view.refreshTooltip")}
 					>
 						<RefreshCw
-							className={`h-3.5 w-3.5 text-slate-500 ${isRefreshing ? "animate-spin" : ""}`}
+							className={`h-3.5 w-3.5 text-muted-foreground ${isRefreshing ? "animate-spin" : ""}`}
 						/>
-						<span className="hidden sm:inline">Làm mới</span>
+						<span className="hidden sm:inline">{t("view.refreshButton")}</span>
 					</button>
 
 					{/* Edit Button */}
@@ -243,23 +236,23 @@ export function ProfileView() {
 						type="button"
 						id="btn-edit-doctor-profile"
 						onClick={openEdit}
-						className="inline-flex items-center gap-2 rounded-[10px] bg-[#0EA5E9] hover:bg-[#25B4F8] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-md hover:shadow-sky-500/15 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+						className="inline-flex items-center gap-2 rounded-[10px] bg-primary hover:bg-primary/90 px-4 py-2 text-xs font-semibold text-primary-foreground shadow-xs hover:shadow-md hover:shadow-primary/15 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
 					>
 						<Pencil className="h-3.5 w-3.5" />
-						<span>Chỉnh sửa hồ sơ</span>
+						<span>{t("view.editButton")}</span>
 					</button>
 				</div>
 			</div>
 
-			{/* ── Summary Stats Cards (Không còn banner inline chen ngang đẩy bố cục) ── */}
+			{/* ── Summary Stats Cards ── */}
 			<ProfileStatsCards doctor={doctor} />
 
 			{/* ── Main Content Grid ── */}
 			{isLoading ? (
-				<div className="flex flex-col items-center justify-center py-20 bg-white rounded-[14px] border border-slate-200/80">
-					<Loader2 className="h-8 w-8 animate-spin text-[#0EA5E9]" />
-					<p className="mt-3 text-xs font-medium text-slate-500">
-						Đang đồng bộ hồ sơ bác sĩ từ hệ thống...
+				<div className="flex flex-col items-center justify-center py-20 bg-card text-card-foreground rounded-[14px] border border-border">
+					<Loader2 className="h-8 w-8 animate-spin text-primary" />
+					<p className="mt-3 text-xs font-medium text-muted-foreground">
+						{t("view.loading")}
 					</p>
 				</div>
 			) : (

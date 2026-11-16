@@ -1,12 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Globe, Monitor, Moon, Palette, Settings, Sun, Type } from "lucide-react";
+import {
+	Globe,
+	Monitor,
+	Moon,
+	Palette,
+	Settings,
+	Sun,
+	Type,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { cn } from "@/lib/utils";
 import { FontSelector } from "@/components/FontSelector";
+import { cn } from "@/lib/utils";
 
 const THEME_OPTIONS = [
 	{ value: "light", icon: Sun, labelKey: "themeLight" },
@@ -24,30 +32,38 @@ export function DoctorSettingsView() {
 	}, []);
 
 	return (
-		<div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6 lg:p-8">
+		<div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6 lg:p-8 text-foreground">
+			{/* ── Header ── */}
 			<div>
-				<div className="flex items-center gap-2">
-					<div className="rounded-xl bg-sky-50 p-2 text-[#0EA5E9]">
+				<div className="flex items-center gap-2.5">
+					<div className="rounded-xl bg-primary/15 p-2 text-primary">
 						<Settings className="h-5 w-5" />
 					</div>
-					<h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
+					<h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
 						{t("title")}
 					</h1>
 				</div>
-				<p className="mt-1 text-xs text-slate-500 sm:text-sm">{t("description")}</p>
+				<p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+					{t("description")}
+				</p>
 			</div>
 
-			<div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+			{/* ── Theme Setting ── */}
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-card text-card-foreground p-5 shadow-xs">
 				<div className="flex items-start gap-3">
-					<div className="rounded-lg bg-slate-100 p-2 text-slate-600">
+					<div className="rounded-lg bg-muted p-2 text-muted-foreground shrink-0">
 						<Palette className="h-4 w-4" />
 					</div>
 					<div>
-						<h2 className="text-sm font-bold text-slate-900">{t("themeTitle")}</h2>
-						<p className="text-xs text-slate-500">{t("themeDescription")}</p>
+						<h2 className="text-sm font-bold text-foreground">
+							{t("themeTitle")}
+						</h2>
+						<p className="text-xs text-muted-foreground">
+							{t("themeDescription")}
+						</p>
 					</div>
 				</div>
-				<div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+				<div className="flex items-center gap-1 rounded-lg border border-border bg-muted/60 p-1 self-start sm:self-auto">
 					{THEME_OPTIONS.map(({ value, icon: Icon, labelKey }) => {
 						const active = mounted && theme === value;
 						return (
@@ -58,8 +74,8 @@ export function DoctorSettingsView() {
 								className={cn(
 									"flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
 									active
-										? "bg-[#0EA5E9] text-white shadow-sm"
-										: "text-slate-600 hover:bg-slate-100"
+										? "bg-primary text-primary-foreground shadow-sm"
+										: "text-muted-foreground hover:text-foreground hover:bg-background/60"
 								)}
 							>
 								<Icon className="h-3.5 w-3.5" />
@@ -70,29 +86,44 @@ export function DoctorSettingsView() {
 				</div>
 			</div>
 
-			<div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+			{/* ── Language Setting ── */}
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-card text-card-foreground p-5 shadow-xs">
 				<div className="flex items-start gap-3">
-					<div className="rounded-lg bg-slate-100 p-2 text-slate-600">
+					<div className="rounded-lg bg-muted p-2 text-muted-foreground shrink-0">
 						<Globe className="h-4 w-4" />
 					</div>
 					<div>
-						<h2 className="text-sm font-bold text-slate-900">{t("languageTitle")}</h2>
-						<p className="text-xs text-slate-500">{t("languageDescription")}</p>
+						<h2 className="text-sm font-bold text-foreground">
+							{t("languageTitle")}
+						</h2>
+						<p className="text-xs text-muted-foreground">
+							{t("languageDescription")}
+						</p>
 					</div>
 				</div>
-				<LanguageSwitcher />
+				<div className="self-start sm:self-auto">
+					<LanguageSwitcher />
+				</div>
 			</div>
-			<div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-				<div className="flex items-start gap-2">
-					<div className="rounded-lg bg-slate-100 p-2 text-slate-600">
+
+			{/* ── Font Setting ── */}
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-card text-card-foreground p-5 shadow-xs">
+				<div className="flex items-start gap-3">
+					<div className="rounded-lg bg-muted p-2 text-muted-foreground shrink-0">
 						<Type className="h-4 w-4" />
 					</div>
 					<div>
-						<h2 className="text-sm font-bold text-slate-900">{t("fontTitle")}</h2>
-						<p className="text-xs text-slate-500">{t("fontDescription")}</p>
+						<h2 className="text-sm font-bold text-foreground">
+							{t("fontTitle")}
+						</h2>
+						<p className="text-xs text-muted-foreground">
+							{t("fontDescription")}
+						</p>
 					</div>
 				</div>
-				<FontSelector/>
+				<div className="self-start sm:self-auto">
+					<FontSelector />
+				</div>
 			</div>
 		</div>
 	);

@@ -899,7 +899,211 @@
       "profile": "Personal information",
       "settings": "Settings",
       "logout": "Sign out",
-      "online": "Online"
+      "online": "Online",
+      "attendingDoctor": "Attending Physician",
+      "doctor": "Doctor",
+      "doctorPrefix": "Dr.",
+      "initialsFallback": "DR"
+    },
+    "profile": {
+      "notUpdated": "Not updated",
+      "fallbackDoctor": "Doctor",
+      "fallbackWithEmail": "Doctor ({email})",
+      "prefixes": {
+        "professor": "Prof.",
+        "associateProfessor": "Assoc. Prof.",
+        "phd": "PhD.",
+        "master": "MSc.",
+        "doctor": "Dr."
+      },
+      "degrees": {
+        "Doctor": "Doctor of Medicine",
+        "Master": "Master",
+        "PhD": "PhD",
+        "Bachelor": "Bachelor",
+        "Professor": "Professor",
+        "PostDoc": "Post-Doctorate",
+        "Associate": "Associate",
+        "Graduate": "Graduate",
+        "Undergraduate": "Undergraduate"
+      },
+      "degreeOptions": {
+        "Doctor": "Doctor of Medicine (MD)",
+        "Master": "Master of Medicine (MSc)",
+        "PhD": "Doctor of Philosophy (PhD)",
+        "Bachelor": "Bachelor of Medicine",
+        "Professor": "Professor Degree",
+        "PostDoc": "Post-Doctorate",
+        "Associate": "Associate Degree",
+        "Graduate": "Graduate Degree",
+        "Undergraduate": "Undergraduate Degree"
+      },
+      "academicTitles": {
+        "None": "None",
+        "AssociateProfessor": "Associate Professor",
+        "Professor": "Professor"
+      },
+      "positions": {
+        "StaffDoctor": "Attending Physician",
+        "SeniorDoctor": "Senior Physician",
+        "DepartmentDeputyHead": "Deputy Head of Department",
+        "HeadOfDepartment": "Head of Department",
+        "DeputyDirector": "Deputy Hospital Director",
+        "Director": "Hospital Director"
+      },
+      "roles": {
+        "Doctor": "Specialist Physician",
+        "HeadDepartmentDoctor": "Department Head Physician",
+        "Admin": "Administrator",
+        "Manager": "Manager"
+      },
+      "view": {
+        "backToHome": "Back to Dashboard",
+        "title": "Physician Profile & Personal Information",
+        "subtitle": "Manage medical credentials, clinical positions, and practicing certificates",
+        "refreshTooltip": "Refresh data from server",
+        "refreshButton": "Refresh",
+        "editButton": "Edit Profile",
+        "loading": "Syncing physician profile from the system...",
+        "toast": {
+          "refreshSuccess": "Physician profile refreshed successfully!",
+          "refreshErrorFallback": "Unable to connect to the server to load the physician profile.",
+          "invalidImageType": "Please select a valid image file (PNG, JPG, WEBP).",
+          "imageTooLarge": "Avatar image size must not exceed 5MB.",
+          "avatarSuccess": "Avatar updated successfully!",
+          "avatarError": "Unable to upload avatar to the server. Please try again.",
+          "updateSuccess": "Physician profile updated successfully!",
+          "updateErrorFallback": "An error occurred while updating the physician profile. Please try again."
+        }
+      },
+      "initialsFallback": "DR",
+      "avatarCard": {
+        "uploading": "Uploading...",
+        "online": "Online",
+        "uploadTooltip": "Upload new avatar",
+        "personalInfoTitle": "Personal Information",
+        "fullName": "Full name:",
+        "dob": "Date of birth:",
+        "gender": "Gender:",
+        "male": "Male",
+        "female": "Female",
+        "cccd": "Citizen ID / Passport:",
+        "hideCccd": "Hide ID number",
+        "showCccd": "Show ID number",
+        "phone": "Phone number:",
+        "email": "Email:",
+        "hideEmail": "Hide email",
+        "showEmail": "Show full email",
+        "address": "Permanent address:",
+        "profileId": "Profile ID:",
+        "accountId": "Account ID:",
+        "createdAt": "Created on:",
+        "accountStatus": "Account status:",
+        "activeStatus": "Active"
+      },
+      "qualificationsCard": {
+        "tabs": {
+          "qualifications": "Qualifications & Training",
+          "colleagues": "Colleague Directory"
+        },
+        "summary": {
+          "positionLabel": "Clinical Position",
+          "positionSub": "Role assignment",
+          "academicTitleLabel": "Academic Title",
+          "academicTitleSub": "Academic council",
+          "roleLabel": "System Role",
+          "statusPrefix": "Status: {status}"
+        },
+        "degrees": {
+          "title": "Earned Medical Degrees & Diplomas",
+          "verified": "Verified",
+          "empty": "No medical degrees or diplomas updated yet."
+        },
+        "colleagues": {
+          "title": "Internal Physician Directory ({count})",
+          "subtitle": "Search colleague profiles within Respira AMS",
+          "searchPlaceholder": "Search by full name or Citizen ID...",
+          "loading": "Loading physician directory...",
+          "emptySearch": "No physicians matched \"{query}\".",
+          "emptyDefault": "Enter a full name or Citizen ID to search colleagues."
+        }
+      },
+      "statsCards": {
+        "positionTitle": "Clinical Position",
+        "educationTitle": "Academic Title & Degrees",
+        "degreesRecorded": "{count} medical degree(s) recorded",
+        "statusTitle": "Profile Status",
+        "activeWithStatus": "Active ({status})",
+        "accountLabel": "Account: {account}",
+        "ssoLinked": "SSO Linked"
+      },
+      "editModal": {
+        "title": "Update Physician Profile",
+        "badge": "Medical Profile",
+        "subtitle": "Edit personal details, medical degrees, and account security settings",
+        "close": "Close",
+        "tabs": {
+          "general": "Personal Information",
+          "academic": "Specialty & Titles",
+          "security": "Security & Password"
+        },
+        "validation": {
+          "lastNameRequired": "Please enter the physician's last and middle name.",
+          "firstNameRequired": "Please enter the physician's first name.",
+          "phoneRequired": "Please enter a contact phone number.",
+          "phoneInvalid": "Invalid phone number (10 digits, starting with 03, 05, 07, 08, or 09).",
+          "dobRequired": "Please select or enter a date of birth.",
+          "dobInvalid": "Invalid date of birth format.",
+          "dobFuture": "Date of birth cannot be in the future.",
+          "dobUnderage": "Physician must be at least 18 years old.",
+          "cccdRequired": "Please enter the Citizen ID / Passport number.",
+          "cccdInvalid": "Citizen ID / Passport number must consist of 9 or 12 digits.",
+          "addressRequired": "Please enter the permanent address.",
+          "passwordMinLength": "New password must be at least 6 characters long.",
+          "passwordMismatch": "New password confirmation does not match.",
+          "invalidImageType": "Please select a valid image file (PNG, JPG, WEBP).",
+          "imageTooLarge": "Image size must not exceed 5MB."
+        },
+        "general": {
+          "chooseNewAvatar": "Choose new photo",
+          "avatarTitle": "Physician Avatar",
+          "avatarHint": "Supports PNG, JPG, WEBP files. Maximum size 5MB.",
+          "uploadFromComputer": "Upload new photo from computer",
+          "lastNameLabel": "Last & Middle Name",
+          "lastNamePlaceholder": "e.g. Le Hoang",
+          "firstNameLabel": "First Name",
+          "firstNamePlaceholder": "e.g. Minh",
+          "phoneLabel": "Contact Phone Number",
+          "phonePlaceholder": "e.g. 0901234567",
+          "genderLabel": "Gender",
+          "dobLabel": "Date of Birth",
+          "cccdLabel": "Citizen ID / Passport",
+          "cccdPlaceholder": "12 digits",
+          "addressLabel": "Permanent Address",
+          "addressPlaceholder": "House number, street, ward, district, city/province",
+          "accountEmailTitle": "Account Email:",
+          "systemIdentityNote": "System identity account"
+        },
+        "academic": {
+          "positionLabel": "Hospital Position",
+          "academicTitleLabel": "Academic Title",
+          "degreesLabel": "Awarded Medical Degrees & Diplomas",
+          "degreesHint": "You can select multiple applicable medical degrees or diplomas."
+        },
+        "security": {
+          "bannerTitle": "Change Physician Account Password",
+          "bannerDescription": "To keep your current password unchanged, please leave both password fields blank.",
+          "newPasswordLabel": "New Password",
+          "newPasswordPlaceholder": "Enter at least 6 characters...",
+          "confirmPasswordLabel": "Confirm New Password",
+          "confirmPasswordPlaceholder": "Re-enter new password..."
+        },
+        "footer": {
+          "cancel": "Cancel",
+          "saving": "Saving changes...",
+          "save": "Save Changes"
+        }
+      }
     },
     "settings": {
       "title": "Settings",
@@ -937,147 +1141,769 @@
       "riskFactors": "Risk Factor"
     },
     "patients": {
-      "title": "Patient List",
-      "totalPatients": "TOTAL CASES",
-      "malePatients": "MALE PATIENTS",
-      "femalePatients": "FEMALE PATIENTS",
-      "searchPlaceholder": "Search by patient name, record code (BA-2026-...)",
-      "addPatient": "Add Patient",
-      "colPatient": "PATIENT & RECORD CODE",
-      "colAgeGender": "AGE / GENDER",
-      "colStatus": "TREATMENT STATUS",
-      "colActions": "ACTIONS",
-      "statusOutOfScope": "Out of scope",
-      "statusDeceased": "Deceased",
-      "statusTreating": "In treatment",
-      "statusRecovered": "Recovered",
-      "statusOther": "Other",
-      "yearsOld": "yrs",
-      "male": "Male",
-      "female": "Female",
-      "showing": "Showing",
-      "of": "of",
-      "prev": "Previous",
-      "next": "Next",
-      "empty": "No patients found.",
-      "deleteTitle": "Confirm Delete Patient",
-      "deleteWarning": "Note: The system only performs soft-deletion. All clinical records and medication history remain preserved in the database.",
-      "deletePrompt": "To confirm, please enter the word",
-      "deleteInputPlaceholder": "Type 'delete' to confirm",
-      "deleteCancel": "Cancel",
-      "deleteConfirm": "Confirm Delete",
-      "deleting": "Processing...",
-      "editPatient": "Edit Patient",
-      "newPatient": "Add New Patient",
-      "fullName": "Full Name",
-      "patientCode": "Record Code",
-      "gender": "Gender",
-      "birthDate": "Date of Birth",
-      "admissionDate": "Admission Date",
-      "diagnosis": "Initial Diagnosis",
-      "notes": "Clinical Notes",
-      "save": "Save Information",
-      "cancel": "Cancel",
-      "updateStatus": "Update Status",
-      "phoneLabel": "Phone Number",
-      "bhytLabel": "Health Insurance Card No.",
-      "addressLabel": "Address",
-      "physiqueLabel": "Physique",
-      "nextOfKin": "Next of Kin",
-      "noNextOfKin": "No next of kin information recorded.",
-      "treatmentTimeline": "Treatment Timeline",
-      "timelineSubtitle": "List of milestones and statuses",
-      "milestonesRecorded": "milestones recorded",
-      "updateStatusModalTitle": "Update Patient Status",
-      "dischargeOutcome": "Treatment Outcome (Discharge)",
-      "dischargeNotice": "This operation records discharge and cannot be undone.",
-      "saving": "Saving...",
-      "saveChanges": "Save changes",
-      "updateProfileBadge": "Update Record",
-      "newProfileBadge": "New Record",
-      "patientDialogSubtitle": "Administrative & physical details",
-      "identityGroup": "Identification Details",
-      "lastNameLabel": "Last & Middle Name",
-      "firstNameLabel": "First Name",
-      "clinicalInfoGroup": "Medical Code & Physique",
-      "heightLabel": "Height (cm)",
-      "weightLabel": "Weight (kg)",
-      "contactGroup": "Contact & Residence Information",
-      "cityLabel": "Province / City",
-      "saveRecord": "Save Record",
-      "btnAddKin": "Add",
-      "btnEdit": "Edit",
-      "btnDelete": "Delete",
-      "addNextOfKinTitle": "Add Next of Kin",
-      "editNextOfKinTitle": "Edit Next of Kin",
-      "kinDialogSubtitle": "Patient emergency contact information",
-      "kinFullName": "Next of kin full name",
-      "kinFullNamePlaceholder": "e.g. John Doe",
-      "kinRelationship": "Relationship with patient",
-      "kinRelationshipPlaceholder": "e.g. Spouse, Parent, Child, Sibling",
-      "kinPhoneNumber": "Contact phone number",
-      "kinPhonePlaceholder": "e.g. 0912345678",
-      "kinNameRequired": "Please enter the next of kin's name.",
-      "kinRelationshipRequired": "Please enter relationship with the patient.",
-      "kinPhoneRequired": "Please enter the contact phone number.",
-      "kinPhoneInvalid": "Invalid phone number format (e.g. 0912345678).",
-      "kinInvalidSpouseMale": "Patient is Male, the spouse relationship must be 'Wife' (cannot be 'Husband').",
-      "kinInvalidSpouseFemale": "Patient is Female, the spouse relationship must be 'Husband' (cannot be 'Wife').",
-      "kinSaveFailed": "Failed to save next of kin.",
-      "btnCancel": "Cancel",
-      "btnSaving": "Saving...",
-      "btnUpdate": "Update",
-      "btnAdd": "Add",
-      "deleteKinTitle": "Confirm Delete Next of Kin",
-      "deleteKinPrompt": "Are you sure you want to delete this next of kin?",
-      "deleteKinFailed": "Failed to delete next of kin.",
-      "btnDeleting": "Deleting...",
-      "treatmentPlansSection": "Treatment Plans",
-      "treatmentPlansSectionSubtitle": "List of antibiotic treatment plans for this patient",
-      "plansRecorded": "plans",
-      "noTreatmentPlans": "No treatment plans recorded yet.",
-      "planDetailTitle": "Treatment Plan Details",
-      "planStatusInProgress": "In Progress",
-      "planStatusClosed": "Closed",
-      "adherenceAdhereShort": "Adherent",
-      "adherenceValidShort": "Non-adherent (Valid)",
-      "adherenceInvalidShort": "Non-adherent (Invalid)",
-      "adherencePendingShort": "Pending Review",
-      "loadingPlanDetail": "Loading treatment plan details...",
-      "loadPlanError": "Failed to load treatment plan details.",
-      "btnRetry": "Retry",
-      "colDoctor": "Prescribing Doctor",
-      "diagnosisLabel": "Diagnosis",
-      "noDiagnosis": "No diagnosis recorded.",
-      "prescribedMedicines": "Prescribed Antibiotics",
-      "itemsUnit": "medicines",
-      "classificationLabel": "Classification",
-      "noMedicinesInPlan": "No antibiotics prescribed in this plan.",
-      "medicineChoiceReason": "Reason for Medicine Choice / Clinical Rationale",
-      "closedReasonTitle": "Close Reason",
-      "noCloseReason": "No close reason noted.",
-      "btnReviewPlan": "Review Plan",
-      "btnClosePlan": "Close Plan",
-      "btnCloseModal": "Close",
-      "closePlanTitle": "Close Treatment Plan",
-      "closePlanSubtitle": "Confirm conclusion and record reason for closing this plan",
-      "closeReasonLabel": "Reason for closing",
-      "closeReasonPlaceholder": "e.g. Patient recovered, switched protocol, etc.",
-      "closeReasonRequired": "Please enter reason for closing the treatment plan.",
-      "closePlanFailed": "Failed to close treatment plan.",
-      "btnSubmitting": "Processing...",
-      "btnClosePlanConfirm": "Close Plan",
-      "reviewPlanTitle": "Review & Approve Plan",
-      "reviewPlanSubtitle": "Department head or authorized doctor approves guideline adherence",
-      "reviewPlanFailed": "Failed to approve treatment plan.",
-      "adherenceAdhere": "Adhere to Protocol",
-      "adherenceAdhereDesc": "Antibiotics and dosages strictly adhere to clinical guidelines.",
-      "adherenceNotAdhereValid": "Not Adhere - Valid (Acceptable)",
-      "adherenceNotAdhereValidDesc": "Deviates from guidelines but has sound clinical rationale.",
-      "adherenceNotAdhereInvalid": "Not Adhere - Invalid (Rejected)",
-      "adherenceNotAdhereInvalidDesc": "Unsuitable antibiotic choice or inadequate justification.",
-      "btnSaveReview": "Save Review",
-      "btnDetail": "Detail"
+      "title": "Patient Management",
+      "description": "Patient records directory, treatment monitoring, and discharge management.",
+      "addButton": "Add Patient",
+      "dialog": {
+        "createTitle": "Add Patient Record",
+        "updateTitle": "Update Patient Record",
+        "deleteTitle": "Confirm Patient Deletion",
+        "deleteDescription": "Are you sure you want to delete the patient record for <bold>\"{name}\"</bold>? This action cannot be undone."
+      },
+      "outcomes": {
+        "InTreatment": "In Treatment",
+        "Recovered": "Recovered",
+        "Death": "Deceased",
+        "OutOfScope": "Out of Scope"
+      },
+      "gender": {
+        "Male": "Male",
+        "Female": "Female"
+      },
+      "table": {
+        "colMedicalRecordCode": "Medical Record ID",
+        "colFullName": "Full Name",
+        "colDobAge": "DOB / Age",
+        "colGender": "Gender",
+        "colStatus": "Status",
+        "ageYears": "({age} yrs)",
+        "empty": "No patient records found.",
+        "filterTitle": "Patient Filters",
+        "filterGender": "Gender",
+        "filterAgeRange": "Age Range (Min - Max)",
+        "ageFromPlaceholder": "From",
+        "ageToPlaceholder": "To",
+        "applyAgeButton": "Apply Age",
+        "clearAllFilters": "Clear all filters",
+        "actionViewDetail": "View details",
+        "actionDischarge": "Discharge patient",
+        "actionEdit": "Edit",
+        "actionDelete": "Delete"
+      },
+      "toast": {
+        "createSuccess": "Patient added successfully!",
+        "createError": "Error adding patient: {error}",
+        "updateSuccess": "Patient record updated successfully!",
+        "updateError": "Error updating patient: {error}",
+        "deleteSuccess": "Patient \"{name}\" deleted successfully!",
+        "deleteError": "Could not delete patient: {error}",
+        "dischargeSuccess": "Discharge status updated successfully!",
+        "dischargeError": "Error updating discharge status: {error}"
+      },
+      "form": {
+        "lastNameLabel": "Last Name",
+        "lastNamePlaceholder": "e.g., Nguyen",
+        "firstNameLabel": "First & Middle Name",
+        "firstNamePlaceholder": "e.g., Van An",
+        "medicalRecordCodeLabel": "Medical Record ID",
+        "medicalRecordCodePlaceholder": "e.g., BA-12345-122",
+        "healthInsuranceCardLabel": "Health Insurance Card",
+        "healthInsuranceCardPlaceholder": "0123456789",
+        "dateOfBirthLabel": "Date of Birth",
+        "phoneNumberLabel": "Phone Number",
+        "phoneNumberPlaceholder": "0912345678",
+        "genderLabel": "Gender",
+        "heightLabel": "Height (cm)",
+        "weightLabel": "Weight (kg)",
+        "addressLabel": "Address",
+        "addressPlaceholder": "e.g., Cai Rang",
+        "cityLabel": "Province / City",
+        "cityPlaceholder": "e.g., Can Tho",
+        "createButton": "Add Patient",
+        "updateButton": "Update Patient"
+      },
+      "validation": {
+        "lastNameRequired": "Last name is required",
+        "firstNameRequired": "First name is required",
+        "phoneRequired": "Phone number is required",
+        "phoneInvalid": "Invalid Vietnamese phone number (e.g., 0912345678)",
+        "dobRequired": "Date of birth is required",
+        "dobInvalid": "Invalid date of birth format",
+        "heightNumber": "Height must be a number",
+        "heightMin": "Height must be greater than 0",
+        "heightMax": "Invalid height value",
+        "weightNumber": "Weight must be a number",
+        "weightMin": "Weight must be greater than 0",
+        "weightMax": "Invalid weight value",
+        "medicalRecordCodeRequired": "Medical record ID is required",
+        "insuranceCardInvalid": "Health insurance card must be exactly 10 digits",
+        "addressRequired": "Address is required",
+        "cityRequired": "Province/City is required"
+      },
+      "discharge": {
+        "title": "Update Discharge Status",
+        "description": "Select the treatment outcome for patient <bold>{name}</bold>.",
+        "confirmButton": "Confirm",
+        "descriptions": {
+          "Recovered": "Patient recovered and discharged",
+          "Death": "Patient deceased during treatment",
+          "OutOfScope": "Transferred to another facility or discontinued monitoring"
+        }
+      },
+      "nextOfKin": {
+        "createTitle": "Add Next of Kin",
+        "updateTitle": "Update Next of Kin",
+        "fullNameLabel": "Full Name",
+        "fullNamePlaceholder": "e.g., Nguyen Van An",
+        "phoneLabel": "Phone Number",
+        "phonePlaceholder": "e.g., 0789456123",
+        "relationshipLabel": "Relationship",
+        "relationshipPlaceholder": "e.g., Eldest Child, Spouse, Parent...",
+        "createButton": "Add Next of Kin",
+        "updateButton": "Save Changes",
+        "validation": {
+          "fullNameRequired": "Next of kin full name is required",
+          "phoneRequired": "Phone number is required",
+          "phoneInvalid": "Invalid Vietnamese phone number (e.g., 0789456123)",
+          "phoneDuplicate": "This phone number is already registered for another next of kin",
+          "relationshipRequired": "Relationship is required"
+        }
+      },
+      "treatmentPlan": {
+        "severity": {
+          "Mild": "Mild",
+          "Moderate": "Moderate",
+          "Severe": "Severe",
+          "Critical": "Critical"
+        },
+        "treatmentSite": {
+          "Outpatient": "Outpatient",
+          "Inpatient": "Inpatient",
+          "ICU": "Intensive Care Unit (ICU)"
+        },
+        "classification": {
+          "title": "Classification",
+          "severityLabel": "Severity",
+          "treatmentSiteLabel": "Treatment Site",
+          "antibioticAllergyLabel": "Antibiotic Allergies:",
+          "otherInfectionsLabel": "Co-existing Infections:"
+        },
+        "medicines": {
+          "title": "Prescribed Antibiotics",
+          "empty": "No antibiotics prescribed.",
+          "choiceReasonLabel": "Reason for Medicine Selection:",
+          "closeReasonLabel": "Reason for Closing Regimen:"
+        },
+        "pathogens": {
+          "title": "Suspected Pathogens",
+          "highRiskLabel": "High Risk:",
+          "worthSuspectedLabel": "Other Suspected Pathogens:"
+        },
+        "protocols": {
+          "title": "System Recommended Regimens ({count})",
+          "groupHeader": "Regimen Group #{index} - {severity} ({site})",
+          "criteriaLabel": "Criteria: {criteria}"
+        },
+        "metrics": {
+          "title": "Severity Assessment Scales",
+          "scoreBadge": "{score} pts",
+          "conclusionLabel": "Conclusion:"
+        },
+        "closeDialog": {
+          "title": "Close Treatment Plan",
+          "description": "Treatment plan <mono>#{planId}</mono> will be marked as closed and cannot be undone.",
+          "reasonLabel": "Reason for Closing Regimen",
+          "reasonPlaceholder": "Enter reason for ending or modifying the treatment plan...",
+          "reasonRequired": "Please enter a reason for closing the treatment plan.",
+          "confirmButton": "Confirm Close"
+        },
+        "reviewDialog": {
+          "title": "Evaluate Regimen Adherence",
+          "description": "Classify adherence validity for treatment plan <mono>#{planId}</mono>.",
+          "confirmButton": "Save Evaluation",
+          "options": {
+            "NotAdhereValid": {
+              "label": "Valid Non-Adherence",
+              "description": "Clinician prescribed outside the regimen with a valid clinical justification."
+            },
+            "NotAdhereInvalid": {
+              "label": "Invalid Non-Adherence",
+              "description": "Clinician prescribed outside the regimen without a valid clinical justification."
+            }
+          }
+        },
+        "detailDialog": {
+          "title": "Treatment Plan Details",
+          "loadError": "Unable to load treatment plan details."
+        }
+      },
+      "detail": {
+        "notFound": "Patient information not found.",
+        "backButton": "Go back",
+        "genderAge": "{gender} • {age} yrs",
+        "dob": "Date of birth: {date}",
+        "notDischarged": "Not discharged",
+        "actions": {
+          "discharge": "Discharge",
+          "addTreatment": "Add Treatment",
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "meta": {
+          "medicalRecordCode": "Medical Record ID:",
+          "medicalRecordCodeShort": "Record ID",
+          "copyMedicalRecordCode": "Copy medical record ID",
+          "healthInsuranceCard": "Insurance Card:",
+          "healthInsuranceCardShort": "Insurance ID",
+          "copyHealthInsuranceCard": "Copy health insurance card number",
+          "admission": "Admitted:",
+          "discharge": "Discharged:"
+        },
+        "biometrics": {
+          "title": "Biometrics",
+          "height": "Height",
+          "weight": "Weight",
+          "bmi": "BMI Index"
+        },
+        "bmi": {
+          "unknown": "Unknown",
+          "underweight": "Underweight",
+          "normal": "Normal",
+          "overweight": "Overweight"
+        },
+        "contact": {
+          "title": "Contact Information",
+          "phone": "Phone",
+          "address": "Address"
+        },
+        "nextOfKinSection": {
+          "title": "Next of Kin",
+          "addButton": "Add",
+          "empty": "No next of kin contact information available.",
+          "callTitle": "Call {name}",
+          "editTitle": "Edit",
+          "deleteTitle": "Delete"
+        },
+        "adherence": {
+          "Adhere": "Adherent",
+          "NotAdhere": "Non-Adherent",
+          "NotAdhereValid": "Valid Non-Adherence",
+          "NotAdhereInvalid": "Invalid Non-Adherence"
+        },
+        "plansSection": {
+          "title": "Treatment Plans",
+          "subtitle": "Sorted by most recent update",
+          "filterAll": "All ({count})",
+          "filterInProgress": "In Progress ({count})",
+          "filterNotAdhere": "Non-Adherent ({count})",
+          "empty": "No treatment plans match the current filter.",
+          "statusInProgress": "In Progress",
+          "statusClosed": "Closed",
+          "reviewAdherenceTitle": "Evaluate regimen adherence",
+          "updatedAt": "Updated at: <strong>{time}</strong>",
+          "closePlanButton": "Close Regimen",
+          "viewDetailButton": "View regimen details →"
+        },
+        "deleteKinDialog": {
+          "title": "Confirm Next of Kin Deletion",
+          "description": "Are you sure you want to delete the contact information for <bold>\"{name}\"</bold>?"
+        },
+        "toast": {
+          "copied": "Copied {label}: {text}",
+          "deleteSuccess": "Patient record deleted successfully!",
+          "kinUpdateSuccess": "Next of kin updated successfully!",
+          "kinUpdateError": "Error updating next of kin: {error}",
+          "kinCreateSuccess": "Next of kin added successfully!",
+          "kinCreateError": "Error adding next of kin: {error}",
+          "kinDeleteSuccess": "Next of kin deleted successfully!",
+          "kinDeleteError": "Error deleting next of kin: {error}",
+          "planCloseSuccess": "Treatment plan closed successfully!",
+          "planCloseError": "Error closing treatment plan: {error}",
+          "planReviewSuccess": "Adherence evaluation updated successfully!",
+          "planReviewError": "Error evaluating regimen adherence: {error}"
+        }
+      }
+    },
+    "doctors": {
+      "title": "Department Doctors",
+      "subtitle": "Manage physicians in the department, review professional profiles, and generate individual prescribing evaluation reports.",
+      "prefixes": {
+        "Professor": "Prof.",
+        "AssociateProfessor": "Assoc. Prof.",
+        "Default": "Dr."
+      },
+      "gender": {
+        "Male": "Male",
+        "Female": "Female"
+      },
+      "academicTitle": {
+        "None": "None",
+        "AssociateProfessor": "Associate Professor (Assoc. Prof.)",
+        "Professor": "Professor (Prof.)"
+      },
+      "position": {
+        "StaffDoctor": "Attending Physician",
+        "SeniorDoctor": "Senior Physician",
+        "DepartmentDeputyHead": "Deputy Head of Department",
+        "HeadOfDepartment": "Head of Department",
+        "DeputyDirector": "Deputy Director",
+        "Director": "Director"
+      },
+      "role": {
+        "HeadDepartmentDoctor": "Head of Department (Manager)",
+        "Doctor": "Doctor"
+      },
+      "accountStatus": {
+        "Active": "Active",
+        "InActive": "Inactive"
+      },
+      "degree": {
+        "Professor": "Professor",
+        "Doctor": "Doctor of Medicine",
+        "Master": "Master",
+        "Bachelor": "Bachelor",
+        "Associate": "Associate",
+        "Undergraduate": "Undergraduate",
+        "Graduate": "Graduate",
+        "PhD": "PhD",
+        "PostDoc": "Postdoctoral"
+      },
+      "table": {
+        "doctor": "Physician",
+        "academicAndDegree": "Academic Title / Degree",
+        "positionAndRole": "Position & Role",
+        "gender": "Gender",
+        "status": "Status",
+        "empty": "No matching physicians found."
+      },
+      "filter": {
+        "buttonTitle": "Filter physicians",
+        "title": "Filter List",
+        "reset": "Reset",
+        "genderLabel": "Gender",
+        "allGenders": "All genders",
+        "academicTitleLabel": "Academic Title",
+        "allAcademicTitles": "All academic titles",
+        "positionLabel": "Position",
+        "allPositions": "All positions"
+      },
+      "actions": {
+        "createReportTitle": "Generate analysis report",
+        "viewDetailTitle": "View physician details"
+      },
+      "createReportDialog": {
+        "title": "Create Individual Analysis Report"
+      },
+      "toast": {
+        "defaultDoctorName": "the physician",
+        "createReportSuccess": "Analysis report created for {name}!",
+        "createReportError": "Error creating report: {error}"
+      },
+      "detailModal": {
+        "title": "Physician Details",
+        "loadError": "Unable to load physician information.",
+        "notUpdated": "Not updated",
+        "createReportButton": "Create Report",
+        "degreesTitle": "Degrees / Qualifications",
+        "noDegrees": "No qualifications updated",
+        "position": "Position",
+        "academicTitle": "Academic Title",
+        "gender": "Gender",
+        "dateOfBirth": "Date of Birth",
+        "citizenId": "Citizen ID / National ID",
+        "joinedDate": "System Join Date",
+        "email": "Email",
+        "phone": "Phone Number",
+        "address": "Address"
+      }
+    },
+    "analysis": {
+      "title": "Antibiotic Analysis Reports",
+      "subtitle": "Statistics on treatment regimen adherence, AWaRe antibiotic classifications, and clinical outcomes.",
+      "createButton": "Create New Report",
+      "doctorBadge": {
+        "generalReport": "General Report",
+        "general": "General",
+        "loading": "Loading physician info...",
+        "fallbackName": "Dr. ({id}...)",
+        "prefixes": {
+          "Professor": "Prof.",
+          "AssociateProfessor": "Assoc. Prof.",
+          "Default": "Dr."
+        }
+      },
+      "table": {
+        "doctor": "Assigned Physician",
+        "period": "Time Period",
+        "total": "Total",
+        "adherence": "Regimen Adherence",
+        "outcomes": "Treatment Outcomes",
+        "createdAt": "Created At",
+        "empty": "No analysis reports found.",
+        "plansCount": "{count} regimens",
+        "patientsCount": "{count} patients",
+        "adherentCount": "Adherent: {count} ({rate}%)",
+        "nonAdherentCount": "Non-Adherent: {count}",
+        "pendingReviewCount": "Pending Review: {count}",
+        "recoveredCount": "Recovered: {count}",
+        "deceasedCount": "Deceased: {count}",
+        "otherOutcomeCount": "Other: {count}"
+      },
+      "actions": {
+        "viewDetailTitle": "View details",
+        "downloadExcelTitle": "Download Excel",
+        "deleteTitle": "Delete report"
+      },
+      "createDialog": {
+        "title": "Create New Analysis Report"
+      },
+      "deleteDialog": {
+        "title": "Confirm Report Deletion",
+        "description": "Are you sure you want to delete the analysis report for <bold>{period}</bold>? This action cannot be undone."
+      },
+      "toast": {
+        "createSuccess": "Analysis report created successfully!",
+        "createError": "Error creating report: {error}",
+        "deleteSuccess": "Analysis report deleted successfully!",
+        "deleteError": "Unable to delete report: {error}",
+        "downloadExcelSuccess": "Excel report downloaded successfully!",
+        "downloadExcelError": "Error downloading Excel file: {error}"
+      },
+      "detail": {
+        "notFound": "Analysis report data not found.",
+        "title": "Analysis Report Details",
+        "periodRange": "Reporting period: <bold>{start}</bold> → <bold>{end}</bold>",
+        "exportExcel": "Export Excel (.xlsx)",
+        "deleteReport": "Delete Report",
+        "deleteConfirmDescription": "Are you sure you want to delete this analysis report? This action cannot be undone.",
+        "cards": {
+          "treatmentScale": {
+            "title": "Treatment Scale",
+            "plans": "{count} <unit>regimens</unit>",
+            "patients": "Across <bold>{count}</bold> total patients"
+          },
+          "adherence": {
+            "title": "Regimen Adherence"
+          },
+          "attention": {
+            "title": "Requires Attention",
+            "nonAdherent": "Non-Adherent",
+            "pendingReview": "Pending Review"
+          },
+          "outcomes": {
+            "title": "Treatment Outcomes",
+            "recovered": "Recovered",
+            "deceased": "Deceased",
+            "other": "Other"
+          }
+        },
+        "doctorsSection": {
+          "title": "Detailed Statistics by Attending Physician ({count})",
+          "empty": "No physician prescribing data found during this period.",
+          "doctorSummary": "Managing <bold>{patients}</bold> patients • Total <bold>{plans}</bold> regimens",
+          "table": {
+            "antibioticName": "Antibiotic Name",
+            "awareClassification": "AWaRe Classification",
+            "totalPrescriptions": "Total Prescriptions",
+            "adherent": "Adherent",
+            "nonAdherent": "Non-Adherent",
+            "pendingReview": "Pending Review",
+            "empty": "No antibiotic data recorded."
+          }
+        }
+      },
+      "createForm": {
+        "defaultDoctorName": "the selected physician",
+        "doctorBanner": "Generate an antibiotic prescribing and regimen adherence analysis report for <bold>{name}</bold>.",
+        "generalBanner": "The system will aggregate antibiotic prescribing and regimen adherence data for <bold>all physicians</bold> within the selected period.",
+        "quickSelect": "Quick select:",
+        "presets": {
+          "today": "Today",
+          "last7Days": "Last 7 days",
+          "last30Days": "Last 30 days",
+          "last90Days": "Last 90 days"
+        },
+        "startLabel": "Start Time",
+        "endLabel": "End Time",
+        "submit": "Create Report",
+        "validation": {
+          "startRequired": "Please select a start time",
+          "endRequired": "Please select an end time",
+          "invalidRange": "Start time must be earlier than or equal to end time"
+        }
+      }
+    },
+    "diagnose": {
+      "categories": {
+        "PersonalInformation": "Patient Information",
+        "MedicalHistory": "Medical & Medication History",
+        "Paraclinical": "Paraclinical",
+        "Clinical": "Clinical",
+        "Other": "Other Indicators"
+      },
+      "allergyTypes": {
+        "No": "No known drug allergies",
+        "Yes": "Antibiotic allergy",
+        "NonRegisteredAntibiotic": "Unlisted antibiotic allergy",
+        "Unknown": "Unknown"
+      },
+      "micCategories": {
+        "Susceptible": "Susceptible (S)",
+        "Intermediate": "Intermediate (I)",
+        "Resistant": "Resistant (R)"
+      },
+      "awareClassifications": {
+        "Access": "Access",
+        "AccessWatch": "Access-Watch",
+        "Watch": "Watch",
+        "Reserve": "Reserve",
+        "Others": "Others",
+        "Unclassified": "Unclassified"
+      },
+      "severity": {
+        "Mild": "Mild",
+        "Moderate": "Moderate",
+        "Severe": "Severe"
+      },
+      "treatmentSite": {
+        "Outpatient": "Outpatient",
+        "Inpatient": "Inpatient",
+        "IntensiveCareUnit": "Intensive Care Unit (ICU)"
+      },
+      "sampleTypes": {
+        "Unknown": "Unknown",
+        "Sputum": "Sputum",
+        "BronchoalveolarLavageFluid": "Bronchoalveolar Lavage Fluid (BAL)",
+        "PleuralFluid": "Pleural Fluid",
+        "Urine": "Urine",
+        "Blood": "Blood",
+        "AbdominalFluid": "Abdominal Fluid",
+        "CerebrospinalFluid": "Cerebrospinal Fluid (CSF)",
+        "WoundExudate": "Wound Exudate / Pus",
+        "Other": "Other Specimen"
+      },
+      "infectionTypes": {
+        "SkinAndSoftTissueInfection": "Skin and Soft Tissue Infection",
+        "SepticArthritis": "Septic Arthritis",
+        "Osteomyelitis": "Osteomyelitis",
+        "BacterialMyositisOrMuscleAbscess": "Bacterial Myositis / Muscle Abscess",
+        "InfectedGoutyTophus": "Infected Gouty Tophus",
+        "PyelonephritisOrRenalAbscess": "Pyelonephritis / Renal Abscess",
+        "AcuteCystitis": "Acute Cystitis",
+        "AcuteNonGonococcalUrethritis": "Acute Non-Gonococcal Urethritis",
+        "BacterialVaginourethritis": "Bacterial Vaginourethritis",
+        "BacterialEndometritis": "Bacterial Endometritis",
+        "PurulentMeningitis": "Purulent Meningitis",
+        "BacterialEncephalitis": "Bacterial Encephalitis",
+        "PleuralEmpyema": "Pleural Empyema",
+        "MediastinalAbscess": "Mediastinal Abscess",
+        "InfectiveEndocarditis": "Infective Endocarditis",
+        "BacterialMyocarditis": "Bacterial Myocarditis",
+        "BacterialPericarditis": "Bacterial Pericarditis",
+        "PulmonaryTuberculosis": "Pulmonary Tuberculosis",
+        "ExtrapulmonaryTuberculosis": "Extrapulmonary Tuberculosis",
+        "BiliaryTractInfection": "Biliary Tract Infection",
+        "BacterialLiverAbscess": "Bacterial Liver Abscess",
+        "InfectedAcutePancreatitis": "Infected Acute Pancreatitis",
+        "BacterialPeritonitis": "Bacterial Peritonitis",
+        "BacterialDiarrhea": "Bacterial Diarrhea",
+        "HelicobacterPyloriInfection": "Helicobacter pylori Infection",
+        "Sepsis": "Sepsis",
+        "OrbitalCellulitis": "Orbital Cellulitis",
+        "Conjunctivitis": "Conjunctivitis",
+        "Keratitis": "Keratitis",
+        "Dacryocystitis": "Dacryocystitis",
+        "MaxillofacialAbscess": "Maxillofacial Abscess",
+        "Other": "Other Infection"
+      },
+      "range": {
+        "and": "and",
+        "placeholderDefault": "Enter value...",
+        "placeholderBetween": "Normal: {min} – {max}",
+        "placeholderMin": "Normal: ≥ {min}",
+        "placeholderMax": "Normal: ≤ {max}"
+      },
+      "validation": {
+        "required": "Please enter \"{name}\".",
+        "invalidNumber": "Value must be a valid number.",
+        "outOfAcceptedRange": "Value is outside the accepted range ({range}).",
+        "outOfNormalRange": "Outside normal range ({range}). Still accepted by the system."
+      },
+      "patientHeader": {
+        "sectionTitle": "Treating Patient Profile",
+        "previousDiagnosisRef": "Referenced clinical metrics from the most recent treatment",
+        "loading": "Loading patient information...",
+        "fallbackId": "Patient ID: {id}",
+        "age": "{age} yrs",
+        "gender": {
+          "male": "Male",
+          "female": "Female"
+        },
+        "measurements": "{height} cm • {weight} kg",
+        "viewProfile": "View Patient Profile"
+      },
+      "workspace": {
+        "title": "Community-Acquired Pneumonia (CAP) Diagnosis & Treatment Guidance",
+        "subtitle": "Complete the 5-step clinical assessment to stratify risk and generate empirical antibiotic regimen recommendations.",
+        "loading": "Loading patient profile and clinical variable catalog...",
+        "noPatient": {
+          "title": "Please create a patient profile before diagnosing",
+          "description": "Enter the patient's demographic and baseline health information so the system can pre-fill baseline metrics for the diagnostic form.",
+          "backToList": "Back to Patient List",
+          "createButton": "Create Patient Profile"
+        },
+        "errors": {
+          "loadPatientFallback": "Unable to load patient profile information.",
+          "loadMetaFallback": "Unable to load diagnostic form metadata.",
+          "submitFallback": "Error submitting diagnosis request.",
+          "patientLoadPrefix": "Error loading patient profile: {error}",
+          "dataLoadPrefix": "Error loading data: {error}"
+        }
+      },
+      "createPatientModal": {
+        "title": "Add New Patient Profile",
+        "description": "Create a new patient profile to attach to this diagnostic session and save treatment plans.",
+        "errorFallback": "Unable to create a new patient profile."
+      },
+      "assessmentForm": {
+        "json": {
+          "import": "Import JSON",
+          "export": "Export JSON"
+        },
+        "steps": {
+          "step1": "Clinical Assessment",
+          "step2": "Antibiotic Allergy",
+          "step3": "Special History",
+          "step4": "Other Infections",
+          "step5": "Microbiology"
+        },
+        "navigation": {
+          "back": "← Back"
+        },
+        "step1": {
+          "title": "1. Clinical & Paraclinical Assessment",
+          "description": "Fields marked with <required>*</required> are required. Values outside the normal range show a yellow warning; values outside the accepted range will be rejected.",
+          "searchPlaceholder": "Search by variable name or code (e.g., CURB, RR, SPO2, AGE)...",
+          "booleanYes": "Yes",
+          "booleanNo": "No",
+          "nextButton": "Next: Antibiotic Allergy →"
+        },
+        "step2": {
+          "title": "2. Antibiotic Allergy History",
+          "description": "Record the patient's antibiotic allergy status to exclude unsafe treatment regimens.",
+          "otherGroup": "Other",
+          "otherAllergyLabel": "Detailed Allergy Description",
+          "otherAllergyPlaceholder": "e.g., Urticaria when taking Beta-lactam antibiotics...",
+          "searchPlaceholder": "Search antibiotic or antibiotic class...",
+          "selectAllVisible": "Select All Visible",
+          "clearAll": "Clear All",
+          "quickSelectByGroup": "Quick Select by Antibiotic Class",
+          "selectedCount": "Selected ({count})",
+          "nextButton": "Next: Special History →"
+        },
+        "step3": {
+          "title": "3. Special Medical History",
+          "description": "Enter additional medical history notes beyond the clinical variable list (optional).",
+          "placeholder": "e.g., History of prior pulmonary tuberculosis, recent chemotherapy...",
+          "addButton": "Add",
+          "empty": "No special medical history recorded yet.",
+          "nextButton": "Next: Other Infections →"
+        },
+        "step4": {
+          "title": "4. Concomitant Active Infections",
+          "description": "Select co-existing sites of infection outside pneumonia (select multiple or skip).",
+          "nextButton": "Next: Microbiology →"
+        },
+        "step5": {
+          "title": "5. Microbiology Specimen Results",
+          "description": "Add microbiological culture and susceptibility results if available. Leave empty if test results are pending.",
+          "sampleHeader": "Specimen #{index}",
+          "deleteSample": "Remove",
+          "sampleTypeLabel": "Specimen Type",
+          "micLabel": "Susceptibility (MIC)",
+          "pathogenLabel": "Pathogen",
+          "pathogenPlaceholder": "-- Select pathogen --",
+          "addSampleButton": "Add Specimen",
+          "submitting": "Analyzing diagnosis...",
+          "submitButton": "Diagnose & Recommend Regimen"
+        },
+        "validation": {
+          "selectAllergyAntibiotic": "Please select at least one antibiotic the patient is allergic to.",
+          "describeOtherAllergy": "Please describe the patient's allergy details.",
+          "samplePathogenRequired": "Specimen #{index}: Please select a causative pathogen.",
+          "invalidJsonFile": "The JSON file does not match the expected diagnosis payload format."
+        }
+      },
+      "result": {
+        "resetButton": "Edit Clinical Data / Perform New Diagnosis",
+        "tabs": {
+          "protocol": "Recommended Regimens",
+          "custom": "Custom Antibiotic Selection"
+        },
+        "stratification": {
+          "title": "Severity Stratification & Care Setting Results",
+          "severityLabel": "Severity Level",
+          "treatmentSiteLabel": "Treatment Setting",
+          "egfrLabel": "eGFR (mL/min/1.73m²)",
+          "pregnancyLabel": "Pregnancy / Lactation",
+          "pregnancyYes": "Yes (Check contraindications)",
+          "pregnancyNo": "No",
+          "allergyLabel": "Antibiotic Allergy",
+          "noAllergy": "No known drug allergies",
+          "otherInfectionsLabel": "Concomitant Infections",
+          "noOtherInfections": "None",
+          "scoringMetricsTitle": "Severity Scoring Breakdown",
+          "totalScore": "Total score: {score}"
+        },
+        "missingVariables": {
+          "title": "Unentered Clinical / Paraclinical Variables"
+        },
+        "pathogens": {
+          "title": "Suspected Pathogens",
+          "heavySuspectedTitle": "High Risk (Heavy Suspected) ({count})",
+          "heavySuspectedEmpty": "No specific risk factors exceeded the high-alert threshold.",
+          "worthSuspectedTitle": "Pathogens to Consider (Worth Suspected) ({count})"
+        },
+        "protocols": {
+          "title": "Recommended Antibiotic Regimens",
+          "subtitle": "Select one complete combination option to confirm treatment.",
+          "count": "{count} regimens",
+          "empty": "No automated regimen matched. Please switch to the \"Custom Antibiotic Selection\" tab.",
+          "defaultName": "Regimen #{index}",
+          "optionLabel": "Option #{index}",
+          "selected": "● Selected",
+          "selectThis": "○ Select this regimen",
+          "selectedSummary": "Selected combination of {count} antibiotic(s).",
+          "selectPrompt": "Select a regimen option above to confirm.",
+          "saving": "Saving regimen...",
+          "confirmButton": "Confirm Selected Regimen"
+        },
+        "cdss": {
+          "title": "Clinical Decision Support (CDSS) Reasoning",
+          "evidencesButton": "Evaluation Evidence ({count})",
+          "resultLabel": "Result:",
+          "missingData": "Missing data",
+          "met": "Met",
+          "notMet": "Not met",
+          "scorePoints": "(+{score} pts)",
+          "microbialButton": "Microbiology Results ({count})",
+          "microbialEmpty": "No microbiology specimens recorded."
+        },
+        "custom": {
+          "title": "Custom Antibiotic Regimen Selection",
+          "subtitle": "A clinical rationale is required. The system will automatically warn if multiple agents from the same antibiotic class are selected.",
+          "searchPlaceholder": "Search by drug name, antibiotic class, or AWaRe classification...",
+          "selectedLabel": "Selected Antibiotics ({count})",
+          "reserveWarning": "Note: You have selected an antibiotic in the <bold>Reserve</bold> group (strictly monitored reserve antibiotics).",
+          "reasonLabel": "Rationale for overriding recommended regimens",
+          "reasonPlaceholder": "e.g., Suspected multidrug-resistant pathogen, history of prior treatment failure...",
+          "helperText": "Select at least 1 antibiotic and provide a complete clinical rationale.",
+          "saving": "Validating & saving...",
+          "confirmButton": "Confirm Custom Treatment"
+        },
+        "errors": {
+          "confirmFailed": "Failed to confirm treatment regimen.",
+          "selectAtLeastOne": "Please select at least one antibiotic.",
+          "reasonRequired": "A clinical rationale is required when selecting a custom antibiotic regimen.",
+          "warnCheckFailed": "Unable to check antibiotic combination warnings."
+        },
+        "groupWarningModal": {
+          "title": "Same-Class Antibiotic Combination Warning",
+          "description": "Your selected antibiotics include drugs from the <bold>same antibiotic class</bold>. Combining agents from the same class usually does not broaden spectrum coverage and may increase toxicity. Are you sure you want to proceed?",
+          "cancelButton": "Cancel & Reselect",
+          "confirmButton": "Proceed Anyway"
+        }
+      }
     }
   },
   

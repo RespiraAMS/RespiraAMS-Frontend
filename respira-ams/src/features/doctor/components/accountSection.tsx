@@ -1,13 +1,20 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { LogOut, Settings, User } from "lucide-react";
 import { logout, getUser } from "@/lib/auth";
-import { getStoredDoctorProfile, fetchCurrentDoctorProfile } from "@/features/profile/api";
-import { getDoctorDisplayName, POSITION_LABELS, DoctorProfile } from "@/features/profile/types";
+import {
+	getStoredDoctorProfile,
+	fetchCurrentDoctorProfile,
+} from "@/features/profile/api";
+import {
+	getDoctorDisplayName,
+	POSITION_LABELS,
+	DoctorProfile,
+} from "@/features/profile/types";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -34,11 +41,35 @@ export interface UserInfo {
 	initials: string;
 }
 
-function buildUserInfo(profile?: DoctorProfile | null, authUser?: { name?: string; email?: string } | null): UserInfo {
+interface UserInfoLabels {
+	attendingDoctor: string;
+	doctor: string;
+	doctorPrefix: string;
+	initialsFallback: string;
+	resolvePosition?: (position: DoctorProfile["position"]) => string | undefined;
+}
+
+function buildUserInfo(
+	labels: UserInfoLabels,
+	profile?: DoctorProfile | null,
+	authUser?: { name?: string; email?: string } | null
+): UserInfo {
 	if (profile && (profile.firstName || profile.lastName)) {
 		const name = getDoctorDisplayName(profile);
-		const initial = (profile.firstName || profile.lastName || "B").trim().charAt(0).toUpperCase();
-		const positionText = POSITION_LABELS[profile.position] || "Bác sĩ điều trị";
+		const initial = (
+			profile.firstName ||
+			profile.lastName ||
+			labels.initialsFallback.charAt(0) ||
+			"B"
+		)
+			.trim()
+			.charAt(0)
+			.toUpperCase();
+		const positionText =
+			labels.resolvePosition?.(profile.position) ||
+			POSITION_LABELS[profile.position] ||
+			labels.attendingDoctor;
+
 		return {
 			name,
 			title: positionText,
@@ -51,11 +82,12 @@ function buildUserInfo(profile?: DoctorProfile | null, authUser?: { name?: strin
 	}
 
 	if (authUser?.name || authUser?.email) {
-		const displayName = authUser.name || authUser.email?.split("@")[0] || "Bác sĩ";
+		const displayName =
+			authUser.name || authUser.email?.split("@")[0] || labels.doctor;
 		const initial = displayName.charAt(0).toUpperCase();
 		return {
-			name: `BS. ${displayName}`,
-			title: "Bác sĩ",
+			name: `${labels.doctorPrefix} ${displayName}`.trim(),
+			title: labels.doctor,
 			department: authUser.email || "Respira AMS",
 			hospital: "",
 			email: authUser.email || "",
@@ -64,12 +96,12 @@ function buildUserInfo(profile?: DoctorProfile | null, authUser?: { name?: strin
 	}
 
 	return {
-		name: "Bác sĩ",
-		title: "Bác sĩ",
+		name: labels.doctor,
+		title: labels.doctor,
 		department: "Respira AMS",
 		hospital: "",
 		email: "",
-		initials: "BS",
+		initials: labels.initialsFallback,
 	};
 }
 
@@ -77,34 +109,56 @@ export interface AccountSectionProps {
 	user?: UserInfo;
 	collapsed?: boolean;
 	className?: string;
+	route?: string;
 }
 
 export function AccountSection({
 	user: initialUser,
 	collapsed = false,
 	className,
+	route = "doctor"
 }: AccountSectionProps) {
 	const router = useRouter();
 	const t = useTranslations("doctor.account");
 	const [mounted, setMounted] = useState(false);
 
+	const userInfoLabels = useMemo<UserInfoLabels>(
+		() => ({
+			attendingDoctor: t("attendingDoctor"),
+			doctor: t("doctor"),
+			doctorPrefix: t("doctorPrefix"),
+			initialsFallback: t("initialsFallback"),
+			resolvePosition: (position) => {
+				if (!position) return undefined;
+				const key = `positions.${position}`;
+				return t.has(key) ? t(key) : undefined;
+			},
+		}),
+		[t]
+	);
+
 	// Khởi tạo đồng nhất trên SSR và Client để ngăn lỗi Hydration Mismatch
 	const [currentUserInfo, setCurrentUserInfo] = useState<UserInfo>(() => {
 		if (initialUser) return initialUser;
-		return buildUserInfo(null, null);
+		return buildUserInfo(userInfoLabels, null, null);
 	});
 
-	const applyDoctorProfile = useCallback((profile: DoctorProfile) => {
-		const storedUser = getUser();
-		const authUser = storedUser
-			? {
-					name: [storedUser.firstName, storedUser.lastName].filter(Boolean).join(" "),
-					email: storedUser.email,
-			  }
-			: null;
-		const info = buildUserInfo(profile, authUser);
-		setCurrentUserInfo(info);
-	}, []);
+	const applyDoctorProfile = useCallback(
+		(profile: DoctorProfile) => {
+			const storedUser = getUser();
+			const authUser = storedUser
+				? {
+						name: [storedUser.firstName, storedUser.lastName]
+							.filter(Boolean)
+							.join(" "),
+						email: storedUser.email,
+					}
+				: null;
+			const info = buildUserInfo(userInfoLabels, profile, authUser);
+			setCurrentUserInfo(info);
+		},
+		[userInfoLabels]
+	);
 
 	// Đồng bộ thông tin cá nhân từ Backend sau khi client đã mount
 	useEffect(() => {
@@ -117,11 +171,15 @@ export function AccountSection({
 			applyDoctorProfile(cached);
 		} else if (storedUser) {
 			setCurrentUserInfo(
-				buildUserInfo(null, {
-					name: [storedUser.firstName, storedUser.lastName].filter(Boolean).join(" "),
+				buildUserInfo(userInfoLabels, null, {
+					name: [storedUser.firstName, storedUser.lastName]
+						.filter(Boolean)
+						.join(" "),
 					email: storedUser.email,
 				})
 			);
+		} else if (!initialUser) {
+			setCurrentUserInfo(buildUserInfo(userInfoLabels, null, null));
 		}
 
 		// 2. Luôn chủ động fetch mới nhất từ backend
@@ -150,10 +208,13 @@ export function AccountSection({
 		window.addEventListener("storage", handleProfileUpdate);
 
 		return () => {
-			window.removeEventListener("respira:profile-updated", handleProfileUpdate);
+			window.removeEventListener(
+				"respira:profile-updated",
+				handleProfileUpdate
+			);
 			window.removeEventListener("storage", handleProfileUpdate);
 		};
-	}, [applyDoctorProfile]);
+	}, [applyDoctorProfile, initialUser, userInfoLabels]);
 
 	const user = currentUserInfo;
 	const activeAvatarUrl = mounted ? user.avatarUrl : undefined;
@@ -178,7 +239,7 @@ export function AccountSection({
 								<button
 									type="button"
 									suppressHydrationWarning
-									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] hover:ring-2 hover:ring-sky-300 transition-all mx-auto cursor-pointer"
+									className="relative flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/15 text-sky-600 dark:bg-sky-400/15 dark:text-sky-400 font-bold text-[11px] hover:ring-2 hover:ring-sky-500/40 transition-all mx-auto cursor-pointer focus:outline-hidden"
 									id="doctor-account-trigger-collapsed"
 								>
 									<div className="h-full w-full rounded-full overflow-hidden flex items-center justify-center">
@@ -192,7 +253,7 @@ export function AccountSection({
 											<span suppressHydrationWarning>{user.initials}</span>
 										)}
 									</div>
-									<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#22C55E] ring-2 ring-white dark:ring-slate-900 z-10 pointer-events-none" />
+									<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-background z-10 pointer-events-none" />
 								</button>
 							</DropdownMenuTrigger>
 						</TooltipTrigger>
@@ -205,10 +266,16 @@ export function AccountSection({
 					</Tooltip>
 				</TooltipProvider>
 
-				<DropdownMenuContent align="end" side="right" className="w-52 text-xs">
+				<DropdownMenuContent
+					align="end"
+					side="right"
+					className="w-52 rounded-[12px] border-border bg-popover text-popover-foreground text-xs"
+				>
 					<DropdownMenuLabel className="font-normal">
 						<div className="flex flex-col gap-0.5">
-							<p className="text-xs font-semibold">{user.name}</p>
+							<p className="text-xs font-semibold text-foreground">
+								{user.name}
+							</p>
 							<p className="text-[10px] text-muted-foreground">
 								{user.title} {user.email ? `• ${user.email}` : ""}
 							</p>
@@ -216,13 +283,19 @@ export function AccountSection({
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem asChild>
-						<Link href="/doctor/profile" className="flex items-center gap-2 cursor-pointer text-xs">
+						<Link
+							href={`/${route}/profile`}
+							className="flex items-center gap-2 cursor-pointer text-xs"
+						>
 							<User className="h-3.5 w-3.5" />
 							{t("profile")}
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
-						<Link href="/doctor/settings" className="flex items-center gap-2 cursor-pointer text-xs">
+						<Link
+							href={`/${route}/settings`}
+							className="flex items-center gap-2 cursor-pointer text-xs"
+						>
 							<Settings className="h-3.5 w-3.5" />
 							{t("settings")}
 						</Link>
@@ -244,7 +317,7 @@ export function AccountSection({
 		<DropdownMenu>
 			<div
 				className={cn(
-					"group flex items-center justify-between gap-2 p-1.5 rounded-[12px] border border-slate-200/80 bg-white hover:border-slate-300 shadow-2xs transition-all",
+					"group flex items-center justify-between gap-2 p-1.5 rounded-[12px] border border-border bg-card text-card-foreground hover:border-foreground/25 hover:bg-accent/30 shadow-2xs transition-all",
 					className
 				)}
 			>
@@ -257,13 +330,10 @@ export function AccountSection({
 						id="doctor-account-trigger"
 					>
 						{/* Avatar Circle with Online Dot */}
-						<div
-							suppressHydrationWarning
-							className="relative shrink-0"
-						>
+						<div suppressHydrationWarning className="relative shrink-0">
 							<div
 								suppressHydrationWarning
-								className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E0F2FE] text-[#0EA5E9] font-bold text-[11px] select-none overflow-hidden"
+								className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/15 text-sky-600 dark:bg-sky-400/15 dark:text-sky-400 font-bold text-[11px] select-none overflow-hidden"
 							>
 								{activeAvatarUrl ? (
 									<img
@@ -276,7 +346,7 @@ export function AccountSection({
 								)}
 							</div>
 							<span
-								className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#22C55E] ring-2 ring-white dark:ring-slate-900 z-10"
+								className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-card z-10"
 								title={t("online")}
 							/>
 						</div>
@@ -285,13 +355,13 @@ export function AccountSection({
 						<div className="min-w-0 flex-1" suppressHydrationWarning>
 							<p
 								suppressHydrationWarning
-								className="truncate text-[11.5px] font-bold text-slate-800 leading-tight"
+								className="truncate text-[11.5px] font-bold text-foreground leading-tight"
 							>
 								{user.name}
 							</p>
 							<p
 								suppressHydrationWarning
-								className="truncate text-[9.5px] text-slate-400 font-medium leading-tight mt-0.5"
+								className="truncate text-[9.5px] text-muted-foreground font-medium leading-tight mt-0.5"
 							>
 								{user.title} {user.email ? `• ${user.email}` : ""}
 							</p>
@@ -305,17 +375,20 @@ export function AccountSection({
 					onClick={handleLogout}
 					title={t("logout")}
 					aria-label={t("logout")}
-					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
 					id="doctor-logout-button"
 				>
 					<LogOut className="h-3.5 w-3.5" />
 				</button>
 			</div>
 
-			<DropdownMenuContent align="end" className="w-52 mb-2 rounded-[12px] text-xs">
+			<DropdownMenuContent
+				align="end"
+				className="w-52 mb-2 rounded-[12px] border-border bg-popover text-popover-foreground text-xs"
+			>
 				<DropdownMenuLabel className="font-normal">
 					<div className="flex flex-col gap-0.5">
-						<p className="text-xs font-semibold text-slate-900">{user.name}</p>
+						<p className="text-xs font-semibold text-foreground">{user.name}</p>
 						<p className="text-[10px] text-muted-foreground">
 							{user.title} {user.email ? `• ${user.email}` : ""}
 						</p>
@@ -323,13 +396,19 @@ export function AccountSection({
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem asChild>
-					<Link href="/doctor/profile" className="flex items-center gap-2 cursor-pointer text-xs">
+					<Link
+						href={`/${route}/profile`}
+						className="flex items-center gap-2 cursor-pointer text-xs"
+					>
 						<User className="h-3.5 w-3.5" />
 						{t("profile")}
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
-					<Link href="/doctor/settings" className="flex items-center gap-2 cursor-pointer text-xs">
+					<Link
+						href={`/${route}/settings`}
+						className="flex items-center gap-2 cursor-pointer text-xs"
+					>
 						<Settings className="h-3.5 w-3.5" />
 						{t("settings")}
 					</Link>
