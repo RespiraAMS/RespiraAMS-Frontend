@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useState, useEffect, useRef } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
 	User,
 	Lock,
@@ -11,8 +12,6 @@ import {
 	Loader2,
 	CheckCircle2,
 	AlertCircle,
-	CreditCard,
-	ShieldCheck,
 	Key,
 	AtSign,
 	HelpCircle,
@@ -38,7 +37,14 @@ const ENABLE_PASSWORD_RESET = true;
 
 export function LoginForm() {
 	const router = useRouter();
+	const pathname = usePathname();
 	const searchParams = useSearchParams();
+	const tLogin = useTranslations("auth.login");
+	const tForgot = useTranslations("auth.forgot");
+
+	// Ô khóa chống double-submit (bấm nhanh 2 lần trước khi state kịp cập nhật).
+	const loginLock = useRef(false);
+	const forgotLock = useRef(false);
 
 	// Modes
 	const [mode, setMode] = useState<AuthMode>("login");
@@ -62,53 +68,65 @@ export function LoginForm() {
 
 	// Load remembered email
 	useEffect(() => {
-		const remembered = getRememberedEmail();
-		if (remembered) {
-			setEmail(remembered);
-			setRememberMe(true);
-		}
+		void Promise.resolve().then(() => {
+			const remembered = getRememberedEmail();
+			if (remembered) {
+				setEmail(remembered);
+				setRememberMe(true);
+			}
+		});
 	}, []);
 
 	// Auto check token from email link
 	useEffect(() => {
-		if (verifyToken) {
-			const handleConfirm = async () => {
-				setIsConfirmingToken(true);
-				setError(null);
-				try {
-					await confirmEmailVerification(verifyToken);
-					setSuccessMessage("Xác thực tài khoản thành công! Bạn có thể đăng nhập ngay bây giờ.");
-				} catch (err: unknown) {
-					setError(
-						err instanceof Error
-							? err.message
-							: "Liên kết xác thực không hợp lệ hoặc đã hết hạn."
-					);
-				} finally {
-					setIsConfirmingToken(false);
-				}
-			};
-			handleConfirm();
-		}
-	}, [verifyToken]);
+		if (!verifyToken) return;
+
+		let cancelled = false;
+
+		const handleConfirm = async () => {
+			setIsConfirmingToken(true);
+			setError(null);
+			try {
+				await confirmEmailVerification(verifyToken);
+				if (cancelled) return;
+				setSuccessMessage(tLogin("tokenSuccess"));
+				// Token is single-use; drop it from the URL so a reload does not retry.
+				router.replace(pathname);
+			} catch (err: unknown) {
+				if (cancelled) return;
+				setError(err instanceof Error ? err.message : tLogin("tokenError"));
+			} finally {
+				if (!cancelled) setIsConfirmingToken(false);
+			}
+		};
+
+		void handleConfirm();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [verifyToken, router, pathname, tLogin]);
 
 	// Xử lý đăng nhập
 	const handleLoginSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (loginLock.current) return;
+
 		setError(null);
 		setSuccessMessage(null);
 
 		const trimmedEmail = email.trim();
 		if (!trimmedEmail) {
-			setError("Vui lòng nhập email hoặc mã nhân viên y tế.");
+			setError(tLogin("emailRequired"));
 			return;
 		}
 
 		if (!password) {
-			setError("Vui lòng nhập mật khẩu.");
+			setError(tLogin("passwordRequired"));
 			return;
 		}
 
+		loginLock.current = true;
 		setIsLoading(true);
 
 		try {
@@ -158,12 +176,9 @@ export function LoginForm() {
 
 			router.push(target);
 		} catch (err: unknown) {
-			setError(
-				err instanceof Error
-					? err.message
-					: "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin."
-			);
+			setError(err instanceof Error ? err.message : tLogin("loginError"));
 		} finally {
+			loginLock.current = false;
 			setIsLoading(false);
 		}
 	};
@@ -171,30 +186,28 @@ export function LoginForm() {
 	// Xử lý gửi liên kết đặt lại mật khẩu qua email
 	const handleSendVerifySubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (forgotLock.current) return;
+
 		setError(null);
 		setSuccessMessage(null);
 
 		const trimmedEmail = forgotEmail.trim();
 		if (!trimmedEmail) {
-			setError("Vui lòng nhập email công việc hoặc mã nhân viên.");
+			setError(tForgot("emailRequired"));
 			return;
 		}
 
+		forgotLock.current = true;
 		setIsSendingVerify(true);
 
 		try {
 			await forgotPassword(trimmedEmail);
 			setMode("login");
-			setSuccessMessage(
-				"Đã gửi liên kết đặt lại mật khẩu. Vui lòng kiểm tra hộp thư email của bạn."
-			);
+			setSuccessMessage(tForgot("success"));
 		} catch (err: unknown) {
-			setError(
-				err instanceof Error
-					? err.message
-					: "Không thể gửi liên kết đặt lại mật khẩu. Vui lòng thử lại sau."
-			);
+			setError(err instanceof Error ? err.message : tForgot("errorFallback"));
 		} finally {
+			forgotLock.current = false;
 			setIsSendingVerify(false);
 		}
 	};
@@ -217,7 +230,7 @@ export function LoginForm() {
 				{isConfirmingToken && (
 					<div className="mb-5 flex items-center gap-2.5 rounded-[16px] border border-primary/30 bg-primary/10 px-4 py-3 text-xs text-primary">
 						<Loader2 className="h-4 w-4 animate-spin text-primary" />
-						<span>Đang xác nhận liên kết kích hoạt tài khoản...</span>
+						<span>{tLogin("tokenChecking")}</span>
 					</div>
 				)}
 
@@ -237,16 +250,16 @@ export function LoginForm() {
 					</div>
 				)}
 
-				{/* -------------------- MÀN HÌNH 1: ĐĂNG NHẬP (ẢNH 1) -------------------- */}
+				{/* -------------------- MÀN HÌNH 1: ĐĂNG NHẬP -------------------- */}
 				{mode === "login" && (
 					<div className="space-y-6">
 						{/* Title */}
 						<div className="space-y-1">
 							<h2 className="text-3xl font-bold tracking-tight text-text-primary">
-								Đăng nhập
+								{tLogin("title")}
 							</h2>
 							<p className="text-xs text-text-secondary leading-relaxed">
-								Tiếp tục vào không gian làm việc y tế lâm sàng RespiraAMS.
+								{tLogin("subtitle")}
 							</p>
 						</div>
 
@@ -258,14 +271,14 @@ export function LoginForm() {
 									htmlFor="login-email"
 									className="text-xs font-semibold text-text-primary"
 								>
-									Email hoặc mã nhân viên y tế
+									{tLogin("emailLabel")}
 								</Label>
 								<div className="relative">
 									<User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
 									<Input
 										id="login-email"
 										type="text"
-										placeholder="bs.minh@respira.vn"
+										placeholder={tLogin("emailPlaceholder")}
 										value={email}
 										onChange={(e) => setEmail(e.target.value)}
 										disabled={isLoading}
@@ -281,14 +294,14 @@ export function LoginForm() {
 									htmlFor="login-password"
 									className="text-xs font-semibold text-text-primary"
 								>
-									Mật khẩu
+									{tLogin("passwordLabel")}
 								</Label>
 								<div className="relative">
 									<Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
 									<Input
 										id="login-password"
 										type={showPassword ? "text" : "password"}
-										placeholder="SecuredPass123!#"
+										placeholder={tLogin("passwordPlaceholder")}
 										value={password}
 										onChange={(e) => setPassword(e.target.value)}
 										disabled={isLoading}
@@ -299,6 +312,7 @@ export function LoginForm() {
 										type="button"
 										onClick={() => setShowPassword(!showPassword)}
 										tabIndex={-1}
+										aria-label={showPassword ? tLogin("hidePassword") : tLogin("showPassword")}
 										className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer"
 									>
 										{showPassword ? (
@@ -323,7 +337,7 @@ export function LoginForm() {
 										htmlFor="remember-session"
 										className="text-xs text-text-secondary cursor-pointer font-normal select-none"
 									>
-										Ghi nhớ phiên làm việc trên máy này
+										{tLogin("remember")}
 									</Label>
 								</div>
 								{ENABLE_PASSWORD_RESET && (
@@ -337,7 +351,7 @@ export function LoginForm() {
 										}}
 										className="text-xs font-medium text-primary hover:underline cursor-pointer"
 									>
-										Quên mật khẩu?
+										{tLogin("forgot")}
 									</button>
 								)}
 							</div>
@@ -352,74 +366,16 @@ export function LoginForm() {
 									<Loader2 className="h-4 w-4 animate-spin" />
 								) : (
 									<>
-										<span>Đăng nhập</span>
+										<span>{tLogin("submit")}</span>
 										<ArrowRight className="h-4 w-4" />
 									</>
 								)}
 							</Button>
-
-							{/* Phân cách: hoặc */}
-							<div className="relative my-4 flex items-center justify-center">
-								<div className="w-full border-t border-border-subtle" />
-								<span className="absolute bg-surface px-3 text-[11px] text-text-tertiary">
-									hoặc
-								</span>
-							</div>
-
-							{/* Tài khoản mẫu thử nghiệm phân quyền */}
-							<div className="rounded-[16px] border border-border-default/80 bg-surface-secondary/70 p-3.5 space-y-2 mt-3">
-								<div className="flex items-center justify-between">
-									<p className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
-										Tài khoản mẫu thử nghiệm
-									</p>
-									<span className="text-[10px] text-text-tertiary">Click để điền nhanh</span>
-								</div>
-								<div className="grid grid-cols-3 gap-2">
-									<button
-										type="button"
-										onClick={() => {
-											setEmail("doctor@respira.ams");
-											setPassword("Admin@123");
-											setError(null);
-										}}
-										className="rounded-[10px] border border-primary/30 bg-surface p-2 text-left hover:border-primary hover:bg-primary/10 transition-all cursor-pointer shadow-2xs"
-									>
-										<p className="text-[11px] font-bold text-primary">Bác sĩ</p>
-										<p className="text-[9.5px] text-text-secondary truncate">doctor@respira.ams</p>
-									</button>
-
-									<button
-										type="button"
-										onClick={() => {
-											setEmail("admin@respira.ams");
-											setPassword("Admin@123");
-											setError(null);
-										}}
-										className="rounded-[10px] border border-warning/30 bg-surface p-2 text-left hover:border-warning hover:bg-warning/10 transition-all cursor-pointer shadow-2xs"
-									>
-										<p className="text-[11px] font-bold text-warning">Admin</p>
-										<p className="text-[9.5px] text-text-secondary truncate">admin@respira.ams</p>
-									</button>
-
-									<button
-										type="button"
-										onClick={() => {
-											setEmail("manager@respira.ams");
-											setPassword("Manager@123");
-											setError(null);
-										}}
-										className="rounded-[10px] border border-success/30 bg-surface p-2 text-left hover:border-success hover:bg-success/10 transition-all cursor-pointer shadow-2xs"
-									>
-										<p className="text-[11px] font-bold text-success">Quản lý</p>
-										<p className="text-[9.5px] text-text-secondary truncate">manager@respira.ams</p>
-									</button>
-								</div>
-							</div>
 						</form>
 					</div>
 				)}
 
-				{/* -------------------- MÀN HÌNH 2: QUÊN MẬT KHẨU (ẢNH 2) -------------------- */}
+				{/* -------------------- MÀN HÌNH 2: QUÊN MẬT KHẨU -------------------- */}
 				{mode === "forgot-email" && (
 					<div className="space-y-6">
 						{/* Icon Key Header */}
@@ -428,10 +384,10 @@ export function LoginForm() {
 								<Key className="h-5 w-5" />
 							</div>
 							<h2 className="text-2xl font-bold tracking-tight text-text-primary">
-								Quên mật khẩu?
+								{tForgot("title")}
 							</h2>
 							<p className="text-xs text-text-secondary mt-2 leading-relaxed">
-								Nhập email công việc đã đăng ký. Hệ thống sẽ gửi một liên kết để bạn tạo mật khẩu mới cho tài khoản.
+								{tForgot("subtitle")}
 							</p>
 						</div>
 
@@ -442,14 +398,14 @@ export function LoginForm() {
 									htmlFor="forgot-email"
 									className="text-xs font-semibold text-text-primary"
 								>
-									Email công việc <span className="text-error">*</span>
+									{tForgot("emailLabel")} <span className="text-error">*</span>
 								</Label>
 								<div className="relative">
 									<AtSign className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
 									<Input
 										id="forgot-email"
 										type="email"
-										placeholder="bs.minh@respira.vn"
+										placeholder={tForgot("emailPlaceholder")}
 										value={forgotEmail}
 										onChange={(e) => setForgotEmail(e.target.value)}
 										disabled={isSendingVerify}
@@ -469,7 +425,7 @@ export function LoginForm() {
 									<Loader2 className="h-4 w-4 animate-spin" />
 								) : (
 									<>
-										<span>Gửi liên kết đặt lại</span>
+										<span>{tForgot("submit")}</span>
 										<ArrowRight className="h-4 w-4" />
 									</>
 								)}
@@ -485,7 +441,7 @@ export function LoginForm() {
 								}}
 								className="w-full h-12 rounded-[16px] bg-surface-secondary hover:bg-surface-tertiary text-text-primary text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer"
 							>
-								Quay lại đăng nhập
+								{tForgot("back")}
 							</button>
 
 							{/* Box Không nhận được email */}
@@ -495,10 +451,10 @@ export function LoginForm() {
 								</div>
 								<div className="space-y-0.5">
 									<h4 className="text-xs font-bold text-text-primary">
-										Không nhận được email?
+										{tForgot("notReceivedTitle")}
 									</h4>
 									<p className="text-[11px] text-text-secondary leading-relaxed">
-										Kiểm tra thư rác (Spam)
+										{tForgot("notReceivedHint")}
 									</p>
 								</div>
 							</div>
