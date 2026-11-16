@@ -32,6 +32,7 @@ import {
     formatTreatmentSiteLabel,
     getSampleTypeLabel,
 } from "../validation";
+import { useConfirmTreatmentMutation } from "../queries";
 
 interface DiagnoseResultViewProps {
     patientId: string;
@@ -72,6 +73,7 @@ export function DiagnoseResultView({
     const [showMicrobial, setShowMicrobial] = useState(false);
 
     const [isConfirming, setIsConfirming] = useState(false);
+    const confirmTreatmentMutation = useConfirmTreatmentMutation();
 
     const filteredCustomAntibiotics = useMemo(() => {
         const q = customSearch.trim().toLowerCase();
@@ -95,10 +97,9 @@ export function DiagnoseResultView({
     );
 
     const executeConfirmTreatment = async (medicineIds: string[], reason: string | null) => {
-        setIsConfirming(true);
         setCustomError(null);
         try {
-            await diagnoseApi.confirmTreatment({
+            await confirmTreatmentMutation.mutateAsync({
                 patientId,
                 diagnosis,
                 medicines: medicineIds,
@@ -106,10 +107,8 @@ export function DiagnoseResultView({
             });
 
             router.push(`/doctor/patients/${patientId}`);
-            router.refresh();
         } catch (err) {
             setCustomError(err instanceof Error ? err.message : "Xác nhận phác đồ thất bại.");
-            setIsConfirming(false);
         }
     };
 
@@ -162,13 +161,13 @@ export function DiagnoseResultView({
                 <TabsList className="grid w-full grid-cols-2 h-auto! items-stretch bg-blue-100 p-0 rounded-lg overflow-hidden">
                     <TabsTrigger 
                         value="protocol" 
-                        className="text-primary hover:text-blue-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm transition-all h-full py-3"
+                        className="text-primary hover:text-blue-700 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm transition-all h-full py-3"
                     >
                         Theo phác đồ khuyến cáo
                     </TabsTrigger>
                     <TabsTrigger 
                         value="custom" 
-                        className="text-primary hover:text-blue-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm transition-all h-full py-3"
+                        className="text-primary hover:text-blue-700 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm transition-all h-full py-3"
                     >
                         Bác sĩ tự chọn kháng sinh
                     </TabsTrigger>
