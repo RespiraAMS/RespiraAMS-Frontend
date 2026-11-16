@@ -31,13 +31,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserItem } from "../types";
-import { useTranslations } from "next-intl";
-import {
-	POSITION_LABELS,
-	ROLE_LABELS,
-	formatDate,
-	formatFullNameWithTitle,
-} from "../utils";
+import { useLocale, useTranslations } from "next-intl";
+import { formatDate, formatFullNameWithTitle } from "../utils";
 
 interface UsersTableProps {
 	users: UserItem[];
@@ -57,12 +52,25 @@ export function UsersTable({
 	onToggleStatus,
 }: UsersTableProps) {
 	const t = useTranslations("admin.users");
+	const tTable = useTranslations("admin.users.table");
+	const tForm = useTranslations("admin.users.form");
+	const locale = useLocale();
+	const positionLabels =
+		(tForm.raw("positions") as Record<string, string> | undefined) ?? {};
+
+	const roleLabel = (role: UserItem["role"]): string => {
+		if (role === "Admin") return tForm("roleAdmin");
+		if (role === "Manager") return tForm("roleManager");
+		if (role === "HeadDepartmentDoctor") return tForm("roleHeadDoctor");
+		return tForm("roleDoctor");
+	};
+
 	// Chỉ hiện spinner toàn màn hình khi chưa có dữ liệu nào
 	if (isLoading && users.length === 0) {
 		return (
 			<div className="bg-surface dark:bg-surface rounded-xl border border-border-default dark:border-border-default p-12 text-center">
 				<div className="inline-block w-8 h-8 border-2 border-border-default border-t-primary rounded-full animate-spin mb-3" />
-				<p className="text-sm font-medium text-text-secondary">Đang tải danh sách người dùng...</p>
+				<p className="text-sm font-medium text-text-secondary">{tTable("loading")}</p>
 			</div>
 		);
 	}
@@ -74,10 +82,10 @@ export function UsersTable({
 					<AlertCircle className="w-6 h-6" />
 				</div>
 				<h3 className="text-sm font-bold text-text-primary dark:text-text-tertiary">
-					Không tìm thấy người dùng phù hợp
+					{tTable("emptyTitle")}
 				</h3>
 				<p className="text-xs text-text-secondary mt-1">
-					Vui lòng thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc vai trò, trạng thái.
+					{tTable("emptyDesc")}
 				</p>
 			</div>
 		);
@@ -127,7 +135,8 @@ export function UsersTable({
 								user.lastName,
 								user.firstName,
 								user.academicTitle,
-								user.degrees
+								user.degrees,
+								locale
 							) || user.email;
 
 						return (
@@ -149,7 +158,11 @@ export function UsersTable({
 												{displayName}
 											</div>
 											<div className="text-[11px] text-text-tertiary truncate">
-												{user.citizenIdentificationNumber ? `CCCD: ${user.citizenIdentificationNumber}` : "Hồ sơ y tế"}
+												{user.citizenIdentificationNumber
+													? tTable("citizenIdPrefix", {
+															id: user.citizenIdentificationNumber,
+														})
+													: tTable("profileFallback")}
 											</div>
 										</div>
 									</div>
@@ -178,7 +191,7 @@ export function UsersTable({
 											variant="outline"
 											className="bg-info/10 text-info border-info/30 dark:bg-info/10 dark:text-info dark:border-info/30 font-bold"
 										>
-											{ROLE_LABELS[user.role]}
+											{roleLabel(user.role)}
 										</Badge>
 									)}
 									{user.role === "Manager" && (
@@ -186,7 +199,7 @@ export function UsersTable({
 											variant="outline"
 											className="bg-warning/10 text-warning border-warning/30 dark:bg-warning/10 dark:text-warning dark:border-warning/30 font-bold"
 										>
-											{ROLE_LABELS[user.role]}
+											{roleLabel(user.role)}
 										</Badge>
 									)}
 									{user.role === "HeadDepartmentDoctor" && (
@@ -194,7 +207,7 @@ export function UsersTable({
 											variant="outline"
 											className="bg-success/10 text-success border-success/30 dark:bg-success/10 dark:text-success dark:border-success/30 font-bold"
 										>
-											{ROLE_LABELS[user.role]}
+											{roleLabel(user.role)}
 										</Badge>
 									)}
 									{user.role === "Doctor" && (
@@ -202,7 +215,7 @@ export function UsersTable({
 											variant="outline"
 											className="bg-primary/10 text-primary border-primary/30 dark:bg-primary/10 dark:text-primary dark:border-primary/30 font-bold"
 										>
-											{ROLE_LABELS[user.role]}
+											{roleLabel(user.role)}
 										</Badge>
 									)}
 								</TableCell>
@@ -210,7 +223,7 @@ export function UsersTable({
 								{/* Position */}
 								<TableCell className="py-3">
 									<span className="text-xs font-medium text-text-primary dark:text-text-tertiary">
-										{POSITION_LABELS[user.position] || user.position || "—"}
+										{positionLabels[user.position] || user.position || "—"}
 									</span>
 								</TableCell>
 
@@ -229,10 +242,10 @@ export function UsersTable({
 											}}
 											title={
 												user.role === "Admin"
-													? "Không thể khóa tài khoản Quản trị viên"
+													? tTable("adminCannotLock")
 													: user.status === "Active"
-													? "Tài khoản đang hoạt động. Nhấn để khóa tài khoản"
-													: "Tài khoản đang bị khóa. Nhấn để mở khóa tài khoản"
+														? tTable("lockAccount")
+														: tTable("unlockAccount")
 											}
 											className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
 												user.role === "Admin"
@@ -272,7 +285,7 @@ export function UsersTable({
 								{/* Created At */}
 								<TableCell className="py-3">
 									<span className="text-xs text-text-secondary whitespace-nowrap">
-										{formatDate(user.createdAt)}
+										{formatDate(user.createdAt, locale)}
 									</span>
 								</TableCell>
 
@@ -283,7 +296,7 @@ export function UsersTable({
 											variant="ghost"
 											size="icon"
 											onClick={() => onEditUser(user)}
-											title="Chỉnh sửa toàn bộ thông tin"
+											title={tTable("editTooltip")}
 											className="h-8 w-8 rounded-lg text-text-secondary hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/10"
 										>
 											<Edit className="w-3.5 h-3.5" />
@@ -305,7 +318,7 @@ export function UsersTable({
 													className="cursor-pointer text-xs font-semibold gap-2 py-2"
 												>
 													<Eye className="w-3.5 h-3.5 text-text-secondary" />
-													<span>Xem chi tiết</span>
+													<span>{tTable("viewDetail")}</span>
 												</DropdownMenuItem>
 
 												<DropdownMenuSeparator />
@@ -316,7 +329,7 @@ export function UsersTable({
 													className="cursor-pointer text-xs font-semibold gap-2 py-2 text-error focus:text-error focus:bg-error/10 dark:focus:bg-error/10"
 												>
 													<Trash2 className="w-3.5 h-3.5 text-error" />
-													<span>Xóa người dùng</span>
+													<span>{tTable("deleteUser")}</span>
 												</DropdownMenuItem>
 											</DropdownMenuContent>
 										</DropdownMenu>

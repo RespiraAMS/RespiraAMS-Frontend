@@ -21,11 +21,17 @@ import {
 import AdminAccountSection from "@/features/admin/components/accountSection";
 import { useAdminSidebarStore } from "@/features/admin/components/sidebarStore";
 
+export type AdminNavKey =
+	| "dashboard"
+	| "users"
+	| "protocols"
+	| "auditLogs"
+	| "settings";
+
 export interface AdminNavItem {
 	icon: LucideIcon;
-	label: string;
 	href: string;
-	key: string;
+	key: AdminNavKey;
 	badge?: number;
 }
 
@@ -38,31 +44,26 @@ interface AdminNavItemProps {
 export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
 	{
 		icon: LayoutDashboard,
-		label: "Tổng quan hệ thống",
 		key: "dashboard",
 		href: "/admin/dashboard",
 	},
 	{
 		icon: Users,
-		label: "Quản lý người dùng",
 		key: "users",
 		href: "/admin/users",
 	},
 	{
 		icon: FileText,
-		label: "Phác đồ & Phiên bản",
 		key: "protocols",
 		href: "/admin/protocols",
 	},
 	{
 		icon: ShieldCheck,
-		label: "Nhật ký kiểm toán",
 		key: "auditLogs",
 		href: "/admin/audit-logs",
 	},
 	{
 		icon: Settings,
-		label: "Cấu hình hệ thống",
 		key: "settings",
 		href: "/admin/settings",
 	},
@@ -71,7 +72,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
 function NavItemLink({ item, collapsed, active }: AdminNavItemProps) {
 	const t = useTranslations("admin.nav");
 	const { icon: Icon, href, key, badge } = item;
-	const label = t(key as any);
+	const label = t(key);
 
 	const linkContent = (
 		<Link
@@ -200,7 +201,7 @@ export function AdminSidebar() {
 
 				{/* Navigation Links */}
 				<nav
-					aria-label="Admin navigation"
+					aria-label={t("ariaLabel")}
 					className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 space-y-1"
 				>
 					{ADMIN_NAV_ITEMS.map((item) => {

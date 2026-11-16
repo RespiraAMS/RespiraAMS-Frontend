@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ExpandableText } from "@/components/ui/expandable-text";
 import { ClinicalMetricItem } from "@/features/manager/clinical-metrics/types";
 
 interface ProtocolsTableProps {
@@ -49,7 +50,7 @@ export function ProtocolsTable({
 		return (
 			<div className="bg-surface rounded-xl border border-border-default p-12 text-center">
 				<div className="inline-block w-8 h-8 border-2 border-border-default border-t-primary rounded-full animate-spin mb-3" />
-				<p className="text-sm font-medium text-text-secondary">{t("loading", { defaultMessage: "Đang tải danh sách phác đồ..." })}</p>
+				<p className="text-sm font-medium text-text-secondary">{t("loading", { defaultMessage: "Đang tải danh sách thang điểm..." })}</p>
 			</div>
 		);
 	}
@@ -59,7 +60,7 @@ export function ProtocolsTable({
 			<div className="bg-surface rounded-xl border border-border-default p-12 text-center">
 				<h3 className="text-sm font-bold text-text-primary">{t("empty")}</h3>
 				<p className="text-xs text-text-secondary mt-1">
-					{t("emptyDesc", { defaultMessage: "Thử đổi từ khóa tìm kiếm, bộ lọc trạng thái hoặc thêm phác đồ mới." })}
+					{t("emptyDesc", { defaultMessage: "Thử đổi từ khóa tìm kiếm, bộ lọc trạng thái hoặc thêm thang điểm mới." })}
 				</p>
 			</div>
 		);
@@ -73,15 +74,15 @@ export function ProtocolsTable({
 					<div className="w-full h-full bg-primary animate-pulse" />
 				</div>
 			)}
-			<Table className={`transition-opacity duration-150 ${isLoading ? "opacity-60" : "opacity-100"}`}>
+			<Table className={`table-fixed w-full transition-opacity duration-150 ${isLoading ? "opacity-60" : "opacity-100"}`}>
 				<TableHeader className="bg-surface-secondary/80">
 					<TableRow className="border-b border-border-default hover:bg-transparent">
-						<TableHead className={`w-[260px] ${HEAD}`}>{t("colProtocol")}</TableHead>
-						<TableHead className={HEAD}>{t("colVersion")}</TableHead>
-						<TableHead className={HEAD}>{t("colPublisher")}</TableHead>
-						<TableHead className={HEAD}>{t("colDescription", { defaultMessage: "Mô tả" })}</TableHead>
-						<TableHead className={HEAD}>{t("colApplied")}</TableHead>
-						<TableHead className={`w-[60px] text-right ${HEAD}`}>{t("colActions")}</TableHead>
+						<TableHead className={`w-[25%] ${HEAD}`}>{t("colProtocol")}</TableHead>
+						<TableHead className={`w-[9%] ${HEAD}`}>{t("colVersion")}</TableHead>
+						<TableHead className={`w-[17%] ${HEAD}`}>{t("colPublisher")}</TableHead>
+						<TableHead className={`w-[32%] ${HEAD}`}>{t("colDescription", { defaultMessage: "Mô tả" })}</TableHead>
+						<TableHead className={`w-[10%] ${HEAD}`}>{t("colApplied")}</TableHead>
+						<TableHead className={`w-[7%] text-right ${HEAD}`}>{t("colActions")}</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -92,24 +93,41 @@ export function ProtocolsTable({
 								key={item.id}
 								className="border-b border-border-subtle hover:bg-surface-secondary/60 transition-colors"
 							>
-								<TableCell className="py-3">
-									<div className="font-bold text-sm text-text-primary">{item.name}</div>
-									<div className="text-[11px] font-mono text-text-tertiary">{item.code}</div>
+								<TableCell className="py-3 align-top">
+									<div
+										className="font-bold text-sm text-text-primary line-clamp-2 break-words"
+										title={item.name}
+									>
+										{item.name}
+									</div>
+									<div className="text-[11px] font-mono text-text-tertiary break-all">
+										{item.code}
+									</div>
 								</TableCell>
 
-								<TableCell className="py-3">
+								<TableCell className="py-3 align-top">
 									<Badge variant="outline" className="font-bold bg-info/10 text-info border-info/30">
 										v{item.version.replace(/^v/i, "")}
 									</Badge>
 								</TableCell>
 
-								<TableCell className="py-3 text-xs text-text-primary">{item.publisher}</TableCell>
-
-								<TableCell className="py-3 max-w-[280px]">
-									<p className="text-xs text-text-secondary line-clamp-2">{item.description}</p>
+								<TableCell className="py-3 align-top">
+									<p
+										className="text-xs text-text-primary line-clamp-2 break-words"
+										title={item.publisher}
+									>
+										{item.publisher}
+									</p>
 								</TableCell>
 
-								<TableCell className="py-3">
+								<TableCell className="py-3 align-top">
+									<ExpandableText
+										text={item.description || "—"}
+										className="text-xs text-text-secondary"
+									/>
+								</TableCell>
+
+								<TableCell className="py-3 align-top">
 									<button
 										type="button"
 										disabled={toggling}
@@ -139,7 +157,7 @@ export function ProtocolsTable({
 									</button>
 								</TableCell>
 
-								<TableCell className="py-3 text-right">
+								<TableCell className="py-3 text-right align-top">
 									<DropdownMenu>
 										<DropdownMenuTrigger asChild>
 											<Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-text-secondary">
@@ -167,7 +185,7 @@ export function ProtocolsTable({
 												className="cursor-pointer text-xs font-semibold gap-2 py-2 text-error focus:text-error focus:bg-error/10"
 											>
 												<Trash2 className="w-3.5 h-3.5 text-error" />
-												<span>{t("actionDelete", { defaultMessage: "Xóa phác đồ" })}</span>
+												<span>{t("actionDelete", { defaultMessage: "Xóa thang điểm" })}</span>
 											</DropdownMenuItem>
 										</DropdownMenuContent>
 									</DropdownMenu>

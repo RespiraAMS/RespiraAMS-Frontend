@@ -39,33 +39,7 @@ function resolveAdminAccount(customUser?: AdminUserInfo): AdminUserInfo {
 	const role = active?.role || "Admin";
 
 	let name = "";
-	let avatarUrl: string | undefined = undefined;
-
-	if (typeof window !== "undefined") {
-		try {
-			const rawUsers = localStorage.getItem("respira_admin_users_v1");
-			if (rawUsers && email) {
-				const users = JSON.parse(rawUsers);
-				if (Array.isArray(users)) {
-					const matched = users.find(
-						(u: any) =>
-							(u.email && u.email.toLowerCase() === email.toLowerCase()) ||
-							(active?.id && (u.id === active.id || u.doctorId === active.id))
-					);
-					if (matched) {
-						if (matched.lastName || matched.firstName) {
-							name = `${matched.lastName || ""} ${matched.firstName || ""}`.trim();
-						}
-						if (matched.avatarUrl) {
-							avatarUrl = matched.avatarUrl;
-						}
-					}
-				}
-			}
-		} catch {
-			// ignore
-		}
-	}
+	const avatarUrl: string | undefined = undefined;
 
 	if (!name) {
 		const customName = (active as { name?: string } | null)?.name;
@@ -74,8 +48,6 @@ function resolveAdminAccount(customUser?: AdminUserInfo): AdminUserInfo {
 		} else if (email) {
 			const prefix = email.split("@")[0];
 			name = prefix.charAt(0).toUpperCase() + prefix.slice(1);
-		} else {
-			name = "Quản trị viên";
 		}
 	}
 
@@ -89,7 +61,7 @@ function resolveAdminAccount(customUser?: AdminUserInfo): AdminUserInfo {
 
 	return {
 		name,
-		role: role === "Admin" ? "Quản trị viên" : role,
+		role,
 		department: email,
 		email,
 		initials: initials.slice(0, 2),
@@ -113,8 +85,8 @@ export function AdminAccountSection({
 
 	const [currentUser, setCurrentUser] = useState<AdminUserInfo>(() =>
 		propUser || {
-			name: "Quản trị viên",
-			role: "Quản trị viên",
+			name: "",
+			role: "Admin",
 			department: "",
 			email: "",
 			initials: "AD",
@@ -122,8 +94,17 @@ export function AdminAccountSection({
 	);
 
 	useEffect(() => {
-		setCurrentUser(resolveAdminAccount(propUser));
+		let cancelled = false;
+		void Promise.resolve().then(() => {
+			if (!cancelled) setCurrentUser(resolveAdminAccount(propUser));
+		});
+		return () => {
+			cancelled = true;
+		};
 	}, [propUser]);
+
+	const displayName = currentUser.name || t("admin");
+	const roleDisplay = currentUser.role === "Admin" ? t("admin") : currentUser.role;
 
 	const handleLogout = async (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -163,9 +144,9 @@ export function AdminAccountSection({
 							</DropdownMenuTrigger>
 						</TooltipTrigger>
 						<TooltipContent side="right">
-							<p className="font-semibold text-xs">{currentUser.name}</p>
+							<p className="font-semibold text-xs">{displayName}</p>
 							<p className="text-[10px] text-muted-foreground">
-								{currentUser.email || currentUser.role}
+								{currentUser.email || roleDisplay}
 							</p>
 						</TooltipContent>
 					</Tooltip>
@@ -174,9 +155,9 @@ export function AdminAccountSection({
 				<DropdownMenuContent align="end" side="right" className="w-52 text-xs">
 					<DropdownMenuLabel className="font-normal">
 						<div className="flex flex-col gap-0.5">
-							<p className="text-xs font-semibold text-text-primary">{currentUser.name}</p>
+							<p className="text-xs font-semibold text-text-primary">{displayName}</p>
 							<p className="text-[10px] text-muted-foreground truncate">
-								{currentUser.email ? `${currentUser.role} • ${currentUser.email}` : currentUser.role}
+								{currentUser.email ? `${roleDisplay} • ${currentUser.email}` : roleDisplay}
 							</p>
 						</div>
 					</DropdownMenuLabel>
@@ -230,10 +211,10 @@ export function AdminAccountSection({
 						{/* Admin Name and Role / Email */}
 						<div className="min-w-0 flex-1">
 							<p className="truncate text-[11.5px] font-bold text-text-primary leading-tight">
-								{currentUser.name}
+								{displayName}
 							</p>
 							<p className="truncate text-[9.5px] text-text-tertiary font-medium leading-tight mt-0.5">
-								{currentUser.email || currentUser.role}
+								{currentUser.email || roleDisplay}
 							</p>
 						</div>
 					</button>

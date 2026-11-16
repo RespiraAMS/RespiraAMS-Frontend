@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { ExpandableText } from "@/components/ui/expandable-text";
 import {
 	Table,
 	TableBody,
@@ -18,11 +19,9 @@ import {
 	Eye,
 	Shield,
 	Clock,
-	Layers,
-	Globe,
-	User,
 } from "lucide-react";
-import { AuditLogItem, AuditLogStatus, AuditServiceType, AuditLogSeverity } from "../types";
+import { AuditLogItem, AuditLogStatus, AuditServiceType } from "../types";
+import { useAuditActionLabel, useAuditRoleLabel, useAuditCategoryLabel } from "../use-audit-labels";
 
 interface AuditLogsTableProps {
 	logs: AuditLogItem[];
@@ -31,18 +30,22 @@ interface AuditLogsTableProps {
 	onViewDetail: (item: AuditLogItem) => void;
 }
 
-export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDetail }: AuditLogsTableProps) {
+export function AuditLogsTable({ logs, isLoading, onViewDetail }: AuditLogsTableProps) {
 	const t = useTranslations("admin.auditLogs");
+	const locale = useLocale();
+	const actionLabel = useAuditActionLabel();
+	const roleLabel = useAuditRoleLabel();
+	const categoryLabel = useAuditCategoryLabel();
 
 	const formatDateTime = (isoString: string) => {
 		try {
 			const d = new Date(isoString);
-			const dateStr = d.toLocaleDateString("vi-VN", {
+			const dateStr = d.toLocaleDateString(locale, {
 				day: "2-digit",
 				month: "2-digit",
 				year: "numeric",
 			});
-			const timeStr = d.toLocaleTimeString("vi-VN", {
+			const timeStr = d.toLocaleTimeString(locale, {
 				hour: "2-digit",
 				minute: "2-digit",
 				second: "2-digit",
@@ -100,54 +103,31 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 		);
 	};
 
-	const renderSeverityBadge = (severity: AuditLogSeverity) => {
-		switch (severity) {
-			case "critical":
-				return (
-					<span className="text-[10px] font-extrabold uppercase tracking-wider text-error bg-error/10 px-1.5 py-0.2 rounded">
-						{t("sevCritical")}
-					</span>
-				);
-			case "high":
-				return (
-					<span className="text-[10px] font-bold uppercase tracking-wider text-warning bg-warning/10 px-1.5 py-0.2 rounded">
-						{t("sevHigh")}
-					</span>
-				);
-			case "medium":
-				return (
-					<span className="text-[10px] font-bold uppercase tracking-wider text-warning bg-warning/10 px-1.5 py-0.2 rounded">
-						{t("sevMedium")}
-					</span>
-				);
-			case "low":
-			default:
-				return (
-					<span className="text-[10px] font-medium uppercase tracking-wider text-text-secondary bg-surface-secondary px-1.5 py-0.2 rounded">
-						{t("sevLow")}
-					</span>
-				);
-		}
-	};
-
 	const renderRoleBadge = (role: string) => {
 		switch (role.toLowerCase()) {
 			case "admin":
 				return (
 					<span className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/30 px-1.5 py-0.2 rounded">
-						Admin
+						{t("roleBadges.Admin")}
 					</span>
 				);
 			case "manager":
+			case "medicalregulationreviewer":
 				return (
 					<span className="text-[10px] font-bold text-info bg-info/10 border border-info/30 px-1.5 py-0.2 rounded">
-						Manager
+						{t("roleBadges.Manager")}
 					</span>
 				);
 			case "doctor":
 				return (
 					<span className="text-[10px] font-bold text-success bg-success/10 border border-success/30 px-1.5 py-0.2 rounded">
-						Doctor
+						{t("roleBadges.Doctor")}
+					</span>
+				);
+			case "headdepartmentdoctor":
+				return (
+					<span className="text-[10px] font-bold text-warning bg-warning/10 border border-warning/30 px-1.5 py-0.2 rounded">
+						{t("roleBadges.HeadDepartmentDoctor")}
 					</span>
 				);
 			case "system":
@@ -155,7 +135,7 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 			default:
 				return (
 					<span className="text-[10px] font-bold text-text-secondary bg-surface-secondary border border-border-default px-1.5 py-0.2 rounded">
-						{role}
+						{t("roleBadges.System")}
 					</span>
 				);
 		}
@@ -206,11 +186,8 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 							<TableHead className="min-w-[250px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
 								{t("colActionTarget")}
 							</TableHead>
-							<TableHead className="w-[125px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
-								{t("colIpDuration")}
-							</TableHead>
 							<TableHead className="w-[145px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5">
-								{t("colStatusSeverity")}
+								{t("colStatus", { defaultMessage: "Trạng thái" })}
 							</TableHead>
 							<TableHead className="w-[70px] text-[11px] font-bold text-text-secondary uppercase tracking-wider py-3.5 text-right pr-4">
 								{t("colDetail")}
@@ -241,7 +218,7 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 										<div className="flex flex-col gap-1">
 											<div className="flex items-center gap-1.5 flex-wrap">
 												<span className="font-semibold text-xs text-text-primary leading-tight">
-													{log.actorName}
+													{roleLabel(log.role)}
 												</span>
 												{renderRoleBadge(log.role)}
 											</div>
@@ -260,37 +237,23 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 									<TableCell className="py-3 align-top">
 										<div className="flex flex-col gap-1">
 											<span className="font-semibold text-xs text-text-primary line-clamp-2 leading-snug">
-												{log.action}
+												{actionLabel(log.action)}
 											</span>
 											<div className="flex items-center gap-1.5 flex-wrap">
 												<span className="text-[10px] font-semibold text-text-secondary bg-surface-secondary px-1.5 py-0.2 rounded font-mono">
-													{log.category}
-												</span>
-												<span className="text-[11px] text-text-secondary font-mono truncate max-w-[220px]">
-													{log.target}
+													{categoryLabel(log.category)}
 												</span>
 											</div>
+											<ExpandableText
+												text={log.target}
+												className="text-[11px] text-text-secondary font-mono"
+											/>
 										</div>
 									</TableCell>
 
-									{/* IP & Latency */}
+									{/* Status */}
 									<TableCell className="py-3 align-top">
-										<div className="flex flex-col">
-											<span className="font-mono text-xs text-text-primary">
-												{log.ipAddress}
-											</span>
-											<span className="text-[10.5px] text-text-tertiary font-mono mt-0.5">
-												{log.durationMs}ms
-											</span>
-										</div>
-									</TableCell>
-
-									{/* Status & Severity */}
-									<TableCell className="py-3 align-top">
-										<div className="flex flex-col gap-1">
-											<div>{renderStatusBadge(log.status)}</div>
-											<div>{renderSeverityBadge(log.severity)}</div>
-										</div>
+										<div>{renderStatusBadge(log.status)}</div>
 									</TableCell>
 
 									{/* Action Button */}
@@ -306,7 +269,7 @@ export function AuditLogsTable({ logs, isLoading, isSearching = false, onViewDet
 											variant="ghost"
 											size="icon"
 											className="h-8 w-8 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-secondary cursor-pointer"
-											title="Xem chi tiết sự kiện"
+											title={t("viewDetail")}
 										>
 											<Eye className="w-4 h-4" />
 										</Button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FileText } from "lucide-react";
 import { toast } from "sonner";
 import { ClinicalMetricItem } from "@/features/manager/clinical-metrics/types";
@@ -16,11 +17,12 @@ import { ProtocolFilter, ProtocolFormValues, filterToIsApplied } from "../types"
 
 const PAGE_SIZE = 10;
 
-function errorMessage(error: unknown): string {
-	return error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định";
-}
-
 export function AdminProtocolsView() {
+	const t = useTranslations("admin.protocols");
+	const tToast = useTranslations("admin.protocols.toast");
+	const errorMessage = (error: unknown): string =>
+		error instanceof Error ? error.message : tToast("unknown");
+
 	const [search, setSearch] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [filter, setFilter] = useState<ProtocolFilter>("ALL");
@@ -45,7 +47,7 @@ export function AdminProtocolsView() {
 	// BE validator yêu cầu SearchTerm có ít nhất 2 ký tự trên endpoint /search.
 	// Nếu < 2 ký tự, không gửi search lên BE để tránh lỗi 400 Bad Request.
 	const effectiveSearch = debouncedSearch.length >= 2 ? debouncedSearch : undefined;
-	const { data, isLoading, isFetching, isError, error, refetch } = useProtocolsList(
+	const { data, isLoading, isError, error } = useProtocolsList(
 		page,
 		PAGE_SIZE,
 		effectiveSearch,
@@ -104,9 +106,9 @@ export function AdminProtocolsView() {
 				{
 					onSuccess: () => {
 						closeForm();
-						toast.success(`Đã cập nhật phác đồ "${values.name}"`);
+						toast.success(tToast("updated", { name: values.name }));
 					},
-					onError: (e) => toast.error(`Cập nhật thất bại: ${errorMessage(e)}`),
+					onError: (e) => toast.error(tToast("updateError", { message: errorMessage(e) })),
 				}
 			);
 		} else {
@@ -121,9 +123,9 @@ export function AdminProtocolsView() {
 				{
 					onSuccess: () => {
 						closeForm();
-						toast.success(`Đã tạo phác đồ "${values.name}"`);
+						toast.success(tToast("created", { name: values.name }));
 					},
-					onError: (e) => toast.error(`Tạo phác đồ thất bại: ${errorMessage(e)}`),
+					onError: (e) => toast.error(tToast("createError", { message: errorMessage(e) })),
 				}
 			);
 		}
@@ -146,10 +148,10 @@ export function AdminProtocolsView() {
 				onSuccess: () =>
 					toast.success(
 						item.isApplied
-							? `Đã ngừng áp dụng "${item.name}"`
-							: `Đã áp dụng "${item.name}"`
+							? tToast("unapplied", { name: item.name })
+							: tToast("applied", { name: item.name })
 					),
-				onError: (e) => toast.error(`Đổi trạng thái thất bại: ${errorMessage(e)}`),
+				onError: (e) => toast.error(tToast("toggleError", { message: errorMessage(e) })),
 				onSettled: () => setTogglingId(null),
 			}
 		);
@@ -159,10 +161,10 @@ export function AdminProtocolsView() {
 		deleteMutation.mutate(item.id, {
 			onSuccess: () => {
 				setDeleteItem(null);
-				toast.success(`Đã xóa mềm phác đồ "${item.name}"`);
+				toast.success(tToast("deleted", { name: item.name }));
 				if (items.length === 1 && page > 1) setPage(page - 1);
 			},
-			onError: (e) => toast.error(`Xóa thất bại: ${errorMessage(e)}`),
+			onError: (e) => toast.error(tToast("deleteError", { message: errorMessage(e) })),
 		});
 	};
 
@@ -174,11 +176,11 @@ export function AdminProtocolsView() {
 						<FileText className="w-5 h-5" />
 					</div>
 					<h1 className="text-xl sm:text-2xl font-extrabold text-text-primary tracking-tight">
-						Phác đồ &amp; Phiên bản
+						{t("title")}
 					</h1>
 				</div>
 				<p className="text-xs sm:text-sm text-text-secondary mt-1">
-					Quản lý các phác đồ / thang điểm lâm sàng, phiên bản ban hành và trạng thái áp dụng trong hệ thống Respira
+					{t("subtitle")}
 				</p>
 			</div>
 
@@ -197,7 +199,7 @@ export function AdminProtocolsView() {
 
 			{isError ? (
 				<div className="bg-error/10 border border-error/30 rounded-xl p-6 text-center">
-					<p className="text-sm font-bold text-error">Không thể tải danh sách phác đồ</p>
+					<p className="text-sm font-bold text-error">{tToast("loadError")}</p>
 					<p className="text-xs text-error mt-1">{errorMessage(error)}</p>
 				</div>
 			) : (

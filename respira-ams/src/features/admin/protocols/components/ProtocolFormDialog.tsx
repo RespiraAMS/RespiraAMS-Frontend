@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,52 +39,76 @@ export function ProtocolFormDialog({
 	onSubmit,
 }: ProtocolFormDialogProps) {
 	const isEdit = !!editingItem;
+	const t = useTranslations("admin.protocols.form");
+	const tCommon = useTranslations("common");
 	const [values, setValues] = useState<ProtocolFormValues>(EMPTY);
 	const [errors, setErrors] = useState<Partial<Record<keyof ProtocolFormValues, string>>>({});
 	const [touched, setTouched] = useState<Partial<Record<keyof ProtocolFormValues, boolean>>>({});
+	const wasOpenRef = useRef(false);
 
 	useEffect(() => {
-		if (!open) return;
-		setValues(
-			editingItem
-				? {
-						name: editingItem.name,
-						code: editingItem.code,
-						description: editingItem.description,
-						version: editingItem.version,
-						publisher: editingItem.publisher,
-						isApplied: editingItem.isApplied,
-				  }
-				: EMPTY
-		);
-		setErrors({});
-		setTouched({});
+		if (!open) {
+			wasOpenRef.current = false;
+			return;
+		}
+		if (wasOpenRef.current) return;
+
+		wasOpenRef.current = true;
+		let cancelled = false;
+
+		void Promise.resolve().then(() => {
+			if (cancelled) return;
+			setValues(
+				editingItem
+					? {
+							name: editingItem.name,
+							code: editingItem.code,
+							description: editingItem.description,
+							version: editingItem.version,
+							publisher: editingItem.publisher,
+							isApplied: editingItem.isApplied,
+					  }
+					: EMPTY
+			);
+			setErrors({});
+			setTouched({});
+		});
+
+		return () => {
+			cancelled = true;
+		};
 	}, [open, editingItem]);
 
-	const validateField = (key: keyof ProtocolFormValues, val: any): string | null => {
+	const validateField = (
+		key: keyof ProtocolFormValues,
+		val: ProtocolFormValues[keyof ProtocolFormValues]
+	): string | null => {
 		const str = typeof val === "string" ? val.trim() : "";
 		switch (key) {
 			case "name":
-				if (!str) return "Tên phác đồ là bắt buộc.";
+				if (!str) return t("errors.nameRequired");
 				return null;
 			case "code":
-				if (!isEdit && !str) return "Mã phác đồ là bắt buộc.";
+				if (!isEdit && !str) return t("errors.codeRequired");
 				return null;
 			case "version":
-				if (!str) return "Phiên bản là bắt buộc.";
+				if (!str) return t("errors.versionRequired");
 				return null;
 			case "publisher":
-				if (!str) return "Đơn vị ban hành là bắt buộc.";
+				if (!str) return t("errors.publisherRequired");
 				return null;
 			case "description":
-				if (!str) return "Mô tả là bắt buộc.";
+				if (!str) return t("errors.descriptionRequired");
 				return null;
 			default:
 				return null;
 		}
 	};
 
-	const handleBlur = (key: keyof ProtocolFormValues, val: any) => {
+	const handleBlur = (
+		key: keyof ProtocolFormValues,
+		val: ProtocolFormValues[keyof ProtocolFormValues]
+	) => {
 		setTouched((prev) => ({ ...prev, [key]: true }));
 		const err = validateField(key, val);
 		setErrors((prev) => {
@@ -109,6 +134,7 @@ export function ProtocolFormDialog({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
+		if (isSubmitting) return;
 		const fields: { key: keyof ProtocolFormValues; id: string }[] = [
 			{ key: "name", id: "pr-name" },
 			{ key: "code", id: "pr-code" },
@@ -166,12 +192,10 @@ export function ProtocolFormDialog({
 			<AdminDialogContent className="max-w-xl">
 				<DialogHeader>
 					<DialogTitle className="text-lg font-bold text-text-primary">
-						{isEdit ? "Chỉnh sửa phác đồ" : "Thêm phác đồ mới"}
+						{isEdit ? t("titleEdit") : t("titleCreate")}
 					</DialogTitle>
 					<DialogDescription className="text-xs text-text-secondary">
-						{isEdit
-							? "Cập nhật nội dung hoặc đổi phiên bản. Mã phác đồ không thể thay đổi."
-							: "Phác đồ mới được tạo ở trạng thái chưa áp dụng. Bạn có thể thêm quy tắc cho phác đồ ở trang quản lý của Trưởng khoa."}
+						{isEdit ? t("descEdit") : t("descCreate")}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -179,14 +203,14 @@ export function ProtocolFormDialog({
 					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
 						<div className="sm:col-span-2">
 							<Label htmlFor="pr-name" className="text-xs font-semibold">
-								Tên phác đồ <span className="text-error">*</span>
+								{t("nameLabel")} <span className="text-error">*</span>
 							</Label>
 							<Input
 								id="pr-name"
 								value={values.name}
 								onChange={(e) => set("name", e.target.value)}
 								onBlur={() => handleBlur("name", values.name)}
-								placeholder="CURB-65"
+								placeholder={t("namePlaceholder")}
 								className={`mt-1 h-9 text-sm ${
 									touched.name && errors.name ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 								}`}
@@ -196,7 +220,7 @@ export function ProtocolFormDialog({
 
 						<div>
 							<Label htmlFor="pr-code" className="text-xs font-semibold">
-								Mã {!isEdit && <span className="text-error">*</span>}
+								{t("codeLabel")} {!isEdit && <span className="text-error">*</span>}
 							</Label>
 							<Input
 								id="pr-code"
@@ -204,7 +228,7 @@ export function ProtocolFormDialog({
 								onChange={(e) => set("code", e.target.value)}
 								onBlur={() => handleBlur("code", values.code)}
 								disabled={isEdit}
-								placeholder="CURB65"
+								placeholder={t("codePlaceholder")}
 								className={`mt-1 h-9 text-sm font-mono ${
 									touched.code && errors.code ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 								}`}
@@ -214,7 +238,7 @@ export function ProtocolFormDialog({
 
 						<div>
 							<Label htmlFor="pr-version" className="text-xs font-semibold">
-								Phiên bản <span className="text-error">*</span>
+								{t("versionLabel")} <span className="text-error">*</span>
 							</Label>
 							<Input
 								id="pr-version"
@@ -231,14 +255,14 @@ export function ProtocolFormDialog({
 
 						<div className="sm:col-span-2">
 							<Label htmlFor="pr-publisher" className="text-xs font-semibold">
-								Đơn vị ban hành <span className="text-error">*</span>
+								{t("publisherLabel")} <span className="text-error">*</span>
 							</Label>
 							<Input
 								id="pr-publisher"
 								value={values.publisher}
 								onChange={(e) => set("publisher", e.target.value)}
 								onBlur={() => handleBlur("publisher", values.publisher)}
-								placeholder="British Thoracic Society"
+								placeholder={t("publisherPlaceholder")}
 								className={`mt-1 h-9 text-sm ${
 									touched.publisher && errors.publisher ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 								}`}
@@ -248,7 +272,7 @@ export function ProtocolFormDialog({
 
 						<div className="sm:col-span-3">
 							<Label htmlFor="pr-desc" className="text-xs font-semibold">
-								Mô tả <span className="text-error">*</span>
+								{t("descriptionLabel")} <span className="text-error">*</span>
 							</Label>
 							<Textarea
 								id="pr-desc"
@@ -256,7 +280,7 @@ export function ProtocolFormDialog({
 								onChange={(e) => set("description", e.target.value)}
 								onBlur={() => handleBlur("description", values.description)}
 								rows={4}
-								placeholder="Thang điểm đánh giá mức độ nặng viêm phổi cộng đồng..."
+								placeholder={t("descriptionPlaceholder")}
 								className={`mt-1 text-sm ${
 									touched.description && errors.description ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 								}`}
@@ -274,10 +298,10 @@ export function ProtocolFormDialog({
 							/>
 							<span>
 								<span className="block text-sm font-semibold text-text-primary">
-									Áp dụng phác đồ này
+									{t("applyLabel")}
 								</span>
 								<span className="block text-xs text-text-secondary">
-									Phác đồ đang áp dụng sẽ được dùng khi hệ thống đánh giá mức độ nặng.
+									{t("applyHint")}
 								</span>
 							</span>
 						</label>
@@ -291,7 +315,7 @@ export function ProtocolFormDialog({
 							disabled={isSubmitting}
 							className="h-11 px-6 text-sm font-semibold"
 						>
-							Hủy bỏ
+							{tCommon("cancel")}
 						</Button>
 						<Button
 							type="submit"
@@ -299,7 +323,7 @@ export function ProtocolFormDialog({
 							className="h-11 px-6 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold"
 						>
 							{isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-							{isEdit ? "Lưu thay đổi" : "Tạo phác đồ"}
+							{isEdit ? t("submitSave") : t("submitCreate")}
 						</Button>
 					</div>
 				</form>

@@ -2,25 +2,20 @@
 
 import React, { useState } from "react";
 import { Dialog } from "radix-ui";
+import { useLocale, useTranslations } from "next-intl";
 import { AdminDialogContent } from "@/features/admin/components/AdminDialogContent";
 import { Button } from "@/components/ui/button";
 import {
-	Shield,
 	CheckCircle2,
 	AlertTriangle,
 	AlertCircle,
-	Check,
-	Clock,
-	Layers,
-	Globe,
-	Server,
 	User,
-	Activity,
 	RotateCcw,
 } from "lucide-react";
-import { toast } from "sonner";
 import { AuditLogItem } from "../types";
 import { AuditLogRollbackDialog } from "./AuditLogRollbackDialog";
+import { SnapshotDiff, stripIdFields } from "@/components/ui/snapshot-diff";
+import { useAuditActionLabel, useAuditRoleLabel, useAuditCategoryLabel } from "../use-audit-labels";
 
 interface AuditLogDetailDialogProps {
 	item: AuditLogItem | null;
@@ -36,13 +31,66 @@ export function AuditLogDetailDialog({
 	onRollbackSuccess,
 }: AuditLogDetailDialogProps) {
 	const [isRollbackOpen, setIsRollbackOpen] = useState(false);
+	const t = useTranslations("admin.auditLogs.detail");
+	const tAudit = useTranslations("admin.auditLogs");
+	const locale = useLocale();
+	const actionLabel = useAuditActionLabel();
+	const roleLabel = useAuditRoleLabel();
+	const categoryLabel = useAuditCategoryLabel();
 
 	if (!item) return null;
+
+	const canRollback = item.service === "Clinical" && item.rawAction.startsWith("Clinical.");
+
+	const detailLabels =
+		(t.raw("labels") as Record<string, string> | undefined) ?? {};
+
+	const formatDetailValue = (key: string, value: unknown): string => {
+		if (key === "changedFields" && Array.isArray(value)) {
+			return value.join(", ");
+		}
+		if (value === null || value === undefined) return "—";
+		if (typeof value === "boolean") return value ? t("flagYes") : t("flagNo");
+		if (typeof value === "object") return JSON.stringify(value, null, 2);
+		return String(value);
+	};
+
+	const details =
+		item.requestPayload && typeof item.requestPayload === "object"
+			? (item.requestPayload as Record<string, unknown>)
+			: null;
+
+	const hasSnapshot = Boolean(details && ("before" in details || "after" in details));
+	const snapshotBefore = details?.before;
+	const snapshotAfter = details?.after;
+
+	const flagEntries = details
+		? Object.entries(details).filter(
+				([key, value]) => key.endsWith("Changed") && typeof value === "boolean"
+			)
+		: [];
+
+	const hiddenDetailKeys = new Set([
+		"Id",
+		"id",
+		"entityId",
+		"accountId",
+		"changeSetId",
+		"traceId",
+		"correlationId",
+		"before",
+		"after",
+		...flagEntries.map(([key]) => key),
+	]);
+
+	const metadataEntries = details
+		? Object.entries(details).filter(([key]) => !hiddenDetailKeys.has(key))
+		: [];
 
 	const formatFullTimestamp = (iso: string) => {
 		try {
 			const d = new Date(iso);
-			return d.toLocaleString("vi-VN", {
+			return d.toLocaleString(locale, {
 				weekday: "long",
 				day: "2-digit",
 				month: "2-digit",
@@ -83,25 +131,22 @@ export function AuditLogDetailDialog({
 						<div>
 							<div className="flex items-center gap-2 flex-wrap mb-1">
 								<h2 className="text-base sm:text-lg font-bold text-text-primary leading-snug">
-									Chi tiết Sự kiện Kiểm toán
+									{t("title")}
 								</h2>
 								<span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-surface-secondary text-text-primary">
 									{item.service}
 								</span>
 							</div>
-							<p className="text-xs text-text-secondary font-mono">
-								ID: {item.id} • Correlation: {item.correlationId}
-							</p>
 						</div>
 					</div>
 				</div>
 
 				<div className="space-y-5 pt-5">
-					{/* Status & Severity Summary Bar */}
-					<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-surface-secondary/80 p-3.5 rounded-xl border border-border-subtle">
+					{/* Status & Category */}
+					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-surface-secondary/80 p-3.5 rounded-xl border border-border-subtle">
 						<div>
 							<span className="text-[11px] font-semibold text-text-tertiary block mb-0.5">
-								Trạng thái
+								{t("status")}
 							</span>
 							<span
 								className={`inline-flex items-center gap-1 font-bold text-xs ${
@@ -113,47 +158,28 @@ export function AuditLogDetailDialog({
 								}`}
 							>
 								{item.status === "success"
-									? "Thành công (Success)"
+									? t("statusSuccess")
 									: item.status === "warning"
-									? "Cảnh báo (Warning)"
-									: "Thất bại (Error)"}
+									? t("statusWarning")
+									: t("statusError")}
 							</span>
 						</div>
 
 						<div>
 							<span className="text-[11px] font-semibold text-text-tertiary block mb-0.5">
-								Mức độ nghiêm trọng
-							</span>
-							<span
-								className={`inline-block font-bold text-xs uppercase ${
-									item.severity === "critical"
-										? "text-error"
-										: item.severity === "high"
-										? "text-warning"
-										: item.severity === "medium"
-										? "text-warning"
-										: "text-text-secondary"
-								}`}
-							>
-								{item.severity}
-							</span>
-						</div>
-
-						<div>
-							<span className="text-[11px] font-semibold text-text-tertiary block mb-0.5">
-								Thời gian xử lý
-							</span>
-							<span className="font-mono text-xs font-bold text-text-primary">
-								{item.durationMs} ms
-							</span>
-						</div>
-
-						<div>
-							<span className="text-[11px] font-semibold text-text-tertiary block mb-0.5">
-								Danh mục
+								{t("category")}
 							</span>
 							<span className="font-mono text-xs font-semibold text-text-primary bg-surface border border-border-default px-1.5 py-0.2 rounded">
-								{item.category}
+								{categoryLabel(item.category)}
+							</span>
+						</div>
+
+						<div>
+							<span className="text-[11px] font-semibold text-text-tertiary block mb-0.5">
+								{t("timestamp")}
+							</span>
+							<span className="font-mono text-[11px] font-semibold text-text-primary">
+								{formatFullTimestamp(item.timestamp)}
 							</span>
 						</div>
 					</div>
@@ -161,120 +187,178 @@ export function AuditLogDetailDialog({
 					{/* Action description */}
 					<div className="bg-surface p-4 rounded-xl border border-border-default/80">
 						<span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider block mb-1.5">
-							Hành động đã thực thi
+							{t("action")}
 						</span>
-						<p className="text-sm font-semibold text-text-primary leading-relaxed">{item.action}</p>
+						<p className="text-sm font-semibold text-text-primary leading-relaxed">
+							{actionLabel(item.action)}
+						</p>
 						<div className="mt-2.5 pt-2.5 border-t border-border-subtle flex items-center gap-2 text-xs text-text-secondary">
-							<span className="font-semibold text-text-tertiary">Tài nguyên đối tượng:</span>
+							<span className="font-semibold text-text-tertiary">{t("resource")}</span>
 							<code className="font-mono text-xs bg-surface-secondary px-2 py-0.5 rounded text-primary font-semibold border border-border-default/60">
 								{item.target}
 							</code>
 						</div>
 					</div>
 
-					{/* Actor & Network Environment */}
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						{/* Actor Box */}
-						<div className="p-4 rounded-xl border border-border-default/80 space-y-2">
-							<div className="flex items-center gap-2 text-xs font-bold text-text-primary uppercase tracking-wider mb-2">
-								<User className="w-3.5 h-3.5 text-primary" />
-								<span>Thông tin Tác nhân (Actor)</span>
-							</div>
-							<div className="text-xs space-y-1.5">
-								<div className="flex justify-between">
-									<span className="text-text-secondary font-medium">Họ tên:</span>
-									<span className="font-bold text-text-primary">{item.actorName}</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-text-secondary font-medium">Email / ID:</span>
-									<span className="font-mono text-text-primary break-all">{item.actor}</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-text-secondary font-medium">Vai trò:</span>
-									<span className="font-bold text-primary">{item.role}</span>
-								</div>
-							</div>
+					{/* Actor */}
+					<div className="p-4 rounded-xl border border-border-default/80 space-y-2">
+						<div className="flex items-center gap-2 text-xs font-bold text-text-primary uppercase tracking-wider mb-2">
+							<User className="w-3.5 h-3.5 text-primary" />
+							<span>{t("actorTitle")}</span>
 						</div>
-
-						{/* Network Box */}
-						<div className="p-4 rounded-xl border border-border-default/80 space-y-2">
-							<div className="flex items-center gap-2 text-xs font-bold text-text-primary uppercase tracking-wider mb-2">
-								<Globe className="w-3.5 h-3.5 text-info" />
-								<span>Môi trường Mạng & Thiết bị</span>
+						<div className="text-xs space-y-1.5">
+							<div className="flex justify-between">
+								<span className="text-text-secondary font-medium">{t("actorName")}</span>
+								<span className="font-bold text-text-primary">
+									{roleLabel(item.role)}
+								</span>
 							</div>
-							<div className="text-xs space-y-1.5">
-								<div className="flex justify-between">
-									<span className="text-text-secondary font-medium">Địa chỉ IP:</span>
-									<span className="font-mono font-bold text-text-primary">{item.ipAddress}</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-text-secondary font-medium">Thời điểm:</span>
-									<span className="font-mono text-text-primary text-[11px]">
-										{formatFullTimestamp(item.timestamp)}
-									</span>
-								</div>
-								<div className="flex flex-col gap-1 pt-1">
-									<span className="text-text-secondary font-medium">User Agent:</span>
-									<span className="font-mono text-[10.5px] text-text-secondary truncate bg-surface-secondary p-1 rounded border border-border-subtle">
-										{item.userAgent || "N/A"}
-									</span>
-								</div>
+							<div className="flex justify-between">
+								<span className="text-text-secondary font-medium">{t("actorEmail")}</span>
+								<span className="font-mono text-text-primary break-all">
+									{item.actor.includes("@") ? item.actor : "—"}
+								</span>
+							</div>
+							<div className="flex justify-between">
+								<span className="text-text-secondary font-medium">{t("role")}</span>
+								<span className="font-bold text-primary">{roleLabel(item.role)}</span>
 							</div>
 						</div>
 					</div>
 
-					{/* Error or Response Box */}
-					{item.errorMessage ? (
-						<div className="p-3.5 rounded-xl bg-error/10 border border-error/30 text-xs">
-							<span className="font-bold text-error block mb-1">
-								Thông điệp Lỗi / Ngoại lệ:
-							</span>
-							<p className="font-mono text-error">{item.errorMessage}</p>
-						</div>
-					) : item.responseSummary ? (
-						<div className="p-3.5 rounded-xl bg-success/10 border border-success/30 text-xs">
-							<span className="font-bold text-success block mb-1">
-								Kết quả phản hồi hệ thống:
-							</span>
-							<p className="text-success font-medium">{item.responseSummary}</p>
-						</div>
-					) : null}
+					{/* Detailed system result from detailsJson */}
+					<div className="p-4 rounded-xl bg-surface border border-border-default/80 text-xs space-y-2">
+						<span className="font-bold text-text-primary block">
+							{t("systemResult")}
+						</span>
+
+						{item.errorMessage && (
+							<div className="rounded-lg bg-error/10 border border-error/30 p-2.5">
+								<span className="font-bold text-error block mb-1">{t("error")}</span>
+								<p className="font-mono text-error">{item.errorMessage}</p>
+							</div>
+						)}
+
+						{hasSnapshot && (
+							<div className="rounded-xl border border-border-default overflow-hidden">
+								<SnapshotDiff
+									before={snapshotBefore}
+									after={snapshotAfter}
+									hideIdFields
+								/>
+							</div>
+						)}
+
+						{flagEntries.length > 0 && (
+							<div className="divide-y divide-border-subtle rounded-lg border border-border-default px-3">
+								{flagEntries.map(([key, value]) => (
+									<div
+										key={key}
+										className="flex items-start justify-between gap-4 py-1.5"
+									>
+										<span className="text-text-secondary font-medium">
+											{detailLabels[key] ?? key}
+										</span>
+										<span
+											className={
+												value
+													? "font-bold text-success"
+													: "font-mono text-text-tertiary"
+											}
+										>
+											{value ? t("flagYes") : t("flagNo")}
+										</span>
+									</div>
+								))}
+							</div>
+						)}
+
+						{metadataEntries.length > 0 && (
+							<div className="divide-y divide-border-subtle">
+								{metadataEntries.map(([key, value]) => (
+									<div
+										key={key}
+										className="flex items-start justify-between gap-4 py-1.5"
+									>
+										<span className="text-text-secondary font-medium">
+											{detailLabels[key] ?? key}
+										</span>
+										<span className="font-mono text-text-primary text-right break-all whitespace-pre-wrap max-w-[60%]">
+											{formatDetailValue(key, value)}
+										</span>
+									</div>
+								))}
+							</div>
+						)}
+
+						{details && (
+							<details className="border-t border-border-subtle pt-2">
+								<summary className="cursor-pointer text-[10.5px] font-semibold text-primary">
+									{t("rawJson")}
+								</summary>
+								<pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded border border-border-subtle bg-surface-secondary p-2 font-mono text-[10.5px] text-text-secondary">
+									{JSON.stringify(stripIdFields(details), null, 2)}
+								</pre>
+							</details>
+						)}
+
+						{!hasSnapshot &&
+							flagEntries.length === 0 &&
+							metadataEntries.length === 0 &&
+							(typeof item.requestPayload !== "string" ||
+								item.requestPayload.trim().length === 0) && (
+								<p className="text-text-tertiary">{t("noDetails")}</p>
+							)}
+
+						{typeof item.requestPayload === "string" &&
+							item.requestPayload.trim().length > 0 && (
+								<pre className="font-mono text-[11px] text-text-secondary whitespace-pre-wrap break-all bg-surface-secondary p-2 rounded border border-border-subtle">
+									{item.requestPayload}
+								</pre>
+							)}
+					</div>
 				</div>
 
 				{/* Footer */}
 				<div className="mt-6 pt-4 border-t border-border-subtle flex items-center justify-between gap-3 flex-wrap">
 					{/* Nút Xem trước & Hoàn tác (Rollback) */}
-					<Button
-						type="button"
-						variant="outline"
-						onClick={() => setIsRollbackOpen(true)}
-						className="h-9 px-3.5 rounded-xl border-warning/30 bg-warning/10 hover:bg-warning/10 text-warning font-semibold text-xs cursor-pointer gap-2 transition-all shadow-2xs hover:shadow-xs active:scale-[0.98]"
-						title="Xem trước sự thay đổi và hoàn tác dữ liệu lâm sàng về phiên bản trước"
-					>
-						<RotateCcw className="w-3.5 h-3.5 text-warning" />
-						<span>Xem trước &amp; Hoàn tác (Rollback)</span>
-					</Button>
+					<div className="flex-1">
+						{canRollback && (
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => setIsRollbackOpen(true)}
+								className="h-9 px-3.5 rounded-xl border-warning/30 bg-warning/10 hover:bg-warning/10 text-warning font-semibold text-xs cursor-pointer gap-2 transition-all shadow-2xs hover:shadow-xs active:scale-[0.98]"
+								title={t("rollbackTitle")}
+							>
+								<RotateCcw className="w-3.5 h-3.5 text-warning" />
+								<span>{tAudit("rollbackBtn")}</span>
+							</Button>
+						)}
+					</div>
 
 					<Button
 						type="button"
+						variant="outline"
 						onClick={() => onOpenChange(false)}
-						className="h-9 px-6 rounded-xl bg-foreground hover:bg-foreground/90 text-background font-semibold text-xs cursor-pointer shadow-xs"
+						className="h-9 px-6 rounded-xl border-border-default text-text-primary hover:bg-surface-secondary text-xs font-semibold cursor-pointer"
 					>
-						Đóng
+						{t("close")}
 					</Button>
 				</div>
 			</AdminDialogContent>
 
 			{/* Modal Xem trước & Hoàn tác (Rollback) */}
-			<AuditLogRollbackDialog
-				item={item}
-				open={isRollbackOpen}
-				onOpenChange={setIsRollbackOpen}
-				onSuccess={() => {
-					onRollbackSuccess?.();
-				}}
-			/>
+			{canRollback && (
+				<AuditLogRollbackDialog
+					item={item}
+					open={isRollbackOpen}
+					onOpenChange={setIsRollbackOpen}
+					onSuccess={() => {
+						onRollbackSuccess?.();
+					}}
+				/>
+			)}
 		</Dialog.Root>
 	);
 }
-

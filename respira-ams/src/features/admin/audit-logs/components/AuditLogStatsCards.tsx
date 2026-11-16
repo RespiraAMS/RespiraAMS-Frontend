@@ -17,7 +17,6 @@ export function AuditLogStatsCards({ stats, isLoading = false }: AuditLogStatsCa
 		{
 			title: t("totalEvents"),
 			value: stats.total,
-			subtitle: `${stats.uniqueActorsCount} ${t("uniqueActorsSuffix", { defaultMessage: "tác nhân & hệ thống ghi nhận" })}`,
 			icon: ShieldCheck,
 			color: "text-primary",
 			bg: "bg-primary/10",
@@ -25,7 +24,6 @@ export function AuditLogStatsCards({ stats, isLoading = false }: AuditLogStatsCa
 		{
 			title: t("successfulEvents"),
 			value: stats.successCount,
-			subtitle: `${t("successRatePrefix", { defaultMessage: "Tỷ lệ thành công đạt" })} ${stats.successRatePercent}%`,
 			icon: CheckCircle2,
 			color: "text-success",
 			bg: "bg-success/10",
@@ -33,7 +31,6 @@ export function AuditLogStatsCards({ stats, isLoading = false }: AuditLogStatsCa
 		{
 			title: t("warningEvents"),
 			value: stats.warningCount,
-			subtitle: t("warningSubtitle", { defaultMessage: "Cần lưu ý & theo dõi đặc quyền" }),
 			icon: AlertTriangle,
 			color: "text-warning",
 			bg: "bg-warning/10",
@@ -41,7 +38,6 @@ export function AuditLogStatsCards({ stats, isLoading = false }: AuditLogStatsCa
 		{
 			title: t("errorEvents"),
 			value: stats.errorCount,
-			subtitle: t("errorSubtitle", { defaultMessage: "Sự cố phân tán & vi phạm bảo mật" }),
 			icon: AlertCircle,
 			color: "text-error",
 			bg: "bg-error/10",
@@ -67,7 +63,6 @@ export function AuditLogStatsCards({ stats, isLoading = false }: AuditLogStatsCa
 							<div className="text-2xl font-extrabold text-text-primary tracking-tight">
 								{isLoading ? "—" : card.value.toLocaleString()}
 							</div>
-							<p className="text-[11px] text-text-tertiary mt-1 font-medium">{card.subtitle}</p>
 						</CardContent>
 					</Card>
 				);

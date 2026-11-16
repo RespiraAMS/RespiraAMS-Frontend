@@ -8,7 +8,10 @@ if (typeof console !== "undefined") {
 	const originalError = console.error;
 	console.error = (...args: unknown[]) => {
 		const isScriptWarning = args.some((arg) => {
-			const str = typeof arg === "string" ? arg : (arg as any)?.message || String(arg || "");
+			const str =
+				typeof arg === "string"
+					? arg
+					: (arg as { message?: string } | null)?.message || String(arg || "");
 			return (
 				str.includes("Encountered a script tag") ||
 				str.includes("Scripts inside React components are never executed")

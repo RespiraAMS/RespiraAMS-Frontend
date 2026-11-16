@@ -15,10 +15,21 @@ export function FontProvider({ children }: { children: React.ReactNode }) {
   const [font, setFontState] = useState<FontOption>('sans');
 
   useEffect(() => {
-    const saved = localStorage.getItem('user-font') as FontOption | null;
-    if (saved && ['sans', 'serif', 'mono'].includes(saved)) {
-      setFontState(saved);
-    }
+    let cancelled = false;
+
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
+
+      const saved = localStorage.getItem('user-font') as FontOption | null;
+      if (saved && ['sans', 'serif', 'mono'].includes(saved)) {
+        setFontState(saved);
+        document.documentElement.setAttribute('data-font', saved);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const setFont = (newFont: FontOption) => {
