@@ -9,12 +9,12 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { PatientForm } from "@/features/doctor/patients/components/PatientForm";
-import { createPatient } from "@/features/doctor/patients/api";
 import type {
     CreatePatientRequest,
     PatientDetail,
     UpdatePatientRequest,
 } from "@/features/doctor/patients/types";
+import { usePatientMutations } from "../../patients/queries";
 
 interface CreatePatientModalProps {
     open: boolean;
@@ -27,15 +27,14 @@ export function CreatePatientModal({
     onOpenChange,
     onCreated,
 }: CreatePatientModalProps) {
-    const [isPending, setIsPending] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
+    const { createMutation } = usePatientMutations();
 
     const handleSubmit = async (raw: CreatePatientRequest | UpdatePatientRequest) => {
         const data = raw as CreatePatientRequest;
-        setIsPending(true);
         setSubmitError(null);
         try {
-            const response = await createPatient(data);
+            const response = await createMutation.mutateAsync(data);
             const createdId =
                 typeof response === "string"
                     ? response
@@ -62,8 +61,6 @@ export function CreatePatientModal({
             setSubmitError(
                 err instanceof Error ? err.message : "Không thể tạo hồ sơ bệnh nhân mới."
             );
-        } finally {
-            setIsPending(false);
         }
     };
 
@@ -86,7 +83,7 @@ export function CreatePatientModal({
                 <PatientForm
                     onSubmit={handleSubmit}
                     onCancel={() => onOpenChange(false)}
-                    isPending={isPending}
+                    isPending={createMutation.isPending}
                 />
             </DialogContent>
         </Dialog>
