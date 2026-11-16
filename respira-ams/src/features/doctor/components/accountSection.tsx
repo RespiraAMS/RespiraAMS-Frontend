@@ -109,12 +109,14 @@ export interface AccountSectionProps {
 	user?: UserInfo;
 	collapsed?: boolean;
 	className?: string;
+	route?: string;
 }
 
 export function AccountSection({
 	user: initialUser,
 	collapsed = false,
 	className,
+	route = "doctor"
 }: AccountSectionProps) {
 	const router = useRouter();
 	const t = useTranslations("doctor.account");
@@ -282,7 +284,7 @@ export function AccountSection({
 					<DropdownMenuSeparator />
 					<DropdownMenuItem asChild>
 						<Link
-							href="/doctor/profile"
+							href={`/${route}/profile`}
 							className="flex items-center gap-2 cursor-pointer text-xs"
 						>
 							<User className="h-3.5 w-3.5" />
@@ -291,7 +293,7 @@ export function AccountSection({
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
 						<Link
-							href="/doctor/settings"
+							href={`/${route}/settings`}
 							className="flex items-center gap-2 cursor-pointer text-xs"
 						>
 							<Settings className="h-3.5 w-3.5" />
@@ -395,7 +397,7 @@ export function AccountSection({
 				<DropdownMenuSeparator />
 				<DropdownMenuItem asChild>
 					<Link
-						href="/doctor/profile"
+						href={`/${route}/profile`}
 						className="flex items-center gap-2 cursor-pointer text-xs"
 					>
 						<User className="h-3.5 w-3.5" />
@@ -404,7 +406,7 @@ export function AccountSection({
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
 					<Link
-						href="/doctor/settings"
+						href={`/${route}/settings`}
 						className="flex items-center gap-2 cursor-pointer text-xs"
 					>
 						<Settings className="h-3.5 w-3.5" />
