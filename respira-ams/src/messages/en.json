@@ -1143,6 +1143,99 @@
           "planReviewError": "Error evaluating regimen adherence: {error}"
         }
       }
+    },
+    "doctors": {
+      "title": "Department Doctors",
+      "subtitle": "Manage physicians in the department, review professional profiles, and generate individual prescribing evaluation reports.",
+      "prefixes": {
+        "Professor": "Prof.",
+        "AssociateProfessor": "Assoc. Prof.",
+        "Default": "Dr."
+      },
+      "gender": {
+        "Male": "Male",
+        "Female": "Female"
+      },
+      "academicTitle": {
+        "None": "None",
+        "AssociateProfessor": "Associate Professor (Assoc. Prof.)",
+        "Professor": "Professor (Prof.)"
+      },
+      "position": {
+        "StaffDoctor": "Attending Physician",
+        "SeniorDoctor": "Senior Physician",
+        "DepartmentDeputyHead": "Deputy Head of Department",
+        "HeadOfDepartment": "Head of Department",
+        "DeputyDirector": "Deputy Director",
+        "Director": "Director"
+      },
+      "role": {
+        "HeadDepartmentDoctor": "Head of Department (Manager)",
+        "Doctor": "Doctor"
+      },
+      "accountStatus": {
+        "Active": "Active",
+        "InActive": "Inactive"
+      },
+      "degree": {
+        "Professor": "Professor",
+        "Doctor": "Doctor of Medicine",
+        "Master": "Master",
+        "Bachelor": "Bachelor",
+        "Associate": "Associate",
+        "Undergraduate": "Undergraduate",
+        "Graduate": "Graduate",
+        "PhD": "PhD",
+        "PostDoc": "Postdoctoral"
+      },
+      "table": {
+        "doctor": "Physician",
+        "academicAndDegree": "Academic Title / Degree",
+        "positionAndRole": "Position & Role",
+        "gender": "Gender",
+        "status": "Status",
+        "empty": "No matching physicians found."
+      },
+      "filter": {
+        "buttonTitle": "Filter physicians",
+        "title": "Filter List",
+        "reset": "Reset",
+        "genderLabel": "Gender",
+        "allGenders": "All genders",
+        "academicTitleLabel": "Academic Title",
+        "allAcademicTitles": "All academic titles",
+        "positionLabel": "Position",
+        "allPositions": "All positions"
+      },
+      "actions": {
+        "createReportTitle": "Generate analysis report",
+        "viewDetailTitle": "View physician details"
+      },
+      "createReportDialog": {
+        "title": "Create Individual Analysis Report"
+      },
+      "toast": {
+        "defaultDoctorName": "the physician",
+        "createReportSuccess": "Analysis report created for {name}!",
+        "createReportError": "Error creating report: {error}"
+      },
+      "detailModal": {
+        "title": "Physician Details",
+        "loadError": "Unable to load physician information.",
+        "notUpdated": "Not updated",
+        "createReportButton": "Create Report",
+        "degreesTitle": "Degrees / Qualifications",
+        "noDegrees": "No qualifications updated",
+        "position": "Position",
+        "academicTitle": "Academic Title",
+        "gender": "Gender",
+        "dateOfBirth": "Date of Birth",
+        "citizenId": "Citizen ID / National ID",
+        "joinedDate": "System Join Date",
+        "email": "Email",
+        "phone": "Phone Number",
+        "address": "Address"
+      }
     }
   },
   

@@ -1143,6 +1143,99 @@
           "planReviewError": "Lỗi đánh giá phác đồ: {error}"
         }
       }
+    },
+    "doctors": {
+      "title": "Danh sách Bác sĩ trực thuộc",
+      "subtitle": "Quản lý đội ngũ bác sĩ trong khoa, xem thông tin hồ sơ chuyên môn và xuất báo cáo đánh giá kê đơn cá nhân.",
+      "prefixes": {
+        "Professor": "GS.",
+        "AssociateProfessor": "PGS.",
+        "Default": "BS."
+      },
+      "gender": {
+        "Male": "Nam",
+        "Female": "Nữ"
+      },
+      "academicTitle": {
+        "None": "Không",
+        "AssociateProfessor": "Phó Giáo sư (PGS)",
+        "Professor": "Giáo sư (GS)"
+      },
+      "position": {
+        "StaffDoctor": "Bác sĩ điều trị",
+        "SeniorDoctor": "Bác sĩ cao cấp",
+        "DepartmentDeputyHead": "Phó Trưởng khoa",
+        "HeadOfDepartment": "Trưởng khoa",
+        "DeputyDirector": "Phó Giám đốc",
+        "Director": "Giám đốc"
+      },
+      "role": {
+        "HeadDepartmentDoctor": "Trưởng khoa (Quản lý)",
+        "Doctor": "Bác sĩ"
+      },
+      "accountStatus": {
+        "Active": "Đang hoạt động",
+        "InActive": "Ngừng hoạt động"
+      },
+      "degree": {
+        "Professor": "Giáo sư",
+        "Doctor": "Bác sĩ",
+        "Master": "Thạc sĩ",
+        "Bachelor": "Cử nhân",
+        "Associate": "Cao đẳng",
+        "Undergraduate": "Đại học",
+        "Graduate": "Sau đại học",
+        "PhD": "Tiến sĩ",
+        "PostDoc": "Sau tiến sĩ"
+      },
+      "table": {
+        "doctor": "Bác sĩ",
+        "academicAndDegree": "Học hàm / Học vị",
+        "positionAndRole": "Chức vụ & Vai trò",
+        "gender": "Giới tính",
+        "status": "Trạng thái",
+        "empty": "Không tìm thấy bác sĩ nào phù hợp."
+      },
+      "filter": {
+        "buttonTitle": "Bộ lọc bác sĩ",
+        "title": "Lọc danh sách",
+        "reset": "Đặt lại",
+        "genderLabel": "Giới tính",
+        "allGenders": "Tất cả giới tính",
+        "academicTitleLabel": "Học hàm",
+        "allAcademicTitles": "Tất cả học hàm",
+        "positionLabel": "Chức vụ",
+        "allPositions": "Tất cả chức vụ"
+      },
+      "actions": {
+        "createReportTitle": "Tạo báo cáo phân tích",
+        "viewDetailTitle": "Xem chi tiết bác sĩ"
+      },
+      "createReportDialog": {
+        "title": "Tạo Báo Cáo Phân Tích Cá Nhân"
+      },
+      "toast": {
+        "defaultDoctorName": "bác sĩ",
+        "createReportSuccess": "Đã tạo báo cáo phân tích cho {name}!",
+        "createReportError": "Lỗi khi tạo báo cáo: {error}"
+      },
+      "detailModal": {
+        "title": "Thông tin chi tiết Bác sĩ",
+        "loadError": "Không thể tải thông tin bác sĩ.",
+        "notUpdated": "Chưa cập nhật",
+        "createReportButton": "Tạo báo cáo",
+        "degreesTitle": "Bằng cấp / Học vị",
+        "noDegrees": "Chưa cập nhật học vị",
+        "position": "Chức vụ",
+        "academicTitle": "Học hàm",
+        "gender": "Giới tính",
+        "dateOfBirth": "Ngày sinh",
+        "citizenId": "Số CCCD / CMND",
+        "joinedDate": "Ngày tham gia hệ thống",
+        "email": "Email",
+        "phone": "Số điện thoại",
+        "address": "Địa chỉ"
+      }
     }
   },
   "admin": {
