@@ -1,11 +1,9 @@
 export interface DashboardMetrics {
-	totalPatients: number;
 	totalAntibiotics: number;
 	totalPathogens: number;
 	totalAntibioticGroups: number;
-	totalTreatments: number;
+	totalClinicalMetrics: number;
 	totalUsers: number;
-	systemUptime: string;
 	activeServicesCount: number;
 	totalServicesCount: number;
 }
@@ -16,12 +14,8 @@ export interface MicroserviceStatus {
 	id: string;
 	name: string;
 	service: string;
-	description: string;
-	port: number | string;
 	status: ServiceHealthStatus;
 	latencyMs: number;
-	uptime: string;
-	version: string;
 }
 
 export type AuditLogStatus = "success" | "warning" | "error";

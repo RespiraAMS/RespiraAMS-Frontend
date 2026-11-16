@@ -1,9 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ShieldCheck, ArrowRight, CheckCircle2, AlertTriangle, AlertCircle } from "lucide-react";
 import { AuditLogItem } from "../types";
+import {
+	useAuditActionLabel,
+	useAuditRoleLabel,
+} from "@/features/admin/audit-logs/use-audit-labels";
 
 interface RecentAuditLogsCardProps {
 	logs: AuditLogItem[];
@@ -11,6 +15,22 @@ interface RecentAuditLogsCardProps {
 
 export function RecentAuditLogsCard({ logs }: RecentAuditLogsCardProps) {
 	const t = useTranslations("admin.dashboard");
+	const locale = useLocale();
+	const actionLabel = useAuditActionLabel();
+	const roleLabel = useAuditRoleLabel();
+
+	const formatTimestamp = (isoString: string) => {
+		const date = new Date(isoString);
+		if (Number.isNaN(date.getTime())) return isoString;
+
+		return new Intl.DateTimeFormat(locale, {
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+		}).format(date);
+	};
 
 	const renderStatusBadge = (status: AuditLogItem["status"]) => {
 		switch (status) {
@@ -50,7 +70,7 @@ export function RecentAuditLogsCard({ logs }: RecentAuditLogsCardProps) {
 							{t("recentAuditTitle", { defaultMessage: "Nhật ký Kiểm toán & Bảo mật Gần đây" })}
 						</h3>
 						<p className="text-xs text-text-secondary">
-							{t("recentAuditSubtitle", { defaultMessage: "Ghi nhận các thao tác quản trị, đăng nhập và thay đổi phác đồ" })}
+							{t("recentAuditSubtitle", { defaultMessage: "Ghi nhận các thao tác quản trị, đăng nhập và thay đổi thang điểm" })}
 						</p>
 					</div>
 				</div>
@@ -73,7 +93,7 @@ export function RecentAuditLogsCard({ logs }: RecentAuditLogsCardProps) {
 						<div className="min-w-0 flex-1">
 							<div className="flex items-center gap-2 flex-wrap">
 								<span className="font-semibold text-xs text-text-primary">
-									{log.action}
+									{actionLabel(log.action)}
 								</span>
 								{renderStatusBadge(log.status)}
 								<span className="rounded-[4px] bg-surface-tertiary/70 px-1.5 py-0.2 text-[9.5px] font-mono text-text-secondary">
@@ -81,13 +101,20 @@ export function RecentAuditLogsCard({ logs }: RecentAuditLogsCardProps) {
 								</span>
 							</div>
 							<p className="text-[11px] text-text-secondary mt-1">
-								{t("by", { defaultMessage: "Bởi" })} <span className="font-medium text-text-primary">{log.actor}</span> ({log.role}) • {t("target", { defaultMessage: "Mục tiêu" })}: <span className="font-mono text-[10.5px] text-text-secondary">{log.target}</span>
+								{t("by", { defaultMessage: "Bởi" })}{" "}
+								<span className="font-medium text-text-primary">
+									{log.actor || roleLabel(log.role)}
+								</span>{" "}
+								({roleLabel(log.role)}) • {t("target", { defaultMessage: "Mục tiêu" })}:{" "}
+								<span className="font-mono text-[10.5px] text-text-secondary">
+									{log.target}
+								</span>
 							</p>
 						</div>
 
 						<div className="text-right shrink-0">
 							<span className="text-[11px] text-text-tertiary block font-medium">
-								{log.timestamp}
+								{formatTimestamp(log.timestamp)}
 							</span>
 						</div>
 					</div>

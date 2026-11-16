@@ -16,8 +16,8 @@ export function QuickActionsCard() {
 			color: "text-primary bg-primary/10 border-primary/30",
 		},
 		{
-			title: t("actionProtocolsTitle", { defaultMessage: "Phiên bản phác đồ" }),
-			description: t("actionProtocolsDesc", { defaultMessage: "Theo dõi thay đổi và rollback phác đồ kháng sinh" }),
+			title: t("actionProtocolsTitle", { defaultMessage: "Thang điểm lâm sàng" }),
+			description: t("actionProtocolsDesc", { defaultMessage: "Quản lý thang điểm đánh giá độ nặng & quy tắc chấm điểm" }),
 			href: "/admin/protocols",
 			icon: FileText,
 			color: "text-info bg-info/10 border-info/30",

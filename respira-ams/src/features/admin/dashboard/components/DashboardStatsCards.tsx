@@ -14,23 +14,23 @@ export function DashboardStatsCards({ metrics }: DashboardStatsCardsProps) {
 
 	return (
 		<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-			{/* Card 1: Tổng phác đồ điều trị */}
+			{/* Card 1: Thang điểm lâm sàng */}
 			<div className="bg-surface rounded-[12px] p-5 border border-border-subtle shadow-2xs hover:shadow-xs transition-all relative overflow-hidden group">
 				<div className="flex items-center justify-between">
 					<p className="text-[10.5px] font-bold text-text-secondary uppercase tracking-wider">
-						{t("cardTreatments", { defaultMessage: "Phác đồ điều trị" })}
+						{t("cardClinicalMetrics", { defaultMessage: "Thang điểm lâm sàng" })}
 					</p>
 					<div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-primary/10 text-primary">
 						<ClipboardList className="h-4 w-4" />
 					</div>
 				</div>
 				<p className="text-2xl font-bold text-text-primary mt-2 tracking-tight">
-					{formatCount(metrics.totalTreatments)}
+					{formatCount(metrics.totalClinicalMetrics)}
 				</p>
 				<div className="flex items-center justify-between mt-3 text-xs text-text-secondary">
 					<span>
-						{t("protocolsSubtitle", {
-							defaultMessage: "Quy trình & phác đồ lâm sàng",
+						{t("clinicalMetricsSubtitle", {
+							defaultMessage: "Thang điểm & phác đồ đánh giá",
 						})}
 					</span>
 				</div>
@@ -86,13 +86,34 @@ export function DashboardStatsCards({ metrics }: DashboardStatsCardsProps) {
 					</div>
 				</div>
 				<p className="text-2xl font-bold text-warning mt-2 tracking-tight">
-					{metrics.systemUptime}
+					{metrics.totalServicesCount > 0
+						? `${Math.round(
+								(metrics.activeServicesCount / metrics.totalServicesCount) * 100
+							)}%`
+						: "—"}
 				</p>
 				<div className="flex items-center justify-between mt-3 text-xs text-text-secondary">
 					<span>{metrics.activeServicesCount}/{metrics.totalServicesCount} {t("servicesSuffix", { defaultMessage: "Dịch vụ" })}</span>
-					<span className="text-success font-semibold flex items-center gap-1">
-						<span className="h-1.5 w-1.5 rounded-full bg-success" />
-						{t("online", { defaultMessage: "Trực tuyến" })}
+					<span
+						className={
+							metrics.activeServicesCount === metrics.totalServicesCount &&
+							metrics.totalServicesCount > 0
+								? "text-success font-semibold flex items-center gap-1"
+								: "text-warning font-semibold flex items-center gap-1"
+						}
+					>
+						<span
+							className={
+								metrics.activeServicesCount === metrics.totalServicesCount &&
+								metrics.totalServicesCount > 0
+									? "h-1.5 w-1.5 rounded-full bg-success"
+									: "h-1.5 w-1.5 rounded-full bg-warning"
+							}
+						/>
+						{metrics.activeServicesCount === metrics.totalServicesCount &&
+						metrics.totalServicesCount > 0
+							? t("online", { defaultMessage: "Trực tuyến" })
+							: t("degraded", { defaultMessage: "Suy giảm" })}
 					</span>
 				</div>
 				<div className="h-1 w-24 bg-warning rounded-full mt-2" />
