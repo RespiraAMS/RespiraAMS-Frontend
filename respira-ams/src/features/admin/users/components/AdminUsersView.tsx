@@ -99,6 +99,8 @@ export function AdminUsersView() {
 				role: filters.role,
 				status: filters.status,
 			}),
+		staleTime: 125_000,
+		refetchOnWindowFocus: false,
 	});
 
 	const users = data?.items || [];
@@ -197,10 +199,21 @@ export function AdminUsersView() {
 				const previous = current.items.find((u) => u.id === result.user.id);
 				if (!previous) return current;
 
-				const items = current.items.map((u) => (u.id === result.user.id ? result.user : u));
+				const merged: UserItem = {
+					...result.user,
+					createdAt: previous.createdAt,
+					isEmailConfirmed: previous.isEmailConfirmed,
+					role: previous.role,
+					status: previous.status,
+					doctorId: previous.doctorId,
+					mediaId: previous.mediaId,
+					avatarUrl: result.user.avatarUrl ?? previous.avatarUrl,
+				};
+
+				const items = current.items.map((u) => (u.id === merged.id ? merged : u));
 				const stats = applyUserStatsDelta(
 					applyUserStatsDelta(current.stats, previous, -1),
-					result.user,
+					merged,
 					1
 				);
 				return { ...current, items, stats };
