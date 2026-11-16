@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Upload, X, ShieldAlert, Check, AlertCircle } from "lucide-react";
+import { Upload, Check, AlertCircle, Eye, EyeOff } from "lucide-react";
 import {
 	Dialog,
 	DialogDescription,
@@ -30,13 +30,8 @@ import {
 	UpdateUserPayload,
 	UserItem,
 	UserRole,
-	UserStatus,
 } from "../types";
-import {
-	ACADEMIC_TITLE_LABELS,
-	DEGREE_LABELS,
-	POSITION_LABELS,
-} from "../utils";
+import { DEGREE_LABELS, POSITION_LABELS } from "../utils";
 
 interface UserFormDialogProps {
 	isOpen: boolean;
@@ -80,9 +75,9 @@ export function UserFormDialog({
 
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
 	const [phone, setPhone] = useState("");
 	const [role, setRole] = useState<UserRole>("Doctor");
-	const [status, setStatus] = useState<UserStatus>("Active");
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [gender, setGender] = useState<GenderType>("Male");
@@ -105,7 +100,15 @@ export function UserFormDialog({
 	const [touched, setTouched] = useState<Record<string, boolean>>({});
 
 	const handleRoleChange = (nextRole: UserRole) => {
+		const previousRole = role;
 		setRole(nextRole);
+
+		if (nextRole === "HeadDepartmentDoctor") {
+			setPosition("HeadOfDepartment");
+		} else if (previousRole === "HeadDepartmentDoctor") {
+			setPosition("StaffDoctor");
+		}
+
 		if (nextRole !== "Manager") return;
 
 		setAvatarFile(null);
@@ -122,9 +125,9 @@ export function UserFormDialog({
 		if (editingUser) {
 			setEmail(editingUser.email || "");
 			setPassword("");
+			setShowPassword(false);
 			setPhone(editingUser.phone || "");
 			setRole(editingUser.role || "Doctor");
-			setStatus(editingUser.status || "Active");
 			setFirstName(editingUser.firstName || "");
 			setLastName(editingUser.lastName || "");
 			setGender(editingUser.gender || "Male");
@@ -143,9 +146,9 @@ export function UserFormDialog({
 		} else {
 			setEmail("");
 			setPassword("Respira@123");
+			setShowPassword(false);
 			setPhone("");
 			setRole("Doctor");
-			setStatus("Active");
 			setFirstName("");
 			setLastName("");
 			setGender("Male");
@@ -340,7 +343,6 @@ export function UserFormDialog({
 				phone: phone.trim(),
 				password: password.trim() || undefined,
 				role: isAccountOnly ? editingUser.role : role,
-				status,
 				firstName: isAccountOnly ? "" : firstName.trim(),
 				lastName: isAccountOnly ? "" : lastName.trim(),
 				degrees: isAccountOnly ? [] : degrees,
@@ -370,7 +372,11 @@ export function UserFormDialog({
 				lastName: isAccountOnly ? "" : lastName.trim(),
 				degrees: isAccountOnly ? [] : degrees,
 				academicTitle: isAccountOnly ? "None" : academicTitle,
-				position: isAccountOnly ? "StaffDoctor" : position,
+				position: isAccountOnly
+					? "StaffDoctor"
+					: createRole === "HeadDepartmentDoctor"
+						? "HeadOfDepartment"
+						: position,
 				gender,
 				citizenIdentificationNumber: isAccountOnly ? "" : citizenId.trim(),
 				dateOfBirth: isAccountOnly ? undefined : dobIso,
@@ -448,6 +454,7 @@ export function UserFormDialog({
 								<Select
 									value={role}
 									onValueChange={(val: UserRole) => handleRoleChange(val)}
+									disabled={isEdit}
 								>
 									<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
 										<SelectValue />
@@ -462,27 +469,6 @@ export function UserFormDialog({
 									</SelectContent>
 								</Select>
 							</div>
-
-							{isEdit && (
-								<div className="w-32">
-									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-										Trạng thái
-									</Label>
-									<Select
-										value={status}
-										onValueChange={(val: UserStatus) => setStatus(val)}
-										disabled={editingUser?.role === "Admin"}
-									>
-										<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="Active">Hoạt động</SelectItem>
-											<SelectItem value="Inactive">Đã khóa</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-							)}
 						</div>
 					</div>
 
@@ -536,16 +522,32 @@ export function UserFormDialog({
 							<Label htmlFor="usr-pass" className="text-xs font-semibold">
 								{isEdit ? "Mật khẩu mới (bỏ trống nếu giữ nguyên)" : "Mật khẩu khởi tạo"} {!isEdit && <span className="text-error">*</span>}
 							</Label>
-							<Input
-								id="usr-pass"
-								type="password"
-								value={password}
-								onChange={(e) => handleFieldChange("password", e.target.value, setPassword)}
-								onBlur={() => handleBlur("password", password)}
-								placeholder={isEdit ? "••••••••" : "Mật khẩu ít nhất 6 ký tự..."}
-								className={`mt-1 h-9 text-xs ${touched.password && errors.password ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
-									}`}
-							/>
+							<div className="relative mt-1">
+								<Input
+									id="usr-pass"
+									type={showPassword ? "text" : "password"}
+									value={password}
+									onChange={(e) => handleFieldChange("password", e.target.value, setPassword)}
+									onBlur={() => handleBlur("password", password)}
+									placeholder={isEdit ? "••••••••" : "Mật khẩu ít nhất 6 ký tự..."}
+									className={`h-9 pr-10 text-xs ${touched.password && errors.password ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
+										}`}
+								/>
+								<button
+									type="button"
+									tabIndex={-1}
+									onClick={() => setShowPassword((prev) => !prev)}
+									disabled={isSubmitting}
+									title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+									className="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer text-text-tertiary transition-colors hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-50"
+								>
+									{showPassword ? (
+										<EyeOff className="h-4 w-4" />
+									) : (
+										<Eye className="h-4 w-4" />
+									)}
+								</button>
+							</div>
 							{touched.password && errors.password && (
 								<p className="text-[11px] font-semibold text-error mt-1 flex items-center gap-1 animate-in fade-in duration-150">
 									<AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -718,6 +720,7 @@ export function UserFormDialog({
 										<Select
 											value={position}
 											onValueChange={(val: PositionType) => setPosition(val)}
+											disabled={role === "HeadDepartmentDoctor"}
 										>
 											<SelectTrigger className="mt-1 h-9 text-xs">
 												<SelectValue />
