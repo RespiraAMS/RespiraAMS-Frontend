@@ -1236,6 +1236,122 @@
         "phone": "Số điện thoại",
         "address": "Địa chỉ"
       }
+    },
+    "analysis": {
+      "title": "Báo cáo Phân tích Kháng sinh",
+      "subtitle": "Thống kê mức độ tuân thủ phác đồ điều trị, phân nhóm thuốc AWaRe và kết quả điều trị.",
+      "createButton": "Tạo báo cáo mới",
+      "doctorBadge": {
+        "generalReport": "Báo cáo tổng quát",
+        "general": "Tổng quát",
+        "loading": "Đang tải thông tin BS...",
+        "fallbackName": "BS ({id}...)",
+        "prefixes": {
+          "Professor": "GS.",
+          "AssociateProfessor": "PGS.",
+          "Default": "BS."
+        }
+      },
+      "table": {
+        "doctor": "Bác sĩ phụ trách",
+        "period": "Khoảng thời gian",
+        "total": "Tổng số",
+        "adherence": "Tuân thủ phác đồ",
+        "outcomes": "Kết quả điều trị",
+        "createdAt": "Ngày tạo",
+        "empty": "Chưa có báo cáo phân tích nào.",
+        "plansCount": "{count} phác đồ",
+        "patientsCount": "{count} bệnh nhân",
+        "adherentCount": "Tuân thủ: {count} ({rate}%)",
+        "nonAdherentCount": "Không tuân thủ: {count}",
+        "pendingReviewCount": "Chờ duyệt: {count}",
+        "recoveredCount": "Hồi phục: {count}",
+        "deceasedCount": "Tử vong: {count}",
+        "otherOutcomeCount": "Khác: {count}"
+      },
+      "actions": {
+        "viewDetailTitle": "Xem chi tiết",
+        "downloadExcelTitle": "Tải xuống Excel",
+        "deleteTitle": "Xóa báo cáo"
+      },
+      "createDialog": {
+        "title": "Tạo Báo Cáo Phân Tích Mới"
+      },
+      "deleteDialog": {
+        "title": "Xác nhận xóa báo cáo",
+        "description": "Bạn có chắc chắn muốn xóa báo cáo phân tích kỳ <bold>{period}</bold> không? Hành động này không thể hoàn tác."
+      },
+      "toast": {
+        "createSuccess": "Đã tạo báo cáo phân tích thành công!",
+        "createError": "Lỗi khi tạo báo cáo: {error}",
+        "deleteSuccess": "Đã xóa báo cáo phân tích thành công!",
+        "deleteError": "Không thể xóa báo cáo: {error}",
+        "downloadExcelSuccess": "Đã tải xuống báo cáo Excel!",
+        "downloadExcelError": "Lỗi khi tải file Excel: {error}"
+      },
+      "detail": {
+        "notFound": "Không tìm thấy dữ liệu báo cáo phân tích.",
+        "title": "Chi tiết Báo cáo Phân tích",
+        "periodRange": "Kỳ thống kê: <bold>{start}</bold> → <bold>{end}</bold>",
+        "exportExcel": "Xuất file Excel (.xlsx)",
+        "deleteReport": "Xóa báo cáo",
+        "deleteConfirmDescription": "Bạn có chắc chắn muốn xóa báo cáo phân tích này không? Hành động này không thể hoàn tác.",
+        "cards": {
+          "treatmentScale": {
+            "title": "Quy mô điều trị",
+            "plans": "{count} <unit>phác đồ</unit>",
+            "patients": "Trên tổng số <bold>{count}</bold> bệnh nhân"
+          },
+          "adherence": {
+            "title": "Tuân thủ phác đồ"
+          },
+          "attention": {
+            "title": "Cần lưu ý",
+            "nonAdherent": "Không tuân thủ",
+            "pendingReview": "Chờ duyệt"
+          },
+          "outcomes": {
+            "title": "Kết quả điều trị",
+            "recovered": "Khỏi bệnh",
+            "deceased": "Tử vong",
+            "other": "Khác"
+          }
+        },
+        "doctorsSection": {
+          "title": "Thống kê chi tiết theo Bác sĩ điều trị ({count})",
+          "empty": "Không có dữ liệu kê đơn của bác sĩ trong khoảng thời gian này.",
+          "doctorSummary": "Quản lý <bold>{patients}</bold> bệnh nhân • Tổng <bold>{plans}</bold> phác đồ",
+          "table": {
+            "antibioticName": "Tên kháng sinh",
+            "awareClassification": "Phân loại AWaRe",
+            "totalPrescriptions": "Tổng lượt kê",
+            "adherent": "Tuân thủ",
+            "nonAdherent": "Không tuân thủ",
+            "pendingReview": "Chờ duyệt",
+            "empty": "Chưa ghi nhận dữ liệu kháng sinh."
+          }
+        }
+      },
+      "createForm": {
+        "defaultDoctorName": "bác sĩ đã chọn",
+        "doctorBanner": "Tạo báo cáo phân tích kê đơn kháng sinh và mức độ tuân thủ phác đồ cho <bold>{name}</bold>.",
+        "generalBanner": "Hệ thống sẽ tổng hợp dữ liệu kê đơn kháng sinh và mức độ tuân thủ phác đồ của <bold>toàn bộ bác sĩ</bold> trong khoảng thời gian đã chọn.",
+        "quickSelect": "Chọn nhanh:",
+        "presets": {
+          "today": "Hôm nay",
+          "last7Days": "7 ngày qua",
+          "last30Days": "30 ngày qua",
+          "last90Days": "90 ngày qua"
+        },
+        "startLabel": "Từ thời điểm",
+        "endLabel": "Đến thời điểm",
+        "submit": "Tạo báo cáo",
+        "validation": {
+          "startRequired": "Vui lòng chọn thời điểm bắt đầu",
+          "endRequired": "Vui lòng chọn thời điểm kết thúc",
+          "invalidRange": "Thời điểm bắt đầu phải nhỏ hơn hoặc bằng thời điểm kết thúc"
+        }
+      }
     }
   },
   "admin": {

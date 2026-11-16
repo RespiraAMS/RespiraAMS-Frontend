@@ -1236,6 +1236,122 @@
         "phone": "Phone Number",
         "address": "Address"
       }
+    },
+    "analysis": {
+      "title": "Antibiotic Analysis Reports",
+      "subtitle": "Statistics on treatment regimen adherence, AWaRe antibiotic classifications, and clinical outcomes.",
+      "createButton": "Create New Report",
+      "doctorBadge": {
+        "generalReport": "General Report",
+        "general": "General",
+        "loading": "Loading physician info...",
+        "fallbackName": "Dr. ({id}...)",
+        "prefixes": {
+          "Professor": "Prof.",
+          "AssociateProfessor": "Assoc. Prof.",
+          "Default": "Dr."
+        }
+      },
+      "table": {
+        "doctor": "Assigned Physician",
+        "period": "Time Period",
+        "total": "Total",
+        "adherence": "Regimen Adherence",
+        "outcomes": "Treatment Outcomes",
+        "createdAt": "Created At",
+        "empty": "No analysis reports found.",
+        "plansCount": "{count} regimens",
+        "patientsCount": "{count} patients",
+        "adherentCount": "Adherent: {count} ({rate}%)",
+        "nonAdherentCount": "Non-Adherent: {count}",
+        "pendingReviewCount": "Pending Review: {count}",
+        "recoveredCount": "Recovered: {count}",
+        "deceasedCount": "Deceased: {count}",
+        "otherOutcomeCount": "Other: {count}"
+      },
+      "actions": {
+        "viewDetailTitle": "View details",
+        "downloadExcelTitle": "Download Excel",
+        "deleteTitle": "Delete report"
+      },
+      "createDialog": {
+        "title": "Create New Analysis Report"
+      },
+      "deleteDialog": {
+        "title": "Confirm Report Deletion",
+        "description": "Are you sure you want to delete the analysis report for <bold>{period}</bold>? This action cannot be undone."
+      },
+      "toast": {
+        "createSuccess": "Analysis report created successfully!",
+        "createError": "Error creating report: {error}",
+        "deleteSuccess": "Analysis report deleted successfully!",
+        "deleteError": "Unable to delete report: {error}",
+        "downloadExcelSuccess": "Excel report downloaded successfully!",
+        "downloadExcelError": "Error downloading Excel file: {error}"
+      },
+      "detail": {
+        "notFound": "Analysis report data not found.",
+        "title": "Analysis Report Details",
+        "periodRange": "Reporting period: <bold>{start}</bold> → <bold>{end}</bold>",
+        "exportExcel": "Export Excel (.xlsx)",
+        "deleteReport": "Delete Report",
+        "deleteConfirmDescription": "Are you sure you want to delete this analysis report? This action cannot be undone.",
+        "cards": {
+          "treatmentScale": {
+            "title": "Treatment Scale",
+            "plans": "{count} <unit>regimens</unit>",
+            "patients": "Across <bold>{count}</bold> total patients"
+          },
+          "adherence": {
+            "title": "Regimen Adherence"
+          },
+          "attention": {
+            "title": "Requires Attention",
+            "nonAdherent": "Non-Adherent",
+            "pendingReview": "Pending Review"
+          },
+          "outcomes": {
+            "title": "Treatment Outcomes",
+            "recovered": "Recovered",
+            "deceased": "Deceased",
+            "other": "Other"
+          }
+        },
+        "doctorsSection": {
+          "title": "Detailed Statistics by Attending Physician ({count})",
+          "empty": "No physician prescribing data found during this period.",
+          "doctorSummary": "Managing <bold>{patients}</bold> patients • Total <bold>{plans}</bold> regimens",
+          "table": {
+            "antibioticName": "Antibiotic Name",
+            "awareClassification": "AWaRe Classification",
+            "totalPrescriptions": "Total Prescriptions",
+            "adherent": "Adherent",
+            "nonAdherent": "Non-Adherent",
+            "pendingReview": "Pending Review",
+            "empty": "No antibiotic data recorded."
+          }
+        }
+      },
+      "createForm": {
+        "defaultDoctorName": "the selected physician",
+        "doctorBanner": "Generate an antibiotic prescribing and regimen adherence analysis report for <bold>{name}</bold>.",
+        "generalBanner": "The system will aggregate antibiotic prescribing and regimen adherence data for <bold>all physicians</bold> within the selected period.",
+        "quickSelect": "Quick select:",
+        "presets": {
+          "today": "Today",
+          "last7Days": "Last 7 days",
+          "last30Days": "Last 30 days",
+          "last90Days": "Last 90 days"
+        },
+        "startLabel": "Start Time",
+        "endLabel": "End Time",
+        "submit": "Create Report",
+        "validation": {
+          "startRequired": "Please select a start time",
+          "endRequired": "Please select an end time",
+          "invalidRange": "Start time must be earlier than or equal to end time"
+        }
+      }
     }
   },
   
