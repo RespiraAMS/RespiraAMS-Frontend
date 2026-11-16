@@ -839,6 +839,206 @@
       "doctorPrefix": "Dr.",
       "initialsFallback": "DR"
     },
+    "profile": {
+      "notUpdated": "Not updated",
+      "fallbackDoctor": "Doctor",
+      "fallbackWithEmail": "Doctor ({email})",
+      "prefixes": {
+        "professor": "Prof.",
+        "associateProfessor": "Assoc. Prof.",
+        "phd": "PhD.",
+        "master": "MSc.",
+        "doctor": "Dr."
+      },
+      "degrees": {
+        "Doctor": "Doctor of Medicine",
+        "Master": "Master",
+        "PhD": "PhD",
+        "Bachelor": "Bachelor",
+        "Professor": "Professor",
+        "PostDoc": "Post-Doctorate",
+        "Associate": "Associate",
+        "Graduate": "Graduate",
+        "Undergraduate": "Undergraduate"
+      },
+      "degreeOptions": {
+        "Doctor": "Doctor of Medicine (MD)",
+        "Master": "Master of Medicine (MSc)",
+        "PhD": "Doctor of Philosophy (PhD)",
+        "Bachelor": "Bachelor of Medicine",
+        "Professor": "Professor Degree",
+        "PostDoc": "Post-Doctorate",
+        "Associate": "Associate Degree",
+        "Graduate": "Graduate Degree",
+        "Undergraduate": "Undergraduate Degree"
+      },
+      "academicTitles": {
+        "None": "None",
+        "AssociateProfessor": "Associate Professor",
+        "Professor": "Professor"
+      },
+      "positions": {
+        "StaffDoctor": "Attending Physician",
+        "SeniorDoctor": "Senior Physician",
+        "DepartmentDeputyHead": "Deputy Head of Department",
+        "HeadOfDepartment": "Head of Department",
+        "DeputyDirector": "Deputy Hospital Director",
+        "Director": "Hospital Director"
+      },
+      "roles": {
+        "Doctor": "Specialist Physician",
+        "HeadDepartmentDoctor": "Department Head Physician",
+        "Admin": "Administrator",
+        "Manager": "Manager"
+      },
+      "view": {
+        "backToHome": "Back to Dashboard",
+        "title": "Physician Profile & Personal Information",
+        "subtitle": "Manage medical credentials, clinical positions, and practicing certificates",
+        "refreshTooltip": "Refresh data from server",
+        "refreshButton": "Refresh",
+        "editButton": "Edit Profile",
+        "loading": "Syncing physician profile from the system...",
+        "toast": {
+          "refreshSuccess": "Physician profile refreshed successfully!",
+          "refreshErrorFallback": "Unable to connect to the server to load the physician profile.",
+          "invalidImageType": "Please select a valid image file (PNG, JPG, WEBP).",
+          "imageTooLarge": "Avatar image size must not exceed 5MB.",
+          "avatarSuccess": "Avatar updated successfully!",
+          "avatarError": "Unable to upload avatar to the server. Please try again.",
+          "updateSuccess": "Physician profile updated successfully!",
+          "updateErrorFallback": "An error occurred while updating the physician profile. Please try again."
+        }
+      },
+      "initialsFallback": "DR",
+      "avatarCard": {
+        "uploading": "Uploading...",
+        "online": "Online",
+        "uploadTooltip": "Upload new avatar",
+        "personalInfoTitle": "Personal Information",
+        "fullName": "Full name:",
+        "dob": "Date of birth:",
+        "gender": "Gender:",
+        "male": "Male",
+        "female": "Female",
+        "cccd": "Citizen ID / Passport:",
+        "hideCccd": "Hide ID number",
+        "showCccd": "Show ID number",
+        "phone": "Phone number:",
+        "email": "Email:",
+        "hideEmail": "Hide email",
+        "showEmail": "Show full email",
+        "address": "Permanent address:",
+        "profileId": "Profile ID:",
+        "accountId": "Account ID:",
+        "createdAt": "Created on:",
+        "accountStatus": "Account status:",
+        "activeStatus": "Active"
+      },
+      "qualificationsCard": {
+        "tabs": {
+          "qualifications": "Qualifications & Training",
+          "colleagues": "Colleague Directory"
+        },
+        "summary": {
+          "positionLabel": "Clinical Position",
+          "positionSub": "Role assignment",
+          "academicTitleLabel": "Academic Title",
+          "academicTitleSub": "Academic council",
+          "roleLabel": "System Role",
+          "statusPrefix": "Status: {status}"
+        },
+        "degrees": {
+          "title": "Earned Medical Degrees & Diplomas",
+          "verified": "Verified",
+          "empty": "No medical degrees or diplomas updated yet."
+        },
+        "colleagues": {
+          "title": "Internal Physician Directory ({count})",
+          "subtitle": "Search colleague profiles within Respira AMS",
+          "searchPlaceholder": "Search by full name or Citizen ID...",
+          "loading": "Loading physician directory...",
+          "emptySearch": "No physicians matched \"{query}\".",
+          "emptyDefault": "Enter a full name or Citizen ID to search colleagues."
+        }
+      },
+      "statsCards": {
+        "positionTitle": "Clinical Position",
+        "educationTitle": "Academic Title & Degrees",
+        "degreesRecorded": "{count} medical degree(s) recorded",
+        "statusTitle": "Profile Status",
+        "activeWithStatus": "Active ({status})",
+        "accountLabel": "Account: {account}",
+        "ssoLinked": "SSO Linked"
+      },
+      "editModal": {
+        "title": "Update Physician Profile",
+        "badge": "Medical Profile",
+        "subtitle": "Edit personal details, medical degrees, and account security settings",
+        "close": "Close",
+        "tabs": {
+          "general": "Personal Information",
+          "academic": "Specialty & Titles",
+          "security": "Security & Password"
+        },
+        "validation": {
+          "lastNameRequired": "Please enter the physician's last and middle name.",
+          "firstNameRequired": "Please enter the physician's first name.",
+          "phoneRequired": "Please enter a contact phone number.",
+          "phoneInvalid": "Invalid phone number (10 digits, starting with 03, 05, 07, 08, or 09).",
+          "dobRequired": "Please select or enter a date of birth.",
+          "dobInvalid": "Invalid date of birth format.",
+          "dobFuture": "Date of birth cannot be in the future.",
+          "dobUnderage": "Physician must be at least 18 years old.",
+          "cccdRequired": "Please enter the Citizen ID / Passport number.",
+          "cccdInvalid": "Citizen ID / Passport number must consist of 9 or 12 digits.",
+          "addressRequired": "Please enter the permanent address.",
+          "passwordMinLength": "New password must be at least 6 characters long.",
+          "passwordMismatch": "New password confirmation does not match.",
+          "invalidImageType": "Please select a valid image file (PNG, JPG, WEBP).",
+          "imageTooLarge": "Image size must not exceed 5MB."
+        },
+        "general": {
+          "chooseNewAvatar": "Choose new photo",
+          "avatarTitle": "Physician Avatar",
+          "avatarHint": "Supports PNG, JPG, WEBP files. Maximum size 5MB.",
+          "uploadFromComputer": "Upload new photo from computer",
+          "lastNameLabel": "Last & Middle Name",
+          "lastNamePlaceholder": "e.g. Le Hoang",
+          "firstNameLabel": "First Name",
+          "firstNamePlaceholder": "e.g. Minh",
+          "phoneLabel": "Contact Phone Number",
+          "phonePlaceholder": "e.g. 0901234567",
+          "genderLabel": "Gender",
+          "dobLabel": "Date of Birth",
+          "cccdLabel": "Citizen ID / Passport",
+          "cccdPlaceholder": "12 digits",
+          "addressLabel": "Permanent Address",
+          "addressPlaceholder": "House number, street, ward, district, city/province",
+          "accountEmailTitle": "Account Email:",
+          "systemIdentityNote": "System identity account"
+        },
+        "academic": {
+          "positionLabel": "Hospital Position",
+          "academicTitleLabel": "Academic Title",
+          "degreesLabel": "Awarded Medical Degrees & Diplomas",
+          "degreesHint": "You can select multiple applicable medical degrees or diplomas."
+        },
+        "security": {
+          "bannerTitle": "Change Physician Account Password",
+          "bannerDescription": "To keep your current password unchanged, please leave both password fields blank.",
+          "newPasswordLabel": "New Password",
+          "newPasswordPlaceholder": "Enter at least 6 characters...",
+          "confirmPasswordLabel": "Confirm New Password",
+          "confirmPasswordPlaceholder": "Re-enter new password..."
+        },
+        "footer": {
+          "cancel": "Cancel",
+          "saving": "Saving changes...",
+          "save": "Save Changes"
+        }
+      }
+    },
     "settings": {
       "title": "Settings",
       "description": "Customize your experience as a doctor.",

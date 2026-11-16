@@ -839,6 +839,206 @@
       "doctorPrefix": "BS.",
       "initialsFallback": "BS"
     },
+    "profile": {
+      "notUpdated": "Chưa cập nhật",
+      "fallbackDoctor": "Bác sĩ",
+      "fallbackWithEmail": "Bác sĩ ({email})",
+      "prefixes": {
+        "professor": "GS.",
+        "associateProfessor": "PGS.",
+        "phd": "TS.",
+        "master": "ThS.",
+        "doctor": "BS."
+      },
+      "degrees": {
+        "Doctor": "Bác sĩ",
+        "Master": "Thạc sĩ",
+        "PhD": "Tiến sĩ",
+        "Bachelor": "Cử nhân",
+        "Professor": "Giáo sư",
+        "PostDoc": "Sau Tiến sĩ",
+        "Associate": "Liên kết",
+        "Graduate": "Sau đại học",
+        "Undergraduate": "Đại học"
+      },
+      "degreeOptions": {
+        "Doctor": "Bác sĩ (Doctor)",
+        "Master": "Thạc sĩ Y khoa (Master)",
+        "PhD": "Tiến sĩ Y khoa (PhD)",
+        "Bachelor": "Cử nhân Y khoa (Bachelor)",
+        "Professor": "Học vị Giáo sư (Professor)",
+        "PostDoc": "Sau Tiến sĩ (Post-Doctorate)",
+        "Associate": "Bằng liên kết (Associate)",
+        "Graduate": "Sau đại học (Graduate)",
+        "Undergraduate": "Đại học (Undergraduate)"
+      },
+      "academicTitles": {
+        "None": "Không có",
+        "AssociateProfessor": "Phó Giáo sư (PGS)",
+        "Professor": "Giáo sư (GS)"
+      },
+      "positions": {
+        "StaffDoctor": "Bác sĩ điều trị",
+        "SeniorDoctor": "Bác sĩ cao cấp",
+        "DepartmentDeputyHead": "Phó Trưởng khoa",
+        "HeadOfDepartment": "Trưởng khoa",
+        "DeputyDirector": "Phó Giám đốc Bệnh viện",
+        "Director": "Giám đốc Bệnh viện"
+      },
+      "roles": {
+        "Doctor": "Bác sĩ chuyên môn",
+        "HeadDepartmentDoctor": "Bác sĩ Trưởng khoa",
+        "Admin": "Quản trị viên",
+        "Manager": "Quản lý"
+      },
+      "view": {
+        "backToHome": "Quay lại trang chính",
+        "title": "Hồ sơ Bác sĩ & Thông tin cá nhân",
+        "subtitle": "Quản lý thông tin định danh y khoa, chức vụ lâm sàng và chứng chỉ hành nghề",
+        "refreshTooltip": "Làm mới dữ liệu từ máy chủ",
+        "refreshButton": "Làm mới",
+        "editButton": "Chỉnh sửa hồ sơ",
+        "loading": "Đang đồng bộ hồ sơ bác sĩ từ hệ thống...",
+        "toast": {
+          "refreshSuccess": "Đã làm mới thông tin hồ sơ bác sĩ thành công!",
+          "refreshErrorFallback": "Không thể kết nối đến máy chủ để tải thông tin hồ sơ bác sĩ.",
+          "invalidImageType": "Vui lòng chọn tệp hình ảnh hợp lệ (PNG, JPG, WEBP).",
+          "imageTooLarge": "Kích thước ảnh đại diện không được vượt quá 5MB.",
+          "avatarSuccess": "Đổi ảnh đại diện thành công!",
+          "avatarError": "Không thể tải ảnh đại diện lên máy chủ. Vui lòng thử lại.",
+          "updateSuccess": "Cập nhật thông tin hồ sơ bác sĩ thành công!",
+          "updateErrorFallback": "Đã xảy ra lỗi khi cập nhật hồ sơ bác sĩ. Vui lòng thử lại."
+        }
+      },
+      "initialsFallback": "BS",
+      "avatarCard": {
+        "uploading": "Đang tải...",
+        "online": "Đang trực tuyến",
+        "uploadTooltip": "Tải ảnh đại diện mới",
+        "personalInfoTitle": "Thông tin cá nhân",
+        "fullName": "Họ và tên:",
+        "dob": "Ngày sinh:",
+        "gender": "Giới tính:",
+        "male": "Nam",
+        "female": "Nữ",
+        "cccd": "Số CCCD/CMND:",
+        "hideCccd": "Ẩn số CCCD",
+        "showCccd": "Xem số CCCD",
+        "phone": "Số điện thoại:",
+        "email": "Email:",
+        "hideEmail": "Ẩn email",
+        "showEmail": "Xem email đầy đủ",
+        "address": "Địa chỉ thường trú:",
+        "profileId": "Mã hồ sơ:",
+        "accountId": "Mã tài khoản:",
+        "createdAt": "Ngày tạo:",
+        "accountStatus": "Trạng thái tài khoản:",
+        "activeStatus": "Đang hoạt động"
+      },
+      "qualificationsCard": {
+        "tabs": {
+          "qualifications": "Trình độ chuyên môn & Đào tạo",
+          "colleagues": "Danh bạ Bác sĩ đồng nghiệp"
+        },
+        "summary": {
+          "positionLabel": "Chức vụ chuyên môn",
+          "positionSub": "Vị trí công tác",
+          "academicTitleLabel": "Học hàm khoa học",
+          "academicTitleSub": "Hội đồng chức danh",
+          "roleLabel": "Vai trò hệ thống",
+          "statusPrefix": "Trạng thái: {status}"
+        },
+        "degrees": {
+          "title": "Học vị & Văn bằng y khoa đã đạt được",
+          "verified": "Đã xác minh",
+          "empty": "Chưa cập nhật học vị hoặc bằng cấp y khoa."
+        },
+        "colleagues": {
+          "title": "Danh bạ Bác sĩ nội bộ ({count})",
+          "subtitle": "Tra cứu thông tin đồng nghiệp trong hệ thống Respira AMS",
+          "searchPlaceholder": "Tìm theo họ tên hoặc số CCCD...",
+          "loading": "Đang tải danh bạ bác sĩ...",
+          "emptySearch": "Không tìm thấy bác sĩ phù hợp với từ khóa \"{query}\".",
+          "emptyDefault": "Nhập họ tên hoặc số CCCD để tra cứu đồng nghiệp."
+        }
+      },
+      "statsCards": {
+        "positionTitle": "Vị trí công tác",
+        "educationTitle": "Học hàm & Bằng cấp",
+        "degreesRecorded": "{count} Văn bằng y khoa đã ghi nhận",
+        "statusTitle": "Trạng thái hồ sơ",
+        "activeWithStatus": "Đang hoạt động ({status})",
+        "accountLabel": "Tài khoản: {account}",
+        "ssoLinked": "Đã liên kết SSO"
+      },
+      "editModal": {
+        "title": "Cập nhật Hồ sơ Bác sĩ",
+        "badge": "Hồ sơ y tế",
+        "subtitle": "Chỉnh sửa thông tin cá nhân, học vị và thiết lập bảo mật tài khoản",
+        "close": "Đóng",
+        "tabs": {
+          "general": "Thông tin cá nhân",
+          "academic": "Chuyên môn & Chức danh",
+          "security": "Bảo mật & Đổi mật khẩu"
+        },
+        "validation": {
+          "lastNameRequired": "Vui lòng nhập họ và tên đệm của bác sĩ.",
+          "firstNameRequired": "Vui lòng nhập tên của bác sĩ.",
+          "phoneRequired": "Vui lòng nhập số điện thoại liên hệ.",
+          "phoneInvalid": "Số điện thoại không hợp lệ (10 số, bắt đầu 03, 05, 07, 08, 09).",
+          "dobRequired": "Vui lòng chọn hoặc nhập ngày sinh.",
+          "dobInvalid": "Ngày sinh không đúng định dạng.",
+          "dobFuture": "Ngày sinh không được ở tương lai.",
+          "dobUnderage": "Bác sĩ phải từ 18 tuổi trở lên.",
+          "cccdRequired": "Vui lòng nhập số CCCD/CMND.",
+          "cccdInvalid": "Số CCCD/CMND phải gồm 9 hoặc 12 chữ số.",
+          "addressRequired": "Vui lòng nhập địa chỉ thường trú.",
+          "passwordMinLength": "Mật khẩu mới phải có ít nhất 6 ký tự.",
+          "passwordMismatch": "Xác nhận mật khẩu mới không trùng khớp.",
+          "invalidImageType": "Vui lòng chọn tệp hình ảnh hợp lệ (PNG, JPG, WEBP).",
+          "imageTooLarge": "Kích thước ảnh không được vượt quá 5MB."
+        },
+        "general": {
+          "chooseNewAvatar": "Chọn ảnh mới",
+          "avatarTitle": "Ảnh đại diện bác sĩ",
+          "avatarHint": "Hỗ trợ tệp PNG, JPG, WEBP. Dung lượng tối đa 5MB.",
+          "uploadFromComputer": "Tải ảnh mới từ máy tính",
+          "lastNameLabel": "Họ & Tên đệm",
+          "lastNamePlaceholder": "Ví dụ: Lê Hoàng",
+          "firstNameLabel": "Tên",
+          "firstNamePlaceholder": "Ví dụ: Minh",
+          "phoneLabel": "Số điện thoại liên hệ",
+          "phonePlaceholder": "Ví dụ: 0901234567",
+          "genderLabel": "Giới tính",
+          "dobLabel": "Ngày sinh",
+          "cccdLabel": "Số CCCD/CMND",
+          "cccdPlaceholder": "12 chữ số",
+          "addressLabel": "Địa chỉ thường trú",
+          "addressPlaceholder": "Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố",
+          "accountEmailTitle": "Email tài khoản:",
+          "systemIdentityNote": "Tài khoản định danh hệ thống"
+        },
+        "academic": {
+          "positionLabel": "Chức vụ bệnh viện",
+          "academicTitleLabel": "Học hàm khoa học",
+          "degreesLabel": "Học vị & Văn bằng y khoa đã cấp",
+          "degreesHint": "Bác sĩ có thể chọn nhiều văn bằng hoặc học vị y khoa phù hợp."
+        },
+        "security": {
+          "bannerTitle": "Đổi mật khẩu tài khoản bác sĩ",
+          "bannerDescription": "Để giữ nguyên mật khẩu hiện tại, vui lòng để trống hai ô mật khẩu dưới đây.",
+          "newPasswordLabel": "Mật khẩu mới",
+          "newPasswordPlaceholder": "Nhập ít nhất 6 ký tự...",
+          "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+          "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới..."
+        },
+        "footer": {
+          "cancel": "Hủy bỏ",
+          "saving": "Đang lưu thông tin...",
+          "save": "Lưu thay đổi"
+        }
+      }
+    },
     "settings": {
       "title": "Cài đặt",
       "description": "Tùy chỉnh trải nghiệm sử dụng dành cho bác sĩ.",
