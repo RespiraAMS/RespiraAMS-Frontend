@@ -421,6 +421,7 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
                             variant="outline"
                             size="sm"
                             onClick={() => setIsDischargeOpen(true)}
+                            disabled={!(patient.treatmentOutcome === 'InTreatment')}
                             className="border-emerald-600/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10"
                         >
                             <LogOut className="w-4 h-4 mr-1.5" /> Xuất viện
@@ -428,11 +429,10 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
                         <Button
                             variant="outline"
                             size="sm"
-                            asChild
+                            disabled={!(patient.treatmentOutcome === 'InTreatment')}
+                            onClick={() => router.push(`/doctor/diagnose?patientId=${patient.id}`)}
                         >
-                            <Link href={`/doctor/diagnose?patientId=${patient.id}`}>
-                                <Plus className="w-4 h-4 mr-1.5 text-amber-600" /> Thêm điều trị
-                            </Link>
+                            <Plus className="w-4 h-4 mr-1.5 text-amber-600" /> Thêm điều trị
                         </Button>
                         <Button
                             variant="outline"

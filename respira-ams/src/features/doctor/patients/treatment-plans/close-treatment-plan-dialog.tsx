@@ -32,6 +32,15 @@ export function CloseTreatmentPlanDialog({
 }: CloseTreatmentPlanDialogProps) {
     const [reason, setReason] = useState("");
     const [error, setError] = useState("");
+    const [prevOpen, setPrevOpen] = useState(open);
+
+    if (open !== prevOpen) {
+        setPrevOpen(open);
+        if (open) {
+            setReason("");
+            setError("");
+        }
+    }
 
     const handleOpenChange = (nextOpen: boolean) => {
         if (!nextOpen) {
@@ -88,7 +97,7 @@ export function CloseTreatmentPlanDialog({
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => onOpenChange(false)}
+                            onClick={() => handleOpenChange(false)}
                             disabled={isPending}
                         >
                             Hủy
