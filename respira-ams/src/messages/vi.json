@@ -1111,7 +1111,7 @@
           "NotAdhereInvalid": "Không tuân thủ không hợp lệ"
         },
         "plansSection": {
-          "title": "Lịch sử & Kế hoạch điều trị",
+          "title": "Kế hoạch điều trị",
           "subtitle": "Sắp xếp theo thời gian cập nhật gần nhất",
           "filterAll": "Tất cả ({count})",
           "filterInProgress": "Đang tiến hành ({count})",

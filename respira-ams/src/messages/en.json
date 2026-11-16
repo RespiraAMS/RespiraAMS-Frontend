@@ -1111,7 +1111,7 @@
           "NotAdhereInvalid": "Invalid Non-Adherence"
         },
         "plansSection": {
-          "title": "Treatment History & Plans",
+          "title": "Treatment Plans",
           "subtitle": "Sorted by most recent update",
           "filterAll": "All ({count})",
           "filterInProgress": "In Progress ({count})",

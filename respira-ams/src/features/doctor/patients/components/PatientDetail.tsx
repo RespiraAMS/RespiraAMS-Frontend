@@ -730,9 +730,9 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
 							<h2 className="text-base font-bold text-foreground">
 								{tDetail("plansSection.title")}
 							</h2>
-							<p className="text-xs text-muted-foreground mt-0.5">
+							{/* <p className="text-xs text-muted-foreground mt-0.5">
 								{tDetail("plansSection.subtitle")}
-							</p>
+							</p> */}
 						</div>
 
 						{/* Filter Tabs */}
