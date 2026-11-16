@@ -40,7 +40,7 @@ export async function createAnalysisReport(
         {
             method: "POST",
             body: JSON.stringify({
-                doctorId: null,
+                doctorId: data.doctorId ?? null,
                 start: data.start,
                 end: data.end,
             }),
