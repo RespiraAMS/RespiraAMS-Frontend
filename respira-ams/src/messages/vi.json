@@ -1191,6 +1191,8 @@
       "updatedAt": "Cập nhật lúc:",
       "syncing": "Đang đồng bộ...",
       "cardPatients": "Bệnh nhân & Hồ sơ EMR",
+      "cardTreatments": "Phác đồ điều trị",
+      "protocolsSubtitle": "Quy trình & phác đồ lâm sàng",
       "realClinicalData": "Dữ liệu lâm sàng thực tế",
       "openRecords": "Hồ sơ mở",
       "cardAntibiotics": "Danh mục Kháng sinh",
@@ -1321,6 +1323,7 @@
       "exportLogs": "Xuất nhật ký",
       "exportCsv": "Xuất file Excel (.csv)",
       "exportJson": "Xuất định dạng (.json)",
+      "totalResults": "Tổng số kết quả",
       "totalEvents": "Tổng số sự kiện kiểm toán",
       "successfulEvents": "Thực thi thành công",
       "warningEvents": "Cảnh báo bảo mật",
@@ -1328,6 +1331,7 @@
       "colTime": "THỜI GIAN",
       "colActor": "TÁC NHÂN",
       "colService": "DỊCH VỤ",
+      "colStatus": "TRẠNG THÁI",
       "colActionTarget": "HÀNH ĐỘNG & ĐỐI TƯỢNG",
       "colIpDuration": "IP / ĐỘ TRỄ",
       "colStatusSeverity": "TRẠNG THÁI & MỨC ĐỘ",
@@ -1351,12 +1355,13 @@
       "next": "Sau",
       "loading": "Đang đồng bộ nhật ký kiểm toán...",
       "loadingDesc": "Đang truy vấn các sự kiện từ các vi dịch vụ",
-      "emptyDesc": "Không có nhật ký nào phù hợp với bộ lọc hiện tại. Thử đổi từ khoá tìm kiếm hoặc xóa bộ lọc.",
+      "emptyDesc": "Không có nhật ký nào trong khoảng thời gian đã chọn.",
       "uniqueActorsSuffix": "tác nhân & hệ thống ghi nhận",
       "successRatePrefix": "Tỷ lệ thành công đạt",
       "warningSubtitle": "Cần lưu ý & theo dõi đặc quyền",
       "errorSubtitle": "Sự cố phân tán & vi phạm bảo mật",
-      "clearSearch": "Xóa tìm kiếm"
+      "clearSearch": "Xóa tìm kiếm",
+      "refresh": "Làm mới dữ liệu"
     }
   }
 }

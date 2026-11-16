@@ -1191,6 +1191,8 @@
       "updatedAt": "Updated at:",
       "syncing": "Syncing...",
       "cardPatients": "Patients & EMR Records",
+      "cardTreatments": "Treatment Protocols",
+      "protocolsSubtitle": "Clinical protocols & workflows",
       "realClinicalData": "Real clinical data",
       "openRecords": "Open records",
       "cardAntibiotics": "Antibiotics Directory",
@@ -1321,6 +1323,7 @@
       "exportLogs": "Export Logs",
       "exportCsv": "Export Excel (.csv)",
       "exportJson": "Export Format (.json)",
+      "totalResults": "Total Results",
       "totalEvents": "Total Audit Events",
       "successfulEvents": "Executed Successfully",
       "warningEvents": "Security Warnings",
@@ -1328,6 +1331,7 @@
       "colTime": "TIMESTAMP",
       "colActor": "ACTOR",
       "colService": "SERVICE",
+      "colStatus": "STATUS",
       "colActionTarget": "ACTION & TARGET",
       "colIpDuration": "IP / LATENCY",
       "colStatusSeverity": "STATUS & SEVERITY",
@@ -1351,12 +1355,13 @@
       "next": "Next",
       "loading": "Loading data...",
       "loadingDesc": "Querying events across microservices",
-      "emptyDesc": "No logs match the current filters. Try changing keywords or clearing filters.",
+      "emptyDesc": "No audit events were recorded in the selected time range.",
       "uniqueActorsSuffix": "recorded actors & services",
       "successRatePrefix": "Success rate reaches",
       "warningSubtitle": "Requires attention & privilege monitoring",
       "errorSubtitle": "Distributed failures & security violations",
-      "clearSearch": "Clear search"
+      "clearSearch": "Clear search",
+      "refresh": "Refresh data"
     }
   }
 }
