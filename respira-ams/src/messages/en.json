@@ -833,7 +833,11 @@
       "profile": "Personal information",
       "settings": "Settings",
       "logout": "Sign out",
-      "online": "Online"
+      "online": "Online",
+      "attendingDoctor": "Attending Physician",
+      "doctor": "Doctor",
+      "doctorPrefix": "Dr.",
+      "initialsFallback": "DR"
     },
     "settings": {
       "title": "Settings",

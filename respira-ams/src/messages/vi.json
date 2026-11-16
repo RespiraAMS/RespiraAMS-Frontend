@@ -833,7 +833,11 @@
       "profile": "Thông tin cá nhân",
       "settings": "Cài đặt",
       "logout": "Đăng xuất",
-      "online": "Đang trực tuyến"
+      "online": "Đang trực tuyến",
+      "attendingDoctor": "Bác sĩ điều trị",
+      "doctor": "Bác sĩ",
+      "doctorPrefix": "BS.",
+      "initialsFallback": "BS"
     },
     "settings": {
       "title": "Cài đặt",
