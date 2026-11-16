@@ -366,17 +366,101 @@ async function findDoctorById(doctorId: string): Promise<UserItem | null> {
 
 async function findDoctorByEmail(email: string): Promise<UserItem | null> {
 	try {
-		const res = await apiRequest<{ items?: BackendDoctorDto[] }>(
-			`/doctors${buildQuery({ Page: 1, Size: LIST_PAGE_SIZE })}`
-		);
+		const profiles = await fetchAllDoctorProfiles();
 		const normalizedEmail = email.trim().toLowerCase();
-		const match = res?.items?.find(
+		const match = [...profiles.values()].find(
 			(item) => (item.email || "").trim().toLowerCase() === normalizedEmail
 		);
 		return match ? mapBackendDoctorToUser(match) : null;
 	} catch {
 		return null;
 	}
+}
+
+export interface DoctorDuplicateInput {
+	email: string;
+	phone?: string;
+	citizenId?: string;
+}
+
+export interface DoctorDuplicateResult {
+	emailExists: boolean;
+	phoneExists: boolean;
+	citizenIdExists: boolean;
+}
+
+const DUPLICATE_CACHE_TTL_MS = 30_000;
+
+let directoryCache: {
+	at: number;
+	accounts: BackendAccountDto[];
+	doctors: BackendDoctorDto[];
+} | null = null;
+
+function normalizeDigits(value?: string | null): string {
+	return (value || "").replace(/\s+/g, "");
+}
+
+async function loadDirectory(): Promise<{
+	accounts: BackendAccountDto[];
+	doctors: BackendDoctorDto[];
+}> {
+	if (directoryCache && Date.now() - directoryCache.at < DUPLICATE_CACHE_TTL_MS) {
+		return directoryCache;
+	}
+
+	const [accounts, doctorMap] = await Promise.all([
+		fetchAllAccounts(),
+		fetchAllDoctorProfiles().catch(() => new Map<string, BackendDoctorDto>()),
+	]);
+
+	const snapshot = {
+		at: Date.now(),
+		accounts,
+		doctors: [...doctorMap.values()],
+	};
+	directoryCache = snapshot;
+	return snapshot;
+}
+
+/**
+ * Kiểm tra trùng hồ sơ bác sĩ qua /doctors (duyệt toàn bộ trang) và đối chiếu
+ * thêm /auth/accounts theo email, vì tài khoản có thể tồn tại trước khi có hồ sơ.
+ */
+export async function checkDoctorDuplicates(
+	input: DoctorDuplicateInput
+): Promise<DoctorDuplicateResult> {
+	const { accounts, doctors } = await loadDirectory();
+
+	const email = input.email.trim().toLowerCase();
+	const phone = normalizeDigits(input.phone);
+	const citizenId = normalizeDigits(input.citizenId);
+
+	const emailExists =
+		accounts.some(
+			(account) =>
+				account.isDeleted !== true &&
+				(account.email || "").trim().toLowerCase() === email
+		) ||
+		doctors.some(
+			(doctor) => (doctor.email || "").trim().toLowerCase() === email
+		);
+
+	const phoneExists = phone
+		? doctors.some((doctor) => normalizeDigits(doctor.phone) === phone)
+		: false;
+
+	const citizenIdExists = citizenId
+		? doctors.some(
+				(doctor) => normalizeDigits(doctor.citizenIdentificationNumber) === citizenId
+		  )
+		: false;
+
+	return { emailExists, phoneExists, citizenIdExists };
+}
+
+export function invalidateDoctorDirectoryCache(): void {
+	directoryCache = null;
 }
 
 async function readCreateAudit(sagaId: string): Promise<AuditOutcome> {
@@ -508,9 +592,20 @@ async function waitForCreatedAccount(
 export async function createUser(payload: CreateUserPayload): Promise<CreateUserResult> {
 	const isManager = payload.role === "Manager";
 
-	const existingDoctor = await findDoctorByEmail(payload.email);
-	if (existingDoctor) {
+	const duplicates = await checkDoctorDuplicates({
+		email: payload.email,
+		phone: isManager ? undefined : payload.phone,
+		citizenId: isManager ? undefined : payload.citizenIdentificationNumber,
+	});
+
+	if (duplicates.emailExists) {
 		throw new Error("Email này đã được sử dụng.");
+	}
+	if (duplicates.citizenIdExists) {
+		throw new Error("Số CCCD/CMND này đã được sử dụng cho một bác sĩ khác.");
+	}
+	if (duplicates.phoneExists) {
+		throw new Error("Số điện thoại này đã được sử dụng cho một bác sĩ khác.");
 	}
 
 	const formData = new FormData();
@@ -587,6 +682,8 @@ export async function createUser(payload: CreateUserPayload): Promise<CreateUser
 			"Tạo tài khoản thất bại và đã được hoàn tác. Vui lòng kiểm tra cấu hình lưu trữ ảnh đại diện."
 		);
 	}
+
+	invalidateDoctorDirectoryCache();
 
 	return result;
 }

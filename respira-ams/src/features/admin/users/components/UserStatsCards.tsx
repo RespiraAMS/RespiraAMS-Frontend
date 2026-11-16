@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Users, Stethoscope, Briefcase, ShieldAlert, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserStats } from "../types";
@@ -10,47 +11,49 @@ interface UserStatsCardsProps {
 }
 
 export function UserStatsCards({ stats }: UserStatsCardsProps) {
+	const t = useTranslations("admin.users.stats");
+
 	const cards = [
 		{
-			title: "Tổng người dùng",
+			title: t("total"),
 			value: stats.total,
-			subtitle: "Tài khoản trong hệ thống",
+			subtitle: t("totalSub"),
 			icon: Users,
 			color: "text-primary",
 			bgColor: "bg-primary/10 dark:bg-primary/10",
 			borderColor: "border-primary/30 dark:border-primary/30",
 		},
 		{
-			title: "Bác sĩ lâm sàng",
+			title: t("doctors"),
 			value: stats.doctors,
-			subtitle: "Khoa phòng điều trị",
+			subtitle: t("doctorsSub"),
 			icon: Stethoscope,
 			color: "text-success",
 			bgColor: "bg-success/10 dark:bg-success/10",
 			borderColor: "border-success/30 dark:border-success/30",
 		},
 		{
-			title: "Trưởng khoa & Quản lý",
+			title: t("managers"),
 			value: stats.managers,
-			subtitle: "Phê duyệt & giám sát",
+			subtitle: t("managersSub"),
 			icon: Briefcase,
 			color: "text-warning",
 			bgColor: "bg-warning/10 dark:bg-warning/10",
 			borderColor: "border-warning/30 dark:border-warning/30",
 		},
 		{
-			title: "Quản trị viên",
+			title: t("admins"),
 			value: stats.admins,
-			subtitle: "Toàn quyền hệ thống",
+			subtitle: t("adminsSub"),
 			icon: ShieldAlert,
 			color: "text-info",
 			bgColor: "bg-info/10 dark:bg-info/10",
 			borderColor: "border-info/30 dark:border-info/30",
 		},
 		{
-			title: "Đang hoạt động",
+			title: t("active"),
 			value: stats.active,
-			subtitle: `${stats.inactive} tài khoản tạm khóa`,
+			subtitle: t("activeSub", { count: stats.inactive }),
 			icon: CheckCircle2,
 			color: "text-success",
 			bgColor: "bg-success/10 dark:bg-success/10",
@@ -60,11 +63,11 @@ export function UserStatsCards({ stats }: UserStatsCardsProps) {
 
 	return (
 		<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
-			{cards.map((card, idx) => {
+			{cards.map((card) => {
 				const Icon = card.icon;
 				return (
 					<Card
-						key={idx}
+						key={card.title}
 						className="border shadow-xs hover:shadow-md transition-all duration-200 bg-surface dark:bg-surface overflow-hidden"
 					>
 						<CardContent className="p-4 flex flex-col justify-between h-full">
@@ -91,4 +94,3 @@ export function UserStatsCards({ stats }: UserStatsCardsProps) {
 		</div>
 	);
 }
-

@@ -35,9 +35,14 @@ export function DeleteUserDialog({
 	const [confirmText, setConfirmText] = useState("");
 
 	useEffect(() => {
-		if (isOpen) {
-			setConfirmText("");
-		}
+		if (!isOpen) return;
+		let cancelled = false;
+		void Promise.resolve().then(() => {
+			if (!cancelled) setConfirmText("");
+		});
+		return () => {
+			cancelled = true;
+		};
 	}, [isOpen]);
 
 	if (!user) return null;
