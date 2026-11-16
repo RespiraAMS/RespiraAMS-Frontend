@@ -25,11 +25,16 @@ import { type SuspectedCauseItem, type Severity, type TreatmentSite } from "../t
 const PAGE_SIZE = 10;
 
 interface SuspectedCausesTableProps {
-	onEdit: (item: SuspectedCauseItem) => void;
-	onDelete: (item: SuspectedCauseItem) => void;
+	readOnly?: boolean;
+	onEdit?: (item: SuspectedCauseItem) => void;
+	onDelete?: (item: SuspectedCauseItem) => void;
 }
 
-export function SuspectedCausesTable({ onEdit, onDelete }: SuspectedCausesTableProps) {
+export function SuspectedCausesTable({
+	readOnly = false,
+	onEdit,
+	onDelete,
+}: SuspectedCausesTableProps) {
 	const t = useTranslations("manager.suspectedCauses");
 	const tTable = useTranslations("manager.suspectedCauses.table");
 	const tCommon = useTranslations("common");
@@ -52,6 +57,7 @@ export function SuspectedCausesTable({ onEdit, onDelete }: SuspectedCausesTableP
 
 	const items = listData?.items || [];
 	const totalPages = listData?.metadata?.pageCount || 1;
+	const columnCount = readOnly ? 3 : 4;
 
 	const handleFilterChange = (type: "pathogen" | "severity" | "site", value: string) => {
 		if (type === "pathogen") setFilterPathogen(value);
@@ -101,6 +107,80 @@ export function SuspectedCausesTable({ onEdit, onDelete }: SuspectedCausesTableP
 		}
 	};
 
+	const filterDropdown = (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button variant="ghost" size="icon" className="relative hover:bg-accent text-foreground">
+					<ListFilter className="h-4 w-4" />
+					{countActiveFilters() > 0 && (
+						<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
+							{countActiveFilters()}
+						</span>
+					)}
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end" className="w-56 bg-popover text-popover-foreground border-border">
+				<DropdownMenuLabel>{tTable("filterData")}</DropdownMenuLabel>
+				<DropdownMenuSeparator />
+
+				<DropdownMenuSub>
+					<DropdownMenuSubTrigger>{tTable("filterByPathogen")}</DropdownMenuSubTrigger>
+					<DropdownMenuSubContent className="max-h-60 overflow-y-auto bg-popover text-popover-foreground border-border">
+						<DropdownMenuItem onClick={() => handleFilterChange("pathogen", "")}>
+							{tCommon("all")}
+						</DropdownMenuItem>
+						{pathogensList.map((p) => (
+							<DropdownMenuItem key={p.id} onClick={() => handleFilterChange("pathogen", p.id)}>
+								{p.name}
+							</DropdownMenuItem>
+						))}
+					</DropdownMenuSubContent>
+				</DropdownMenuSub>
+
+				<DropdownMenuSub>
+					<DropdownMenuSubTrigger>{tTable("filterBySeverity")}</DropdownMenuSubTrigger>
+					<DropdownMenuSubContent className="bg-popover text-popover-foreground border-border">
+						<DropdownMenuItem onClick={() => handleFilterChange("severity", "")}>
+							{tCommon("all")}
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => handleFilterChange("severity", "Mild")}>
+							{t("form.severityMild")}
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => handleFilterChange("severity", "Moderate")}>
+							{t("form.severityModerate")}
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => handleFilterChange("severity", "Severe")}>
+							{t("form.severitySevere")}
+						</DropdownMenuItem>
+					</DropdownMenuSubContent>
+				</DropdownMenuSub>
+
+				<DropdownMenuSub>
+					<DropdownMenuSubTrigger>{tTable("filterBySite")}</DropdownMenuSubTrigger>
+					<DropdownMenuSubContent className="bg-popover text-popover-foreground border-border">
+						<DropdownMenuItem onClick={() => handleFilterChange("site", "")}>
+							{tCommon("all")}
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => handleFilterChange("site", "Outpatient")}>
+							{t("form.siteOutpatient")}
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => handleFilterChange("site", "Inpatient")}>
+							{t("form.siteInpatient")}
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => handleFilterChange("site", "IntensiveCareUnit")}>
+							{t("form.siteICU")}
+						</DropdownMenuItem>
+					</DropdownMenuSubContent>
+				</DropdownMenuSub>
+
+				<DropdownMenuSeparator />
+				<DropdownMenuItem onClick={clearFilters} disabled={countActiveFilters() === 0}>
+					{tTable("clearFilter")}
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+
 	return (
 		<div className="relative">
 			{isFetching && (
@@ -114,98 +194,36 @@ export function SuspectedCausesTable({ onEdit, onDelete }: SuspectedCausesTableP
 					<TableRow className="border-border hover:bg-transparent">
 						<TableHead className="text-muted-foreground w-1/3 font-semibold">{tTable("colPathogen")}</TableHead>
 						<TableHead className="text-muted-foreground font-semibold">{tTable("colSeverity")}</TableHead>
-						<TableHead className="text-muted-foreground font-semibold">{tTable("colSite")}</TableHead>
-						<TableHead className="text-muted-foreground text-right font-semibold">
-							<div className="flex items-center justify-end gap-2">
-								{tCommon("actions")}
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button variant="ghost" size="icon" className="relative hover:bg-accent text-foreground">
-											<ListFilter className="h-4 w-4" />
-											{countActiveFilters() > 0 && (
-												<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
-													{countActiveFilters()}
-												</span>
-											)}
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end" className="w-56 bg-popover text-popover-foreground border-border">
-										<DropdownMenuLabel>{tTable("filterData")}</DropdownMenuLabel>
-										<DropdownMenuSeparator />
-
-										{/* Pathogen Filter */}
-										<DropdownMenuSub>
-											<DropdownMenuSubTrigger>{tTable("filterByPathogen")}</DropdownMenuSubTrigger>
-											<DropdownMenuSubContent className="max-h-60 overflow-y-auto bg-popover text-popover-foreground border-border">
-												<DropdownMenuItem onClick={() => handleFilterChange("pathogen", "")}>
-													{tCommon("all")}
-												</DropdownMenuItem>
-												{pathogensList.map((p) => (
-													<DropdownMenuItem key={p.id} onClick={() => handleFilterChange("pathogen", p.id)}>
-														{p.name}
-													</DropdownMenuItem>
-												))}
-											</DropdownMenuSubContent>
-										</DropdownMenuSub>
-
-										{/* Severity Filter */}
-										<DropdownMenuSub>
-											<DropdownMenuSubTrigger>{tTable("filterBySeverity")}</DropdownMenuSubTrigger>
-											<DropdownMenuSubContent className="bg-popover text-popover-foreground border-border">
-												<DropdownMenuItem onClick={() => handleFilterChange("severity", "")}>
-													{tCommon("all")}
-												</DropdownMenuItem>
-												<DropdownMenuItem onClick={() => handleFilterChange("severity", "Mild")}>
-													{t("form.severityMild")}
-												</DropdownMenuItem>
-												<DropdownMenuItem onClick={() => handleFilterChange("severity", "Moderate")}>
-													{t("form.severityModerate")}
-												</DropdownMenuItem>
-												<DropdownMenuItem onClick={() => handleFilterChange("severity", "Severe")}>
-													{t("form.severitySevere")}
-												</DropdownMenuItem>
-											</DropdownMenuSubContent>
-										</DropdownMenuSub>
-
-										{/* Treatment Site Filter */}
-										<DropdownMenuSub>
-											<DropdownMenuSubTrigger>{tTable("filterBySite")}</DropdownMenuSubTrigger>
-											<DropdownMenuSubContent className="bg-popover text-popover-foreground border-border">
-												<DropdownMenuItem onClick={() => handleFilterChange("site", "")}>
-													{tCommon("all")}
-												</DropdownMenuItem>
-												<DropdownMenuItem onClick={() => handleFilterChange("site", "Outpatient")}>
-													{t("form.siteOutpatient")}
-												</DropdownMenuItem>
-												<DropdownMenuItem onClick={() => handleFilterChange("site", "Inpatient")}>
-													{t("form.siteInpatient")}
-												</DropdownMenuItem>
-												<DropdownMenuItem onClick={() => handleFilterChange("site", "IntensiveCareUnit")}>
-													{t("form.siteICU")}
-												</DropdownMenuItem>
-											</DropdownMenuSubContent>
-										</DropdownMenuSub>
-
-										<DropdownMenuSeparator />
-										<DropdownMenuItem onClick={clearFilters} disabled={countActiveFilters() === 0}>
-											{tTable("clearFilter")}
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</div>
+						<TableHead className="text-muted-foreground font-semibold">
+							{readOnly ? (
+								<div className="flex items-center justify-between gap-2">
+									<span>{tTable("colSite")}</span>
+									{filterDropdown}
+								</div>
+							) : (
+								tTable("colSite")
+							)}
 						</TableHead>
+						{!readOnly && (
+							<TableHead className="text-muted-foreground text-right font-semibold">
+								<div className="flex items-center justify-end gap-2">
+									{tCommon("actions")}
+									{filterDropdown}
+								</div>
+							</TableHead>
+						)}
 					</TableRow>
 				</TableHeader>
 				<TableBody>
 					{isLoading ? (
 						<TableRow className="border-border">
-							<TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+							<TableCell colSpan={columnCount} className="h-32 text-center text-muted-foreground">
 								<Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
 							</TableCell>
 						</TableRow>
 					) : items.length === 0 ? (
 						<TableRow className="border-border">
-							<TableCell colSpan={4} className="text-center text-muted-foreground py-10">
+							<TableCell colSpan={columnCount} className="text-center text-muted-foreground py-10">
 								{tTable("empty")}
 							</TableCell>
 						</TableRow>
@@ -231,26 +249,32 @@ export function SuspectedCausesTable({ onEdit, onDelete }: SuspectedCausesTableP
 										{formatTreatmentSite(item.treatmentSite)}
 									</span>
 								</TableCell>
-								<TableCell className="text-right">
-									<div className="flex justify-end gap-1">
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => onEdit(item)}
-											className="hover:bg-accent text-foreground"
-										>
-											<Edit className="h-4 w-4" />
-										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => onDelete(item)}
-											className="hover:bg-destructive/10"
-										>
-											<Trash className="h-4 w-4 text-destructive" />
-										</Button>
-									</div>
-								</TableCell>
+								{!readOnly && (
+									<TableCell className="text-right">
+										<div className="flex justify-end gap-1">
+											{onEdit && (
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => onEdit(item)}
+													className="hover:bg-accent text-foreground"
+												>
+													<Edit className="h-4 w-4" />
+												</Button>
+											)}
+											{onDelete && (
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => onDelete(item)}
+													className="hover:bg-destructive/10"
+												>
+													<Trash className="h-4 w-4 text-destructive" />
+												</Button>
+											)}
+										</div>
+									</TableCell>
+								)}
 							</TableRow>
 						))
 					)}

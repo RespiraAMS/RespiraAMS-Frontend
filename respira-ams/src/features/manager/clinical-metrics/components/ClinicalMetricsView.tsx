@@ -25,12 +25,22 @@ import {
 	type CreateClinicalMetricRequest,
 	type UpdateClinicalMetricRequest,
 } from "../types";
+import { TableSearchInput } from "../../components/TableSearchInput";
 
-export function ClinicalMetricsView() {
+interface ClinicalMetricsViewProps {
+	readOnly?: boolean;
+	detailBasePath?: string;
+}
+
+export function ClinicalMetricsView({
+	readOnly = false,
+	detailBasePath = "/manage/clinical-metrics",
+}: ClinicalMetricsViewProps) {
 	const t = useTranslations("manager.clinicalMetrics");
 	const tCommon = useTranslations("common");
 	const router = useRouter();
 
+	const [searchName, setSearchName] = useState("");
 	const [modalMode, setModalMode] = useState<"create" | "update" | null>(null);
 	const [selectedItem, setSelectedItem] = useState<ClinicalMetricItem | null>(null);
 	const [itemToDelete, setItemToDelete] = useState<ClinicalMetricItem | null>(null);
@@ -38,7 +48,7 @@ export function ClinicalMetricsView() {
 	const { createMutation, updateMutation, deleteMutation } = useClinicalMetricMutations();
 
 	const openDetail = (id: string) => {
-		router.push(`/manage/clinical-metrics/${id}`);
+		router.push(`${detailBasePath}/${id}`);
 	};
 
 	const openCreate = () => {
@@ -94,75 +104,88 @@ export function ClinicalMetricsView() {
 
 	return (
 		<div className="space-y-6 text-foreground bg-background">
-			{/* Header */}
+			{/* Page Header */}
 			<div className="flex items-center justify-between">
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h2>
 					<p className="text-muted-foreground mt-1">{t("description")}</p>
 				</div>
-				<Button onClick={openCreate} className="bg-primary text-primary-foreground hover:bg-primary/90">
-					<Plus className="mr-2 h-4 w-4" /> {t("addButton")}
-				</Button>
+				{!readOnly && (
+					<Button onClick={openCreate} className="bg-primary text-primary-foreground hover:bg-primary/90">
+						<Plus className="mr-2 h-4 w-4" /> {t("addButton")}
+					</Button>
+				)}
 			</div>
 
 			{/* Table Card */}
-			<div className="rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto text-card-foreground">
-				<ClinicalMetricsTable onViewDetail={openDetail} onEdit={openUpdate} onDelete={setItemToDelete} />
+			<TableSearchInput onSearchChange={setSearchName} />
+			<div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto text-card-foreground">
+				<ClinicalMetricsTable
+					readOnly={readOnly}
+					searchName={searchName}
+					onViewDetail={openDetail}
+					onEdit={readOnly ? undefined : openUpdate}
+					onDelete={readOnly ? undefined : setItemToDelete}
+				/>
 			</div>
 
-			{/* Create/Update Modal */}
-			<Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
-				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
-					<DialogHeader>
-						<DialogTitle className="text-foreground">
-							{modalMode === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}
-						</DialogTitle>
-					</DialogHeader>
-					{modalMode && (
-						<ClinicalMetricForm
-							initialData={selectedItem}
-							onSubmit={handleFormSubmit}
-							onCancel={closeModal}
-							isPending={createMutation.isPending || updateMutation.isPending}
-						/>
-					)}
-				</DialogContent>
-			</Dialog>
+			{!readOnly && (
+				<>
+					{/* Create/Update Modal */}
+					<Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
+						<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
+							<DialogHeader>
+								<DialogTitle className="text-foreground">
+									{modalMode === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}
+								</DialogTitle>
+							</DialogHeader>
+							{modalMode && (
+								<ClinicalMetricForm
+									initialData={selectedItem}
+									onSubmit={handleFormSubmit}
+									onCancel={closeModal}
+									isPending={createMutation.isPending || updateMutation.isPending}
+								/>
+							)}
+						</DialogContent>
+					</Dialog>
 
-			{/* Delete Alert */}
-			<AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
-				<AlertDialogContent className="border-border bg-popover text-popover-foreground">
-					<AlertDialogHeader>
-						<AlertDialogTitle className="text-destructive font-semibold">
-							{t("dialog.deleteTitle")}
-						</AlertDialogTitle>
-						<AlertDialogDescription className="text-muted-foreground">
-							{t.rich("dialog.deleteDescription", {
-								name: itemToDelete?.name || "",
-								b: (chunks) => <span className="font-bold text-foreground">{chunks}</span>,
-							})}
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<Button
-							variant="outline"
-							onClick={() => setItemToDelete(null)}
-							className="border-border text-foreground hover:bg-accent"
-						>
-							{tCommon("cancel")}
-						</Button>
-						<Button
-							variant="destructive"
-							onClick={handleDelete}
-							disabled={deleteMutation.isPending}
-							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-						>
-							{deleteMutation.isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}{" "}
-							{tCommon("delete")}
-						</Button>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+					{/* Delete Alert */}
+					<AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+						<AlertDialogContent className="border-border bg-popover text-popover-foreground">
+							<AlertDialogHeader>
+								<AlertDialogTitle className="text-destructive font-semibold">
+									{t("dialog.deleteTitle")}
+								</AlertDialogTitle>
+								<AlertDialogDescription className="text-muted-foreground">
+									{t.rich("dialog.deleteDescription", {
+										name: itemToDelete?.name || "",
+										b: (chunks) => <span className="font-bold text-foreground">{chunks}</span>,
+									})}
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogFooter>
+								<Button
+									variant="outline"
+									onClick={() => setItemToDelete(null)}
+									className="border-border text-foreground hover:bg-accent"
+								>
+									{tCommon("cancel")}
+								</Button>
+								<Button
+									variant="destructive"
+									onClick={handleDelete}
+									disabled={deleteMutation.isPending}
+									className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+								>
+									{deleteMutation.isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}{" "}
+									{tCommon("delete")}
+								</Button>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
+				</>
+			)}
 		</div>
 	);
 }

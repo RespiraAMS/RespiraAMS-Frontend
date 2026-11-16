@@ -16,11 +16,16 @@ import { PrerequisiteFormatter } from "../../components/PrerequisiteFormatter";
 const PAGE_SIZE = 10;
 
 interface RiskFactorsTableProps {
-	onEdit: (item: RiskFactorItem) => void;
-	onDelete: (item: RiskFactorItem) => void;
+	readOnly?: boolean;
+	onEdit?: (item: RiskFactorItem) => void;
+	onDelete?: (item: RiskFactorItem) => void;
 }
 
-export function RiskFactorsTable({ onEdit, onDelete }: RiskFactorsTableProps) {
+export function RiskFactorsTable({
+	readOnly = false,
+	onEdit,
+	onDelete,
+}: RiskFactorsTableProps) {
 	const tTable = useTranslations("manager.riskFactors.table");
 	const tCommon = useTranslations("common");
 
@@ -33,11 +38,47 @@ export function RiskFactorsTable({ onEdit, onDelete }: RiskFactorsTableProps) {
 	const items = listData?.items || [];
 	const totalPages = listData?.metadata?.pageCount || 1;
 	const pathogensList = pathogensData?.pathogens || [];
+	const columnCount = readOnly ? 4 : 5;
 
 	const handleFilterChange = (id: string | null) => {
 		setFilterPathogenId(id);
 		setPage(1);
 	};
+
+	const filterDropdown = (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button variant="ghost" size="icon" className="relative hover:bg-accent h-8 w-8 text-foreground">
+					<ListFilter className="h-4 w-4" />
+					{filterPathogenId !== null && (
+						<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
+							1
+						</span>
+					)}
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end" className="w-56 max-h-[300px] overflow-y-auto bg-popover text-popover-foreground border-border">
+				<DropdownMenuLabel>{tTable("filterTitle")}</DropdownMenuLabel>
+				<DropdownMenuSeparator className="bg-border" />
+				<DropdownMenuItem
+					onClick={() => handleFilterChange(null)}
+					className={filterPathogenId === null ? "bg-accent font-bold" : ""}
+				>
+					{tTable("allPathogens")}
+				</DropdownMenuItem>
+				<DropdownMenuSeparator className="bg-border" />
+				{pathogensList.map((p) => (
+					<DropdownMenuItem
+						key={p.id}
+						onClick={() => handleFilterChange(p.id)}
+						className={filterPathogenId === p.id ? "bg-accent font-bold" : ""}
+					>
+						{p.name}
+					</DropdownMenuItem>
+				))}
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
 
 	return (
 		<div className="relative">
@@ -53,57 +94,37 @@ export function RiskFactorsTable({ onEdit, onDelete }: RiskFactorsTableProps) {
 						<TableHead className="text-muted-foreground font-semibold w-1/6">{tTable("colPathogen")}</TableHead>
 						<TableHead className="text-muted-foreground font-semibold">{tTable("colSeverity")}</TableHead>
 						<TableHead className="text-muted-foreground font-semibold w-1/6">{tTable("colCriterionName")}</TableHead>
-						<TableHead className="text-muted-foreground font-semibold">{tTable("colFormula")}</TableHead>
-						<TableHead className="text-muted-foreground text-right font-semibold w-[120px]">
-							<div className="flex items-center justify-end gap-2">
-								{tCommon("actions")}
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button variant="ghost" size="icon" className="relative hover:bg-accent h-8 w-8 text-foreground">
-											<ListFilter className="h-4 w-4" />
-											{filterPathogenId !== null && (
-												<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
-													1
-												</span>
-											)}
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end" className="w-56 max-h-[300px] overflow-y-auto bg-popover text-popover-foreground border-border">
-										<DropdownMenuLabel>{tTable("filterTitle")}</DropdownMenuLabel>
-										<DropdownMenuSeparator className="bg-border" />
-										<DropdownMenuItem
-											onClick={() => handleFilterChange(null)}
-											className={filterPathogenId === null ? "bg-accent font-bold" : ""}
-										>
-											{tTable("allPathogens")}
-										</DropdownMenuItem>
-										<DropdownMenuSeparator className="bg-border" />
-										{pathogensList.map((p) => (
-											<DropdownMenuItem
-												key={p.id}
-												onClick={() => handleFilterChange(p.id)}
-												className={filterPathogenId === p.id ? "bg-accent font-bold" : ""}
-											>
-												{p.name}
-											</DropdownMenuItem>
-										))}
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</div>
+						<TableHead className="text-muted-foreground font-semibold">
+							{readOnly ? (
+								<div className="flex items-center justify-between gap-2">
+									<span>{tTable("colFormula")}</span>
+									{filterDropdown}
+								</div>
+							) : (
+								tTable("colFormula")
+							)}
 						</TableHead>
+						{!readOnly && (
+							<TableHead className="text-muted-foreground text-right font-semibold w-[120px]">
+								<div className="flex items-center justify-end gap-2">
+									{tCommon("actions")}
+									{filterDropdown}
+								</div>
+							</TableHead>
+						)}
 					</TableRow>
 				</TableHeader>
 
 				<TableBody>
 					{isLoading ? (
 						<TableRow className="border-border">
-							<TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+							<TableCell colSpan={columnCount} className="h-32 text-center text-muted-foreground">
 								<Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
 							</TableCell>
 						</TableRow>
 					) : items.length === 0 ? (
 						<TableRow className="border-border">
-							<TableCell colSpan={4} className="text-center text-muted-foreground py-10">
+							<TableCell colSpan={columnCount} className="text-center text-muted-foreground py-10">
 								{tTable("empty")}
 							</TableCell>
 						</TableRow>
@@ -114,16 +135,16 @@ export function RiskFactorsTable({ onEdit, onDelete }: RiskFactorsTableProps) {
 									{item.pathogen.name}
 								</TableCell>
 								<TableCell className="align-top">
-                                    {item.isCriticalFactor ? (
-                                        <span className="inline-flex items-center gap-1 rounded-md bg-destructive/15 border border-destructive/30 px-2 py-0.5 text-xs font-semibold text-destructive">
-                                            <AlertCircle className="w-3 h-3" /> {tTable("critical")}
-                                        </span>
-                                    ) : (
-                                        <span className="inline-flex items-center rounded-md bg-muted border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                                            {tTable("normal")}
-                                        </span>
-                                    )}
-                                </TableCell>
+									{item.isCriticalFactor ? (
+										<span className="inline-flex items-center gap-1 rounded-md bg-destructive/15 border border-destructive/30 px-2 py-0.5 text-xs font-semibold text-destructive">
+											<AlertCircle className="w-3 h-3" /> {tTable("critical")}
+										</span>
+									) : (
+										<span className="inline-flex items-center rounded-md bg-muted border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
+											{tTable("normal")}
+										</span>
+									)}
+								</TableCell>
 								<TableCell className="font-medium text-foreground align-top whitespace-normal break-words">
 									{item.criterion.name}
 								</TableCell>
@@ -132,26 +153,32 @@ export function RiskFactorsTable({ onEdit, onDelete }: RiskFactorsTableProps) {
 										{item.criterion.formula}
 									</div>
 								</TableCell>
-								<TableCell className="align-top">
-									<div className="flex justify-end gap-1">
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => onEdit(item)}
-											className="hover:bg-accent h-8 w-8 text-foreground"
-										>
-											<Edit className="h-4 w-4" />
-										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => onDelete(item)}
-											className="hover:bg-destructive/10 h-8 w-8 text-destructive"
-										>
-											<Trash className="h-4 w-4" />
-										</Button>
-									</div>
-								</TableCell>
+								{!readOnly && (
+									<TableCell className="align-top">
+										<div className="flex justify-end gap-1">
+											{onEdit && (
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => onEdit(item)}
+													className="hover:bg-accent h-8 w-8 text-foreground"
+												>
+													<Edit className="h-4 w-4" />
+												</Button>
+											)}
+											{onDelete && (
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => onDelete(item)}
+													className="hover:bg-destructive/10 h-8 w-8 text-destructive"
+												>
+													<Trash className="h-4 w-4" />
+												</Button>
+											)}
+										</div>
+									</TableCell>
+								)}
 							</TableRow>
 						))
 					)}

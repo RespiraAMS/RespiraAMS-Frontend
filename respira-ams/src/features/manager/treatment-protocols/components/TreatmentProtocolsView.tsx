@@ -21,7 +21,11 @@ import { TreatmentProtocolForm } from "./TreatmentProtocolForm";
 import { useTreatmentProtocolMutations } from "../queries";
 import { type TreatmentProtocolItem, type TreatmentProtocolRequest } from "../types";
 
-export function TreatmentProtocolsView() {
+interface TreatmentProtocolsViewProps {
+	readOnly?: boolean;
+}
+
+export function TreatmentProtocolsView({ readOnly = false }: TreatmentProtocolsViewProps) {
 	const t = useTranslations("manager.treatmentProtocols");
 	const tCommon = useTranslations("common");
 
@@ -89,69 +93,79 @@ export function TreatmentProtocolsView() {
 					<h2 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h2>
 					<p className="text-muted-foreground mt-1">{t("description")}</p>
 				</div>
-				<Button
-					onClick={openCreate}
-					className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
-				>
-					<Plus className="mr-2 h-4 w-4" /> {t("addButton")}
-				</Button>
+				{!readOnly && (
+					<Button
+						onClick={openCreate}
+						className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
+					>
+						<Plus className="mr-2 h-4 w-4" /> {t("addButton")}
+					</Button>
+				)}
 			</div>
 
 			{/* Main Table Container */}
 			<div className="rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto text-card-foreground">
-				<TreatmentProtocolsTable onEdit={openUpdate} onDelete={setItemToDelete} />
+				<TreatmentProtocolsTable
+					readOnly={readOnly}
+					onEdit={readOnly ? undefined : openUpdate}
+					onDelete={readOnly ? undefined : setItemToDelete}
+				/>
 			</div>
 
-			{/* Form Modal */}
-			<Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
-				<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground max-h-[95vh] overflow-y-auto">
-					<DialogHeader>
-						<DialogTitle className="text-xl text-foreground">
-							{modalMode === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}
-						</DialogTitle>
-					</DialogHeader>
-					{modalMode && (
-						<TreatmentProtocolForm
-							initialData={selectedItem}
-							onSubmit={handleFormSubmit}
-							onCancel={closeModal}
-							isPending={createMutation.isPending || updateMutation.isPending}
-						/>
-					)}
-				</DialogContent>
-			</Dialog>
+			{!readOnly && (
+				<>
+					{/* Form Modal */}
+					<Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
+						<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground max-h-[95vh] overflow-y-auto">
+							<DialogHeader>
+								<DialogTitle className="text-xl text-foreground">
+									{modalMode === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}
+								</DialogTitle>
+							</DialogHeader>
+							{modalMode && (
+								<TreatmentProtocolForm
+									initialData={selectedItem}
+									onSubmit={handleFormSubmit}
+									onCancel={closeModal}
+									isPending={createMutation.isPending || updateMutation.isPending}
+								/>
+							)}
+						</DialogContent>
+					</Dialog>
 
-			{/* Delete Alert Dialog */}
-			<AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
-				<AlertDialogContent className="border-border bg-popover text-popover-foreground">
-					<AlertDialogHeader>
-						<AlertDialogTitle className="text-destructive font-semibold">
-							{t("dialog.deleteTitle")}
-						</AlertDialogTitle>
-						<AlertDialogDescription className="text-muted-foreground">
-							{t("dialog.deleteDescription")}
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<Button
-							variant="outline"
-							onClick={() => setItemToDelete(null)}
-							className="border-border text-foreground hover:bg-accent"
-						>
-							{tCommon("cancel")}
-						</Button>
-						<Button
-							variant="destructive"
-							onClick={handleDelete}
-							disabled={deleteMutation.isPending}
-							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-						>
-							{deleteMutation.isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}{" "}
-							{tCommon("delete")}
-						</Button>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+					{/* Delete Alert Dialog */}
+					<AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+						<AlertDialogContent className="border-border bg-popover text-popover-foreground">
+							<AlertDialogHeader>
+								<AlertDialogTitle className="text-destructive font-semibold">
+									{t("dialog.deleteTitle")}
+								</AlertDialogTitle>
+								<AlertDialogDescription className="text-muted-foreground">
+									{t("dialog.deleteDescription")}
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogFooter>
+								<Button
+									variant="outline"
+									onClick={() => setItemToDelete(null)}
+									className="border-border text-foreground hover:bg-accent"
+								>
+									{tCommon("cancel")}
+								</Button>
+								<Button
+									variant="destructive"
+									onClick={handleDelete}
+									disabled={deleteMutation.isPending}
+									className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+								>
+									{deleteMutation.isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}{" "}
+									{tCommon("delete")}
+								</Button>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
+				</>
+			)}
 		</div>
 	);
 }

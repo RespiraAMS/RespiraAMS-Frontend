@@ -1,225 +1,244 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Plus, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Patient, PatientPayload, StatFilter } from "../types";
+import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-	createPatient,
-	deletePatient,
-	fetchPatientById,
-	fetchPatients,
-	searchPatients,
-	updatePatient,
-} from "../api";
-import { PatientStatsCards } from "./PatientStatsCards";
-import { PatientSearchBar } from "./PatientSearchBar";
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 import { PatientsTable } from "./PatientsTable";
-import { PatientDialog } from "./PatientDialog";
-import { DeletePatientDialog } from "./DeletePatientDialog";
+import { PatientForm } from "./PatientForm";
+import { DischargePatientDialog } from "./DischargePatientDialog";
+import { usePatientDetail, usePatientMutations } from "../queries";
+import {
+    type PatientItem,
+    type CreatePatientRequest,
+    type UpdatePatientRequest,
+    type TreatmentOutcome,
+} from "../types";
+import { TableSearchInput } from "@/features/manager/components/TableSearchInput";
 
-const PAGE_SIZE = 8;
-
-function errorText(err: unknown): string {
-	return err instanceof Error ? err.message : "Đã xảy ra lỗi không xác định.";
+interface PatientsViewProps {
+    readOnly?: boolean;
 }
 
-export function PatientsView() {
-	const router = useRouter();
-	const queryClient = useQueryClient();
+export function PatientsView({ readOnly = false }: PatientsViewProps) {
+    const tCommon = useTranslations("common");
+    const router = useRouter();
 
-	const [searchQuery, setSearchQuery] = useState("");
-	const [debouncedQuery, setDebouncedQuery] = useState("");
-	const [activeFilter, setActiveFilter] = useState<StatFilter>("all");
-	const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [modalMode, setModalMode] = useState<"create" | "update" | null>(null);
+    const [selectedItem, setSelectedItem] = useState<PatientItem | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<PatientItem | null>(null);
+    const [itemToDischarge, setItemToDischarge] = useState<PatientItem | null>(null);
 
-	// Dialog states
-	const [isAddEditOpen, setIsAddEditOpen] = useState(false);
-	const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
+    const { createMutation, updateMutation, deleteMutation, dischargeMutation } =
+        usePatientMutations();
 
-	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-	const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
+    const { data: detailData, isFetching: isFetchingDetail } = usePatientDetail(
+        selectedItem?.id ?? "",
+        { enabled: modalMode === "update" && !!selectedItem?.id }
+    );
 
-	// Debounce search input nhanh (180ms)
-	useEffect(() => {
-		const timer = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 180);
-		return () => clearTimeout(timer);
-	}, [searchQuery]);
+    const openDetail = (id: string) => {
+        router.push(`patients/${id}`);
+    };
 
-	// React Query: Summary counts (cache lâu dài, chỉ refetch khi có update/delete)
-	const { data: statsData } = useQuery({
-		queryKey: ["patients", "stats"],
-		queryFn: async () => {
-			const [all, male, female] = await Promise.all([
-				fetchPatients({ page: 1, size: 1 }),
-				fetchPatients({ page: 1, size: 1, gender: "Male" }),
-				fetchPatients({ page: 1, size: 1, gender: "Female" }),
-			]);
-			return {
-				total: all.totalCount,
-				male: male.totalCount,
-				female: female.totalCount,
-			};
-		},
-	});
+    const openCreate = () => {
+        setSelectedItem(null);
+        setModalMode("create");
+    };
 
-	const stats = statsData ?? { total: 0, male: 0, female: 0 };
+    const openUpdate = (item: PatientItem) => {
+        setSelectedItem(item);
+        setModalMode("update");
+    };
 
-	// React Query: Patients list (server-side pagination, filter & search)
-	const {
-		data: listData,
-		isLoading,
-		error: queryError,
-	} = useQuery({
-		queryKey: [
-			"patients",
-			"list",
-			{ page: currentPage, size: PAGE_SIZE, query: debouncedQuery, filter: activeFilter },
-		],
-		queryFn: async () => {
-			if (debouncedQuery) {
-				return await searchPatients({
-					page: currentPage,
-					size: PAGE_SIZE,
-					searchTerm: debouncedQuery,
-				});
-			}
-			return await fetchPatients({
-				page: currentPage,
-				size: PAGE_SIZE,
-				gender: activeFilter === "all" ? undefined : activeFilter,
-			});
-		},
-	});
+    const closeModal = () => {
+        setModalMode(null);
+        setSelectedItem(null);
+    };
 
-	const patients = listData?.items ?? [];
-	const totalCount = listData?.totalCount ?? 0;
-	const totalPages = listData?.totalPages ?? 1;
-	const loadError = queryError ? errorText(queryError) : null;
+    const handleFormSubmit = (data: CreatePatientRequest | UpdatePatientRequest) => {
+        if (modalMode === "create") {
+            createMutation.mutate(data as CreatePatientRequest, {
+                onSuccess: () => {
+                    closeModal();
+                    toast.success("Thêm bệnh nhân thành công!");
+                },
+                onError: (error) => toast.error("Lỗi thêm mới: " + error.message),
+            });
+        } else if (modalMode === "update" && selectedItem) {
+            updateMutation.mutate(
+                { id: selectedItem.id, data: data as UpdatePatientRequest },
+                {
+                    onSuccess: () => {
+                        closeModal();
+                        toast.success("Cập nhật thông tin bệnh nhân thành công!");
+                    },
+                    onError: (error) => toast.error("Lỗi cập nhật: " + error.message),
+                }
+            );
+        }
+    };
 
-	// Handlers
-	const handleFilterChange = (filter: StatFilter) => {
-		setActiveFilter(filter);
-		setSearchQuery("");
-		setDebouncedQuery("");
-		setCurrentPage(1);
-	};
+    const handleDelete = () => {
+        if (itemToDelete) {
+            deleteMutation.mutate(itemToDelete.id, {
+                onSuccess: () => {
+                    setItemToDelete(null);
+                    toast.success(`Đã xóa bệnh nhân "${itemToDelete.fullName}" thành công!`);
+                },
+                onError: (error) => toast.error("Không thể xóa: " + error.message),
+            });
+        }
+    };
 
-	const handleSearchChange = (query: string) => {
-		setSearchQuery(query);
-		setCurrentPage(1);
-	};
+    const handleDischargeConfirm = (outcome: TreatmentOutcome) => {
+        if (itemToDischarge) {
+            dischargeMutation.mutate(
+                { id: itemToDischarge.id, outcome },
+                {
+                    onSuccess: () => {
+                        setItemToDischarge(null);
+                        toast.success("Cập nhật trạng thái xuất viện thành công!");
+                    },
+                    onError: (error) => toast.error("Lỗi cập nhật xuất viện: " + error.message),
+                }
+            );
+        }
+    };
 
-	const handleAddPatient = () => {
-		setEditingPatient(null);
-		setIsAddEditOpen(true);
-	};
+    return (
+        <div className="space-y-6 text-foreground bg-background">
+            {/* Page Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                        Quản lý Bệnh nhân
+                    </h2>
+                    <p className="text-muted-foreground mt-1">
+                        Danh sách hồ sơ bệnh nhân, theo dõi điều trị và xuất viện
+                    </p>
+                </div>
+                {!readOnly && (
+                    <Button
+                        onClick={openCreate}
+                        className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                        <Plus className="mr-2 h-4 w-4" /> Thêm bệnh nhân
+                    </Button>
+                )}
+            </div>
 
-	const handleEditPatient = async (patient: Patient) => {
-		try {
-			// List items only carry summary data, load the full record for editing
-			setEditingPatient(await fetchPatientById(patient.id));
-			setIsAddEditOpen(true);
-		} catch (err) {
-			toast.error(errorText(err));
-		}
-	};
+            {/* Search Input */}
+            <TableSearchInput onSearchChange={setSearchTerm} />
 
-	const handleViewDetails = (patient: Patient) => {
-		router.push(`/doctor/patients/${patient.id}`);
-	};
+            {/* Table Card */}
+            <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto text-card-foreground">
+                <PatientsTable
+                    readOnly={readOnly}
+                    searchTerm={searchTerm}
+                    onViewDetail={openDetail}
+                    onEdit={readOnly ? undefined : openUpdate}
+                    onDelete={readOnly ? undefined : setItemToDelete}
+                    onDischarge={readOnly ? undefined : setItemToDischarge}
+                />
+            </div>
 
-	const handleDeletePatient = (patient: Patient) => {
-		setPatientToDelete(patient);
-		setIsDeleteOpen(true);
-	};
+            {!readOnly && (
+                <>
+                    {/* Create / Update Modal */}
+                    <Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
+                        <DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle className="text-xl text-foreground">
+                                    {modalMode === "create"
+                                        ? "Thêm Hồ Sơ Bệnh Nhân"
+                                        : "Cập Nhật Hồ Sơ Bệnh Nhân"}
+                                </DialogTitle>
+                            </DialogHeader>
+                            {modalMode === "update" && isFetchingDetail ? (
+                                <div className="flex justify-center py-10">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                </div>
+                            ) : (
+                                modalMode && (
+                                    <PatientForm
+                                        initialData={modalMode === "update" ? detailData : null}
+                                        onSubmit={handleFormSubmit}
+                                        onCancel={closeModal}
+                                        isPending={
+                                            createMutation.isPending || updateMutation.isPending
+                                        }
+                                    />
+                                )
+                            )}
+                        </DialogContent>
+                    </Dialog>
 
-	const handleSavePatient = async (payload: PatientPayload, id?: string) => {
-		try {
-			if (id) {
-				await updatePatient(id, payload);
-				toast.success("Cập nhật thông tin bệnh nhân thành công!");
-			} else {
-				await createPatient(payload);
-				toast.success("Thêm mới hồ sơ bệnh nhân thành công!");
-				setCurrentPage(1);
-			}
-			// Chỉ tự động refetch khi có update / create
-			await queryClient.invalidateQueries({ queryKey: ["patients"] });
-		} catch (err) {
-			toast.error(errorText(err));
-		}
-	};
+                    {/* Discharge Modal */}
+                    <DischargePatientDialog
+                        open={!!itemToDischarge}
+                        onOpenChange={(open) => !open && setItemToDischarge(null)}
+                        patientName={itemToDischarge?.fullName ?? ""}
+                        currentOutcome={itemToDischarge?.treatmentOutcome}
+                        onConfirm={handleDischargeConfirm}
+                        isPending={dischargeMutation.isPending}
+                    />
 
-	const handleConfirmDelete = async (id: string) => {
-		try {
-			await deletePatient(id);
-			toast.success("Đã xóa mềm hồ sơ bệnh nhân thành công!");
-			if (patients.length === 1 && currentPage > 1) {
-				setCurrentPage(currentPage - 1);
-			}
-			// Chỉ tự động refetch khi có xóa
-			await queryClient.invalidateQueries({ queryKey: ["patients"] });
-		} catch (err) {
-			const rawMsg = err instanceof Error ? err.message : "";
-			if (rawMsg.includes("already received treatments")) {
-				toast.error("Bệnh nhân đã có phác đồ điều trị, hệ thống không cho phép xóa để bảo toàn bệnh án.");
-			} else {
-				toast.error(errorText(err));
-			}
-			throw err;
-		}
-	};
-
-	return (
-		<div className="p-6 max-w-[1300px] mx-auto">
-			{/* Top 3 Summary Stats Cards */}
-			<PatientStatsCards
-				total={stats.total}
-				male={stats.male}
-				female={stats.female}
-				activeFilter={activeFilter}
-				onFilterChange={handleFilterChange}
-			/>
-
-			{/* Search input with Ctrl+K & Add Patient button */}
-			<PatientSearchBar
-				searchQuery={searchQuery}
-				onSearchChange={handleSearchChange}
-				onAddPatient={handleAddPatient}
-			/>
-
-			{/* Patients Table or Empty / Loading State */}
-			<PatientsTable
-				patients={patients}
-				totalCount={totalCount}
-				pageSize={PAGE_SIZE}
-				totalPages={totalPages}
-				currentPage={currentPage}
-				isLoading={isLoading}
-				errorMessage={loadError}
-				onPageChange={setCurrentPage}
-				onViewDetails={handleViewDetails}
-				onEditPatient={handleEditPatient}
-				onDeletePatient={handleDeletePatient}
-			/>
-
-			{/* Add / Edit Patient Modal */}
-			<PatientDialog
-				open={isAddEditOpen}
-				initialData={editingPatient}
-				onOpenChange={setIsAddEditOpen}
-				onSave={handleSavePatient}
-			/>
-
-			{/* Confirm Delete Dialog */}
-			<DeletePatientDialog
-				open={isDeleteOpen}
-				patient={patientToDelete}
-				onOpenChange={setIsDeleteOpen}
-				onConfirmDelete={handleConfirmDelete}
-			/>
-		</div>
-	);
+                    {/* Delete Confirmation Alert */}
+                    <AlertDialog
+                        open={!!itemToDelete}
+                        onOpenChange={(open) => !open && setItemToDelete(null)}
+                    >
+                        <AlertDialogContent className="border-border bg-popover text-popover-foreground shadow-lg">
+                            <AlertDialogHeader>
+                                <AlertDialogTitle className="text-destructive font-semibold">
+                                    Xác nhận xóa bệnh nhân
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="text-muted-foreground">
+                                    Bạn có chắc chắn muốn xóa hồ sơ bệnh nhân{" "}
+                                    <span className="font-bold text-foreground">
+                                        &quot;{itemToDelete?.fullName}&quot;
+                                    </span>{" "}
+                                    không? Hành động này không thể hoàn tác.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setItemToDelete(null)}
+                                    className="border-border text-foreground hover:bg-accent"
+                                >
+                                    {tCommon("cancel")}
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    onClick={handleDelete}
+                                    disabled={deleteMutation.isPending}
+                                >
+                                    {deleteMutation.isPending && (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    )}
+                                    {tCommon("delete")}
+                                </Button>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </>
+            )}
+        </div>
+    );
 }

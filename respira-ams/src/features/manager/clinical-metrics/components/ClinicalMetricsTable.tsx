@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Edit, ListFilter, Loader2, Eye, Trash } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -16,31 +16,31 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { useSearchStore } from "@/features/manager/stores/searchStore";
 import { useClinicalMetricsList } from "../queries";
 import { type ClinicalMetricItem } from "../types";
 
 const PAGE_SIZE = 10;
 
 interface ClinicalMetricsTableProps {
+	readOnly?: boolean;
+	searchName?: string;
 	onViewDetail: (id: string) => void;
-	onEdit: (item: ClinicalMetricItem) => void;
-	onDelete: (item: ClinicalMetricItem) => void;
+	onEdit?: (item: ClinicalMetricItem) => void;
+	onDelete?: (item: ClinicalMetricItem) => void;
 }
 
-export function ClinicalMetricsTable({ onViewDetail, onEdit, onDelete }: ClinicalMetricsTableProps) {
+export function ClinicalMetricsTable({
+	readOnly = false,
+	searchName = "",
+	onViewDetail,
+	onEdit,
+	onDelete,
+}: ClinicalMetricsTableProps) {
 	const tTable = useTranslations("manager.clinicalMetrics.table");
 	const tCommon = useTranslations("common");
 
 	const [page, setPage] = useState(1);
 	const [filterApplied, setFilterApplied] = useState<boolean | null>(null);
-
-	const searchName = useSearchStore((s) => s.value);
-	const clearSearch = useSearchStore((s) => s.clear);
-
-	useEffect(() => {
-		clearSearch();
-	}, [clearSearch]);
 
 	const [prevFilters, setPrevFilters] = useState({ searchName, filterApplied });
 	if (searchName !== prevFilters.searchName || filterApplied !== prevFilters.filterApplied) {
@@ -175,22 +175,26 @@ export function ClinicalMetricsTable({ onViewDetail, onEdit, onDelete }: Clinica
 										>
 											<Eye className="h-4 w-4" />
 										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => onEdit(item)}
-											className="hover:bg-accent text-foreground h-8 w-8"
-										>
-											<Edit className="h-4 w-4" />
-										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => onDelete(item)}
-											className="hover:bg-destructive/10 text-destructive h-8 w-8"
-										>
-											<Trash className="h-4 w-4" />
-										</Button>
+										{!readOnly && onEdit && (
+											<Button
+												variant="ghost"
+												size="icon"
+												onClick={() => onEdit(item)}
+												className="hover:bg-accent text-foreground h-8 w-8"
+											>
+												<Edit className="h-4 w-4" />
+											</Button>
+										)}
+										{!readOnly && onDelete && (
+											<Button
+												variant="ghost"
+												size="icon"
+												onClick={() => onDelete(item)}
+												className="hover:bg-destructive/10 text-destructive h-8 w-8"
+											>
+												<Trash className="h-4 w-4" />
+											</Button>
+										)}
 									</div>
 								</TableCell>
 							</TableRow>

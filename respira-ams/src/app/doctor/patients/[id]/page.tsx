@@ -1,15 +1,16 @@
-import { PatientDetailsView } from "@/features/doctor/patients/components/PatientDetailsView";
+import { PatientDetail } from "@/features/doctor/patients/components/PatientDetail";
+import { getSession } from "@/lib/session";
 
-export const metadata = {
-	title: "Chi tiết bệnh nhân | RespiraAMS",
-	description: "Hồ sơ chi tiết và tiến trình điều trị bệnh nhân.",
-};
+export default async function ClinicalVariableDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const unwrappedParams = await params;
+    const cleanId = decodeURIComponent(unwrappedParams.id);
 
-export default async function PatientDetailPage({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}) {
-	const resolvedParams = await params;
-	return <PatientDetailsView patientId={resolvedParams.id} />;
+    const session = await getSession();
+    const isHeadDepartmentDoctor = session.role?.toLowerCase()==="headdepartmentdoctor";
+
+    return (
+        <div className="p-6">
+			<PatientDetail id={cleanId} isHeadDepartmentDoctor={isHeadDepartmentDoctor}/>
+        </div>
+    );
 }

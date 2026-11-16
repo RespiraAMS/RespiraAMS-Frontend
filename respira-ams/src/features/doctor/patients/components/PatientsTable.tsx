@@ -1,196 +1,408 @@
-"use client";
+'use client';
 
-import { useTranslations } from "next-intl";
-import { Info, SquarePen, Trash2 } from "lucide-react";
-import { Patient } from "../types";
-import { PatientStatusBadge } from "./PatientStatusBadge";
+import { useState } from 'react';
+import { Edit, Eye, Link, ListFilter, Loader2, LogOut, Plus, Trash } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+import { usePatientsList } from '../queries';
+import {
+    type PatientItem,
+    type PatientFilters,
+    type Gender,
+    type TreatmentOutcome,
+} from '../types';
+
+const PAGE_SIZE = 10;
 
 interface PatientsTableProps {
-	patients: Patient[];
-	totalCount: number;
-	pageSize: number;
-	isLoading?: boolean;
-	errorMessage?: string | null;
-	currentPage: number;
-	totalPages: number;
-	onPageChange: (page: number) => void;
-	onViewDetails: (patient: Patient) => void;
-	onEditPatient: (patient: Patient) => void;
-	onDeletePatient: (patient: Patient) => void;
+    readOnly?: boolean;
+    searchTerm?: string;
+    onViewDetail: (id: string) => void;
+    onEdit?: (item: PatientItem) => void;
+    onDelete?: (item: PatientItem) => void;
+    onDischarge?: (item: PatientItem) => void;
+}
+
+export function renderOutcomeBadge(outcome: TreatmentOutcome) {
+    switch (outcome) {
+        case 'InTreatment':
+            return (
+                <span className="inline-flex items-center rounded bg-blue-500/15 border border-blue-500/30 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
+                    Đang điều trị
+                </span>
+            );
+        case 'Recovered':
+            return (
+                <span className="inline-flex items-center rounded bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                    Khỏi bệnh
+                </span>
+            );
+        case 'Death':
+            return (
+                <span className="inline-flex items-center rounded bg-rose-500/15 border border-rose-500/30 px-2 py-0.5 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                    Tử vong
+                </span>
+            );
+        case 'OutOfScope':
+            return (
+                <span className="inline-flex items-center rounded bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                    Ngoài phạm vi
+                </span>
+            );
+        default:
+            return null;
+    }
 }
 
 export function PatientsTable({
-	patients,
-	totalCount,
-	pageSize,
-	isLoading = false,
-	errorMessage = null,
-	currentPage,
-	totalPages,
-	onPageChange,
-	onViewDetails,
-	onEditPatient,
-	onDeletePatient,
+    readOnly = false,
+    searchTerm = '',
+    onViewDetail,
+    onEdit,
+    onDelete,
+    onDischarge,
 }: PatientsTableProps) {
-	const t = useTranslations("doctor.patients");
+    const tCommon = useTranslations('common');
 
-	// Show a sliding window of at most 5 page buttons
-	const windowStart = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
-	const windowEnd = Math.min(totalPages, windowStart + 4);
-	const pageNumbers = Array.from(
-		{ length: windowEnd - windowStart + 1 },
-		(_, i) => windowStart + i
-	);
+    const [page, setPage] = useState(1);
+    const [selectedGender, setSelectedGender] = useState<Gender | ''>('');
+    const [minAge, setMinAge] = useState<number | ''>('');
+    const [maxAge, setMaxAge] = useState<number | ''>('');
 
-	const renderGender = (gender: string) => {
-		if (gender.toLowerCase() === "male" || gender.toLowerCase() === "nam") {
-			return t("male");
-		}
-		if (gender.toLowerCase() === "female" || gender.toLowerCase() === "nữ") {
-			return t("female");
-		}
-		return gender;
-	};
+    const [draftMinAge, setDraftMinAge] = useState<string>('');
+    const [draftMaxAge, setDraftMaxAge] = useState<string>('');
 
-	return (
-		<div className="bg-white rounded-[14px] border border-slate-100/90 shadow-2xs overflow-hidden mt-4">
-			{/* Table Container */}
-			<div className="overflow-x-auto">
-				<table className="w-full text-left border-collapse">
-					<thead>
-						<tr className="border-b border-slate-100">
-							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-								{t("colPatient")}
-							</th>
-							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-								{t("colAgeGender")}
-							</th>
-							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-								{t("colStatus")}
-							</th>
-							<th className="px-6 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
-								{t("colActions")}
-							</th>
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-slate-100/80">
-						{patients.length === 0 ? (
-							<tr>
-								<td colSpan={4} className="px-6 py-10 text-center text-slate-400 text-sm">
-									{isLoading
-										? "..."
-										: (errorMessage ?? t("empty"))}
-								</td>
-							</tr>
-						) : (
-							patients.map((patient) => (
-								<tr
-									key={patient.id}
-									className="hover:bg-slate-50/60 transition-colors group"
-								>
-									{/* Name & Code */}
-									<td className="px-6 py-3">
-										<div
-											onClick={() => onViewDetails(patient)}
-											className="cursor-pointer group/name"
-										>
-											<p className="font-bold text-slate-800 text-[13.5px] leading-tight group-hover/name:text-[#0EA5E9] transition-colors">
-												{patient.name}
-											</p>
-											<p className="text-[11px] text-slate-400 font-normal leading-tight mt-0.5">
-												{patient.code}
-											</p>
-										</div>
-									</td>
+    const [prevFilters, setPrevFilters] = useState({ searchTerm, selectedGender, minAge, maxAge });
+    if (
+        searchTerm !== prevFilters.searchTerm ||
+        selectedGender !== prevFilters.selectedGender ||
+        minAge !== prevFilters.minAge ||
+        maxAge !== prevFilters.maxAge
+    ) {
+        setPrevFilters({ searchTerm, selectedGender, minAge, maxAge });
+        setPage(1);
+    }
 
-									{/* Age & Gender */}
-									<td className="px-6 py-3 text-slate-600 font-medium text-[13px]">
-										{patient.age} {t("yearsOld")} · {renderGender(patient.gender)}
-									</td>
+    const filters: PatientFilters = {
+        gender: selectedGender,
+        minAge,
+        maxAge,
+    };
 
-									{/* Status Badge */}
-									<td className="px-6 py-3">
-										<PatientStatusBadge status={patient.status} />
-									</td>
+    const {
+        data: listData,
+        isLoading,
+        isFetching,
+    } = usePatientsList(page, PAGE_SIZE, searchTerm, filters);
 
-									{/* Actions */}
-									<td className="px-6 py-3 text-right">
-										<div className="flex items-center justify-end gap-3 text-slate-600">
-											<button
-												type="button"
-												onClick={() => onViewDetails(patient)}
-												title="Details"
-												className="p-1 rounded-[5px] hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
-											>
-												<Info className="h-4 w-4" />
-											</button>
-											<button
-												type="button"
-												onClick={() => onEditPatient(patient)}
-												title="Edit"
-												className="p-1 rounded-[5px] hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
-											>
-												<SquarePen className="h-4 w-4" />
-											</button>
-											<button
-												type="button"
-												onClick={() => onDeletePatient(patient)}
-												title="Delete"
-												className="p-1 rounded-[5px] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-											>
-												<Trash2 className="h-4 w-4" />
-											</button>
-										</div>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
-			</div>
+    const items = listData?.items || [];
+    const totalPages = listData?.metadata?.pageCount || 1;
 
-			{/* Footer Pagination Row */}
-			<div className="px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 text-[12.5px] text-slate-500">
-				<div>
-					{t("showing")} <span className="font-bold text-slate-800">{patients.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} - {(currentPage - 1) * pageSize + patients.length}</span> {t("of")}{" "}
-					<span className="font-bold text-slate-800">{totalCount}</span>
-				</div>
+    const activeFilterCount =
+        (selectedGender ? 1 : 0) + (minAge !== '' ? 1 : 0) + (maxAge !== '' ? 1 : 0);
 
-				<div className="flex items-center gap-3">
-					<button
-						type="button"
-						disabled={currentPage <= 1}
-						onClick={() => onPageChange(currentPage - 1)}
-						className="text-slate-400 hover:text-slate-700 disabled:opacity-40 disabled:hover:text-slate-400 cursor-pointer font-medium transition-colors text-xs"
-					>
-						{t("prev")}
-					</button>
+    const applyAgeFilter = () => {
+        setMinAge(draftMinAge === '' ? '' : Number(draftMinAge));
+        setMaxAge(draftMaxAge === '' ? '' : Number(draftMaxAge));
+    };
 
-					{pageNumbers.map((page) => (
-						<button
-							key={page}
-							type="button"
-							onClick={() => onPageChange(page)}
-							className={`h-7 w-7 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
-								page === currentPage
-									? "bg-[#0EA5E9] text-white shadow-2xs"
-									: "text-slate-600 hover:bg-slate-100"
-							}`}
-						>
-							{page}
-						</button>
-					))}
+    const clearAllFilters = () => {
+        setSelectedGender('');
+        setMinAge('');
+        setMaxAge('');
+        setDraftMinAge('');
+        setDraftMaxAge('');
+    };
 
-					<button
-						type="button"
-						disabled={currentPage >= totalPages}
-						onClick={() => onPageChange(currentPage + 1)}
-						className="text-slate-400 hover:text-slate-700 disabled:opacity-40 disabled:hover:text-slate-400 cursor-pointer font-medium transition-colors text-xs"
-					>
-						{t("next")}
-					</button>
-				</div>
-			</div>
-		</div>
-	);
+    const filterDropdown = (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative hover:bg-accent text-foreground h-8 w-8"
+                >
+                    <ListFilter className="h-4 w-4" />
+                    {activeFilterCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
+                            {activeFilterCount}
+                        </span>
+                    )}
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+                align="end"
+                className="w-64 bg-popover text-popover-foreground border-border"
+            >
+                <DropdownMenuLabel>Bộ lọc bệnh nhân</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                        Giới tính{' '}
+                        {selectedGender ? `(${selectedGender === 'Male' ? 'Nam' : 'Nữ'})` : ''}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="bg-popover text-popover-foreground border-border">
+                        <DropdownMenuItem
+                            onClick={() => setSelectedGender('')}
+                            className={selectedGender === '' ? 'bg-accent font-semibold' : ''}
+                        >
+                            Tất cả
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => setSelectedGender('Male')}
+                            className={selectedGender === 'Male' ? 'bg-accent font-semibold' : ''}
+                        >
+                            Nam (Male)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => setSelectedGender('Female')}
+                            className={selectedGender === 'Female' ? 'bg-accent font-semibold' : ''}
+                        >
+                            Nữ (Female)
+                        </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                </DropdownMenuSub>
+
+                <DropdownMenuSeparator />
+
+                <div className="p-2 space-y-2" onKeyDown={(e) => e.stopPropagation()}>
+                    <Label className="text-xs font-semibold text-muted-foreground">
+                        Độ tuổi (Min - Max)
+                    </Label>
+                    <div className="flex items-center gap-2">
+                        <Input
+                            type="number"
+                            min={0}
+                            placeholder="Từ"
+                            value={draftMinAge}
+                            onChange={(e) => setDraftMinAge(e.target.value)}
+                            className="h-8 text-xs"
+                        />
+                        <span className="text-muted-foreground">-</span>
+                        <Input
+                            type="number"
+                            min={0}
+                            placeholder="Đến"
+                            value={draftMaxAge}
+                            onChange={(e) => setDraftMaxAge(e.target.value)}
+                            className="h-8 text-xs"
+                        />
+                    </div>
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        className="w-full h-7 text-xs"
+                        onClick={applyAgeFilter}
+                    >
+                        Áp dụng tuổi
+                    </Button>
+                </div>
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                    onClick={clearAllFilters}
+                    className="text-destructive focus:text-destructive"
+                >
+                    Xóa tất cả bộ lọc
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+
+    return (
+        <div className="relative">
+            {isFetching && (
+                <div className="absolute top-0 right-0 left-0 h-1 bg-primary/20 overflow-hidden rounded-t-md">
+                    <div className="h-full bg-primary animate-pulse w-1/2 translate-x-1/2" />
+                </div>
+            )}
+
+            <Table className="border-border">
+                <TableHeader>
+                    <TableRow className="border-border hover:bg-transparent">
+                        <TableHead className="text-muted-foreground font-semibold w-44">
+                            Mã bệnh án
+                        </TableHead>
+                        <TableHead className="text-muted-foreground font-semibold">
+                            Họ và tên
+                        </TableHead>
+                        <TableHead className="text-muted-foreground font-semibold">
+                            Ngày sinh / Tuổi
+                        </TableHead>
+                        <TableHead className="text-muted-foreground font-semibold text-center">
+                            Giới tính
+                        </TableHead>
+                        <TableHead className="text-muted-foreground font-semibold text-center">
+                            Trạng thái
+                        </TableHead>
+                        <TableHead className="text-muted-foreground text-right font-semibold">
+                            <div className="flex items-center justify-end gap-2">
+                                {tCommon('actions')}
+                                {filterDropdown}
+                            </div>
+                        </TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {isLoading ? (
+                        <TableRow className="border-border">
+                            <TableCell
+                                colSpan={6}
+                                className="h-32 text-center text-muted-foreground"
+                            >
+                                <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
+                            </TableCell>
+                        </TableRow>
+                    ) : items.length === 0 ? (
+                        <TableRow className="border-border">
+                            <TableCell
+                                colSpan={6}
+                                className="text-center text-muted-foreground py-10"
+                            >
+                                Không tìm thấy dữ liệu bệnh nhân.
+                            </TableCell>
+                        </TableRow>
+                    ) : (
+                        items.map((item) => (
+                            <TableRow
+                                key={item.id}
+                                className="border-border hover:bg-accent/50 cursor-pointer"
+                                onDoubleClick={() => onViewDetail(item.id)}
+                            >
+                                <TableCell className="font-mono text-sm font-medium text-foreground">
+                                    {item.medicalRecordCode}
+                                </TableCell>
+                                <TableCell className="font-semibold text-primary">
+                                    {item.fullName}
+                                </TableCell>
+                                <TableCell className="text-sm text-muted-foreground">
+                                    {item.dateOfBirth}{' '}
+                                    <span className="font-medium text-foreground">
+                                        ({item.age} tuổi)
+                                    </span>
+                                </TableCell>
+                                <TableCell className="text-center text-sm">
+                                    {item.gender === 'Male' ? 'Nam' : 'Nữ'}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    {renderOutcomeBadge(item.treatmentOutcome)}
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex justify-end gap-1">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => onViewDetail(item.id)}
+                                            className="hover:bg-accent text-foreground h-8 w-8"
+                                            title="Xem chi tiết"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        {!readOnly && onDischarge && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => onDischarge(item)}
+                                                className="hover:bg-accent text-emerald-600 h-8 w-8"
+                                                title="Xuất viện"
+                                                disabled={
+                                                    !(item.treatmentOutcome === 'InTreatment')
+                                                }
+                                            >
+                                                <LogOut className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                        {!readOnly && onEdit && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => onEdit(item)}
+                                                className="hover:bg-accent text-blue-600 h-8 w-8"
+                                                title="Chỉnh sửa"
+                                            >
+                                                <Edit className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                        {!readOnly && onDelete && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => onDelete(item)}
+                                                className="hover:bg-destructive/10 text-destructive h-8 w-8"
+                                                title="Xóa"
+                                            >
+                                                <Trash className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    )}
+                </TableBody>
+            </Table>
+
+            {totalPages > 1 && (
+                <Pagination className="mt-4">
+                    <PaginationContent>
+                        <PaginationItem>
+                            <PaginationPrevious
+                                className={
+                                    page > 1
+                                        ? 'cursor-pointer hover:bg-accent'
+                                        : 'pointer-events-none opacity-50'
+                                }
+                                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            />
+                        </PaginationItem>
+                        <span className="text-sm text-muted-foreground px-2">
+                            {tCommon('pageOf', { page, totalPages })}
+                        </span>
+                        <PaginationItem>
+                            <PaginationNext
+                                className={
+                                    page < totalPages
+                                        ? 'cursor-pointer hover:bg-accent'
+                                        : 'pointer-events-none opacity-50'
+                                }
+                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                            />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
+            )}
+        </div>
+    );
 }
