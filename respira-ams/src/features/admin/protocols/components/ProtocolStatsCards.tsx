@@ -16,7 +16,7 @@ export function ProtocolStatsCards() {
 			title: t("totalProtocols", { defaultMessage: "Tổng số phác đồ" }),
 			value: total.data,
 			loading: total.isLoading,
-			subtitle: t("protocolsSubtitle", { defaultMessage: "Phác đồ / thang điểm lâm sàng" }),
+			subtitle: t("protocolsSubtitle", { defaultMessage: "Thang điểm & phác đồ đánh giá" }),
 			icon: FileText,
 			color: "text-primary",
 			bg: "bg-primary/10",

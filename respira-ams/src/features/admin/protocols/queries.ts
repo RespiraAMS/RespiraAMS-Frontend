@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getClinicalMetricsList, getStoredProtocolCount } from "@/features/manager/clinical-metrics/api";
+import { getClinicalMetricsList } from "@/features/manager/clinical-metrics/api";
 import { clinicalMetricKeys } from "@/features/manager/clinical-metrics/queries";
 
 export {

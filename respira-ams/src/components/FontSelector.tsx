@@ -16,7 +16,7 @@ const FONT_OPTIONS: { id: FontOption; label: string; previewStyle: string }[] = 
   {
     id: 'mono',
     label: 'JetBrains Mono',
-    previewStyle: 'var(--font-mono)',
+    previewStyle: 'var(--font-jetbrains-mono)',
   },
 ];
 
@@ -24,7 +24,7 @@ export function FontSelector() {
   const { font, setFont } = useFont();
 
   return (
-    <div className="inline-flex rounded-lg border border-gray-200 bg-gray-100 p-1">
+    <div className="inline-flex rounded-lg border border-border-default bg-surface-secondary p-1">
       {FONT_OPTIONS.map((option) => {
         const isActive = font === option.id;
         return (
@@ -33,10 +33,10 @@ export function FontSelector() {
             type="button"
             onClick={() => setFont(option.id)}
             style={{ fontFamily: option.previewStyle }}
-            className={`rounded-md px-3 py-1.5 text-sm transition-all ${
+            className={`cursor-pointer rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
               isActive
-                ? 'bg-primary font-semibold text-primary-foreground shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-text-secondary hover:bg-surface-tertiary hover:text-text-primary'
             }`}
           >
             {option.label}

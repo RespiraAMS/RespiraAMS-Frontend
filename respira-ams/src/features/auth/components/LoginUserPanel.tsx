@@ -1,4 +1,10 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 export function LoginUserPanel() {
+	const t = useTranslations("auth.login");
+
 	return (
 		<div
 			className="relative hidden lg:flex w-1/2 shrink-0 flex-col justify-between overflow-hidden bg-primary p-12 text-primary-foreground select-none"
@@ -19,7 +25,7 @@ export function LoginUserPanel() {
 						<span className="text-primary-foreground/80 ml-1">AMS</span>
 					</div>
 					<span className="text-[10px] font-semibold text-primary-foreground/70 tracking-wider uppercase mt-0.5">
-						CLINICAL WORKSPACE FOR RESPIRATORY CARE
+						{t("brandTagline")}
 					</span>
 				</div>
 			</div>
@@ -27,7 +33,7 @@ export function LoginUserPanel() {
 			{/* Description in center-top */}
 			<div className="relative z-10 max-w-lg mt-8">
 				<p className="text-sm text-primary-foreground/85 leading-relaxed font-normal">
-					Hệ thống hỗ trợ ra quyết định lâm sàng trong quản lý sử dụng kháng sinh cho bệnh nhân viêm phổi mắc phải cộng đồng
+					{t("panelDescription")}
 				</p>
 			</div>
 

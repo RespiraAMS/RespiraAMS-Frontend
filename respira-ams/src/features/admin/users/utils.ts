@@ -1,65 +1,30 @@
-import { AcademicTitle, DegreeType, PositionType, UserRole } from "./types";
-
-export const DEGREE_LABELS: Record<DegreeType, string> = {
-	Professor: "Giáo sư",
-	Doctor: "Bác sĩ",
-	Master: "Thạc sĩ",
-	Bachelor: "Cử nhân",
-	Associate: "Cao đẳng",
-	Undergraduate: "Chưa tốt nghiệp",
-	Graduate: "Đã tốt nghiệp",
-	PhD: "Tiến sĩ",
-	PostDoc: "Sau tiến sĩ",
-};
-
-export const ACADEMIC_TITLE_LABELS: Record<AcademicTitle, string> = {
-	None: "Không",
-	AssociateProfessor: "Phó giáo sư (PGS)",
-	Professor: "Giáo sư (GS)",
-};
-
-export const POSITION_LABELS: Record<PositionType, string> = {
-	StaffDoctor: "Bác sĩ điều trị",
-	SeniorDoctor: "Bác sĩ cao cấp",
-	DepartmentDeputyHead: "Phó trưởng khoa",
-	HeadOfDepartment: "Trưởng khoa",
-	DeputyDirector: "Phó giám đốc",
-	Director: "Giám đốc",
-};
-
-export const ROLE_LABELS: Record<UserRole, string> = {
-	Doctor: "Bác sĩ",
-	HeadDepartmentDoctor: "Trưởng khoa",
-	Manager: "Quản lý chuyên môn",
-	Admin: "Quản trị viên",
-};
-
-export function formatDegrees(degrees?: DegreeType[]): string {
-	if (!degrees || degrees.length === 0) return "Chưa cập nhật";
-	return degrees.map((d) => DEGREE_LABELS[d] || d).join(", ");
-}
+import { AcademicTitle, DegreeType } from "./types";
 
 export function formatFullNameWithTitle(
 	lastName: string,
 	firstName: string,
 	academicTitle?: AcademicTitle,
-	degrees?: DegreeType[]
+	degrees?: DegreeType[],
+	locale: string = "vi"
 ): string {
+	const isVietnamese = locale.startsWith("vi");
 	let prefix = "";
-	if (academicTitle === "Professor") prefix = "GS. ";
-	else if (academicTitle === "AssociateProfessor") prefix = "PGS. ";
-	else if (degrees?.includes("PhD")) prefix = "TS. ";
-	else if (degrees?.includes("Master")) prefix = "ThS. ";
-	else if (degrees?.includes("Doctor")) prefix = "BS. ";
+
+	if (academicTitle === "Professor") prefix = isVietnamese ? "GS. " : "Prof. ";
+	else if (academicTitle === "AssociateProfessor") {
+		prefix = isVietnamese ? "PGS. " : "Assoc. Prof. ";
+	} else if (degrees?.includes("PhD")) prefix = isVietnamese ? "TS. " : "PhD. ";
+	else if (degrees?.includes("Master")) prefix = isVietnamese ? "ThS. " : "MSc. ";
+	else if (degrees?.includes("Doctor")) prefix = isVietnamese ? "BS. " : "Dr. ";
 
 	return `${prefix}${lastName} ${firstName}`.trim();
 }
 
-export function formatDate(dateString?: string): string {
+export function formatDate(dateString?: string, locale: string = "vi-VN"): string {
 	if (!dateString) return "—";
 	try {
 		const d = new Date(dateString);
-		return d.toLocaleDateString("vi-VN", {
+		return d.toLocaleDateString(locale, {
 			day: "2-digit",
 			month: "2-digit",
 			year: "numeric",
@@ -69,11 +34,11 @@ export function formatDate(dateString?: string): string {
 	}
 }
 
-export function formatDateTime(dateString?: string): string {
+export function formatDateTime(dateString?: string, locale: string = "vi-VN"): string {
 	if (!dateString) return "—";
 	try {
 		const d = new Date(dateString);
-		return d.toLocaleDateString("vi-VN", {
+		return d.toLocaleDateString(locale, {
 			day: "2-digit",
 			month: "2-digit",
 			year: "numeric",
@@ -84,4 +49,3 @@ export function formatDateTime(dateString?: string): string {
 		return dateString;
 	}
 }
-

@@ -1,4 +1,4 @@
-import { apiRequest, buildQuery } from "@/lib/api";
+import { apiRequest, ApiError, buildQuery } from "@/lib/api";
 import { API_V1, CLIENT_API_BASE } from "@/lib/api-base";
 import {
 	UserItem,
@@ -47,6 +47,15 @@ interface BackendAuditLogPagination {
 interface AuditOutcome {
 	created: boolean;
 	emailFailed: boolean;
+	softDeleted: boolean;
+}
+
+interface SagaStatus {
+	sagaId?: string;
+	step?: string | number;
+	accountId?: string;
+	doctorId?: string;
+	failureReason?: string | null;
 }
 
 interface BackendPaginationMetadata {
@@ -61,6 +70,8 @@ interface BackendAccountDto {
 	role?: string | null;
 	isEmailConfirmed?: boolean;
 	status?: string | null;
+	isDeleted?: boolean;
+	createdAt?: string | null;
 }
 
 const ACCOUNT_ROLE_TO_USER_ROLE: Record<string, UserRole> = {
@@ -157,7 +168,10 @@ function mapBackendAccountToUser(
 		dateOfBirth: profile?.dateOfBirth,
 		address: profile?.address || "",
 		avatarUrl: profile?.avatarUrl,
-		createdAt: profile?.createdAt || "",
+		// Ưu tiên ngày tạo account; hồ sơ bác sĩ chỉ là fallback cho dữ liệu cũ.
+		createdAt: account.createdAt
+			? String(account.createdAt)
+			: profile?.createdAt || "",
 	};
 }
 
@@ -223,7 +237,10 @@ export async function fetchUsers(
 		console.warn("[AdminUsersAPI] Không thể tải danh sách tài khoản từ Backend:", e);
 	}
 
-	const allUsers: UserItem[] = accounts.map((account) =>
+	// Tài khoản đã xoá mềm không được hiển thị trong danh sách quản trị.
+	const visibleAccounts = accounts.filter((account) => account.isDeleted !== true);
+
+	const allUsers: UserItem[] = visibleAccounts.map((account) =>
 		mapBackendAccountToUser(account, doctorProfiles.get(account.id))
 	);
 
@@ -282,6 +299,43 @@ function delay(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Poll a saga status endpoint until it finishes. Wolverine deletes a saga as soon
+ * as it completes, so a 404 after the run was observed in flight means success.
+ */
+async function waitForSagaCompletion(
+	endpoint: string,
+	sagaId: string,
+	timeoutMs = 45000
+): Promise<void> {
+	const startedAt = Date.now();
+	let sawInFlight = false;
+
+	while (Date.now() - startedAt < timeoutMs) {
+		try {
+			const status = await apiRequest<SagaStatus>(`${endpoint}/${sagaId}`);
+			if (status?.failureReason) {
+				throw new Error(translateCreateError(status.failureReason));
+			}
+			sawInFlight = true;
+		} catch (error) {
+			if (error instanceof ApiError && error.status === 404) {
+				if (sawInFlight || Date.now() - startedAt >= 2500) {
+					return;
+				}
+			} else {
+				throw error;
+			}
+		}
+
+		await delay(800);
+	}
+
+	throw new Error(
+		"Thao tác chưa hoàn tất. Vui lòng kiểm tra lại danh sách hoặc nhật ký hệ thống."
+	);
+}
+
 function translateCreateError(message: string): string {
 	if (/already exists/i.test(message)) return "Email này đã được sử dụng.";
 	if (/avatar.*required/i.test(message)) {
@@ -312,17 +366,101 @@ async function findDoctorById(doctorId: string): Promise<UserItem | null> {
 
 async function findDoctorByEmail(email: string): Promise<UserItem | null> {
 	try {
-		const res = await apiRequest<{ items?: BackendDoctorDto[] }>(
-			`/doctors${buildQuery({ Page: 1, Size: LIST_PAGE_SIZE })}`
-		);
+		const profiles = await fetchAllDoctorProfiles();
 		const normalizedEmail = email.trim().toLowerCase();
-		const match = res?.items?.find(
+		const match = [...profiles.values()].find(
 			(item) => (item.email || "").trim().toLowerCase() === normalizedEmail
 		);
 		return match ? mapBackendDoctorToUser(match) : null;
 	} catch {
 		return null;
 	}
+}
+
+export interface DoctorDuplicateInput {
+	email: string;
+	phone?: string;
+	citizenId?: string;
+}
+
+export interface DoctorDuplicateResult {
+	emailExists: boolean;
+	phoneExists: boolean;
+	citizenIdExists: boolean;
+}
+
+const DUPLICATE_CACHE_TTL_MS = 30_000;
+
+let directoryCache: {
+	at: number;
+	accounts: BackendAccountDto[];
+	doctors: BackendDoctorDto[];
+} | null = null;
+
+function normalizeDigits(value?: string | null): string {
+	return (value || "").replace(/\s+/g, "");
+}
+
+async function loadDirectory(): Promise<{
+	accounts: BackendAccountDto[];
+	doctors: BackendDoctorDto[];
+}> {
+	if (directoryCache && Date.now() - directoryCache.at < DUPLICATE_CACHE_TTL_MS) {
+		return directoryCache;
+	}
+
+	const [accounts, doctorMap] = await Promise.all([
+		fetchAllAccounts(),
+		fetchAllDoctorProfiles().catch(() => new Map<string, BackendDoctorDto>()),
+	]);
+
+	const snapshot = {
+		at: Date.now(),
+		accounts,
+		doctors: [...doctorMap.values()],
+	};
+	directoryCache = snapshot;
+	return snapshot;
+}
+
+/**
+ * Kiểm tra trùng hồ sơ bác sĩ qua /doctors (duyệt toàn bộ trang) và đối chiếu
+ * thêm /auth/accounts theo email, vì tài khoản có thể tồn tại trước khi có hồ sơ.
+ */
+export async function checkDoctorDuplicates(
+	input: DoctorDuplicateInput
+): Promise<DoctorDuplicateResult> {
+	const { accounts, doctors } = await loadDirectory();
+
+	const email = input.email.trim().toLowerCase();
+	const phone = normalizeDigits(input.phone);
+	const citizenId = normalizeDigits(input.citizenId);
+
+	const emailExists =
+		accounts.some(
+			(account) =>
+				account.isDeleted !== true &&
+				(account.email || "").trim().toLowerCase() === email
+		) ||
+		doctors.some(
+			(doctor) => (doctor.email || "").trim().toLowerCase() === email
+		);
+
+	const phoneExists = phone
+		? doctors.some((doctor) => normalizeDigits(doctor.phone) === phone)
+		: false;
+
+	const citizenIdExists = citizenId
+		? doctors.some(
+				(doctor) => normalizeDigits(doctor.citizenIdentificationNumber) === citizenId
+		  )
+		: false;
+
+	return { emailExists, phoneExists, citizenIdExists };
+}
+
+export function invalidateDoctorDirectoryCache(): void {
+	directoryCache = null;
 }
 
 async function readCreateAudit(sagaId: string): Promise<AuditOutcome> {
@@ -343,9 +481,15 @@ async function readCreateAudit(sagaId: string): Promise<AuditOutcome> {
 					entry.correlationId === sagaId &&
 					entry.action === "Authentication.VerificationEmailFailed"
 			),
+			softDeleted: items.some(
+				(entry) =>
+					entry.correlationId === sagaId &&
+					(entry.action === "Authentication.AccountSoftDeleted" ||
+						entry.action === "Doctor.ProfileSoftDeleted")
+			),
 		};
 	} catch {
-		return { created: false, emailFailed: false };
+		return { created: false, emailFailed: false, softDeleted: false };
 	}
 }
 
@@ -380,7 +524,7 @@ async function waitForCreatedAccount(
 	const startedAt = Date.now();
 	const deadline = startedAt + CREATE_TIMEOUT_MS;
 	let lastFailure: string | null = null;
-	let lastAudit: AuditOutcome = { created: false, emailFailed: false };
+	let lastAudit: AuditOutcome = { created: false, emailFailed: false, softDeleted: false };
 	let lastAccountUser: UserItem | null = null;
 
 	while (Date.now() < deadline) {
@@ -448,9 +592,20 @@ async function waitForCreatedAccount(
 export async function createUser(payload: CreateUserPayload): Promise<CreateUserResult> {
 	const isManager = payload.role === "Manager";
 
-	const existingDoctor = await findDoctorByEmail(payload.email);
-	if (existingDoctor) {
+	const duplicates = await checkDoctorDuplicates({
+		email: payload.email,
+		phone: isManager ? undefined : payload.phone,
+		citizenId: isManager ? undefined : payload.citizenIdentificationNumber,
+	});
+
+	if (duplicates.emailExists) {
 		throw new Error("Email này đã được sử dụng.");
+	}
+	if (duplicates.citizenIdExists) {
+		throw new Error("Số CCCD/CMND này đã được sử dụng cho một bác sĩ khác.");
+	}
+	if (duplicates.phoneExists) {
+		throw new Error("Số điện thoại này đã được sử dụng cho một bác sĩ khác.");
 	}
 
 	const formData = new FormData();
@@ -515,7 +670,22 @@ export async function createUser(payload: CreateUserPayload): Promise<CreateUser
 		throw new Error("Máy chủ không trả về mã Saga. Vui lòng thử lại.");
 	}
 
-	return waitForCreatedAccount(sagaId, payload);
+	const result = await waitForCreatedAccount(sagaId, payload);
+
+	// A later saga step can still compensate (for example when the avatar upload
+	// fails). Give it a short window to settle so we do not report success for an
+	// account that is about to be soft-deleted.
+	await delay(1200);
+	const finalAudit = await readCreateAudit(sagaId);
+	if (finalAudit.softDeleted) {
+		throw new Error(
+			"Tạo tài khoản thất bại và đã được hoàn tác. Vui lòng kiểm tra cấu hình lưu trữ ảnh đại diện."
+		);
+	}
+
+	invalidateDoctorDirectoryCache();
+
+	return result;
 }
 
 /**
@@ -579,12 +749,18 @@ export async function updateUser(
 		throw new Error("Không thể kết nối tới máy chủ. Vui lòng thử lại.");
 	}
 
+	if (!backendSagaId) {
+		throw new Error("Máy chủ không trả về mã Saga. Vui lòng thử lại.");
+	}
+
+	await waitForSagaCompletion("/profile/update", backendSagaId);
+
 	const updatedUser: UserItem = {
 		id: payload.accountId,
 		doctorId: payload.doctorId,
 		role: payload.role || "Doctor",
 		status: payload.status || "Active",
-		isEmailConfirmed: true,
+		isEmailConfirmed: false,
 		email: payload.email,
 		phone: payload.phone,
 		firstName: payload.firstName,
@@ -597,11 +773,11 @@ export async function updateUser(
 		dateOfBirth: payload.dateOfBirth,
 		address: payload.address,
 		avatarUrl: payload.avatarFile ? URL.createObjectURL(payload.avatarFile) : undefined,
-		createdAt: new Date().toISOString(),
+		createdAt: "",
 	};
 
 	return {
-		sagaId: backendSagaId || `saga-update-${Date.now()}`,
+		sagaId: backendSagaId,
 		user: updatedUser,
 	};
 }
@@ -648,7 +824,13 @@ export async function deleteUser(
 
 	backendSagaId = json?.data || json?.id || null;
 
-	return { sagaId: backendSagaId || `saga-delete-${Date.now()}` };
+	if (!backendSagaId) {
+		throw new Error("Máy chủ không trả về mã Saga. Vui lòng thử lại.");
+	}
+
+	await waitForSagaCompletion("/profile/delete", backendSagaId);
+
+	return { sagaId: backendSagaId };
 }
 
 /**

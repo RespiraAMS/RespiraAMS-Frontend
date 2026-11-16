@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useMemo } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,15 +17,10 @@ import { QuickActionsCard } from "./QuickActionsCard";
 
 export function AdminDashboardView() {
 	const t = useTranslations("admin.dashboard");
+	const locale = useLocale();
 	const queryClient = useQueryClient();
-	const [lastUpdated, setLastUpdated] = useState<string>("");
 
-	const {
-		data,
-		isLoading,
-		isFetching,
-		refetch,
-	} = useQuery({
+	const { data, isLoading, isFetching, dataUpdatedAt } = useQuery({
 		queryKey: ["admin", "dashboard"],
 		queryFn: async () => {
 			const [metricsData, servicesData, logsData] = await Promise.all([
@@ -33,13 +28,6 @@ export function AdminDashboardView() {
 				fetchMicroservicesStatus(),
 				fetchRecentAuditLogs(),
 			]);
-			setLastUpdated(
-				new Date().toLocaleTimeString("vi-VN", {
-					hour: "2-digit",
-					minute: "2-digit",
-					second: "2-digit",
-				})
-			);
 			return {
 				metrics: metricsData,
 				services: servicesData,
@@ -48,13 +36,33 @@ export function AdminDashboardView() {
 		},
 	});
 
-	const metrics = data?.metrics || null;
+	const lastUpdated = useMemo(() => {
+		if (!dataUpdatedAt) return "";
+		return new Intl.DateTimeFormat(locale, {
+			hour: "2-digit",
+			minute: "2-digit",
+			second: "2-digit",
+		}).format(new Date(dataUpdatedAt));
+	}, [dataUpdatedAt, locale]);
+
 	const services = useMemo(() => data?.services || [], [data?.services]);
 	const logs = useMemo(() => data?.logs || [], [data?.logs]);
+	const metrics = useMemo(() => {
+		const base = data?.metrics;
+		if (!base) return null;
+
+		const activeServices = services.filter((service) => service.status === "operational").length;
+		return {
+			...base,
+			activeServicesCount: activeServices,
+			totalServicesCount: services.length,
+		};
+	}, [data?.metrics, services]);
 
 	const handleRefresh = async () => {
+		// invalidateQueries already triggers one refetch; calling refetch() as well
+		// sends the whole dashboard request twice.
 		await queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
-		await refetch();
 	};
 
 	return (

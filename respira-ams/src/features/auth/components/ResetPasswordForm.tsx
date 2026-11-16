@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
 	AlertCircle,
 	ArrowRight,
@@ -20,8 +21,10 @@ import { Label } from "@/components/ui/label";
 import { resetPassword } from "../api";
 
 export function ResetPasswordForm() {
+	const t = useTranslations("auth.reset");
 	const searchParams = useSearchParams();
 	const token = searchParams.get("token") || "";
+	const submitLock = useRef(false);
 
 	const [newPassword, setNewPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
@@ -33,23 +36,26 @@ export function ResetPasswordForm() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (submitLock.current) return;
+
 		setError(null);
 
 		if (!token) {
-			setError("Liên kết đặt lại mật khẩu thiếu mã token. Vui lòng mở lại liên kết trong email.");
+			setError(t("missingToken"));
 			return;
 		}
 
 		if (newPassword.length < 6) {
-			setError("Mật khẩu mới phải có ít nhất 6 ký tự.");
+			setError(t("passwordTooShort"));
 			return;
 		}
 
 		if (newPassword !== confirmPassword) {
-			setError("Mật khẩu xác nhận không khớp.");
+			setError(t("passwordMismatch"));
 			return;
 		}
 
+		submitLock.current = true;
 		setIsSubmitting(true);
 
 		try {
@@ -58,12 +64,9 @@ export function ResetPasswordForm() {
 			setNewPassword("");
 			setConfirmPassword("");
 		} catch (err: unknown) {
-			setError(
-				err instanceof Error
-					? err.message
-					: "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn."
-			);
+			setError(err instanceof Error ? err.message : t("errorFallback"));
 		} finally {
+			submitLock.current = false;
 			setIsSubmitting(false);
 		}
 	};
@@ -86,10 +89,10 @@ export function ResetPasswordForm() {
 
 				<div className="space-y-1.5">
 					<h1 className="text-2xl font-bold tracking-tight text-text-primary">
-						Tạo mật khẩu mới
+						{t("title")}
 					</h1>
 					<p className="text-xs leading-relaxed text-text-secondary">
-						Chọn mật khẩu mạnh để bảo vệ thông tin bệnh nhân và phiên làm việc của bạn.
+						{t("subtitle")}
 					</p>
 				</div>
 
@@ -103,19 +106,14 @@ export function ResetPasswordForm() {
 				{isSuccess && (
 					<div className="flex items-start gap-2.5 rounded-[16px] border border-success/30 bg-success/10 px-4 py-3 text-xs text-success">
 						<CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-						<p className="flex-1 font-medium">
-							Mật khẩu đã được cập nhật thành công! Vui lòng đăng nhập lại.
-						</p>
+						<p className="flex-1 font-medium">{t("success")}</p>
 					</div>
 				)}
 
 				{!isSuccess && !token && (
 					<div className="flex items-start gap-2.5 rounded-[16px] border border-warning/30 bg-warning/10 px-4 py-3 text-xs text-warning">
 						<AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-						<p className="flex-1 font-medium">
-							Liên kết không hợp lệ. Vui lòng yêu cầu lại liên kết đặt lại mật khẩu từ
-							trang đăng nhập.
-						</p>
+						<p className="flex-1 font-medium">{t("invalidLink")}</p>
 					</div>
 				)}
 
@@ -123,14 +121,14 @@ export function ResetPasswordForm() {
 					<form onSubmit={handleSubmit} className="space-y-4">
 						<div className="space-y-1.5">
 							<Label htmlFor="new-password" className="text-xs font-semibold text-text-primary">
-								Mật khẩu mới
+								{t("newPasswordLabel")}
 							</Label>
 							<div className="relative">
 								<Key className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
 								<Input
 									id="new-password"
 									type={showNewPassword ? "text" : "password"}
-									placeholder="••••••••••••••••"
+									placeholder={t("passwordPlaceholder")}
 									value={newPassword}
 									onChange={(e) => setNewPassword(e.target.value)}
 									disabled={isSubmitting || !token}
@@ -141,6 +139,7 @@ export function ResetPasswordForm() {
 									type="button"
 									onClick={() => setShowNewPassword(!showNewPassword)}
 									tabIndex={-1}
+									aria-label={showNewPassword ? t("hidePassword") : t("showPassword")}
 									className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-text-tertiary transition-colors hover:text-text-secondary"
 								>
 									{showNewPassword ? (
@@ -157,14 +156,14 @@ export function ResetPasswordForm() {
 								htmlFor="confirm-password"
 								className="text-xs font-semibold text-text-primary"
 							>
-								Nhập lại mật khẩu mới
+								{t("confirmPasswordLabel")}
 							</Label>
 							<div className="relative">
 								<Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
 								<Input
 									id="confirm-password"
 									type={showConfirmPassword ? "text" : "password"}
-									placeholder="••••••••••••••••"
+									placeholder={t("passwordPlaceholder")}
 									value={confirmPassword}
 									onChange={(e) => setConfirmPassword(e.target.value)}
 									disabled={isSubmitting || !token}
@@ -175,6 +174,7 @@ export function ResetPasswordForm() {
 									type="button"
 									onClick={() => setShowConfirmPassword(!showConfirmPassword)}
 									tabIndex={-1}
+									aria-label={showConfirmPassword ? t("hidePassword") : t("showPassword")}
 									className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-text-tertiary transition-colors hover:text-text-secondary"
 								>
 									{showConfirmPassword ? (
@@ -195,7 +195,7 @@ export function ResetPasswordForm() {
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
 								<>
-									<span>Đổi mật khẩu</span>
+									<span>{t("submit")}</span>
 									<ArrowRight className="h-4 w-4" />
 								</>
 							)}
@@ -208,7 +208,7 @@ export function ResetPasswordForm() {
 					variant="outline"
 					className="h-12 w-full cursor-pointer rounded-[16px] border-border-default text-xs font-semibold text-text-primary hover:bg-surface-secondary"
 				>
-					<Link href="/login">Quay lại đăng nhập</Link>
+					<Link href="/login">{t("backToLogin")}</Link>
 				</Button>
 			</div>
 		</div>

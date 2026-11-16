@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Upload, X, ShieldAlert, Check, AlertCircle } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Upload, Check, AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import {
 	Dialog,
 	DialogDescription,
@@ -30,13 +31,8 @@ import {
 	UpdateUserPayload,
 	UserItem,
 	UserRole,
-	UserStatus,
 } from "../types";
-import {
-	ACADEMIC_TITLE_LABELS,
-	DEGREE_LABELS,
-	POSITION_LABELS,
-} from "../utils";
+import { checkDoctorDuplicates } from "../api";
 
 interface UserFormDialogProps {
 	isOpen: boolean;
@@ -76,13 +72,20 @@ export function UserFormDialog({
 	onSubmitUpdate,
 	isSubmitting = false,
 }: UserFormDialogProps) {
+	const t = useTranslations("admin.users.form");
+	const tCommon = useTranslations("common");
 	const isEdit = !!editingUser;
+
+	const degreeLabels = (t.raw("degrees") as Record<string, string> | undefined) ?? {};
+	const positionLabels = (t.raw("positions") as Record<string, string> | undefined) ?? {};
+	const academicTitleLabels =
+		(t.raw("academicTitles") as Record<string, string> | undefined) ?? {};
 
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
 	const [phone, setPhone] = useState("");
 	const [role, setRole] = useState<UserRole>("Doctor");
-	const [status, setStatus] = useState<UserStatus>("Active");
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [gender, setGender] = useState<GenderType>("Male");
@@ -103,9 +106,21 @@ export function UserFormDialog({
 
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [touched, setTouched] = useState<Record<string, boolean>>({});
+	const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
+	const duplicateCheckSeq = useRef(0);
+	const submitLock = useRef(false);
+	const wasOpenRef = useRef(false);
 
 	const handleRoleChange = (nextRole: UserRole) => {
+		const previousRole = role;
 		setRole(nextRole);
+
+		if (nextRole === "HeadDepartmentDoctor") {
+			setPosition("HeadOfDepartment");
+		} else if (previousRole === "HeadDepartmentDoctor") {
+			setPosition("StaffDoctor");
+		}
+
 		if (nextRole !== "Manager") return;
 
 		setAvatarFile(null);
@@ -119,47 +134,64 @@ export function UserFormDialog({
 	};
 
 	useEffect(() => {
-		if (editingUser) {
-			setEmail(editingUser.email || "");
-			setPassword("");
-			setPhone(editingUser.phone || "");
-			setRole(editingUser.role || "Doctor");
-			setStatus(editingUser.status || "Active");
-			setFirstName(editingUser.firstName || "");
-			setLastName(editingUser.lastName || "");
-			setGender(editingUser.gender || "Male");
-			setCitizenId(editingUser.citizenIdentificationNumber || "");
-			setDateOfBirth(
-				editingUser.dateOfBirth
-					? new Date(editingUser.dateOfBirth).toISOString().split("T")[0]
-					: ""
-			);
-			setAddress(editingUser.address || "");
-			setDegrees(editingUser.degrees || ["Doctor"]);
-			setAcademicTitle(editingUser.academicTitle || "None");
-			setPosition(editingUser.position || "StaffDoctor");
-			setAvatarPreview(editingUser.avatarUrl || null);
-			setAvatarFile(null);
-		} else {
-			setEmail("");
-			setPassword("Respira@123");
-			setPhone("");
-			setRole("Doctor");
-			setStatus("Active");
-			setFirstName("");
-			setLastName("");
-			setGender("Male");
-			setCitizenId("");
-			setDateOfBirth("1988-01-01");
-			setAddress("");
-			setDegrees(["Doctor"]);
-			setAcademicTitle("None");
-			setPosition("StaffDoctor");
-			setAvatarFile(null);
-			setAvatarPreview(null);
+		if (!isOpen) {
+			wasOpenRef.current = false;
+			return;
 		}
-		setErrors({});
-		setTouched({});
+		if (wasOpenRef.current) return;
+		wasOpenRef.current = true;
+
+		let cancelled = false;
+		void Promise.resolve().then(() => {
+			if (cancelled) return;
+			if (editingUser) {
+				setEmail(editingUser.email || "");
+				setPassword("");
+				setShowPassword(false);
+				setPhone(editingUser.phone || "");
+				setRole(editingUser.role || "Doctor");
+				setFirstName(editingUser.firstName || "");
+				setLastName(editingUser.lastName || "");
+				setGender(editingUser.gender || "Male");
+				setCitizenId(editingUser.citizenIdentificationNumber || "");
+				setDateOfBirth(
+					editingUser.dateOfBirth
+						? new Date(editingUser.dateOfBirth).toISOString().split("T")[0]
+						: ""
+				);
+				setAddress(editingUser.address || "");
+				setDegrees(editingUser.degrees || ["Doctor"]);
+				setAcademicTitle(editingUser.academicTitle || "None");
+				setPosition(editingUser.position || "StaffDoctor");
+				setAvatarPreview(editingUser.avatarUrl || null);
+				setAvatarFile(null);
+			} else {
+				setEmail("");
+				setPassword("Respira@123");
+				setShowPassword(false);
+				setPhone("");
+				setRole("Doctor");
+				setFirstName("");
+				setLastName("");
+				setGender("Male");
+				setCitizenId("");
+				setDateOfBirth("1988-01-01");
+				setAddress("");
+				setDegrees(["Doctor"]);
+				setAcademicTitle("None");
+				setPosition("StaffDoctor");
+				setAvatarFile(null);
+				setAvatarPreview(null);
+			}
+			setErrors({});
+			setTouched({});
+			setIsCheckingDuplicates(false);
+			duplicateCheckSeq.current += 1;
+		});
+
+		return () => {
+			cancelled = true;
+		};
 	}, [editingUser, isOpen]);
 
 	const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,7 +201,7 @@ export function UserFormDialog({
 		if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
 			setErrors((prev) => ({
 				...prev,
-				avatar: "Ảnh đại diện phải là tệp .jpg, .jpeg, .png hoặc .webp.",
+				avatar: t("errors.avatarType"),
 			}));
 			return;
 		}
@@ -177,7 +209,7 @@ export function UserFormDialog({
 		if (file.size > 5 * 1024 * 1024) {
 			setErrors((prev) => ({
 				...prev,
-				avatar: "Ảnh đại diện phải có dung lượng tối đa 5MB.",
+				avatar: t("errors.avatarSize"),
 			}));
 			return;
 		}
@@ -202,58 +234,117 @@ export function UserFormDialog({
 		const val = (value || "").trim();
 		switch (field) {
 			case "email":
-				if (!val) return "Email là bắt buộc.";
-				if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return "Email không đúng định dạng.";
+				if (!val) return t("errors.emailRequired");
+				if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return t("errors.emailInvalid");
 				return null;
 			case "phone":
-				if (!val) return "Số điện thoại là bắt buộc.";
+				if (!val) return t("errors.phoneRequired");
 				if (!/^(0|\+84|84)(3|5|7|8|9)[0-9]{8}$/.test(val)) {
-					return "Số điện thoại không hợp lệ (10 số, bắt đầu 03, 05, 07, 08, 09).";
+					return t("errors.phoneInvalid");
 				}
 				return null;
 			case "password":
-				if (!isEdit && !val) return "Mật khẩu khởi tạo là bắt buộc.";
-				if (val && val.length < 6) return "Mật khẩu phải có ít nhất 6 ký tự.";
+				if (!isEdit && !val) return t("errors.passwordRequired");
+				if (val && val.length < 6) return t("errors.passwordTooShort");
 				return null;
 			case "lastName":
-				if (!val) return "Họ và tên đệm là bắt buộc.";
+				if (!val) return t("errors.lastNameRequired");
 				return null;
 			case "firstName":
-				if (!val) return "Tên là bắt buộc.";
+				if (!val) return t("errors.firstNameRequired");
 				return null;
 			case "citizenId":
 				const rawCccd = val.replace(/\s+/g, "");
-				if (!rawCccd) return "Số CCCD/CMND là bắt buộc.";
+				if (!rawCccd) return t("errors.citizenIdRequired");
 				if (!/^[0-9]{9,12}$/.test(rawCccd)) {
-					return "Số CCCD/CMND phải gồm 9 hoặc 12 chữ số.";
+					return t("errors.citizenIdInvalid");
 				}
 				return null;
 			case "dateOfBirth":
 				if (val) {
 					const d = new Date(val);
-					if (isNaN(d.getTime())) return "Ngày sinh không hợp lệ.";
-					if (d > new Date()) return "Ngày sinh không được ở tương lai.";
+					if (isNaN(d.getTime())) return t("errors.dobInvalid");
+					if (d > new Date()) return t("errors.dobFuture");
 					const age = new Date().getFullYear() - d.getFullYear();
-					if (age < 18) return "Nhân viên y tế phải từ 18 tuổi trở lên.";
+					if (age < 18) return t("errors.ageInvalid");
 				}
 				return null;
 			case "address":
-				if (!val) return "Địa chỉ là bắt buộc.";
+				if (!val) return t("errors.addressRequired");
 				return null;
 			default:
 				return null;
 		}
 	};
 
-	const handleBlur = (field: string, value: string) => {
-		setTouched((prev) => ({ ...prev, [field]: true }));
-		const err = validateField(field, value);
+	const setFieldError = (field: string, message: string | null) => {
 		setErrors((prev) => {
 			const next = { ...prev };
-			if (err) next[field] = err;
+			if (message) next[field] = message;
 			else delete next[field];
 			return next;
 		});
+	};
+
+	const runDuplicateCheck = async (values: {
+		email: string;
+		phone?: string;
+		citizenId?: string;
+	}): Promise<{ field: string; message: string } | null> => {
+		if (isEdit) return null;
+
+		const seq = duplicateCheckSeq.current + 1;
+		duplicateCheckSeq.current = seq;
+		setIsCheckingDuplicates(true);
+
+		try {
+			const result = await checkDoctorDuplicates({
+				email: values.email,
+				phone: isAccountOnly ? undefined : values.phone,
+				citizenId: isAccountOnly ? undefined : values.citizenId,
+			});
+
+			if (seq !== duplicateCheckSeq.current) return null;
+
+			if (result.emailExists) {
+				return { field: "email", message: t("errors.emailDuplicate") };
+			}
+			if (result.citizenIdExists) {
+				return { field: "citizenId", message: t("errors.citizenIdDuplicate") };
+			}
+			if (result.phoneExists) {
+				return { field: "phone", message: t("errors.phoneDuplicate") };
+			}
+			return null;
+		} catch (error) {
+			// The backend remains the final guard if the directory lookup fails.
+			console.warn("[UserFormDialog] Doctor duplicate check failed:", error);
+			return null;
+		} finally {
+			if (seq === duplicateCheckSeq.current) setIsCheckingDuplicates(false);
+		}
+	};
+
+	const handleBlur = (field: string, value: string) => {
+		setTouched((prev) => ({ ...prev, [field]: true }));
+		const err = validateField(field, value);
+		setFieldError(field, err);
+
+		const shouldCheckDuplicate =
+			!err && !isEdit && ["email", "phone", "citizenId"].includes(field);
+
+		if (shouldCheckDuplicate) {
+			void (async () => {
+				const duplicate = await runDuplicateCheck({
+					email: field === "email" ? value : email,
+					phone: field === "phone" ? value : phone,
+					citizenId: field === "citizenId" ? value : citizenId,
+				});
+				if (duplicate && duplicate.field === field) {
+					setFieldError(duplicate.field, duplicate.message);
+				}
+			})();
+		}
 	};
 
 	const handleFieldChange = (
@@ -264,17 +355,13 @@ export function UserFormDialog({
 		setter(value);
 		if (touched[field]) {
 			const err = validateField(field, value);
-			setErrors((prev) => {
-				const next = { ...prev };
-				if (err) next[field] = err;
-				else delete next[field];
-				return next;
-			});
+			setFieldError(field, err);
 		}
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (submitLock.current || isSubmitting || isCheckingDuplicates) return;
 
 		const profileFields = isAccountOnly
 			? []
@@ -307,7 +394,7 @@ export function UserFormDialog({
 		}
 
 		if (!isAccountOnly && !isEdit && !avatarFile) {
-			nextErr.avatar = "Ảnh đại diện là bắt buộc với tài khoản bác sĩ.";
+			nextErr.avatar = t("errors.avatarRequired");
 			allTouched.avatar = true;
 		}
 
@@ -315,7 +402,6 @@ export function UserFormDialog({
 		setErrors(nextErr);
 
 		if (firstInvalidId) {
-			// Nhập sai format: Báo ngay, không out ra ngoài mà cuộn và focus ngay vào ô sai!
 			const targetEl = document.getElementById(firstInvalidId);
 			if (targetEl) {
 				targetEl.focus();
@@ -328,56 +414,83 @@ export function UserFormDialog({
 			return;
 		}
 
-		const dobIso = dateOfBirth ? new Date(dateOfBirth).toISOString() : undefined;
+		submitLock.current = true;
 
-		if (isEdit && editingUser) {
-			const payload: UpdateUserPayload = {
-				accountId: editingUser.id,
-				doctorId: isAccountOnly
-					? "00000000-0000-0000-0000-000000000000"
-					: editingUser.doctorId || editingUser.id,
-				email: email.trim(),
-				phone: phone.trim(),
-				password: password.trim() || undefined,
-				role: isAccountOnly ? editingUser.role : role,
-				status,
-				firstName: isAccountOnly ? "" : firstName.trim(),
-				lastName: isAccountOnly ? "" : lastName.trim(),
-				degrees: isAccountOnly ? [] : degrees,
-				academicTitle: isAccountOnly ? "None" : academicTitle,
-				position: isAccountOnly ? "StaffDoctor" : position,
-				gender,
-				citizenIdentificationNumber: isAccountOnly ? "" : citizenId.trim(),
-				dateOfBirth: isAccountOnly ? undefined : dobIso,
-				address: isAccountOnly ? "" : address.trim(),
-				avatarFile: isAccountOnly ? null : avatarFile,
-			};
-			await onSubmitUpdate(payload);
-		} else {
-			const createRole: CreateUserPayload["role"] =
-				role === "HeadDepartmentDoctor"
-					? "HeadDepartmentDoctor"
-					: role === "Manager"
-						? "Manager"
-						: "Doctor";
+		try {
+			const duplicate = await runDuplicateCheck({
+				email,
+				phone,
+				citizenId,
+			});
+			if (duplicate) {
+				setErrors((prev) => ({ ...prev, [duplicate.field]: duplicate.message }));
+				setTouched((prev) => ({ ...prev, [duplicate.field]: true }));
+				const targetId =
+					duplicate.field === "email"
+						? "usr-email"
+						: duplicate.field === "citizenId"
+							? "usr-citizen"
+							: "usr-phone";
+				document.getElementById(targetId)?.focus();
+				return;
+			}
 
-			const payload: CreateUserPayload = {
-				email: email.trim(),
-				password: password.trim(),
-				phone: phone.trim(),
-				role: createRole,
-				firstName: isAccountOnly ? "" : firstName.trim(),
-				lastName: isAccountOnly ? "" : lastName.trim(),
-				degrees: isAccountOnly ? [] : degrees,
-				academicTitle: isAccountOnly ? "None" : academicTitle,
-				position: isAccountOnly ? "StaffDoctor" : position,
-				gender,
-				citizenIdentificationNumber: isAccountOnly ? "" : citizenId.trim(),
-				dateOfBirth: isAccountOnly ? undefined : dobIso,
-				address: isAccountOnly ? "" : address.trim(),
-				avatarFile: isAccountOnly ? null : avatarFile,
-			};
-			await onSubmitCreate(payload);
+			const dobIso = dateOfBirth ? new Date(dateOfBirth).toISOString() : undefined;
+
+			if (isEdit && editingUser) {
+				const payload: UpdateUserPayload = {
+					accountId: editingUser.id,
+					doctorId: isAccountOnly
+						? "00000000-0000-0000-0000-000000000000"
+						: editingUser.doctorId || editingUser.id,
+					email: email.trim(),
+					phone: phone.trim(),
+					password: password.trim() || undefined,
+					role: isAccountOnly ? editingUser.role : role,
+					firstName: isAccountOnly ? "" : firstName.trim(),
+					lastName: isAccountOnly ? "" : lastName.trim(),
+					degrees: isAccountOnly ? [] : degrees,
+					academicTitle: isAccountOnly ? "None" : academicTitle,
+					position: isAccountOnly ? "StaffDoctor" : position,
+					gender,
+					citizenIdentificationNumber: isAccountOnly ? "" : citizenId.trim(),
+					dateOfBirth: isAccountOnly ? undefined : dobIso,
+					address: isAccountOnly ? "" : address.trim(),
+					avatarFile: isAccountOnly ? null : avatarFile,
+				};
+				await onSubmitUpdate(payload);
+			} else {
+				const createRole: CreateUserPayload["role"] =
+					role === "HeadDepartmentDoctor"
+						? "HeadDepartmentDoctor"
+						: role === "Manager"
+							? "Manager"
+							: "Doctor";
+
+				const payload: CreateUserPayload = {
+					email: email.trim(),
+					password: password.trim(),
+					phone: phone.trim(),
+					role: createRole,
+					firstName: isAccountOnly ? "" : firstName.trim(),
+					lastName: isAccountOnly ? "" : lastName.trim(),
+					degrees: isAccountOnly ? [] : degrees,
+					academicTitle: isAccountOnly ? "None" : academicTitle,
+					position: isAccountOnly
+						? "StaffDoctor"
+						: createRole === "HeadDepartmentDoctor"
+							? "HeadOfDepartment"
+							: position,
+					gender,
+					citizenIdentificationNumber: isAccountOnly ? "" : citizenId.trim(),
+					dateOfBirth: isAccountOnly ? undefined : dobIso,
+					address: isAccountOnly ? "" : address.trim(),
+					avatarFile: isAccountOnly ? null : avatarFile,
+				};
+				await onSubmitCreate(payload);
+			}
+		} finally {
+			submitLock.current = false;
 		}
 	};
 
@@ -386,12 +499,10 @@ export function UserFormDialog({
 			<UserDialogContent className="max-w-2xl">
 				<DialogHeader>
 					<DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">
-						{isEdit ? "Chỉnh sửa thông tin người dùng" : "Tạo mới tài khoản y tế"}
+						{isEdit ? t("titleEdit") : t("titleCreate")}
 					</DialogTitle>
 					<DialogDescription className="text-xs text-slate-500">
-						{isEdit
-							? "Cập nhật thông tin tài khoản và hồ sơ bác sĩ theo quy trình Saga của hệ thống."
-							: "Hệ thống sẽ đồng thời khởi tạo Tài khoản (Authentication), Hồ sơ Bác sĩ (Doctor), và cấp quyền tương ứng."}
+						{isEdit ? t("descEdit") : t("descCreate")}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -400,7 +511,7 @@ export function UserFormDialog({
 					<div className="flex items-center gap-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800">
 						<Avatar className="h-16 w-16 border-2 border-white shadow-sm shrink-0">
 							{avatarPreview ? (
-								<AvatarImage src={avatarPreview} alt="Preview" />
+								<AvatarImage src={avatarPreview} alt={firstName || "Avatar"} />
 							) : (
 								<AvatarFallback className="bg-sky-100 text-sky-800 font-bold text-lg">
 									{firstName ? firstName[0] : "BS"}
@@ -410,12 +521,12 @@ export function UserFormDialog({
 
 						<div className="flex-1 space-y-1.5">
 							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-								Ảnh đại diện y bác sĩ (.jpg, .png, .webp)
+								{t("avatarLabel")}
 							</Label>
 							<div className="flex items-center gap-2">
 								<label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 transition-colors">
 									<Upload className="w-3.5 h-3.5 text-slate-500" />
-									<span>Chọn ảnh</span>
+									<span>{t("chooseImage")}</span>
 									<input
 										type="file"
 										accept="image/png,image/jpeg,image/webp"
@@ -434,55 +545,41 @@ export function UserFormDialog({
 										}}
 										className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
 									>
-										Xóa ảnh
+										{t("removeImage")}
 									</Button>
 								)}
 							</div>
+							{touched.avatar && errors.avatar && (
+								<p className="text-[11px] font-semibold text-error flex items-center gap-1">
+									<AlertCircle className="w-3.5 h-3.5 shrink-0" />
+									<span>{errors.avatar}</span>
+								</p>
+							)}
 						</div>
 
 						<div className="flex items-center gap-3">
 							<div className="w-36">
 								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-									Vai trò phân quyền <span className="text-red-500">*</span>
+									{t("roleLabel")} <span className="text-red-500">*</span>
 								</Label>
 								<Select
 									value={role}
 									onValueChange={(val: UserRole) => handleRoleChange(val)}
+									disabled={isEdit}
 								>
 									<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="Doctor">Bác sĩ</SelectItem>
-										<SelectItem value="HeadDepartmentDoctor">Trưởng khoa</SelectItem>
-										<SelectItem value="Manager">Quản lý chuyên môn</SelectItem>
+										<SelectItem value="Doctor">{t("roleDoctor")}</SelectItem>
+										<SelectItem value="HeadDepartmentDoctor">{t("roleHeadDoctor")}</SelectItem>
+										<SelectItem value="Manager">{t("roleManager")}</SelectItem>
 										{editingUser?.role === "Admin" && (
-											<SelectItem value="Admin">Quản trị viên</SelectItem>
+											<SelectItem value="Admin">{t("roleAdmin")}</SelectItem>
 										)}
 									</SelectContent>
 								</Select>
 							</div>
-
-							{isEdit && (
-								<div className="w-32">
-									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-										Trạng thái
-									</Label>
-									<Select
-										value={status}
-										onValueChange={(val: UserStatus) => setStatus(val)}
-										disabled={editingUser?.role === "Admin"}
-									>
-										<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="Active">Hoạt động</SelectItem>
-											<SelectItem value="Inactive">Đã khóa</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-							)}
 						</div>
 					</div>
 
@@ -490,7 +587,7 @@ export function UserFormDialog({
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
 						<div>
 							<Label htmlFor="usr-email" className="text-xs font-semibold">
-								Email đăng nhập <span className="text-red-500">*</span>
+								{t("emailLabel")} <span className="text-red-500">*</span>
 							</Label>
 							<Input
 								id="usr-email"
@@ -498,7 +595,7 @@ export function UserFormDialog({
 								value={email}
 								onChange={(e) => handleFieldChange("email", e.target.value, setEmail)}
 								onBlur={() => handleBlur("email", email)}
-								placeholder="doctor@respira.vn"
+								placeholder={t("emailPlaceholder")}
 								className={`mt-1 h-9 text-xs ${touched.email && errors.email ? "border-red-400 focus-visible:ring-red-400 bg-red-50/20" : ""
 									}`}
 							/>
@@ -512,7 +609,7 @@ export function UserFormDialog({
 
 						<div>
 							<Label htmlFor="usr-phone" className="text-xs font-semibold">
-								Số điện thoại liên hệ <span className="text-error">*</span>
+								{t("phoneLabel")} <span className="text-error">*</span>
 							</Label>
 							<Input
 								id="usr-phone"
@@ -520,7 +617,7 @@ export function UserFormDialog({
 								value={phone}
 								onChange={(e) => handleFieldChange("phone", e.target.value, setPhone)}
 								onBlur={() => handleBlur("phone", phone)}
-								placeholder="0912345678"
+								placeholder={t("phonePlaceholder")}
 								className={`mt-1 h-9 text-xs ${touched.phone && errors.phone ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 									}`}
 							/>
@@ -534,18 +631,38 @@ export function UserFormDialog({
 
 						<div className="sm:col-span-2">
 							<Label htmlFor="usr-pass" className="text-xs font-semibold">
-								{isEdit ? "Mật khẩu mới (bỏ trống nếu giữ nguyên)" : "Mật khẩu khởi tạo"} {!isEdit && <span className="text-error">*</span>}
+								{isEdit ? t("passwordEditLabel") : t("passwordCreateLabel")}{" "}
+								{!isEdit && <span className="text-error">*</span>}
 							</Label>
-							<Input
-								id="usr-pass"
-								type="password"
-								value={password}
-								onChange={(e) => handleFieldChange("password", e.target.value, setPassword)}
-								onBlur={() => handleBlur("password", password)}
-								placeholder={isEdit ? "••••••••" : "Mật khẩu ít nhất 6 ký tự..."}
-								className={`mt-1 h-9 text-xs ${touched.password && errors.password ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
-									}`}
-							/>
+							<div className="relative mt-1">
+								<Input
+									id="usr-pass"
+									type={showPassword ? "text" : "password"}
+									value={password}
+									onChange={(e) => handleFieldChange("password", e.target.value, setPassword)}
+									onBlur={() => handleBlur("password", password)}
+									placeholder={
+										isEdit ? "••••••••" : t("passwordCreatePlaceholder")
+									}
+									className={`h-9 pr-10 text-xs ${touched.password && errors.password ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
+										}`}
+								/>
+								<button
+									type="button"
+									tabIndex={-1}
+									onClick={() => setShowPassword((prev) => !prev)}
+									disabled={isSubmitting}
+									title={showPassword ? t("hidePassword") : t("showPassword")}
+									aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+									className="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer text-text-tertiary transition-colors hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-50"
+								>
+									{showPassword ? (
+										<EyeOff className="h-4 w-4" />
+									) : (
+										<Eye className="h-4 w-4" />
+									)}
+								</button>
+							</div>
 							{touched.password && errors.password && (
 								<p className="text-[11px] font-semibold text-error mt-1 flex items-center gap-1 animate-in fade-in duration-150">
 									<AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -560,20 +677,20 @@ export function UserFormDialog({
 							{/* Profile Info */}
 							<div className="border-t border-border-default dark:border-border-default pt-4">
 								<h4 className="text-xs font-extrabold uppercase tracking-wider text-text-secondary mb-3">
-									Thông tin cá nhân & Nhân thân
+									{t("personalTitle")}
 								</h4>
 
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
 									<div>
 										<Label htmlFor="usr-lname" className="text-xs font-semibold">
-											Họ và tên đệm <span className="text-error">*</span>
+											{t("lastNameLabel")} <span className="text-error">*</span>
 										</Label>
 										<Input
 											id="usr-lname"
 											value={lastName}
 											onChange={(e) => handleFieldChange("lastName", e.target.value, setLastName)}
 											onBlur={() => handleBlur("lastName", lastName)}
-											placeholder="Nguyễn Văn"
+											placeholder={t("lastNamePlaceholder")}
 											className={`mt-1 h-9 text-xs ${touched.lastName && errors.lastName ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 												}`}
 										/>
@@ -587,14 +704,14 @@ export function UserFormDialog({
 
 									<div>
 										<Label htmlFor="usr-fname" className="text-xs font-semibold">
-											Tên <span className="text-error">*</span>
+											{t("firstNameLabel")} <span className="text-error">*</span>
 										</Label>
 										<Input
 											id="usr-fname"
 											value={firstName}
 											onChange={(e) => handleFieldChange("firstName", e.target.value, setFirstName)}
 											onBlur={() => handleBlur("firstName", firstName)}
-											placeholder="An"
+											placeholder={t("firstNamePlaceholder")}
 											className={`mt-1 h-9 text-xs ${touched.firstName && errors.firstName ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 												}`}
 										/>
@@ -608,14 +725,14 @@ export function UserFormDialog({
 
 									<div>
 										<Label htmlFor="usr-citizen" className="text-xs font-semibold">
-											Số CCCD / CMND <span className="text-error">*</span>
+											{t("citizenIdLabel")} <span className="text-error">*</span>
 										</Label>
 										<Input
 											id="usr-citizen"
 											value={citizenId}
 											onChange={(e) => handleFieldChange("citizenId", e.target.value, setCitizenId)}
 											onBlur={() => handleBlur("citizenId", citizenId)}
-											placeholder="001088012345"
+											placeholder={t("citizenIdPlaceholder")}
 											className={`mt-1 h-9 text-xs ${touched.citizenId && errors.citizenId ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 												}`}
 										/>
@@ -629,7 +746,7 @@ export function UserFormDialog({
 
 									<div className="grid grid-cols-2 gap-2">
 										<div>
-											<Label className="text-xs font-semibold">Giới tính</Label>
+											<Label className="text-xs font-semibold">{t("genderLabel")}</Label>
 											<Select
 												value={gender}
 												onValueChange={(val: GenderType) => setGender(val)}
@@ -638,15 +755,15 @@ export function UserFormDialog({
 													<SelectValue />
 												</SelectTrigger>
 												<SelectContent>
-													<SelectItem value="Male">Nam</SelectItem>
-													<SelectItem value="Female">Nữ</SelectItem>
+													<SelectItem value="Male">{t("male")}</SelectItem>
+													<SelectItem value="Female">{t("female")}</SelectItem>
 												</SelectContent>
 											</Select>
 										</div>
 
 										<div>
 											<Label htmlFor="usr-dob" className="text-xs font-semibold">
-												Ngày sinh
+												{t("dobLabel")}
 											</Label>
 											<Input
 												id="usr-dob"
@@ -668,14 +785,14 @@ export function UserFormDialog({
 
 									<div className="sm:col-span-2">
 										<Label htmlFor="usr-address" className="text-xs font-semibold">
-											Địa chỉ nơi cư trú / Khoa phòng <span className="text-error">*</span>
+											{t("addressLabel")} <span className="text-error">*</span>
 										</Label>
 										<Input
 											id="usr-address"
 											value={address}
 											onChange={(e) => handleFieldChange("address", e.target.value, setAddress)}
 											onBlur={() => handleBlur("address", address)}
-											placeholder="Khoa Hồi sức tích cực, Bệnh viện Bạch Mai"
+											placeholder={t("addressPlaceholder")}
 											className={`mt-1 h-9 text-xs ${touched.address && errors.address ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 												}`}
 										/>
@@ -692,12 +809,12 @@ export function UserFormDialog({
 							{/* Medical Qualifications */}
 							<div className="border-t border-border-default dark:border-border-default pt-4">
 								<h4 className="text-xs font-extrabold uppercase tracking-wider text-text-secondary mb-3">
-									Chuyên môn & Chức vụ bệnh viện
+									{t("professionalTitle")}
 								</h4>
 
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
 									<div>
-										<Label className="text-xs font-semibold">Học hàm</Label>
+										<Label className="text-xs font-semibold">{t("academicTitleLabel")}</Label>
 										<Select
 											value={academicTitle}
 											onValueChange={(val: AcademicTitle) => setAcademicTitle(val)}
@@ -706,18 +823,21 @@ export function UserFormDialog({
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="None">Không</SelectItem>
-												<SelectItem value="AssociateProfessor">Phó giáo sư (PGS)</SelectItem>
-												<SelectItem value="Professor">Giáo sư (GS)</SelectItem>
+												{["None", "AssociateProfessor", "Professor"].map((value) => (
+													<SelectItem key={value} value={value}>
+														{academicTitleLabels[value] ?? value}
+													</SelectItem>
+												))}
 											</SelectContent>
 										</Select>
 									</div>
 
 									<div>
-										<Label className="text-xs font-semibold">Vị trí / Chức vụ</Label>
+										<Label className="text-xs font-semibold">{t("positionLabel")}</Label>
 										<Select
 											value={position}
 											onValueChange={(val: PositionType) => setPosition(val)}
+											disabled={role === "HeadDepartmentDoctor"}
 										>
 											<SelectTrigger className="mt-1 h-9 text-xs">
 												<SelectValue />
@@ -725,7 +845,7 @@ export function UserFormDialog({
 											<SelectContent>
 												{ALL_POSITIONS.map((pos) => (
 													<SelectItem key={pos} value={pos}>
-														{POSITION_LABELS[pos] || pos}
+														{positionLabels[pos] || pos}
 													</SelectItem>
 												))}
 											</SelectContent>
@@ -734,7 +854,7 @@ export function UserFormDialog({
 
 									<div className="sm:col-span-2">
 										<Label className="text-xs font-semibold mb-1.5 block">
-											Học vị y khoa (Chọn một hoặc nhiều)
+											{t("degreesLabel")}
 										</Label>
 										<div className="flex flex-wrap gap-1.5">
 											{ALL_DEGREES.map((deg) => {
@@ -750,7 +870,7 @@ export function UserFormDialog({
 															}`}
 													>
 														{selected && <Check className="w-3.5 h-3.5 text-primary" />}
-														<span>{DEGREE_LABELS[deg] || deg}</span>
+														<span>{degreeLabels[deg] || deg}</span>
 													</button>
 												);
 											})}
@@ -758,11 +878,16 @@ export function UserFormDialog({
 									</div>
 								</div>
 							</div>
-
 						</>
 					)}
 
 					<DialogFooter className="pt-3 gap-2">
+						{isCheckingDuplicates && (
+							<span className="mr-auto inline-flex items-center gap-1.5 text-[11px] font-medium text-text-secondary">
+								<Loader2 className="h-3.5 w-3.5 animate-spin" />
+								{t("checkingDuplicate")}
+							</span>
+						)}
 						<Button
 							type="button"
 							variant="outline"
@@ -770,18 +895,20 @@ export function UserFormDialog({
 							disabled={isSubmitting}
 							className="h-11 px-6 text-sm font-semibold"
 						>
-							Hủy bỏ
+							{tCommon("cancel")}
 						</Button>
 						<Button
 							type="submit"
-							disabled={isSubmitting}
+							disabled={isSubmitting || isCheckingDuplicates}
 							className="h-11 px-6 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold"
 						>
 							{isSubmitting
-								? "Đang lưu..."
-								: isEdit
-									? "Lưu thay đổi"
-									: "Tạo người dùng"}
+								? t("saving")
+								: isCheckingDuplicates
+									? t("checkingShort")
+									: isEdit
+										? t("save")
+										: t("create")}
 						</Button>
 					</DialogFooter>
 				</form>
@@ -789,4 +916,3 @@ export function UserFormDialog({
 		</Dialog>
 	);
 }
-

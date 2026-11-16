@@ -4,6 +4,7 @@ import './globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { ThemeProvider } from '@/components/theme-provider';
+import { FontSizeProvider } from '@/components/font-size-provider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthBootstrap } from '@/components/AuthBootstrap';
@@ -24,7 +25,7 @@ const merriweather = Merriweather({
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin', 'vietnamese'],
-  variable: '--font-mono',
+  variable: '--font-jetbrains-mono',
   display: 'swap',
 });
 
@@ -32,14 +33,19 @@ const fontInitScript = `
   (function() {
     try {
       var savedFont = localStorage.getItem('user-font') || 'sans';
+      if (['sans', 'serif', 'mono'].indexOf(savedFont) === -1) savedFont = 'sans';
       document.documentElement.setAttribute('data-font', savedFont);
+
+      var scale = localStorage.getItem('respira_font_scale');
+      var px = scale === 'large' ? 18 : scale === 'small' ? 14 : 16;
+      document.documentElement.style.fontSize = px + 'px';
     } catch (e) {}
   })();
 `;
 
 export const metadata: Metadata = {
-    title: 'RespiraAMS',
-    description: 'Respiratory Airway Management System',
+  title: 'RespiraAMS',
+  description: 'Respiratory Airway Management System',
 };
 
 export default async function RootLayout({
@@ -62,15 +68,17 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <FontProvider>
-            <NextIntlClientProvider messages={messages}>
-              <QueryProvider>
-                      <AuthBootstrap />
-                      {children}
-                      <Toaster richColors position="top-center" duration={3000} closeButton />
-              </QueryProvider>
-            </NextIntlClientProvider>
-          </FontProvider>
+          <FontSizeProvider>
+            <FontProvider>
+              <NextIntlClientProvider messages={messages}>
+                <QueryProvider>
+                  <AuthBootstrap />
+                  {children}
+                  <Toaster richColors position="top-center" duration={3000} closeButton />
+                </QueryProvider>
+              </NextIntlClientProvider>
+            </FontProvider>
+          </FontSizeProvider>
         </ThemeProvider>
       </body>
     </html>

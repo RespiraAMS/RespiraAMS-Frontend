@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { AdminDialogContent } from "@/features/admin/components/AdminDialogContent";
@@ -22,6 +23,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function ProtocolDetailDialog({ item, open, onClose }: ProtocolDetailDialogProps) {
+	const t = useTranslations("admin.protocols.detail");
 	const { data, isLoading, isError, error } = useProtocolDetail(item?.id ?? "", {
 		enabled: open && !!item,
 	});
@@ -40,9 +42,9 @@ export function ProtocolDetailDialog({ item, open, onClose }: ProtocolDetailDial
 							v{detail.version.replace(/^v/i, "")}
 						</Badge>
 						{detail.isApplied ? (
-							<Badge variant="outline" className="font-bold bg-success/10 text-success border-success/30">Đang áp dụng</Badge>
+							<Badge variant="outline" className="font-bold bg-success/10 text-success border-success/30">{t("applied")}</Badge>
 						) : (
-							<Badge variant="outline" className="font-bold bg-warning/10 text-warning border-warning/30">Chưa áp dụng</Badge>
+							<Badge variant="outline" className="font-bold bg-warning/10 text-warning border-warning/30">{t("notApplied")}</Badge>
 						)}
 					</div>
 					<p className="text-xs font-mono text-text-tertiary">{detail.code}</p>
@@ -50,27 +52,30 @@ export function ProtocolDetailDialog({ item, open, onClose }: ProtocolDetailDial
 
 				<div className="space-y-5 pt-4">
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-						<Field label="Đơn vị ban hành">{detail.publisher}</Field>
-						<Field label="Phiên bản">{detail.version}</Field>
+						<Field label={t("publisher")}>{detail.publisher}</Field>
+						<Field label={t("version")}>{detail.version}</Field>
 						<div className="sm:col-span-2 p-3.5 rounded-xl bg-surface-secondary border border-border-default/80 space-y-1">
-							<div className="text-text-tertiary font-semibold uppercase tracking-wider text-[10px]">Mô tả</div>
+							<div className="text-text-tertiary font-semibold uppercase tracking-wider text-[10px]">{t("description")}</div>
 							<p className="text-sm text-text-primary leading-relaxed">{detail.description}</p>
 						</div>
 					</div>
 
 					<div>
 						<h4 className="text-xs font-extrabold uppercase tracking-wider text-text-secondary mb-3 pb-2 border-b border-dashed border-border-default">
-							Quy tắc đánh giá {data && `(${rules.length})`}
+							{t("rulesTitle")} {data && `(${rules.length})`}
 						</h4>
 
-						{isLoading && <p className="text-xs text-text-tertiary">Đang tải quy tắc...</p>}
+						{isLoading && <p className="text-xs text-text-tertiary">{t("rulesLoading")}</p>}
 						{isError && (
 							<p className="text-xs font-semibold text-error">
-								Không thể tải quy tắc: {error instanceof Error ? error.message : "Lỗi không xác định"}
+								{t("rulesError", {
+									message:
+										error instanceof Error ? error.message : t("unknownError"),
+								})}
 							</p>
 						)}
 						{data && rules.length === 0 && (
-							<p className="text-xs italic text-text-tertiary">Phác đồ này chưa có quy tắc nào.</p>
+							<p className="text-xs italic text-text-tertiary">{t("noRules")}</p>
 						)}
 
 						<div className="space-y-2">
@@ -81,11 +86,11 @@ export function ProtocolDetailDialog({ item, open, onClose }: ProtocolDetailDial
 										<div className="flex items-center gap-1.5">
 											{rule.isMajorRule != null && (
 												<Badge variant={rule.isMajorRule ? "destructive" : "secondary"} className="text-[11px]">
-													{rule.isMajorRule ? "Tiêu chí chính" : "Tiêu chí phụ"}
+													{rule.isMajorRule ? t("majorRule") : t("minorRule")}
 												</Badge>
 											)}
 											{rule.scoreFunction && (
-												<Badge variant="outline" className="text-[11px] bg-info/10 text-info border-info/30">Có hàm tính điểm</Badge>
+												<Badge variant="outline" className="text-[11px] bg-info/10 text-info border-info/30">{t("hasScoreFunction")}</Badge>
 											)}
 										</div>
 									</div>

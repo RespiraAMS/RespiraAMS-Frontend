@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { AlertCircle, ArrowRight, CheckCircle2, Loader2, MailCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,9 @@ type VerificationResult = {
 };
 
 export function VerifyEmailView() {
+	const t = useTranslations("auth.verify");
+	const router = useRouter();
+	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const token = searchParams.get("token");
 
@@ -31,29 +35,26 @@ export function VerifyEmailView() {
 				if (cancelled) return;
 				setResult({
 					status: "success",
-					message: "Xác thực tài khoản thành công! Bạn có thể đăng nhập ngay bây giờ.",
+					message: t("success"),
 				});
+				// Token is single-use; drop it from the URL so a reload does not retry.
+				router.replace(pathname);
 			})
 			.catch((err: unknown) => {
 				if (cancelled) return;
 				setResult({
 					status: "error",
-					message:
-						err instanceof Error
-							? err.message
-							: "Liên kết xác thực không hợp lệ hoặc đã hết hạn.",
+					message: err instanceof Error ? err.message : t("errorFallback"),
 				});
 			});
 
 		return () => {
 			cancelled = true;
 		};
-	}, [token]);
+	}, [token, router, pathname, t]);
 
 	const state: VerificationState = !token ? "error" : result?.status ?? "loading";
-	const message = !token
-		? "Liên kết xác thực thiếu mã token. Vui lòng mở lại liên kết trong email."
-		: result?.message ?? "";
+	const message = !token ? t("errorMissingToken") : result?.message ?? "";
 
 	return (
 		<div className="flex min-h-screen w-full items-center justify-center bg-background px-4 py-10 font-sans">
@@ -73,17 +74,17 @@ export function VerifyEmailView() {
 
 				<div className="space-y-1.5">
 					<h1 className="text-2xl font-bold tracking-tight text-text-primary">
-						Xác thực email
+						{t("title")}
 					</h1>
 					<p className="text-xs leading-relaxed text-text-secondary">
-						Hệ thống đang kiểm tra liên kết kích hoạt tài khoản của bạn.
+						{t("subtitle")}
 					</p>
 				</div>
 
 				{state === "loading" && (
 					<div className="flex items-center gap-2.5 rounded-[16px] border border-primary/30 bg-primary/10 px-4 py-3 text-xs text-primary">
 						<Loader2 className="h-4 w-4 animate-spin text-primary" />
-						<span>Đang xác nhận liên kết kích hoạt tài khoản...</span>
+						<span>{t("loading")}</span>
 					</div>
 				)}
 
@@ -106,7 +107,7 @@ export function VerifyEmailView() {
 					className="h-12 w-full cursor-pointer rounded-[16px] bg-primary text-xs font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90"
 				>
 					<Link href="/login">
-						<span>Về trang đăng nhập</span>
+						<span>{t("backToLogin")}</span>
 						<ArrowRight className="h-4 w-4" />
 					</Link>
 				</Button>

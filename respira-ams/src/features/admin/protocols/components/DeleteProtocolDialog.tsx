@@ -28,9 +28,14 @@ export function DeleteProtocolDialog({ item, isDeleting, onClose, onConfirm }: D
 	const [confirmText, setConfirmText] = useState("");
 
 	useEffect(() => {
-		if (item) {
-			setConfirmText("");
-		}
+		if (!item) return;
+		let cancelled = false;
+		void Promise.resolve().then(() => {
+			if (!cancelled) setConfirmText("");
+		});
+		return () => {
+			cancelled = true;
+		};
 	}, [item]);
 
 	if (!item) return null;

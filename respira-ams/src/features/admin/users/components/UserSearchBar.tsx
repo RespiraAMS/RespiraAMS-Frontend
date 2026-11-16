@@ -26,7 +26,6 @@ export function UserSearchBar({
 	filters,
 	onFiltersChange,
 	onOpenCreateDialog,
-	isLoading = false,
 }: UserSearchBarProps) {
 	const t = useTranslations("admin.users");
 
@@ -47,7 +46,7 @@ export function UserSearchBar({
 						type="button"
 						onClick={() => onFiltersChange({ ...filters, search: "" })}
 						className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary p-0.5 rounded cursor-pointer"
-						title="Clear search"
+						title={t("clearSearch")}
 					>
 						<X className="w-3.5 h-3.5" />
 					</button>

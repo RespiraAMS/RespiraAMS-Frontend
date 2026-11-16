@@ -2,11 +2,14 @@
 
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { PanelLeft, Shield } from "lucide-react";
+import { PanelLeft } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useAdminSidebarStore } from "@/features/admin/components/sidebarStore";
 
-const PAGE_TITLE_KEYS: Record<string, string> = {
+const PAGE_TITLE_KEYS: Record<
+	string,
+	"pageDashboard" | "pageUsers" | "pageProtocols" | "pageAuditLogs" | "pageSettings"
+> = {
 	"/admin": "pageDashboard",
 	"/admin/dashboard": "pageDashboard",
 	"/admin/users": "pageUsers",
@@ -26,7 +29,7 @@ export function AdminHeader() {
 			.filter(([href]) => href !== "/admin")
 			.find(([href]) => pathname.startsWith(href + "/"))?.[1];
 
-	const title = titleKey ? t(titleKey as any) : t("defaultTitle");
+	const title = titleKey ? t(titleKey) : t("defaultTitle");
 
 	return (
 		<header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border-subtle bg-surface px-6">
@@ -36,8 +39,8 @@ export function AdminHeader() {
 					type="button"
 					onClick={toggleSidebar}
 					className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-text-secondary hover:text-text-primary hover:bg-surface-secondary transition-colors cursor-pointer"
-					title="Thu gọn / Mở rộng thanh điều hướng"
-					aria-label="Thu gọn / Mở rộng thanh điều hướng"
+					title={t("toggleSidebar")}
+					aria-label={t("toggleSidebar")}
 				>
 					<PanelLeft className="h-4 w-4" />
 				</button>

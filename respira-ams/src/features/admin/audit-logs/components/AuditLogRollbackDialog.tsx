@@ -2,24 +2,26 @@
 
 import React, { useState, useEffect } from "react";
 import { Dialog } from "radix-ui";
+import { useLocale, useTranslations } from "next-intl";
 import { AdminDialogContent } from "@/features/admin/components/AdminDialogContent";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { SnapshotDiff } from "@/components/ui/snapshot-diff";
 import {
 	RotateCcw,
 	CheckCircle2,
 	AlertCircle,
 	AlertTriangle,
 	Loader2,
-	Layers,
-	ArrowRight,
 	History,
-	FileText,
 	ShieldAlert,
 	Check,
+	Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
 	AuditLogItem,
+	ClinicalRollbackChange,
 	ClinicalRollbackPreview,
 	ClinicalRollbackResult,
 } from "../types";
@@ -35,65 +37,150 @@ interface AuditLogRollbackDialogProps {
 	onSuccess?: () => void;
 }
 
+function RollbackChangeDiff({
+	change,
+}: {
+	change: ClinicalRollbackChange;
+}) {
+	return (
+		<div className="rounded-xl border border-border-default bg-surface overflow-hidden shadow-2xs">
+			{/* Change Header */}
+			<div className="px-3.5 py-2.5 bg-surface-secondary border-b border-border-default flex items-center justify-between flex-wrap gap-2">
+				<div className="flex items-center gap-2 min-w-0">
+					<span
+						className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold ${
+							change.operation === "Insert"
+								? "bg-success/10 text-success"
+								: change.operation === "Delete"
+								? "bg-error/10 text-error"
+								: "bg-info/10 text-info"
+						}`}
+					>
+						{change.operation}
+					</span>
+					<span className="font-bold text-text-primary text-xs truncate">
+						{change.entityType}
+					</span>
+				</div>
+				<span className="text-text-secondary text-[11px]">{change.description}</span>
+			</div>
+
+			<SnapshotDiff
+				before={change.currentJson}
+				after={change.targetJson}
+				hideIdFields
+			/>
+		</div>
+	);
+}
+
+function buildConfirmationCode(preview: ClinicalRollbackPreview | null, item: AuditLogItem | null) {
+	const source = preview?.changeSetId || item?.id || "";
+	const compact = source.replace(/[^a-zA-Z0-9]/g, "");
+	return compact.slice(-6).toUpperCase();
+}
+
 export function AuditLogRollbackDialog({
 	item,
 	open,
 	onOpenChange,
 	onSuccess,
 }: AuditLogRollbackDialogProps) {
+	const t = useTranslations("admin.auditLogs.rollback");
+	const locale = useLocale();
+
 	const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 	const [preview, setPreview] = useState<ClinicalRollbackPreview | null>(null);
 	const [previewError, setPreviewError] = useState<string | null>(null);
+	const [visibleChanges, setVisibleChanges] = useState(20);
 
 	const [isApplying, setIsApplying] = useState(false);
 	const [result, setResult] = useState<ClinicalRollbackResult | null>(null);
 
+	const [confirmationInput, setConfirmationInput] = useState("");
+	const [confirmationError, setConfirmationError] = useState<string | null>(null);
+	const [copied, setCopied] = useState(false);
+
 	// Tải preview khi mở dialog
 	useEffect(() => {
-		if (open && item) {
+		if (!open || !item) return;
+
+		let cancelled = false;
+
+		const load = async () => {
+			// Reset state after the current render pass.
+			await Promise.resolve();
+			if (cancelled) return;
+
 			setResult(null);
 			setPreview(null);
 			setPreviewError(null);
+			setVisibleChanges(20);
+			setConfirmationInput("");
+			setConfirmationError(null);
+			setCopied(false);
 			setIsLoadingPreview(true);
 
-			previewClinicalRollback(item.id)
-				.then((res) => {
-					setPreview(res);
-				})
-				.catch((err) => {
-					console.error("Lỗi khi tải rollback preview:", err);
-					setPreviewError(
-						err instanceof Error
-							? err.message
-							: "Không thể tải bản xem trước hoàn tác."
-					);
-				})
-				.finally(() => {
-					setIsLoadingPreview(false);
-				});
-		}
-	}, [open, item]);
+			try {
+				const res = await previewClinicalRollback(item.id);
+				if (cancelled) return;
+				setPreview(res);
+				setVisibleChanges(20);
+			} catch (err) {
+				if (cancelled) return;
+				console.error("[Rollback] Failed to load preview:", err);
+				setPreviewError(
+					err instanceof Error ? err.message : t("previewErrorFallback")
+				);
+			} finally {
+				if (!cancelled) setIsLoadingPreview(false);
+			}
+		};
+
+		void load();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [open, item, t]);
 
 	if (!item) return null;
 
-	const handleApplyRollback = async () => {
-		if (!preview || !preview.canApply) return;
+	const requiredCode = buildConfirmationCode(preview, item);
+	const isCodeMatched =
+		confirmationInput.trim().toUpperCase() === requiredCode && requiredCode.length > 0;
 
+	const handleCopyCode = async () => {
+		try {
+			await navigator.clipboard.writeText(requiredCode);
+			setCopied(true);
+			toast.success(t("confirmCopied"));
+			setTimeout(() => setCopied(false), 1500);
+		} catch {
+			// Clipboard can be unavailable (permissions/insecure context); the code stays visible.
+		}
+	};
+
+	const handleApplyRollback = async () => {
+		if (!preview || !preview.canApply || isApplying) return;
+
+		if (!isCodeMatched) {
+			setConfirmationError(t("confirmMismatch"));
+			return;
+		}
+
+		setConfirmationError(null);
 		setIsApplying(true);
 		try {
 			const res = await applyClinicalRollback(item.id);
 			setResult(res);
-			toast.success("Hoàn tác dữ liệu lâm sàng thành công!");
+			toast.success(t("applySuccessToast"));
 			if (onSuccess) {
 				onSuccess();
 			}
 		} catch (err) {
-			console.error("Lỗi khi thực thi rollback:", err);
-			toast.error(
-				err instanceof Error
-					? err.message
-					: "Hoàn tác thất bại. Vui lòng kiểm tra lại quyền hoặc xung đột dữ liệu."
-			);
+			console.error("[Rollback] Apply failed:", err);
+			toast.error(err instanceof Error ? err.message : t("applyErrorToast"));
 		} finally {
 			setIsApplying(false);
 		}
@@ -112,14 +199,14 @@ export function AuditLogRollbackDialog({
 						<div>
 							<div className="flex items-center gap-2 flex-wrap mb-1">
 								<h2 className="text-base sm:text-lg font-bold text-text-primary leading-snug">
-									Xem trước &amp; Hoàn tác Dữ liệu (Clinical Rollback)
+									{t("title")}
 								</h2>
 								<span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-warning/10 text-warning border border-warning/30">
-									Admin Action
+									{t("adminAction")}
 								</span>
 							</div>
 							<p className="text-xs text-text-secondary font-mono">
-								ID Sự kiện: {item.id} • Dịch vụ: {item.service}
+								{t("eventMeta", { id: item.id, service: item.service })}
 							</p>
 						</div>
 					</div>
@@ -135,32 +222,32 @@ export function AuditLogRollbackDialog({
 							</div>
 							<div>
 								<h3 className="text-base font-bold text-success">
-									Hoàn tác dữ liệu thành công!
+									{t("successTitle")}
 								</h3>
 								<p className="text-xs text-success mt-1">
-									Dữ liệu lâm sàng đã được phục hồi về phiên bản trước sự kiện này một cách an toàn.
+									{t("successDesc")}
 								</p>
 							</div>
 
 							<div className="bg-surface p-4 rounded-xl border border-success/30 text-left max-w-lg mx-auto space-y-2 text-xs font-mono">
 								<div className="flex justify-between py-1 border-b border-border-subtle">
-									<span className="text-text-secondary">Mã giao dịch Hoàn tác:</span>
+									<span className="text-text-secondary">{t("rollbackAuditId")}</span>
 									<span className="font-bold text-text-primary">{result.rollbackAuditEntryId}</span>
 								</div>
 								<div className="flex justify-between py-1 border-b border-border-subtle">
-									<span className="text-text-secondary">Mã ChangeSet:</span>
+									<span className="text-text-secondary">{t("changeSetIdLabel")}</span>
 									<span className="font-bold text-text-primary">{result.changeSetId}</span>
 								</div>
 								<div className="flex justify-between py-1 border-b border-border-subtle">
-									<span className="text-text-secondary">Số thay đổi đã áp dụng:</span>
+									<span className="text-text-secondary">{t("changesApplied")}</span>
 									<span className="font-bold text-success">
-										{result.changesApplied} đối tượng
+										{t("objectsSuffix", { count: result.changesApplied })}
 									</span>
 								</div>
 								<div className="flex justify-between py-1">
-									<span className="text-text-secondary">Thời điểm hoàn tất:</span>
+									<span className="text-text-secondary">{t("completedAt")}</span>
 									<span className="text-text-primary">
-										{new Date(result.completedAt).toLocaleString("vi-VN")}
+										{new Date(result.completedAt).toLocaleString(locale)}
 									</span>
 								</div>
 							</div>
@@ -169,14 +256,14 @@ export function AuditLogRollbackDialog({
 						<div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
 							<Loader2 className="w-8 h-8 animate-spin text-primary" />
 							<p className="text-xs text-text-secondary font-medium">
-								Đang kết nối vi dịch vụ Clinical để phân tích và kiểm tra xung đột dữ liệu...
+								{t("previewLoading")}
 							</p>
 						</div>
 					) : previewError ? (
 						<div className="p-4 rounded-xl bg-error/10 border border-error/30 text-error flex items-start gap-3">
 							<AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
 							<div>
-								<h4 className="font-bold">Không thể tải bản xem trước hoàn tác</h4>
+								<h4 className="font-bold">{t("previewErrorTitle")}</h4>
 								<p className="mt-0.5">{previewError}</p>
 							</div>
 						</div>
@@ -186,30 +273,24 @@ export function AuditLogRollbackDialog({
 							{preview.canApply ? (
 								<div className="p-3.5 rounded-xl bg-success/10 border border-success/30 text-success flex items-center gap-2.5">
 									<CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-									<span className="font-medium text-xs">
-										Sẵn sàng hoàn tác: Dữ liệu hiện tại hoàn toàn khớp và không có xung đột phiên bản.
-									</span>
+									<span className="font-medium text-xs">{t("ready")}</span>
 								</div>
 							) : (
 								<div className="p-3.5 rounded-xl bg-error/10 border border-error/30 text-error flex items-start gap-2.5">
 									<AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
 									<div>
-										<p className="font-bold text-xs">
-											Phát hiện xung đột: Không thể hoàn tác tự động cho sự kiện này.
-										</p>
-										<p className="text-[11px] text-error mt-0.5">
-											Dữ liệu đối tượng đã bị thay đổi hoặc bản ghi gốc không hợp lệ để đảo ngược.
-										</p>
+										<p className="font-bold text-xs">{t("conflictTitle")}</p>
+										<p className="text-[11px] text-error mt-0.5">{t("conflictDesc")}</p>
 									</div>
 								</div>
 							)}
 
-							{/* Conflicts List (nếu có) */}
+							{/* Conflicts List */}
 							{preview.conflicts.length > 0 && (
 								<div className="p-3.5 rounded-xl bg-warning/10 border border-warning/30 space-y-2">
 									<div className="flex items-center gap-2 font-bold text-warning">
 										<AlertTriangle className="w-4 h-4 text-warning" />
-										<span>Chi tiết xung đột ({preview.conflicts.length})</span>
+										<span>{t("conflictDetails", { count: preview.conflicts.length })}</span>
 									</div>
 									<div className="space-y-1.5 pl-6 list-disc">
 										{preview.conflicts.map((c, i) => (
@@ -226,74 +307,99 @@ export function AuditLogRollbackDialog({
 								<div className="flex items-center justify-between">
 									<h4 className="font-bold text-text-primary flex items-center gap-1.5 text-xs">
 										<History className="w-4 h-4 text-primary" />
-										<span>Các thay đổi dự kiến sẽ được đảo ngược ({preview.changes.length})</span>
+										<span>{t("changesTitle", { count: preview.changes.length })}</span>
 									</h4>
 									<span className="text-[11px] text-text-secondary font-mono">
-										ChangeSet: {preview.changeSetId}
+										{t("changeSet", { id: preview.changeSetId })}
 									</span>
 								</div>
 
-								{preview.changes.map((change, idx) => (
-									<div
-										key={idx}
-										className="rounded-xl border border-border-default bg-surface overflow-hidden shadow-2xs"
-									>
-										{/* Change Header */}
-										<div className="px-3.5 py-2.5 bg-surface-secondary border-b border-border-default flex items-center justify-between flex-wrap gap-2">
-											<div className="flex items-center gap-2">
-												<span
-													className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold ${
-														change.operation === "Insert"
-															? "bg-success/10 text-success"
-															: change.operation === "Delete"
-															? "bg-error/10 text-error"
-															: "bg-info/10 text-info"
-													}`}
-												>
-													{change.operation}
-												</span>
-												<span className="font-bold text-text-primary text-xs">
-													{change.entityType}
-												</span>
-											</div>
-											<span className="text-text-secondary text-xs">{change.description}</span>
-										</div>
-
-										{/* Side-by-side Diff */}
-										<div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border-default bg-surface text-[11px] font-mono">
-											{/* Cột 1: Giá trị hiện tại */}
-											<div className="p-3 overflow-x-auto">
-												<div className="text-error font-bold mb-1.5 flex items-center gap-1.5">
-													<span className="w-2 h-2 rounded-full bg-error" />
-													<span>Giá trị hiện tại trong hệ thống</span>
-												</div>
-												<pre className="text-text-tertiary max-h-40 overflow-y-auto whitespace-pre-wrap">
-													{change.currentJson || "(Không có)"}
-												</pre>
-											</div>
-
-											{/* Cột 2: Giá trị sau hoàn tác */}
-											<div className="p-3 overflow-x-auto bg-background/50">
-												<div className="text-success font-bold mb-1.5 flex items-center gap-1.5">
-													<span className="w-2 h-2 rounded-full bg-success" />
-													<span>Giá trị phục hồi sau Hoàn tác</span>
-												</div>
-												<pre className="text-success max-h-40 overflow-y-auto whitespace-pre-wrap">
-													{change.targetJson || "(Sẽ bị thu hồi / xóa)"}
-												</pre>
-											</div>
-										</div>
-									</div>
+								{preview.changes.slice(0, visibleChanges).map((change, idx) => (
+									<RollbackChangeDiff key={idx} change={change} />
 								))}
+
+								{preview.changes.length > visibleChanges && (
+									<div className="flex justify-center pt-1">
+										<Button
+											type="button"
+											variant="outline"
+											onClick={() =>
+												setVisibleChanges((value) =>
+													Math.min(value + 20, preview.changes.length)
+												)
+											}
+											className="h-8 px-4 rounded-lg border-border-default text-text-primary hover:bg-surface-secondary text-xs font-semibold cursor-pointer"
+										>
+											{t("showMore", {
+												count: Math.min(20, preview.changes.length - visibleChanges),
+											})}
+										</Button>
+									</div>
+								)}
 							</div>
 
 							{/* Warning Message */}
 							<div className="p-3 rounded-xl bg-warning/10 border border-warning/30 flex items-start gap-2.5 text-warning text-xs">
 								<ShieldAlert className="w-4 h-4 text-warning shrink-0 mt-0.5" />
-								<span>
-									<strong>Lưu ý:</strong> Thao tác này sẽ khôi phục dữ liệu lâm sàng về phiên bản trước đó và tự động ghi lại một sự kiện kiểm toán mới mang tên <em>Clinical Rollback</em>.
-								</span>
+								<span>{t("warning")}</span>
 							</div>
+
+							{/* Confirmation code */}
+							{preview.canApply && (
+								<div className="rounded-xl border border-warning/40 bg-warning/5 p-3.5 space-y-2.5">
+									<div>
+										<p className="font-bold text-text-primary text-xs">
+											{t("confirmTitle")}
+										</p>
+										<p className="text-[11px] text-text-secondary mt-0.5">
+											{t("confirmHint")}
+										</p>
+									</div>
+
+									<div className="flex items-center gap-2 flex-wrap">
+										<span className="text-[11px] font-semibold text-text-secondary">
+											{t("confirmLabel")}:
+										</span>
+										<code className="rounded-md border border-warning/40 bg-surface px-2.5 py-1 font-mono text-sm font-bold tracking-[0.2em] text-warning">
+											{requiredCode}
+										</code>
+										<button
+											type="button"
+											onClick={handleCopyCode}
+											className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10.5px] font-semibold text-primary hover:bg-primary/10 cursor-pointer"
+										>
+											{copied ? (
+												<Check className="h-3.5 w-3.5" />
+											) : (
+												<Copy className="h-3.5 w-3.5" />
+											)}
+											<span>{t("confirmCopy")}</span>
+										</button>
+									</div>
+
+									<Input
+										value={confirmationInput}
+										onChange={(event) => {
+											setConfirmationInput(event.target.value);
+											if (confirmationError) setConfirmationError(null);
+										}}
+										placeholder={t("confirmPlaceholder")}
+										autoComplete="off"
+										spellCheck={false}
+										aria-label={t("confirmLabel")}
+										aria-invalid={Boolean(confirmationError)}
+										className={`h-9 max-w-xs font-mono text-xs uppercase tracking-widest ${
+											confirmationError ? "border-error focus-visible:ring-error/40" : ""
+										}`}
+									/>
+									{confirmationError && (
+										<p className="flex items-center gap-1 text-[11px] font-semibold text-error">
+											<AlertCircle className="h-3.5 w-3.5" />
+											{confirmationError}
+										</p>
+									)}
+								</div>
+							)}
 						</>
 					) : null}
 				</div>
@@ -307,16 +413,21 @@ export function AuditLogRollbackDialog({
 						disabled={isApplying}
 						className="h-9 px-4 rounded-xl border-border-default text-text-primary hover:bg-surface-secondary text-xs font-semibold cursor-pointer"
 					>
-						{result ? "Đóng" : "Quay lại"}
+						{result ? t("close") : t("back")}
 					</Button>
 
 					{!result && (
 						<Button
 							type="button"
 							onClick={handleApplyRollback}
-							disabled={!preview?.canApply || isApplying || isLoadingPreview}
+							disabled={
+								!preview?.canApply ||
+								!isCodeMatched ||
+								isApplying ||
+								isLoadingPreview
+							}
 							className={`h-9 px-5 rounded-xl font-semibold text-xs cursor-pointer shadow-xs gap-2 ${
-								preview?.canApply
+								preview?.canApply && isCodeMatched
 									? "bg-warning hover:bg-warning/90 text-primary-foreground"
 									: "bg-surface-tertiary text-text-tertiary cursor-not-allowed"
 							}`}
@@ -324,12 +435,12 @@ export function AuditLogRollbackDialog({
 							{isApplying ? (
 								<>
 									<Loader2 className="w-3.5 h-3.5 animate-spin" />
-									<span>Đang hoàn tác dữ liệu...</span>
+									<span>{t("applying")}</span>
 								</>
 							) : (
 								<>
 									<RotateCcw className="w-3.5 h-3.5" />
-									<span>Xác nhận Hoàn tác (Rollback)</span>
+									<span>{t("apply")}</span>
 								</>
 							)}
 						</Button>
@@ -339,4 +450,3 @@ export function AuditLogRollbackDialog({
 		</Dialog.Root>
 	);
 }
-

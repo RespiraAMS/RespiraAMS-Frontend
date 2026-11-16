@@ -29,10 +29,20 @@ export function setRememberedEmail(email: string, remember: boolean): void {
 }
 
 /**
- * API: POST /api/v1/auth/email-verification
- * Gửi email xác thực tài khoản.
+ * Verification tokens are single-use on the backend: a second request with the
+ * same token returns 401 even though the account is already confirmed. Both the
+ * verify page and the login page can mount the same confirmation, and React
+ * StrictMode mounts effects twice in development, so requests are coalesced here.
  */
-export async function sendEmailVerification(
+const CONFIRM_SUCCESS_TTL_MS = 5 * 60 * 1000;
+const SEND_DEDUPE_TTL_MS = 30 * 1000;
+
+const confirmInFlight = new Map<string, Promise<boolean>>();
+const confirmedAt = new Map<string, number>();
+const sendInFlight = new Map<string, Promise<boolean>>();
+const sentAt = new Map<string, number>();
+
+async function requestEmailVerification(
 	email: string,
 	sagaId?: string
 ): Promise<boolean> {
@@ -56,7 +66,7 @@ export async function sendEmailVerification(
 	if (!response.ok || payload?.error) {
 		throw new Error(
 			payload?.error?.description ||
-				"Không thể gửi email xác thực. Vui lòng thử lại sau."
+			"Không thể gửi email xác thực. Vui lòng thử lại sau."
 		);
 	}
 
@@ -64,10 +74,37 @@ export async function sendEmailVerification(
 }
 
 /**
- * API: POST /api/v1/auth/email-verification/confirm
- * Xác nhận email bằng mã token từ liên kết xác nhận.
+ * API: POST /api/v1/auth/email-verification
+ * Gửi email xác thực tài khoản. Yêu cầu trùng trong 30 giây được gộp lại.
  */
-export async function confirmEmailVerification(token: string): Promise<boolean> {
+export function sendEmailVerification(
+	email: string,
+	sagaId?: string
+): Promise<boolean> {
+	const key = `${email.trim().toLowerCase()}|${sagaId ?? ""}`;
+
+	const sentTimestamp = sentAt.get(key);
+	if (sentTimestamp && Date.now() - sentTimestamp < SEND_DEDUPE_TTL_MS) {
+		return Promise.resolve(true);
+	}
+
+	const pending = sendInFlight.get(key);
+	if (pending) return pending;
+
+	const task = requestEmailVerification(email, sagaId)
+		.then((result) => {
+			sentAt.set(key, Date.now());
+			return result;
+		})
+		.finally(() => {
+			sendInFlight.delete(key);
+		});
+
+	sendInFlight.set(key, task);
+	return task;
+}
+
+async function requestEmailConfirmation(token: string): Promise<boolean> {
 	const body: VerifyEmailRequest = { token };
 
 	const response = await fetch(`${API_BASE_URL}/auth/email-verification/confirm`, {
@@ -85,11 +122,40 @@ export async function confirmEmailVerification(token: string): Promise<boolean> 
 	if (!response.ok || payload?.error) {
 		throw new Error(
 			payload?.error?.description ||
-				"Liên kết xác thực không hợp lệ hoặc đã hết hạn."
+			"Liên kết xác thực không hợp lệ hoặc đã hết hạn."
 		);
 	}
 
 	return true;
+}
+
+/**
+ * API: POST /api/v1/auth/email-verification/confirm
+ * Xác nhận email bằng mã token từ liên kết xác nhận.
+ * Token chỉ dùng được một lần nên kết quả thành công được cache ngắn hạn.
+ */
+export function confirmEmailVerification(token: string): Promise<boolean> {
+	const key = token.trim();
+
+	const confirmedTimestamp = confirmedAt.get(key);
+	if (confirmedTimestamp && Date.now() - confirmedTimestamp < CONFIRM_SUCCESS_TTL_MS) {
+		return Promise.resolve(true);
+	}
+
+	const pending = confirmInFlight.get(key);
+	if (pending) return pending;
+
+	const task = requestEmailConfirmation(key)
+		.then((result) => {
+			confirmedAt.set(key, Date.now());
+			return result;
+		})
+		.finally(() => {
+			confirmInFlight.delete(key);
+		});
+
+	confirmInFlight.set(key, task);
+	return task;
 }
 
 /**

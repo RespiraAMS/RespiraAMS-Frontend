@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
 import { UserStatsCards } from "./UserStatsCards";
@@ -66,6 +67,8 @@ function matchesUserFilters(
 
 export function AdminUsersView() {
 	const queryClient = useQueryClient();
+	const t = useTranslations("admin.users");
+	const refreshTimerRef = useRef<number | null>(null);
 
 	const [filters, setFilters] = useState<UserFilters>({
 		search: "",
@@ -99,6 +102,8 @@ export function AdminUsersView() {
 				role: filters.role,
 				status: filters.status,
 			}),
+		staleTime: 125_000,
+		refetchOnWindowFocus: false,
 	});
 
 	const users = data?.items || [];
@@ -141,10 +146,22 @@ export function AdminUsersView() {
 	// để không ghi đè các cập nhật lạc quan bằng dữ liệu cũ.
 	const refreshUsersAfterCacheTtl = () => {
 		if (typeof window === "undefined") return;
-		window.setTimeout(() => {
+		if (refreshTimerRef.current !== null) {
+			window.clearTimeout(refreshTimerRef.current);
+		}
+		refreshTimerRef.current = window.setTimeout(() => {
+			refreshTimerRef.current = null;
 			void queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
 		}, 125_000);
 	};
+
+	useEffect(() => {
+		return () => {
+			if (refreshTimerRef.current !== null) {
+				window.clearTimeout(refreshTimerRef.current);
+			}
+		};
+	}, []);
 
 	// Create user
 	const handleCreateUser = async (payload: CreateUserPayload) => {
@@ -155,12 +172,10 @@ export function AdminUsersView() {
 
 			const displayName =
 				[payload.lastName, payload.firstName].filter(Boolean).join(" ") || payload.email;
-			showNotice(`Đã tạo tài khoản thành công cho ${displayName}`);
+			showNotice(t("toast.created", { name: displayName }));
 
 			if (!result.emailSent) {
-				toast.warning(
-					"Tài khoản đã tạo nhưng chưa gửi được email xác thực. Vui lòng kiểm tra cấu hình email của backend."
-				);
+				toast.warning(t("toast.emailFailed"));
 			}
 
 			if (result.user && matchesUserFilters(result.user, filters, debouncedSearch)) {
@@ -178,7 +193,7 @@ export function AdminUsersView() {
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error creating user:", error);
-			showNotice(error instanceof Error ? error.message : "Tạo người dùng thất bại", "error");
+			showNotice(error instanceof Error ? error.message : t("toast.createError"), "error");
 		} finally {
 			setIsSubmittingForm(false);
 		}
@@ -191,16 +206,27 @@ export function AdminUsersView() {
 			const result = await updateUser(payload);
 			setIsFormDialogOpen(false);
 			setEditingUser(null);
-			showNotice(`Đã cập nhật hồ sơ thành công`);
+			showNotice(t("toast.updated"));
 
 			updateUsersCache((current) => {
 				const previous = current.items.find((u) => u.id === result.user.id);
 				if (!previous) return current;
 
-				const items = current.items.map((u) => (u.id === result.user.id ? result.user : u));
+				const merged: UserItem = {
+					...result.user,
+					createdAt: previous.createdAt,
+					isEmailConfirmed: previous.isEmailConfirmed,
+					role: previous.role,
+					status: previous.status,
+					doctorId: previous.doctorId,
+					mediaId: previous.mediaId,
+					avatarUrl: result.user.avatarUrl ?? previous.avatarUrl,
+				};
+
+				const items = current.items.map((u) => (u.id === merged.id ? merged : u));
 				const stats = applyUserStatsDelta(
 					applyUserStatsDelta(current.stats, previous, -1),
-					result.user,
+					merged,
 					1
 				);
 				return { ...current, items, stats };
@@ -210,7 +236,7 @@ export function AdminUsersView() {
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error updating user:", error);
-			showNotice(error instanceof Error ? error.message : "Cập nhật người dùng thất bại", "error");
+			showNotice(error instanceof Error ? error.message : t("toast.updateError"), "error");
 		} finally {
 			setIsSubmittingForm(false);
 		}
@@ -223,7 +249,11 @@ export function AdminUsersView() {
 			await deleteUser(user.id, user.doctorId, user.mediaId);
 			setIsDeleteOpen(false);
 			setDeleteTargetUser(null);
-			showNotice(`Đã xóa người dùng ${user.lastName} ${user.firstName}`);
+			showNotice(
+				t("toast.deleted", {
+					name: `${user.lastName} ${user.firstName}`.trim() || user.email,
+				})
+			);
 
 			updateUsersCache((current) => {
 				const removed = current.items.find((u) => u.id === user.id);
@@ -239,7 +269,7 @@ export function AdminUsersView() {
 			queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
 		} catch (error) {
 			console.error("Error deleting user:", error);
-			showNotice(error instanceof Error ? error.message : "Xóa người dùng thất bại", "error");
+			showNotice(error instanceof Error ? error.message : t("toast.deleteError"), "error");
 		} finally {
 			setIsDeleting(false);
 		}
@@ -249,8 +279,12 @@ export function AdminUsersView() {
 	const handleToggleStatus = async (user: UserItem) => {
 		try {
 			const updated = await toggleUserStatus(user.id, user);
+			const displayName =
+				`${user.lastName} ${user.firstName}`.trim() || user.email;
 			showNotice(
-				`Đã ${updated.status === "Active" ? "mở khóa" : "khóa"} tài khoản ${user.lastName} ${user.firstName} (${user.email})`
+				updated.status === "Active"
+					? t("toast.statusUnlocked", { name: displayName, email: user.email })
+					: t("toast.statusLocked", { name: displayName, email: user.email })
 			);
 
 			updateUsersCache((current) => {
@@ -271,7 +305,7 @@ export function AdminUsersView() {
 		} catch (error) {
 			console.error("Error toggling status:", error);
 			showNotice(
-				error instanceof Error ? error.message : "Không thể thay đổi trạng thái tài khoản",
+				error instanceof Error ? error.message : t("toast.statusError"),
 				"error"
 			);
 		}
@@ -287,11 +321,11 @@ export function AdminUsersView() {
 							<Users className="w-5 h-5" />
 						</div>
 						<h1 className="text-xl sm:text-2xl font-extrabold text-text-primary dark:text-primary-foreground tracking-tight">
-							Quản lý người dùng
+							{t("title")}
 						</h1>
 					</div>
 					<p className="text-xs sm:text-sm text-text-secondary dark:text-text-tertiary mt-1">
-						Quản trị danh sách tài khoản y bác sĩ, trưởng khoa, quản lý chuyên môn và phân quyền hoạt động hệ thống Respira
+						{t("pageSubtitle")}
 					</p>
 				</div>
 			</div>
