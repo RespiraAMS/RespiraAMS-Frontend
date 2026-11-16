@@ -1,14 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { AuditLogItem, AuditLogStats } from "../types";
-import {
-	fetchAuditLogs,
-	exportAuditLogsToCsv,
-	exportAuditLogsToJson,
-} from "../api";
+import { fetchAuditLogs } from "../api";
 import { AuditLogStatsCards } from "./AuditLogStatsCards";
 import { AuditLogToolbar } from "./AuditLogToolbar";
 import { AuditLogsTable } from "./AuditLogsTable";
@@ -18,6 +15,7 @@ import { AuditLogDetailDialog } from "./AuditLogDetailDialog";
 const PAGE_SIZE = 10;
 
 export function AdminAuditLogsView() {
+	const t = useTranslations("admin.auditLogs");
 	const [timeRange, setTimeRange] = useState("ALL");
 	const [page, setPage] = useState(1);
 
@@ -29,7 +27,7 @@ export function AdminAuditLogsView() {
 		warningCount: 0,
 		errorCount: 0,
 		uniqueActorsCount: 0,
-		successRatePercent: 100,
+		successRatePercent: 0,
 	});
 
 	const [isLoading, setIsLoading] = useState(true);
@@ -54,7 +52,7 @@ export function AdminAuditLogsView() {
 			} catch (err) {
 				if (cancelled) return;
 				console.error("[AdminAuditLogsView] Failed to load audit logs:", err);
-				toast.error("Không thể tải nhật ký kiểm toán. Vui lòng thử lại.");
+				toast.error(t("loadErrorToast"));
 			} finally {
 				if (!cancelled) {
 					setIsLoading(false);
@@ -68,7 +66,7 @@ export function AdminAuditLogsView() {
 		return () => {
 			cancelled = true;
 		};
-	}, [page, timeRange, reloadKey]);
+	}, [page, timeRange, reloadKey, t]);
 
 	const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 	const currentPage = Math.min(page, pageCount);
@@ -76,30 +74,12 @@ export function AdminAuditLogsView() {
 	const handleRefresh = () => {
 		setIsRefreshing(true);
 		setReloadKey((value) => value + 1);
-		toast.info("Đang làm mới nhật ký kiểm toán...");
+		toast.info(t("refreshingToast"));
 	};
 
 	const handleTimeRangeChange = (value: string) => {
 		setTimeRange(value);
 		setPage(1);
-	};
-
-	const handleExportCsv = () => {
-		if (logs.length === 0) {
-			toast.warning("Không có dữ liệu nhật ký để xuất");
-			return;
-		}
-		exportAuditLogsToCsv(logs);
-		toast.success("Đã xuất file CSV nhật ký kiểm toán thành công");
-	};
-
-	const handleExportJson = () => {
-		if (logs.length === 0) {
-			toast.warning("Không có dữ liệu nhật ký để xuất");
-			return;
-		}
-		exportAuditLogsToJson(logs);
-		toast.success("Đã xuất file JSON nhật ký kiểm toán thành công");
 	};
 
 	const handleViewDetail = (item: AuditLogItem) => {
@@ -116,27 +96,25 @@ export function AdminAuditLogsView() {
 						<ShieldCheck className="w-5 h-5" />
 					</div>
 					<h1 className="text-xl sm:text-2xl font-extrabold text-text-primary tracking-tight">
-						Nhật ký kiểm toán &amp; Bảo mật
+						{t("pageTitle")}
 					</h1>
 				</div>
 				<p className="text-xs sm:text-sm text-text-secondary mt-1">
-					Theo dõi toàn diện các giao dịch phân tán, hoạt động đăng nhập, chỉnh sửa phác đồ và truy cập dữ liệu y tế trong hệ thống Respira
+					{t("pageSubtitle")}
 				</p>
 			</div>
 
 			{/* Stats Cards */}
 			<AuditLogStatsCards stats={stats} isLoading={isLoading} />
 			<p className="text-[11px] text-text-tertiary -mt-3">
-				Tổng sự kiện là toàn hệ thống; thành công / cảnh báo / lỗi được tính trên trang hiện tại.
+				{t("statsNote")}
 			</p>
 
-			{/* Toolbar (Time range, Export, Refresh) */}
+			{/* Toolbar (Time range & Refresh) */}
 			<AuditLogToolbar
 				timeRange={timeRange}
 				onTimeRangeChange={handleTimeRangeChange}
 				onRefresh={handleRefresh}
-				onExportCsv={handleExportCsv}
-				onExportJson={handleExportJson}
 				isRefreshing={isRefreshing}
 				totalResults={total}
 			/>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface SnapshotDiffProps {
 	before?: unknown;
@@ -85,7 +86,7 @@ function buildRows(before: unknown, after: unknown): SnapshotRow[] {
 		if (before === undefined && after === undefined) return [];
 		return [
 			{
-				key: "Giá trị",
+				key: "value",
 				before,
 				after,
 				changed: comparable(before) !== comparable(after),
@@ -109,11 +110,13 @@ function buildRows(before: unknown, after: unknown): SnapshotRow[] {
 }
 
 function DiffValue({ value }: { value: unknown }) {
+	const t = useTranslations("admin.auditLogs.diff");
+
 	if (value === undefined) {
-		return <span className="text-text-tertiary">—</span>;
+		return <span className="text-text-tertiary">{t("emptyValue")}</span>;
 	}
 	if (value === null) {
-		return <span className="text-text-tertiary">null</span>;
+		return <span className="text-text-tertiary">{t("nullValue")}</span>;
 	}
 	if (typeof value === "object") {
 		return (
@@ -132,6 +135,7 @@ export function SnapshotDiff({
 	defaultShowUnchanged = false,
 	className,
 }: SnapshotDiffProps) {
+	const t = useTranslations("admin.auditLogs.diff");
 	const [showUnchanged, setShowUnchanged] = useState(defaultShowUnchanged);
 
 	const parsedBefore = parseSnapshot(before);
@@ -148,7 +152,7 @@ export function SnapshotDiff({
 		<div className={className}>
 			<div className="flex items-center justify-between gap-3 flex-wrap border-b border-border-subtle px-3 py-2">
 				<span className="text-[11px] font-semibold text-text-secondary">
-					{changedRows.length} trường thay đổi / {rows.length} trường
+					{t("summary", { changed: changedRows.length, total: rows.length })}
 				</span>
 				{hiddenUnchanged > 0 && (
 					<button
@@ -157,8 +161,8 @@ export function SnapshotDiff({
 						className="cursor-pointer text-[10.5px] font-semibold text-primary hover:underline"
 					>
 						{showUnchanged
-							? "Ẩn trường không đổi"
-							: `Hiện ${hiddenUnchanged} trường không đổi`}
+							? t("hideUnchanged")
+							: t("showUnchanged", { count: hiddenUnchanged })}
 					</button>
 				)}
 			</div>
@@ -173,9 +177,9 @@ export function SnapshotDiff({
 						</colgroup>
 						<thead>
 							<tr className="bg-surface-secondary/70 text-text-secondary">
-								<th className="px-3 py-2 text-left font-bold">Trường</th>
-								<th className="px-3 py-2 text-left font-bold text-error">Trước</th>
-								<th className="px-3 py-2 text-left font-bold text-success">Sau</th>
+								<th className="px-3 py-2 text-left font-bold">{t("field")}</th>
+								<th className="px-3 py-2 text-left font-bold text-error">{t("before")}</th>
+								<th className="px-3 py-2 text-left font-bold text-success">{t("after")}</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-border-subtle">
@@ -185,7 +189,7 @@ export function SnapshotDiff({
 									className={row.changed ? "bg-warning/5" : "opacity-60"}
 								>
 									<td className="break-all px-3 py-2 align-top font-semibold text-text-primary">
-										{row.key}
+										{row.key === "value" ? t("rowValue") : row.key}
 									</td>
 									<td
 										className={`break-all px-3 py-2 align-top ${
@@ -207,33 +211,31 @@ export function SnapshotDiff({
 					</table>
 				</div>
 			) : (
-				<p className="px-3.5 py-3 text-[11px] text-text-tertiary">
-					Không có trường thay đổi.
-				</p>
+				<p className="px-3.5 py-3 text-[11px] text-text-tertiary">{t("noChanges")}</p>
 			)}
 
 			<details className="border-t border-border-subtle">
 				<summary className="cursor-pointer px-3.5 py-2 text-[10.5px] font-semibold text-primary">
-					Xem JSON gốc
+					{t("rawJson")}
 				</summary>
 				<div className="grid grid-cols-1 divide-y divide-border-default md:grid-cols-2 md:divide-x md:divide-y-0">
 					<div className="p-3">
 						<div className="mb-1.5 text-[10.5px] font-bold text-error">
-							Giá trị hiện tại
+							{t("currentValue")}
 						</div>
 						<pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all text-[10.5px] text-text-tertiary">
 							{displayBefore === undefined
-								? "(Không có)"
+								? t("none")
 								: JSON.stringify(displayBefore, null, 2)}
 						</pre>
 					</div>
 					<div className="bg-background/50 p-3">
 						<div className="mb-1.5 text-[10.5px] font-bold text-success">
-							Giá trị sau hoàn tác
+							{t("targetValue")}
 						</div>
 						<pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all text-[10.5px] text-success">
 							{displayAfter === undefined
-								? "(Không có)"
+								? t("none")
 								: JSON.stringify(displayAfter, null, 2)}
 						</pre>
 					</div>

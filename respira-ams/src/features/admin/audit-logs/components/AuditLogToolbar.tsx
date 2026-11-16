@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Download, FileSpreadsheet, FileJson, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	Select,
@@ -11,19 +11,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface AuditLogToolbarProps {
 	timeRange: string;
 	onTimeRangeChange: (value: string) => void;
 	onRefresh: () => void;
-	onExportCsv: () => void;
-	onExportJson: () => void;
 	isRefreshing?: boolean;
 	totalResults: number;
 }
@@ -32,8 +24,6 @@ export function AuditLogToolbar({
 	timeRange,
 	onTimeRangeChange,
 	onRefresh,
-	onExportCsv,
-	onExportJson,
 	isRefreshing = false,
 	totalResults,
 }: AuditLogToolbarProps) {
@@ -75,30 +65,6 @@ export function AuditLogToolbar({
 					/>
 					<span>{t("refresh", { defaultMessage: "Làm mới" })}</span>
 				</Button>
-
-				{/* Export Dropdown */}
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button
-							type="button"
-							variant="outline"
-							className="h-9.5 px-3.5 rounded-lg border-border-default text-xs font-semibold text-text-primary hover:bg-surface-secondary gap-1.5 cursor-pointer shadow-2xs"
-						>
-							<Download className="w-3.5 h-3.5 text-text-secondary" />
-							<span>{t("exportLogs")}</span>
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end" className="w-44 text-xs font-medium">
-						<DropdownMenuItem onClick={onExportCsv} className="gap-2 cursor-pointer">
-							<FileSpreadsheet className="w-4 h-4 text-success" />
-							<span>{t("exportCsv")}</span>
-						</DropdownMenuItem>
-						<DropdownMenuItem onClick={onExportJson} className="gap-2 cursor-pointer">
-							<FileJson className="w-4 h-4 text-primary" />
-							<span>{t("exportJson")}</span>
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
 			</div>
 		</div>
 	);

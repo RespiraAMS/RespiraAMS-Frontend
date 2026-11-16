@@ -46,41 +46,6 @@ function parseDetails(rawJson: string): AuditDetails {
 	}
 }
 
-function mapActionTitle(action: string): string {
-	const actionMap: Record<string, string> = {
-		"Clinical.ClinicalMetric.Updated": "Cập nhật phác đồ đánh giá lâm sàng",
-		"Clinical.ClinicalMetric.Created": "Thêm mới phác đồ đánh giá lâm sàng",
-		"Clinical.ClinicalMetric.SoftDeleted": "Xóa mềm phác đồ đánh giá lâm sàng",
-		"Authentication.LoginSucceeded": "Đăng nhập hệ thống thành công",
-		"Authentication.LoginFailed": "Đăng nhập hệ thống thất bại",
-		"Authentication.LogoutSucceeded": "Đăng xuất khỏi hệ thống",
-		"Authentication.AccountCreated": "Khởi tạo tài khoản người dùng mới",
-		"Authentication.AccountUpdated": "Cập nhật thông tin / trạng thái tài khoản",
-		"Authentication.VerificationEmailFailed": "Gửi email xác thực tài khoản thất bại",
-		"Doctor.ProfileCreated": "Khởi tạo hồ sơ bác sĩ lâm sàng",
-		"Doctor.ProfileUpdated": "Cập nhật thông tin hồ sơ bác sĩ",
-		"Doctor.ProfileMediaLinked": "Cập nhật ảnh đại diện / tài nguyên bác sĩ",
-		"Patient.Patient.Created": "Tiếp nhận hồ sơ bệnh nhân mới",
-		"Patient.Patient.Updated": "Cập nhật thông tin hồ sơ bệnh nhân",
-		"Patient.Patient.SoftDeleted": "Xóa mềm hồ sơ bệnh nhân",
-		"Analysis.ClinicalAnalysis.Created": "Khởi tạo báo cáo phân tích ca bệnh",
-		"Analysis.ClinicalAnalysis.SoftDeleted": "Xóa mềm báo cáo phân tích ca bệnh",
-		"Media.AssetCreated": "Tải lên tệp tài nguyên đa phương tiện",
-		"Media.AssetDeleted": "Xóa tệp tài nguyên đa phương tiện",
-	};
-
-	if (actionMap[action]) return actionMap[action];
-
-	const parts = action.split(".");
-	if (parts.length >= 2) {
-		const op = parts[parts.length - 1];
-		const entity = parts[parts.length - 2];
-		return `${op} trên đối tượng ${entity} (${parts[0]})`;
-	}
-
-	return action;
-}
-
 function mapService(action: string, entityType: string): AuditServiceType {
 	if (action.startsWith("Clinical.") || entityType.includes("Clinical")) return "Clinical";
 	if (action.startsWith("Authentication.") || action.startsWith("Auth.") || entityType === "Account") return "Auth";
@@ -140,26 +105,9 @@ function mapActor(
 	const role = entry.actorRole || "System";
 	const knownEmail = entry.actorAccountId ? actorEmails.get(entry.actorAccountId) : undefined;
 
-	let actor = knownEmail ?? (entry.actorAccountId ? `ID ${entry.actorAccountId.slice(0, 8)}…` : "Hệ thống");
-	let actorName = "Hệ thống tự động phân tán";
+	const actor = knownEmail ?? (entry.actorAccountId ? `ID ${entry.actorAccountId.slice(0, 8)}…` : "");
 
-	if (role === "Admin") {
-		actorName = "Quản trị viên Hệ thống";
-	} else if (role === "MedicalRegulationReviewer" || role === "Manager") {
-		actorName = "Quản lý chuyên môn";
-	} else if (role === "Doctor") {
-		actorName = "Bác sĩ điều trị";
-	} else if (role === "HeadDepartmentDoctor") {
-		actorName = "Trưởng khoa";
-	} else if (role === "System") {
-		actorName = "Hệ thống tự động phân tán";
-	}
-
-	if (!knownEmail && role === "System") {
-		actor = "Hệ thống";
-	}
-
-	return { actor, actorName, role };
+	return { actor, actorName: role, role };
 }
 
 function mapTarget(entry: BackendAuditLogEntry, details: AuditDetails): string {
@@ -183,7 +131,6 @@ export function transformBackendEntryToAuditLogItem(
 	const status = mapStatus(entry.action, details);
 	const { actor, actorName, role } = mapActor(entry, actorEmails);
 	const target = mapTarget(entry, details);
-	const actionTitle = mapActionTitle(entry.action);
 
 	const requestPayload: Record<string, unknown> | undefined =
 		Object.keys(details).length > 0 ? details : undefined;
@@ -194,7 +141,7 @@ export function transformBackendEntryToAuditLogItem(
 		actor,
 		actorName,
 		role,
-		action: actionTitle,
+		action: entry.action,
 		rawAction: entry.action,
 		category,
 		target,
@@ -299,70 +246,6 @@ export async function fetchAuditLogs(
 		total,
 		stats: buildStats(items, total),
 	};
-}
-
-/**
- * Xuất dữ liệu nhật ký kiểm toán ra file Excel (.CSV) với mã hóa UTF-8 BOM
- */
-export function exportAuditLogsToCsv(logs: AuditLogItem[]): void {
-	if (logs.length === 0) return;
-
-	const headers = [
-		"Thời gian",
-		"ID sự kiện",
-		"Tác nhân (Email/ID)",
-		"Họ tên tác nhân",
-		"Vai trò",
-		"Hành động",
-		"Phân loại",
-		"Dịch vụ",
-		"Đối tượng tác động",
-		"Trạng thái",
-		"Correlation ID",
-	];
-
-	const rows = logs.map((l) => [
-		`"${l.timestamp}"`,
-		`"${l.id}"`,
-		`"${l.actor}"`,
-		`"${l.actorName.replace(/"/g, '""')}"`,
-		`"${l.role}"`,
-		`"${l.action.replace(/"/g, '""')}"`,
-		`"${l.category}"`,
-		`"${l.service}"`,
-		`"${l.target.replace(/"/g, '""')}"`,
-		`"${l.status}"`,
-		`"${l.correlationId}"`,
-	]);
-
-	const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
-	const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-	const url = URL.createObjectURL(blob);
-	const link = document.createElement("a");
-	link.href = url;
-	link.setAttribute("download", `RespiraAMS_AuditLogs_${new Date().toISOString().slice(0, 10)}.csv`);
-	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
-	URL.revokeObjectURL(url);
-}
-
-/**
- * Xuất dữ liệu nhật ký kiểm toán ra file JSON
- */
-export function exportAuditLogsToJson(logs: AuditLogItem[]): void {
-	if (logs.length === 0) return;
-
-	const jsonContent = JSON.stringify(logs, null, 2);
-	const blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" });
-	const url = URL.createObjectURL(blob);
-	const link = document.createElement("a");
-	link.href = url;
-	link.setAttribute("download", `RespiraAMS_AuditLogs_${new Date().toISOString().slice(0, 10)}.json`);
-	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
-	URL.revokeObjectURL(url);
 }
 
 /**

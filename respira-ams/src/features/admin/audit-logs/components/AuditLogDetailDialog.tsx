@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Dialog } from "radix-ui";
+import { useLocale, useTranslations } from "next-intl";
 import { AdminDialogContent } from "@/features/admin/components/AdminDialogContent";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import {
 import { AuditLogItem } from "../types";
 import { AuditLogRollbackDialog } from "./AuditLogRollbackDialog";
 import { SnapshotDiff, stripIdFields } from "@/components/ui/snapshot-diff";
+import { useAuditActionLabel, useAuditRoleLabel, useAuditCategoryLabel } from "../use-audit-labels";
 
 interface AuditLogDetailDialogProps {
 	item: AuditLogItem | null;
@@ -29,30 +31,26 @@ export function AuditLogDetailDialog({
 	onRollbackSuccess,
 }: AuditLogDetailDialogProps) {
 	const [isRollbackOpen, setIsRollbackOpen] = useState(false);
+	const t = useTranslations("admin.auditLogs.detail");
+	const tAudit = useTranslations("admin.auditLogs");
+	const locale = useLocale();
+	const actionLabel = useAuditActionLabel();
+	const roleLabel = useAuditRoleLabel();
+	const categoryLabel = useAuditCategoryLabel();
 
 	if (!item) return null;
 
 	const canRollback = item.service === "Clinical" && item.rawAction.startsWith("Clinical.");
 
-	const detailLabels: Record<string, string> = {
-		RoleChanged: "Vai trò thay đổi",
-		EmailChanged: "Email thay đổi",
-		PhoneChanged: "Số điện thoại thay đổi",
-		StatusChanged: "Trạng thái thay đổi",
-		PasswordChanged: "Mật khẩu thay đổi",
-		operation: "Thao tác",
-		changedFields: "Các trường thay đổi",
-		requestPath: "Đường dẫn yêu cầu",
-		after: "Sau thay đổi",
-		before: "Trước thay đổi",
-	};
+	const detailLabels =
+		(t.raw("labels") as Record<string, string> | undefined) ?? {};
 
 	const formatDetailValue = (key: string, value: unknown): string => {
 		if (key === "changedFields" && Array.isArray(value)) {
 			return value.join(", ");
 		}
 		if (value === null || value === undefined) return "—";
-		if (typeof value === "boolean") return value ? "Có" : "Không";
+		if (typeof value === "boolean") return value ? t("flagYes") : t("flagNo");
 		if (typeof value === "object") return JSON.stringify(value, null, 2);
 		return String(value);
 	};
@@ -92,7 +90,7 @@ export function AuditLogDetailDialog({
 	const formatFullTimestamp = (iso: string) => {
 		try {
 			const d = new Date(iso);
-			return d.toLocaleString("vi-VN", {
+			return d.toLocaleString(locale, {
 				weekday: "long",
 				day: "2-digit",
 				month: "2-digit",
@@ -133,7 +131,7 @@ export function AuditLogDetailDialog({
 						<div>
 							<div className="flex items-center gap-2 flex-wrap mb-1">
 								<h2 className="text-base sm:text-lg font-bold text-text-primary leading-snug">
-									Chi tiết Sự kiện Kiểm toán
+									{t("title")}
 								</h2>
 								<span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-surface-secondary text-text-primary">
 									{item.service}
@@ -148,7 +146,7 @@ export function AuditLogDetailDialog({
 					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-surface-secondary/80 p-3.5 rounded-xl border border-border-subtle">
 						<div>
 							<span className="text-[11px] font-semibold text-text-tertiary block mb-0.5">
-								Trạng thái
+								{t("status")}
 							</span>
 							<span
 								className={`inline-flex items-center gap-1 font-bold text-xs ${
@@ -160,25 +158,25 @@ export function AuditLogDetailDialog({
 								}`}
 							>
 								{item.status === "success"
-									? "Thành công (Success)"
+									? t("statusSuccess")
 									: item.status === "warning"
-									? "Cảnh báo (Warning)"
-									: "Thất bại (Error)"}
+									? t("statusWarning")
+									: t("statusError")}
 							</span>
 						</div>
 
 						<div>
 							<span className="text-[11px] font-semibold text-text-tertiary block mb-0.5">
-								Danh mục
+								{t("category")}
 							</span>
 							<span className="font-mono text-xs font-semibold text-text-primary bg-surface border border-border-default px-1.5 py-0.2 rounded">
-								{item.category}
+								{categoryLabel(item.category)}
 							</span>
 						</div>
 
 						<div>
 							<span className="text-[11px] font-semibold text-text-tertiary block mb-0.5">
-								Thời điểm
+								{t("timestamp")}
 							</span>
 							<span className="font-mono text-[11px] font-semibold text-text-primary">
 								{formatFullTimestamp(item.timestamp)}
@@ -189,11 +187,13 @@ export function AuditLogDetailDialog({
 					{/* Action description */}
 					<div className="bg-surface p-4 rounded-xl border border-border-default/80">
 						<span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider block mb-1.5">
-							Hành động đã thực thi
+							{t("action")}
 						</span>
-						<p className="text-sm font-semibold text-text-primary leading-relaxed">{item.action}</p>
+						<p className="text-sm font-semibold text-text-primary leading-relaxed">
+							{actionLabel(item.action)}
+						</p>
 						<div className="mt-2.5 pt-2.5 border-t border-border-subtle flex items-center gap-2 text-xs text-text-secondary">
-							<span className="font-semibold text-text-tertiary">Tài nguyên đối tượng:</span>
+							<span className="font-semibold text-text-tertiary">{t("resource")}</span>
 							<code className="font-mono text-xs bg-surface-secondary px-2 py-0.5 rounded text-primary font-semibold border border-border-default/60">
 								{item.target}
 							</code>
@@ -204,22 +204,24 @@ export function AuditLogDetailDialog({
 					<div className="p-4 rounded-xl border border-border-default/80 space-y-2">
 						<div className="flex items-center gap-2 text-xs font-bold text-text-primary uppercase tracking-wider mb-2">
 							<User className="w-3.5 h-3.5 text-primary" />
-							<span>Thông tin Tác nhân (Actor)</span>
+							<span>{t("actorTitle")}</span>
 						</div>
 						<div className="text-xs space-y-1.5">
 							<div className="flex justify-between">
-								<span className="text-text-secondary font-medium">Họ tên:</span>
-								<span className="font-bold text-text-primary">{item.actorName}</span>
+								<span className="text-text-secondary font-medium">{t("actorName")}</span>
+								<span className="font-bold text-text-primary">
+									{roleLabel(item.role)}
+								</span>
 							</div>
 							<div className="flex justify-between">
-								<span className="text-text-secondary font-medium">Email:</span>
+								<span className="text-text-secondary font-medium">{t("actorEmail")}</span>
 								<span className="font-mono text-text-primary break-all">
 									{item.actor.includes("@") ? item.actor : "—"}
 								</span>
 							</div>
 							<div className="flex justify-between">
-								<span className="text-text-secondary font-medium">Vai trò:</span>
-								<span className="font-bold text-primary">{item.role}</span>
+								<span className="text-text-secondary font-medium">{t("role")}</span>
+								<span className="font-bold text-primary">{roleLabel(item.role)}</span>
 							</div>
 						</div>
 					</div>
@@ -227,12 +229,12 @@ export function AuditLogDetailDialog({
 					{/* Detailed system result from detailsJson */}
 					<div className="p-4 rounded-xl bg-surface border border-border-default/80 text-xs space-y-2">
 						<span className="font-bold text-text-primary block">
-							Kết quả hệ thống
+							{t("systemResult")}
 						</span>
 
 						{item.errorMessage && (
 							<div className="rounded-lg bg-error/10 border border-error/30 p-2.5">
-								<span className="font-bold text-error block mb-1">Lỗi / Ngoại lệ:</span>
+								<span className="font-bold text-error block mb-1">{t("error")}</span>
 								<p className="font-mono text-error">{item.errorMessage}</p>
 							</div>
 						)}
@@ -264,7 +266,7 @@ export function AuditLogDetailDialog({
 													: "font-mono text-text-tertiary"
 											}
 										>
-											{value ? "Có" : "Không"}
+											{value ? t("flagYes") : t("flagNo")}
 										</span>
 									</div>
 								))}
@@ -292,7 +294,7 @@ export function AuditLogDetailDialog({
 						{details && (
 							<details className="border-t border-border-subtle pt-2">
 								<summary className="cursor-pointer text-[10.5px] font-semibold text-primary">
-									Xem JSON gốc
+									{t("rawJson")}
 								</summary>
 								<pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded border border-border-subtle bg-surface-secondary p-2 font-mono text-[10.5px] text-text-secondary">
 									{JSON.stringify(stripIdFields(details), null, 2)}
@@ -305,7 +307,7 @@ export function AuditLogDetailDialog({
 							metadataEntries.length === 0 &&
 							(typeof item.requestPayload !== "string" ||
 								item.requestPayload.trim().length === 0) && (
-								<p className="text-text-tertiary">Không có dữ liệu chi tiết.</p>
+								<p className="text-text-tertiary">{t("noDetails")}</p>
 							)}
 
 						{typeof item.requestPayload === "string" &&
@@ -327,20 +329,21 @@ export function AuditLogDetailDialog({
 								variant="outline"
 								onClick={() => setIsRollbackOpen(true)}
 								className="h-9 px-3.5 rounded-xl border-warning/30 bg-warning/10 hover:bg-warning/10 text-warning font-semibold text-xs cursor-pointer gap-2 transition-all shadow-2xs hover:shadow-xs active:scale-[0.98]"
-								title="Xem trước sự thay đổi và hoàn tác dữ liệu lâm sàng về phiên bản trước"
+								title={t("rollbackTitle")}
 							>
 								<RotateCcw className="w-3.5 h-3.5 text-warning" />
-								<span>Xem trước &amp; Hoàn tác (Rollback)</span>
+								<span>{tAudit("rollbackBtn")}</span>
 							</Button>
 						)}
 					</div>
 
 					<Button
 						type="button"
+						variant="outline"
 						onClick={() => onOpenChange(false)}
-						className="h-9 px-6 rounded-xl bg-foreground hover:bg-foreground/90 text-background font-semibold text-xs cursor-pointer shadow-xs"
+						className="h-9 px-6 rounded-xl border-border-default text-text-primary hover:bg-surface-secondary text-xs font-semibold cursor-pointer"
 					>
-						Đóng
+						{t("close")}
 					</Button>
 				</div>
 			</AdminDialogContent>
@@ -359,4 +362,3 @@ export function AuditLogDetailDialog({
 		</Dialog.Root>
 	);
 }
-
