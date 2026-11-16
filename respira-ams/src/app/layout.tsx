@@ -4,6 +4,7 @@ import './globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { ThemeProvider } from '@/components/theme-provider';
+import { FontSizeProvider } from '@/components/font-size-provider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthBootstrap } from '@/components/AuthBootstrap';
@@ -29,6 +30,14 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning className={inter.variable}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var s=localStorage.getItem('respira_font_scale');var px=s==='large'?18:s==='small'?14:16;document.documentElement.style.fontSize=px+'px';}catch(e){}})();",
+          }}
+        />
+      </head>
       <body>
         <ThemeProvider
           attribute="class"
@@ -36,13 +45,15 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NextIntlClientProvider messages={messages}>
-            <QueryProvider>
-                    <AuthBootstrap />
-                    {children}
-                    <Toaster richColors position="top-center" duration={3000} closeButton />
-            </QueryProvider>
-          </NextIntlClientProvider>
+          <FontSizeProvider>
+            <NextIntlClientProvider messages={messages}>
+              <QueryProvider>
+                <AuthBootstrap />
+                {children}
+                <Toaster richColors position="top-center" duration={3000} closeButton />
+              </QueryProvider>
+            </NextIntlClientProvider>
+          </FontSizeProvider>
         </ThemeProvider>
       </body>
     </html>
