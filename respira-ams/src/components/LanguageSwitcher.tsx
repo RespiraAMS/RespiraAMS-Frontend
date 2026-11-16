@@ -29,7 +29,7 @@ export default function LanguageSwitcher() {
           disabled={isPending}
           className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
             locale === loc
-              ? 'bg-blue-600 text-white'
+              ? 'bg-primary text-primary-foreground'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
