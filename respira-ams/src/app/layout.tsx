@@ -25,7 +25,7 @@ const merriweather = Merriweather({
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin', 'vietnamese'],
-  variable: '--font-mono',
+  variable: '--font-jetbrains-mono',
   display: 'swap',
 });
 
@@ -33,7 +33,12 @@ const fontInitScript = `
   (function() {
     try {
       var savedFont = localStorage.getItem('user-font') || 'sans';
+      if (['sans', 'serif', 'mono'].indexOf(savedFont) === -1) savedFont = 'sans';
       document.documentElement.setAttribute('data-font', savedFont);
+
+      var scale = localStorage.getItem('respira_font_scale');
+      var px = scale === 'large' ? 18 : scale === 'small' ? 14 : 16;
+      document.documentElement.style.fontSize = px + 'px';
     } catch (e) {}
   })();
 `;
@@ -63,15 +68,17 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <FontProvider>
-            <NextIntlClientProvider messages={messages}>
-              <QueryProvider>
-                <AuthBootstrap />
-                {children}
-                <Toaster richColors position="top-center" duration={3000} closeButton />
-              </QueryProvider>
-            </NextIntlClientProvider>
-          </FontProvider>
+          <FontSizeProvider>
+            <FontProvider>
+              <NextIntlClientProvider messages={messages}>
+                <QueryProvider>
+                  <AuthBootstrap />
+                  {children}
+                  <Toaster richColors position="top-center" duration={3000} closeButton />
+                </QueryProvider>
+              </NextIntlClientProvider>
+            </FontProvider>
+          </FontSizeProvider>
         </ThemeProvider>
       </body>
     </html>

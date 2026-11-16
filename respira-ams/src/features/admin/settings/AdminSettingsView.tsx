@@ -124,17 +124,17 @@ export function AdminSettingsView() {
 				</div>
 				<LanguageSwitcher />
 			</div>
-			<div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-				<div className="flex items-start gap-2">
-					<div className="rounded-lg bg-slate-100 p-2 text-slate-600">
+			<div className="flex items-center justify-between gap-4 rounded-xl border border-border-default bg-surface p-5 shadow-xs">
+				<div className="flex items-start gap-3">
+					<div className="rounded-lg bg-surface-secondary p-2 text-text-secondary">
 						<Type className="h-4 w-4" />
 					</div>
 					<div>
-						<h2 className="text-sm font-bold text-slate-900">{t("fontTitle")}</h2>
-						<p className="text-xs text-slate-500">{t("fontDescription")}</p>
+						<h2 className="text-sm font-bold text-text-primary">{t("fontTitle")}</h2>
+						<p className="text-xs text-text-secondary">{t("fontDescription")}</p>
 					</div>
 				</div>
-				<FontSelector/>
+				<FontSelector />
 			</div>
 		</div>
 	);
