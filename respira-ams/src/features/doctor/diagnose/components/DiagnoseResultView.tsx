@@ -394,7 +394,7 @@ export function DiagnoseResultView({
                                 Không có phác đồ tự động phù hợp. Vui lòng chuyển sang tab &ldquo;Bác sĩ tự chọn kháng sinh&rdquo;.
                             </p>
                         ) : (
-                            <div className="space-y-4">
+                            <div className="space-y-4 max-h-96 overflow-y-auto">
                                 {diagnosis.protocols.map((protocol, pIdx) => (
                                     <div
                                         key={protocol.id}

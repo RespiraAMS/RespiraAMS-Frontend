@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Upload, Download, Plus, Trash2, Loader2, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
-import type { PatientDetail } from "@/features/doctor/patients/types";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Upload, Download, Plus, Trash2, Loader2, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
+import type { PatientDetail } from '@/features/doctor/patients/types';
 import {
     ALLERGY_TYPE_OPTIONS,
     type AllergyType,
@@ -24,14 +24,14 @@ import {
     SAMPLE_TYPES,
     type SubmitDiagnosisRequest,
     type VariableCategory,
-} from "../types";
+} from '../types';
 import {
     calculateAge,
     extractPreviousObservations,
     getNormalPlaceholder,
     plainNumber,
     validateVariableValue,
-} from "../validation";
+} from '../validation';
 
 interface SampleRow {
     rowId: string;
@@ -49,11 +49,11 @@ interface DiagnoseAssessmentFormProps {
 }
 
 const STEPS = [
-    { step: 1, title: "Đánh giá lâm sàng" },
-    { step: 2, title: "Dị ứng kháng sinh" },
-    { step: 3, title: "Tiền sử đặc biệt" },
-    { step: 4, title: "Nhiễm khuẩn khác" },
-    { step: 5, title: "Mẫu vi sinh" },
+    { step: 1, title: 'Đánh giá lâm sàng' },
+    { step: 2, title: 'Dị ứng kháng sinh' },
+    { step: 3, title: 'Tiền sử đặc biệt' },
+    { step: 4, title: 'Nhiễm khuẩn khác' },
+    { step: 5, title: 'Mẫu vi sinh' },
 ];
 
 export function DiagnoseAssessmentForm({
@@ -64,18 +64,18 @@ export function DiagnoseAssessmentForm({
     onSubmit,
 }: DiagnoseAssessmentFormProps) {
     const [currentStep, setCurrentStep] = useState(1);
-    const [variableSearch, setVariableSearch] = useState("");
+    const [variableSearch, setVariableSearch] = useState('');
     const [values, setValues] = useState<Record<string, string | boolean>>({});
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
 
-    const [allergyType, setAllergyType] = useState<AllergyType>("No");
+    const [allergyType, setAllergyType] = useState<AllergyType>('No');
     const [selectedAllergyIds, setSelectedAllergyIds] = useState<Set<string>>(new Set());
-    const [otherAllergy, setOtherAllergy] = useState("");
-    const [antibioticSearch, setAntibioticSearch] = useState("");
+    const [otherAllergy, setOtherAllergy] = useState('');
+    const [antibioticSearch, setAntibioticSearch] = useState('');
     const [allergyError, setAllergyError] = useState<string | null>(null);
 
-    const [historyInput, setHistoryInput] = useState("");
+    const [historyInput, setHistoryInput] = useState('');
     const [specialHistory, setSpecialHistory] = useState<string[]>([]);
 
     const [otherInfections, setOtherInfections] = useState<Set<string>>(new Set());
@@ -88,7 +88,7 @@ export function DiagnoseAssessmentForm({
     useEffect(() => {
         const previousObsValues = extractPreviousObservations(
             previousDiagnosis,
-            metadata.clinicalVariables
+            metadata.clinicalVariables,
         );
 
         setValues((prev) => {
@@ -96,23 +96,23 @@ export function DiagnoseAssessmentForm({
             const age = calculateAge(patient?.dateOfBirth);
 
             for (const v of metadata.clinicalVariables) {
-                if (next[v.id] === undefined && v.valueType === "Boolean" && v.isRequired) {
+                if (next[v.id] === undefined && v.valueType === 'Boolean' && v.isRequired) {
                     next[v.id] = false;
                 }
                 if (patient) {
-                    if (v.code === "AGE" && age !== undefined) {
+                    if (v.code === 'AGE' && age !== undefined) {
                         next[v.id] = String(age);
                     }
-                    if (v.code === "GENDER" && patient.gender) {
+                    if (v.code === 'GENDER' && patient.gender) {
                         const matched = v.acceptedValues?.find(
-                            (opt) => opt.toLowerCase() === patient.gender.toLowerCase()
+                            (opt) => opt.toLowerCase() === patient.gender.toLowerCase(),
                         );
                         next[v.id] = matched || patient.gender;
                     }
-                    if (v.code === "WEIGHT" && patient.weight !== undefined) {
+                    if (v.code === 'WEIGHT' && patient.weight !== undefined) {
                         next[v.id] = String(patient.weight);
                     }
-                    if (v.code === "HEIGHT" && patient.height !== undefined) {
+                    if (v.code === 'HEIGHT' && patient.height !== undefined) {
                         next[v.id] = String(patient.height);
                     }
                 }
@@ -121,11 +121,11 @@ export function DiagnoseAssessmentForm({
         });
 
         if (previousDiagnosis?.allergy) {
-            setAllergyType(previousDiagnosis.allergy.type || "No");
+            setAllergyType(previousDiagnosis.allergy.type || 'No');
             setSelectedAllergyIds(
-                new Set((previousDiagnosis.allergy.allergicAntibiotics || []).map((a) => a.id))
+                new Set((previousDiagnosis.allergy.allergicAntibiotics || []).map((a) => a.id)),
             );
-            setOtherAllergy(previousDiagnosis.allergy.otherAllergy || "");
+            setOtherAllergy(previousDiagnosis.allergy.otherAllergy || '');
         }
 
         if (Array.isArray(previousDiagnosis?.otherInfections)) {
@@ -139,9 +139,9 @@ export function DiagnoseAssessmentForm({
         const timer = window.setTimeout(() => {
             const el = document.getElementById(pendingScrollId);
             if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 const focusable = el.querySelector<HTMLElement>(
-                    "input:not([type='hidden']), select, textarea, button"
+                    "input:not([type='hidden']), select, textarea, button",
                 );
                 focusable?.focus({ preventScroll: true });
             }
@@ -155,7 +155,7 @@ export function DiagnoseAssessmentForm({
         const groups = new Map<VariableCategory, ClinicalVariableDto[]>();
         for (const cat of CATEGORY_ORDER) groups.set(cat, []);
         for (const v of metadata.clinicalVariables) {
-            const cat = CATEGORY_ORDER.includes(v.category) ? v.category : "Other";
+            const cat = CATEGORY_ORDER.includes(v.category) ? v.category : 'Other';
             if (!groups.has(cat)) groups.set(cat, []);
             groups.get(cat)!.push(v);
         }
@@ -169,7 +169,7 @@ export function DiagnoseAssessmentForm({
             return (
                 v.name.toLowerCase().includes(query) ||
                 v.code.toLowerCase().includes(query) ||
-                (v.description || "").toLowerCase().includes(query)
+                (v.description || '').toLowerCase().includes(query)
             );
         });
 
@@ -177,7 +177,7 @@ export function DiagnoseAssessmentForm({
         for (const cat of CATEGORY_ORDER) groups.set(cat, []);
 
         for (const v of filtered) {
-            const cat = CATEGORY_ORDER.includes(v.category) ? v.category : "Other";
+            const cat = CATEGORY_ORDER.includes(v.category) ? v.category : 'Other';
             if (!groups.has(cat)) groups.set(cat, []);
             groups.get(cat)!.push(v);
         }
@@ -188,7 +188,7 @@ export function DiagnoseAssessmentForm({
     const antibioticGroups = useMemo(() => {
         const map = new Map<string, string[]>();
         for (const ab of metadata.antibiotics) {
-            const groupName = ab.antibioticGroupName || "Khác";
+            const groupName = ab.antibioticGroupName || 'Khác';
             if (!map.has(groupName)) map.set(groupName, []);
             map.get(groupName)!.push(ab.id);
         }
@@ -202,10 +202,9 @@ export function DiagnoseAssessmentForm({
             (ab) =>
                 ab.name.toLowerCase().includes(q) ||
                 ab.antibioticGroupName.toLowerCase().includes(q) ||
-                ab.classification.toLowerCase().includes(q)
+                ab.classification.toLowerCase().includes(q),
         );
     }, [metadata.antibiotics, antibioticSearch]);
-
 
     const validateStep1 = (shouldScroll = true): boolean => {
         const errors: Record<string, string> = {};
@@ -219,7 +218,7 @@ export function DiagnoseAssessmentForm({
         if (firstInvalidVar) {
             if (shouldScroll) {
                 if (variableSearch.trim()) {
-                    setVariableSearch("");
+                    setVariableSearch('');
                 }
                 setCurrentStep(1);
                 setPendingScrollId(`clinical-var-${firstInvalidVar.id}`);
@@ -230,22 +229,22 @@ export function DiagnoseAssessmentForm({
     };
 
     const validateStep2 = (shouldScroll = true): boolean => {
-        if (allergyType === "Yes" && selectedAllergyIds.size === 0) {
-            setAllergyError("Vui lòng chọn ít nhất một kháng sinh bệnh nhân bị dị ứng.");
+        if (allergyType === 'Yes' && selectedAllergyIds.size === 0) {
+            setAllergyError('Vui lòng chọn ít nhất một kháng sinh bệnh nhân bị dị ứng.');
             if (shouldScroll) {
                 setCurrentStep(2);
-                setPendingScrollId("step-2-allergy-section");
+                setPendingScrollId('step-2-allergy-section');
             }
             return false;
         }
         if (
-            (allergyType === "NonRegisteredAntibiotic" || allergyType === "Unknown") &&
+            (allergyType === 'NonRegisteredAntibiotic' || allergyType === 'Unknown') &&
             !otherAllergy.trim()
         ) {
-            setAllergyError("Vui lòng mô tả thông tin dị ứng của bệnh nhân.");
+            setAllergyError('Vui lòng mô tả thông tin dị ứng của bệnh nhân.');
             if (shouldScroll) {
                 setCurrentStep(2);
-                setPendingScrollId("step-2-other-allergy-input");
+                setPendingScrollId('step-2-other-allergy-input');
             }
             return false;
         }
@@ -280,8 +279,9 @@ export function DiagnoseAssessmentForm({
         const observations = metadata.clinicalVariables
             .map((v) => {
                 const raw = values[v.id];
-                if (raw === undefined || raw === null || String(raw).trim() === "") return null;
-                const formatted = v.valueType === "Numeric" ? plainNumber(String(raw)) : String(raw);
+                if (raw === undefined || raw === null || String(raw).trim() === '') return null;
+                const formatted =
+                    v.valueType === 'Numeric' ? plainNumber(String(raw)) : String(raw);
                 return { variableId: v.id, value: formatted };
             })
             .filter((item): item is { variableId: string; value: string } => item !== null);
@@ -290,9 +290,9 @@ export function DiagnoseAssessmentForm({
             observations,
             allergy: {
                 type: allergyType,
-                allergicAntibioticIds: allergyType === "Yes" ? Array.from(selectedAllergyIds) : [],
+                allergicAntibioticIds: allergyType === 'Yes' ? Array.from(selectedAllergyIds) : [],
                 otherAllergy:
-                    allergyType === "NonRegisteredAntibiotic" || allergyType === "Unknown"
+                    allergyType === 'NonRegisteredAntibiotic' || allergyType === 'Unknown'
                         ? otherAllergy.trim()
                         : null,
             },
@@ -316,10 +316,10 @@ export function DiagnoseAssessmentForm({
 
     const handleExportJson = () => {
         const blob = new Blob([JSON.stringify(buildPayload(), null, 2)], {
-            type: "application/json",
+            type: 'application/json',
         });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = url;
         a.download = `respira-diagnosis-${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
@@ -337,16 +337,16 @@ export function DiagnoseAssessmentForm({
                     const meta = metadata.clinicalVariables.find((v) => v.id === obs.variableId);
                     if (!meta) continue;
                     nextValues[obs.variableId] =
-                        meta.valueType === "Boolean"
-                            ? String(obs.value).toLowerCase() === "true"
+                        meta.valueType === 'Boolean'
+                            ? String(obs.value).toLowerCase() === 'true'
                             : String(obs.value);
                 }
                 setValues(nextValues);
             }
             if (parsed.allergy) {
-                setAllergyType(parsed.allergy.type || "No");
+                setAllergyType(parsed.allergy.type || 'No');
                 setSelectedAllergyIds(new Set(parsed.allergy.allergicAntibioticIds || []));
-                setOtherAllergy(parsed.allergy.otherAllergy || "");
+                setOtherAllergy(parsed.allergy.otherAllergy || '');
             }
             if (Array.isArray(parsed.specialMedicalHistory)) {
                 setSpecialHistory(parsed.specialMedicalHistory);
@@ -359,15 +359,15 @@ export function DiagnoseAssessmentForm({
                     parsed.microbialSamples.map((s, idx) => ({
                         rowId: `import-${Date.now()}-${idx}`,
                         sampleType: Number(s.sampleType ?? 0),
-                        micCategory: s.micCategory || "Susceptible",
-                        pathogenId: s.pathogenId || "",
-                    }))
+                        micCategory: s.micCategory || 'Susceptible',
+                        pathogenId: s.pathogenId || '',
+                    })),
                 );
             }
         } catch {
-            alert("File JSON không đúng định dạng payload chẩn đoán.");
+            alert('File JSON không đúng định dạng payload chẩn đoán.');
         } finally {
-            e.target.value = "";
+            e.target.value = '';
         }
     };
 
@@ -398,7 +398,7 @@ export function DiagnoseAssessmentForm({
         if (!specialHistory.includes(trimmed)) {
             setSpecialHistory((prev) => [...prev, trimmed]);
         }
-        setHistoryInput("");
+        setHistoryInput('');
     };
 
     return (
@@ -443,22 +443,22 @@ export function DiagnoseAssessmentForm({
                             type="button"
                             onClick={() => handleGoStep(step)}
                             className={cn(
-                                "flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-xs font-semibold transition",
+                                'flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-xs font-semibold transition',
                                 isActive
-                                    ? "border-primary bg-primary/10 text-primary shadow-sm"
+                                    ? 'border-primary bg-primary/10 text-primary shadow-sm'
                                     : isCompleted
-                                      ? "border-emerald-200 bg-emerald-50/60 text-emerald-800"
-                                      : "border-border bg-card text-muted-foreground hover:border-foreground/30"
+                                      ? 'border-emerald-200 bg-emerald-50/60 text-emerald-800'
+                                      : 'border-border bg-card text-muted-foreground hover:border-foreground/30',
                             )}
                         >
                             <span
                                 className={cn(
-                                    "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
+                                    'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold',
                                     isActive
-                                        ? "bg-primary text-primary-foreground"
+                                        ? 'bg-primary text-primary-foreground'
                                         : isCompleted
-                                          ? "bg-emerald-600 text-white"
-                                          : "bg-muted text-muted-foreground"
+                                          ? 'bg-emerald-600 text-white'
+                                          : 'bg-muted text-muted-foreground',
                                 )}
                             >
                                 {isCompleted ? <Check className="h-3 w-3" /> : step}
@@ -473,10 +473,12 @@ export function DiagnoseAssessmentForm({
                 <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-5">
                     <div className="border-b border-border pb-3 space-y-2">
                         <h3 className="text-base font-bold text-foreground">
-                            1. Đánh giá mức độ nặng & chỉ số lâm sàng
+                            1. Đánh giá chỉ số lâm sàng
                         </h3>
                         <p className="text-xs text-muted-foreground">
-                            Các trường có dấu <span className="font-bold text-destructive">*</span> là bắt buộc. Giá trị ngoài ngưỡng bình thường sẽ hiển thị cảnh báo vàng; ngoài ngưỡng cho phép sẽ bị từ chối.
+                            Các trường có dấu <span className="font-bold text-destructive">*</span>{' '}
+                            là bắt buộc. Giá trị ngoài ngưỡng bình thường sẽ hiển thị cảnh báo vàng;
+                            ngoài ngưỡng cho phép sẽ bị từ chối.
                         </p>
                         <Input
                             type="search"
@@ -493,7 +495,12 @@ export function DiagnoseAssessmentForm({
                                     <span className="text-xs font-bold uppercase tracking-wider text-primary">
                                         {CATEGORY_LABELS[category]}
                                     </span>
-                                    <Badge variant="secondary" className="border-primary bg-primary/10 text-primary shadow-sm">{vars.length}</Badge>
+                                    <Badge
+                                        variant="secondary"
+                                        className="border-primary bg-primary/10 text-primary shadow-sm"
+                                    >
+                                        {vars.length}
+                                    </Badge>
                                 </div>
 
                                 <div className="space-y-2.5">
@@ -507,12 +514,12 @@ export function DiagnoseAssessmentForm({
                                                 key={v.id}
                                                 id={`clinical-var-${v.id}`}
                                                 className={cn(
-                                                    "rounded-lg border p-3.5 transition",
+                                                    'rounded-lg border p-3.5 transition',
                                                     error
-                                                        ? "border-destructive bg-destructive/5 ring-1 ring-destructive/30"
+                                                        ? 'border-destructive bg-destructive/5 ring-1 ring-destructive/30'
                                                         : warning
-                                                          ? "border-amber-300 bg-amber-50/60"
-                                                          : "border-border bg-muted/20 focus-within:border-primary/60"
+                                                          ? 'border-amber-300 bg-amber-50/60'
+                                                          : 'border-border bg-muted/20 focus-within:border-primary/60',
                                                 )}
                                             >
                                                 <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_260px] md:items-center">
@@ -541,75 +548,109 @@ export function DiagnoseAssessmentForm({
                                                     </div>
 
                                                     <div>
-                                                        {v.valueType === "Numeric" && (
+                                                        {v.valueType === 'Numeric' && (
                                                             <div
                                                                 className={cn(
-                                                                    "flex items-center overflow-hidden rounded-md border bg-background",
+                                                                    'group flex h-10 items-center overflow-hidden rounded-md border bg-surface transition-all',
                                                                     error
-                                                                        ? "border-destructive"
-                                                                        : "border-input"
+                                                                        ? 'border-destructive focus-within:ring-2 focus-within:ring-destructive/20'
+                                                                        : 'border-input hover:border-border-strong focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20',
                                                                 )}
                                                             >
                                                                 <input
                                                                     type="number"
                                                                     step="any"
-                                                                    value={typeof val === "string" ? val : ""}
-                                                                    placeholder={getNormalPlaceholder(v)}
+                                                                    value={
+                                                                        typeof val === 'string'
+                                                                            ? val
+                                                                            : ''
+                                                                    }
+                                                                    placeholder={getNormalPlaceholder(
+                                                                        v,
+                                                                    )}
                                                                     onChange={(e) => {
-                                                                        const nextVal = e.target.value;
+                                                                        const nextVal =
+                                                                            e.target.value;
                                                                         setValues((prev) => ({
                                                                             ...prev,
                                                                             [v.id]: nextVal,
                                                                         }));
-                                                                        const check = validateVariableValue(
-                                                                            v,
-                                                                            nextVal
-                                                                        );
+                                                                        const check =
+                                                                            validateVariableValue(
+                                                                                v,
+                                                                                nextVal,
+                                                                            );
                                                                         setFieldErrors((prev) => {
-                                                                            const copy = { ...prev };
+                                                                            const copy = {
+                                                                                ...prev,
+                                                                            };
                                                                             if (check.error)
-                                                                                copy[v.id] = check.error;
+                                                                                copy[v.id] =
+                                                                                    check.error;
                                                                             else delete copy[v.id];
                                                                             return copy;
                                                                         });
                                                                     }}
-                                                                    className="h-9 w-full min-w-0 px-3 text-sm font-medium focus:outline-none"
+                                                                    className="h-full w-full min-w-0 bg-transparent px-3 text-sm font-medium text-text-primary placeholder:text-text-tertiary focus:outline-none"
                                                                 />
                                                                 {v.canonicalUnit && (
-                                                                    <span className="flex h-9 items-center border-l border-input bg-muted px-2.5 text-xs font-semibold text-muted-foreground">
+                                                                    <span
+                                                                        className={cn(
+                                                                            'flex h-full shrink-0 items-center border-l px-3 text-xs font-semibold transition-colors select-none',
+                                                                            error
+                                                                                ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                                                                                : 'border-input bg-surface-secondary text-text-secondary group-focus-within:border-primary/30 group-focus-within:bg-primary/10 group-focus-within:text-primary',
+                                                                        )}
+                                                                    >
                                                                         {v.canonicalUnit}
                                                                     </span>
                                                                 )}
                                                             </div>
                                                         )}
 
-                                                        {v.valueType === "Boolean" && (
-                                                            <div className="grid grid-cols-2 p-1 bg-muted rounded-md border border-border h-10">
+                                                        {v.valueType === 'Boolean' && (
+                                                            <div className="grid h-10 grid-cols-2 gap-1 rounded-md border border-border bg-surface-secondary p-1">
                                                                 {[
-                                                                    { label: "Có", boolVal: true },
-                                                                    { label: "Không", boolVal: false },
+                                                                    { label: 'Có', boolVal: true },
+                                                                    {
+                                                                        label: 'Không',
+                                                                        boolVal: false,
+                                                                    },
                                                                 ].map((opt) => {
-                                                                    const active = val === opt.boolVal;
+                                                                    const active =
+                                                                        val === opt.boolVal;
                                                                     return (
                                                                         <button
-                                                                            key={String(opt.boolVal)}
+                                                                            key={String(
+                                                                                opt.boolVal,
+                                                                            )}
                                                                             type="button"
                                                                             onClick={() => {
-                                                                                setValues((prev) => ({
-                                                                                    ...prev,
-                                                                                    [v.id]: opt.boolVal,
-                                                                                }));
-                                                                                setFieldErrors((prev) => {
-                                                                                    const copy = { ...prev };
-                                                                                    delete copy[v.id];
-                                                                                    return copy;
-                                                                                });
+                                                                                setValues(
+                                                                                    (prev) => ({
+                                                                                        ...prev,
+                                                                                        [v.id]:
+                                                                                            opt.boolVal,
+                                                                                    }),
+                                                                                );
+                                                                                setFieldErrors(
+                                                                                    (prev) => {
+                                                                                        const copy =
+                                                                                            {
+                                                                                                ...prev,
+                                                                                            };
+                                                                                        delete copy[
+                                                                                            v.id
+                                                                                        ];
+                                                                                        return copy;
+                                                                                    },
+                                                                                );
                                                                             }}
                                                                             className={cn(
-                                                                                "flex items-center justify-center h-full text-xs font-medium rounded transition-all",
+                                                                                'flex h-full cursor-pointer items-center justify-center rounded-sm text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
                                                                                 active
-                                                                                    ? "bg-background text-foreground shadow-sm"
-                                                                                    : "text-muted-foreground hover:text-foreground"
+                                                                                    ? 'bg-primary font-semibold text-primary-foreground shadow-sm'
+                                                                                    : 'font-medium text-text-secondary hover:bg-surface-tertiary/70 hover:text-text-primary',
                                                                             )}
                                                                         >
                                                                             {opt.label}
@@ -619,50 +660,64 @@ export function DiagnoseAssessmentForm({
                                                             </div>
                                                         )}
 
-                                                        {v.valueType === "Categorical" && (
+                                                        {v.valueType === 'Categorical' && (
                                                             <div
                                                                 className={cn(
-                                                                    "flex p-1 bg-muted rounded-md border h-10",
+                                                                    'flex h-10 gap-1 rounded-md border bg-surface-secondary p-1',
                                                                     error
-                                                                        ? "border-destructive"
-                                                                        : "border-border"
+                                                                        ? 'border-destructive'
+                                                                        : 'border-border',
                                                                 )}
                                                             >
-                                                                {(v.acceptedValues || []).map((option) => {
-                                                                    const active = val === option;
-                                                                    const displayLabel =
-                                                                        option.toUpperCase() === "MALE"
-                                                                            ? "Nam"
-                                                                            : option.toUpperCase() ===
-                                                                                "FEMALE"
-                                                                              ? "Nữ"
-                                                                              : option;
-                                                                    return (
-                                                                        <button
-                                                                            key={option}
-                                                                            type="button"
-                                                                            onClick={() => {
-                                                                                setValues((prev) => ({
-                                                                                    ...prev,
-                                                                                    [v.id]: option,
-                                                                                }));
-                                                                                setFieldErrors((prev) => {
-                                                                                    const copy = { ...prev };
-                                                                                    delete copy[v.id];
-                                                                                    return copy;
-                                                                                });
-                                                                            }}
-                                                                            className={cn(
-                                                                                "flex-1 flex items-center justify-center h-full text-xs font-medium rounded transition-all",
-                                                                                active
-                                                                                    ? "bg-background text-foreground shadow-sm"
-                                                                                    : "text-muted-foreground hover:text-foreground"
-                                                                            )}
-                                                                        >
-                                                                            {displayLabel}
-                                                                        </button>
-                                                                    );
-                                                                })}
+                                                                {(v.acceptedValues || []).map(
+                                                                    (option) => {
+                                                                        const active =
+                                                                            val === option;
+                                                                        const displayLabel =
+                                                                            option.toUpperCase() ===
+                                                                            'MALE'
+                                                                                ? 'Nam'
+                                                                                : option.toUpperCase() ===
+                                                                                    'FEMALE'
+                                                                                  ? 'Nữ'
+                                                                                  : option;
+                                                                        return (
+                                                                            <button
+                                                                                key={option}
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    setValues(
+                                                                                        (prev) => ({
+                                                                                            ...prev,
+                                                                                            [v.id]:
+                                                                                                option,
+                                                                                        }),
+                                                                                    );
+                                                                                    setFieldErrors(
+                                                                                        (prev) => {
+                                                                                            const copy =
+                                                                                                {
+                                                                                                    ...prev,
+                                                                                                };
+                                                                                            delete copy[
+                                                                                                v.id
+                                                                                            ];
+                                                                                            return copy;
+                                                                                        },
+                                                                                    );
+                                                                                }}
+                                                                                className={cn(
+                                                                                    'flex h-full flex-1 cursor-pointer items-center justify-center rounded-sm px-2.5 text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                                                                                    active
+                                                                                        ? 'bg-primary font-semibold text-primary-foreground shadow-sm'
+                                                                                        : 'font-medium text-text-secondary hover:bg-surface-tertiary/70 hover:text-text-primary',
+                                                                                )}
+                                                                            >
+                                                                                {displayLabel}
+                                                                            </button>
+                                                                        );
+                                                                    },
+                                                                )}
                                                             </div>
                                                         )}
                                                     </div>
@@ -687,7 +742,11 @@ export function DiagnoseAssessmentForm({
                     </div>
 
                     <div className="flex justify-end pt-2 border-t border-border">
-                        <Button type="button" onClick={() => handleGoStep(2)} className="bg-primary">
+                        <Button
+                            type="button"
+                            onClick={() => handleGoStep(2)}
+                            className="bg-primary"
+                        >
                             Tiếp theo: Dị ứng kháng sinh →
                         </Button>
                     </div>
@@ -704,7 +763,8 @@ export function DiagnoseAssessmentForm({
                             2. Tiền sử dị ứng kháng sinh
                         </h3>
                         <p className="mt-1 text-xs text-muted-foreground">
-                            Ghi nhận trạng thái dị ứng kháng sinh của bệnh nhân để loại trừ phác đồ không an toàn.
+                            Ghi nhận trạng thái dị ứng kháng sinh của bệnh nhân để loại trừ phác đồ
+                            không an toàn.
                         </p>
                     </div>
 
@@ -718,10 +778,10 @@ export function DiagnoseAssessmentForm({
                                     setAllergyError(null);
                                 }}
                                 className={cn(
-                                    "rounded-lg border px-3 py-2.5 text-xs font-semibold transition",
+                                    'rounded-lg border px-3 py-2.5 text-xs font-semibold transition',
                                     allergyType === opt.value
-                                        ? "border-primary bg-primary text-primary-foreground"
-                                        : "border-border bg-muted/40 text-foreground hover:bg-muted"
+                                        ? 'border-primary bg-primary text-primary-foreground'
+                                        : 'border-border bg-muted/40 text-foreground hover:bg-muted',
                                 )}
                             >
                                 {opt.label}
@@ -729,7 +789,7 @@ export function DiagnoseAssessmentForm({
                         ))}
                     </div>
 
-                    {(allergyType === "NonRegisteredAntibiotic" || allergyType === "Unknown") && (
+                    {(allergyType === 'NonRegisteredAntibiotic' || allergyType === 'Unknown') && (
                         <div id="step-2-other-allergy-input" className="space-y-1.5">
                             <Label>
                                 Mô tả chi tiết dị ứng <span className="text-destructive">*</span>
@@ -745,7 +805,7 @@ export function DiagnoseAssessmentForm({
                         </div>
                     )}
 
-                    {allergyType === "Yes" && (
+                    {allergyType === 'Yes' && (
                         <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <Input
@@ -788,7 +848,7 @@ export function DiagnoseAssessmentForm({
                                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                                     {antibioticGroups.map(([groupName, ids]) => {
                                         const selectedCount = ids.filter((id) =>
-                                            selectedAllergyIds.has(id)
+                                            selectedAllergyIds.has(id),
                                         ).length;
                                         const isAll = selectedCount === ids.length;
                                         const isPartial = selectedCount > 0 && !isAll;
@@ -798,12 +858,12 @@ export function DiagnoseAssessmentForm({
                                                 type="button"
                                                 onClick={() => toggleAllergyGroup(ids)}
                                                 className={cn(
-                                                    "rounded-full border px-3 py-1 text-xs font-semibold transition",
+                                                    'rounded-full border px-3 py-1 text-xs font-semibold transition',
                                                     isAll
-                                                        ? "border-primary bg-primary text-primary-foreground"
+                                                        ? 'border-primary bg-primary text-primary-foreground'
                                                         : isPartial
-                                                          ? "border-primary/50 bg-primary/10 text-primary"
-                                                          : "border-border bg-background text-foreground hover:border-primary/50"
+                                                          ? 'border-primary/50 bg-primary/10 text-primary'
+                                                          : 'border-border bg-background text-foreground hover:border-primary/50',
                                                 )}
                                             >
                                                 {groupName} ({selectedCount}/{ids.length})
@@ -820,10 +880,10 @@ export function DiagnoseAssessmentForm({
                                         <label
                                             key={ab.id}
                                             className={cn(
-                                                "relative flex cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 text-xs transition",
+                                                'relative flex cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 text-xs transition',
                                                 checked
-                                                    ? "border-primary bg-primary/10"
-                                                    : "border-border bg-background hover:border-primary/40"
+                                                    ? 'border-primary bg-primary/10'
+                                                    : 'border-border bg-background hover:border-primary/40',
                                             )}
                                         >
                                             <Checkbox
@@ -835,7 +895,7 @@ export function DiagnoseAssessmentForm({
                                                     {ab.name}
                                                 </div>
                                                 <div className="truncate text-[11px] text-muted-foreground">
-                                                    {ab.antibioticGroupName} •{" "}
+                                                    {ab.antibioticGroupName} •{' '}
                                                     {AWARE_LABELS[ab.classification]}
                                                 </div>
                                             </div>
@@ -882,7 +942,11 @@ export function DiagnoseAssessmentForm({
                         <Button type="button" variant="outline" onClick={() => setCurrentStep(1)}>
                             ← Quay lại
                         </Button>
-                        <Button type="button" onClick={() => handleGoStep(3)} className="bg-primary">
+                        <Button
+                            type="button"
+                            onClick={() => handleGoStep(3)}
+                            className="bg-primary"
+                        >
                             Tiếp theo: Tiền sử đặc biệt →
                         </Button>
                     </div>
@@ -896,7 +960,8 @@ export function DiagnoseAssessmentForm({
                             3. Tiền sử bệnh lý đặc biệt
                         </h3>
                         <p className="mt-1 text-xs text-muted-foreground">
-                            Nhập các ghi chú tiền sử bổ sung ngoài danh mục biến lâm sàng (không bắt buộc).
+                            Nhập các ghi chú tiền sử bổ sung ngoài danh mục biến lâm sàng (không bắt
+                            buộc).
                         </p>
                     </div>
 
@@ -905,7 +970,7 @@ export function DiagnoseAssessmentForm({
                             value={historyInput}
                             onChange={(e) => setHistoryInput(e.target.value)}
                             onKeyDown={(e) => {
-                                if (e.key === "Enter") {
+                                if (e.key === 'Enter') {
                                     e.preventDefault();
                                     addHistoryEntry();
                                 }
@@ -929,7 +994,9 @@ export function DiagnoseAssessmentForm({
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            setSpecialHistory((prev) => prev.filter((x) => x !== item))
+                                            setSpecialHistory((prev) =>
+                                                prev.filter((x) => x !== item),
+                                            )
                                         }
                                         className="font-bold hover:text-destructive"
                                     >
@@ -944,7 +1011,11 @@ export function DiagnoseAssessmentForm({
                         <Button type="button" variant="outline" onClick={() => setCurrentStep(2)}>
                             ← Quay lại
                         </Button>
-                        <Button type="button" onClick={() => handleGoStep(4)} className="bg-primary">
+                        <Button
+                            type="button"
+                            onClick={() => handleGoStep(4)}
+                            className="bg-primary"
+                        >
                             Tiếp theo: Nhiễm khuẩn khác →
                         </Button>
                     </div>
@@ -958,7 +1029,8 @@ export function DiagnoseAssessmentForm({
                             4. Nhiễm khuẩn hoạt động khác đi kèm
                         </h3>
                         <p className="mt-1 text-xs text-muted-foreground">
-                            Chọn các ổ nhiễm khuẩn phối hợp ngoài viêm phổi (có thể chọn nhiều hoặc bỏ qua).
+                            Chọn các ổ nhiễm khuẩn phối hợp ngoài viêm phổi (có thể chọn nhiều hoặc
+                            bỏ qua).
                         </p>
                     </div>
 
@@ -969,10 +1041,10 @@ export function DiagnoseAssessmentForm({
                                 <label
                                     key={inf.name}
                                     className={cn(
-                                        "relative flex cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 text-xs font-medium transition",
+                                        'relative flex cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 text-xs font-medium transition',
                                         checked
-                                            ? "border-primary bg-primary/10 text-foreground"
-                                            : "border-border bg-muted/20 hover:border-primary/40"
+                                            ? 'border-primary bg-primary/10 text-foreground'
+                                            : 'border-border bg-muted/20 hover:border-primary/40',
                                     )}
                                 >
                                     <Checkbox
@@ -996,7 +1068,11 @@ export function DiagnoseAssessmentForm({
                         <Button type="button" variant="outline" onClick={() => setCurrentStep(3)}>
                             ← Quay lại
                         </Button>
-                        <Button type="button" onClick={() => handleGoStep(5)} className="bg-primary">
+                        <Button
+                            type="button"
+                            onClick={() => handleGoStep(5)}
+                            className="bg-primary"
+                        >
                             Tiếp theo: Mẫu vi sinh →
                         </Button>
                     </div>
@@ -1010,7 +1086,8 @@ export function DiagnoseAssessmentForm({
                             5. Kết quả mẫu bệnh phẩm vi sinh
                         </h3>
                         <p className="mt-1 text-xs text-muted-foreground">
-                            Thêm kết quả phân lập vi sinh và kháng sinh đồ nếu có. Bỏ trống nếu chưa có kết quả xét nghiệm.
+                            Thêm kết quả phân lập vi sinh và kháng sinh đồ nếu có. Bỏ trống nếu chưa
+                            có kết quả xét nghiệm.
                         </p>
                     </div>
 
@@ -1020,10 +1097,10 @@ export function DiagnoseAssessmentForm({
                                 key={row.rowId}
                                 id={`sample-row-${row.rowId}`}
                                 className={cn(
-                                    "rounded-lg border p-3.5 space-y-3",
+                                    'rounded-lg border p-3.5 space-y-3',
                                     !row.pathogenId && sampleError
-                                        ? "border-destructive bg-destructive/5"
-                                        : "border-border bg-muted/20"
+                                        ? 'border-destructive bg-destructive/5'
+                                        : 'border-border bg-muted/20',
                                 )}
                             >
                                 <div className="flex items-center justify-between">
@@ -1036,7 +1113,7 @@ export function DiagnoseAssessmentForm({
                                         size="sm"
                                         onClick={() =>
                                             setSamples((prev) =>
-                                                prev.filter((r) => r.rowId !== row.rowId)
+                                                prev.filter((r) => r.rowId !== row.rowId),
                                             )
                                         }
                                         className="h-7 gap-1 text-xs text-destructive hover:text-destructive"
@@ -1057,8 +1134,8 @@ export function DiagnoseAssessmentForm({
                                                     prev.map((r) =>
                                                         r.rowId === row.rowId
                                                             ? { ...r, sampleType: val }
-                                                            : r
-                                                    )
+                                                            : r,
+                                                    ),
                                                 );
                                             }}
                                             className="h-9 w-full rounded-md border border-input bg-background px-2.5 text-xs font-medium"
@@ -1081,8 +1158,8 @@ export function DiagnoseAssessmentForm({
                                                     prev.map((r) =>
                                                         r.rowId === row.rowId
                                                             ? { ...r, micCategory: val }
-                                                            : r
-                                                    )
+                                                            : r,
+                                                    ),
                                                 );
                                             }}
                                             className="h-9 w-full rounded-md border border-input bg-background px-2.5 text-xs font-medium"
@@ -1097,7 +1174,8 @@ export function DiagnoseAssessmentForm({
 
                                     <div className="space-y-1">
                                         <Label className="text-xs">
-                                            Tác nhân gây bệnh <span className="text-destructive">*</span>
+                                            Tác nhân gây bệnh{' '}
+                                            <span className="text-destructive">*</span>
                                         </Label>
                                         <select
                                             value={row.pathogenId}
@@ -1107,8 +1185,8 @@ export function DiagnoseAssessmentForm({
                                                     prev.map((r) =>
                                                         r.rowId === row.rowId
                                                             ? { ...r, pathogenId: val }
-                                                            : r
-                                                    )
+                                                            : r,
+                                                    ),
                                                 );
                                                 setSampleError(null);
                                             }}
@@ -1141,8 +1219,8 @@ export function DiagnoseAssessmentForm({
                                 {
                                     rowId: `sample-${Date.now()}-${prev.length}`,
                                     sampleType: 0,
-                                    micCategory: "Susceptible",
-                                    pathogenId: "",
+                                    micCategory: 'Susceptible',
+                                    pathogenId: '',
                                 },
                             ])
                         }
@@ -1159,8 +1237,8 @@ export function DiagnoseAssessmentForm({
                         <Button type="submit" disabled={isSubmitting} className="gap-2 bg-primary">
                             {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
                             {isSubmitting
-                                ? "Đang phân tích chẩn đoán..."
-                                : "Chẩn đoán & Gợi ý phác đồ"}
+                                ? 'Đang phân tích chẩn đoán...'
+                                : 'Chẩn đoán & Gợi ý phác đồ'}
                         </Button>
                     </div>
                 </div>
