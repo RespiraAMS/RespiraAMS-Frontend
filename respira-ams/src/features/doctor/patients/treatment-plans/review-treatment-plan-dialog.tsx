@@ -61,6 +61,15 @@ export function ReviewTreatmentPlanDialog({
         onOpenChange(nextOpen);
     };
 
+    const [prevOpen, setPrevOpen] = useState(open);
+
+    if (open !== prevOpen) {
+        setPrevOpen(open);
+        if (open) {
+            setSelectedStateOverride(null);
+        }
+    }
+
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="sm:max-w-md border-border bg-popover text-popover-foreground">
@@ -114,7 +123,7 @@ export function ReviewTreatmentPlanDialog({
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => onOpenChange(false)}
+                        onClick={() => handleOpenChange(false)}
                         disabled={isPending}
                     >
                         Hủy
@@ -123,7 +132,6 @@ export function ReviewTreatmentPlanDialog({
                         type="button"
                         onClick={() => {
                             if (planId) onConfirm(planId, selectedState);
-                            setSelectedStateOverride(null);
                         }}
                         disabled={isPending}
                         className="bg-primary"

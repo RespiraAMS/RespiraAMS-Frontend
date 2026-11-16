@@ -97,6 +97,7 @@ export function DiagnoseResultView({
     );
 
     const executeConfirmTreatment = async (medicineIds: string[], reason: string | null) => {
+        setIsConfirming(true);
         setCustomError(null);
         try {
             await confirmTreatmentMutation.mutateAsync({
@@ -108,6 +109,7 @@ export function DiagnoseResultView({
 
             router.push(`/doctor/patients/${patientId}`);
         } catch (err) {
+            setIsConfirming(false);
             setCustomError(err instanceof Error ? err.message : "Xác nhận phác đồ thất bại.");
         }
     };
