@@ -47,7 +47,7 @@ export function RecentAuditLogsCard({ logs }: RecentAuditLogsCardProps) {
 					</div>
 					<div>
 						<h3 className="text-sm font-bold text-slate-900">
-							{t("recentAuditTitle", { defaultMessage: "Nhật ký Kiểm toán & Bảo mật Gần đây" })}
+							{t("recentAuditTitle", { defaultMessage: "Nhật ký kiểm toán gần đây" })}
 						</h3>
 						<p className="text-xs text-slate-500">
 							{t("recentAuditSubtitle", { defaultMessage: "Ghi nhận các thao tác quản trị, đăng nhập và thay đổi phác đồ" })}

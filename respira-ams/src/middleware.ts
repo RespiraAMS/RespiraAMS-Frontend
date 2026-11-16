@@ -31,7 +31,12 @@ function inspectToken(token?: string | null): { isValid: boolean; role: string }
 			decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
 			"";
 
-		const role = String(rawRole).toLowerCase();
+		let role = (Array.isArray(rawRole) ? rawRole[0] : String(rawRole || "")).toLowerCase();
+		if (role === "reviewer" || role === "manager") {
+			role = "medicalregulationreviewer";
+		} else if (role === "headofdepartment") {
+			role = "headdepartmentdoctor";
+		}
 		return { isValid: true, role };
 	} catch {
 		return { isValid: false, role: "" };
@@ -115,7 +120,7 @@ export function middleware(request: NextRequest) {
 
 	// Xác định trang đích mặc định cho từng vai trò
 	const getDefaultDashboard = (r: string) => {
-		if (r === "admin") return "/admin/dashboard";
+		if (r === "admin") return "/admin/audit-logs";
 		if (r === "manager" || r === "medicalregulationreviewer") return "/manage/dashboard";
 		return "/doctor/patients";
 	};
@@ -134,6 +139,13 @@ export function middleware(request: NextRequest) {
 		if (userRole !== "admin") {
 			const target = getDefaultDashboard(userRole);
 			const response = NextResponse.redirect(new URL(target, request.url));
+			applyLocaleCookie(request, response);
+			return response;
+		}
+
+		// Nếu truy cập /admin hoặc /admin/dashboard, tự động chuyển hướng vào /admin/audit-logs
+		if (pathname === "/admin" || pathname === "/admin/dashboard") {
+			const response = NextResponse.redirect(new URL("/admin/audit-logs", request.url));
 			applyLocaleCookie(request, response);
 			return response;
 		}
@@ -165,8 +177,14 @@ export function middleware(request: NextRequest) {
 	}
 
 	// Route Profile (/profile)
+	// MedicalRegulationReviewer là tài khoản không có hồ sơ bác sĩ (never has a doctor profile)
 	if (pathname === "/profile") {
-		const target = userRole === "admin" ? "/admin/dashboard" : "/doctor/profile";
+		let target = "/doctor/profile";
+		if (userRole === "admin") {
+			target = "/admin/audit-logs";
+		} else if (userRole === "medicalregulationreviewer" || userRole === "manager") {
+			target = "/manage/dashboard";
+		}
 		const response = NextResponse.redirect(new URL(target, request.url));
 		applyLocaleCookie(request, response);
 		return response;

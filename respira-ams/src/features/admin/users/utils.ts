@@ -28,9 +28,10 @@ export const POSITION_LABELS: Record<PositionType, string> = {
 };
 
 export const ROLE_LABELS: Record<UserRole, string> = {
-	Doctor: "Bác sĩ",
-	Manager: "Trưởng khoa / Quản lý",
-	Admin: "Quản trị viên",
+	Doctor: "Bác sĩ điều trị",
+	MedicalRegulationReviewer: "Dược sĩ Thẩm định Quy chế",
+	Admin: "Quản trị viên Hệ thống",
+	HeadDepartmentDoctor: "Bác sĩ Trưởng khoa",
 };
 
 export function formatDegrees(degrees?: DegreeType[]): string {

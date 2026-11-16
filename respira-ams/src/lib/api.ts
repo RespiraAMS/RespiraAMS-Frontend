@@ -1,6 +1,7 @@
 import logger from "./logger";
 import { getAccessToken, refreshSession, clearAuth } from "./auth";
 import { ApiResult } from "./models";
+import { getStoredUser, parseJwt } from "@/features/auth/api";
 
 const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION ?? "v1";
 
@@ -32,9 +33,19 @@ async function handle401(): Promise<boolean> {
 
 export async function apiFetch<T>(
     url: string,
-    opts?: RequestInit,
+    opts?: RequestInit & { _isRetry?: boolean },
     withAuth: boolean = true
 ): Promise<T | null> {
+    let finalUrl = url;
+    if (typeof window !== "undefined") {
+        // Rewrite direct Gateway/Backend URLs in browser to proxy '/api/backend'
+        // This ensures cookies are sent, CORS is bypassed, and token elevation works
+        finalUrl = finalUrl
+            .replace(/^https?:\/\/localhost:\d+\/api\/v1/i, "/api/backend")
+            .replace(/^https?:\/\/[^/]+\/api\/v1/i, "/api/backend")
+            .replace(/^\/api\/v1/i, "/api/backend");
+    }
+
     const isFormData = opts?.body instanceof FormData;
     const headers = new Headers(opts?.headers);
 
@@ -49,9 +60,9 @@ export async function apiFetch<T>(
         headers.set("Content-Type", "application/json");
     }
 
-    const resp = await fetch(url, {
+    const resp = await fetch(finalUrl, {
         headers,
-        signal: opts?.signal || AbortSignal.timeout(1500),
+        signal: opts?.signal || AbortSignal.timeout(10000),
         ...opts,
     });
 
@@ -70,15 +81,17 @@ export async function apiFetch<T>(
     // Check both HTTP status and the API's custom error object
     if (!resp.ok || result.error) {
         const errorMessage = result.error?.description || "An unexpected error occurred";
-        logger.error("Failed to make API request", { url, message: errorMessage, status: resp.status });
+        logger.error("Failed to make API request", { url: finalUrl, message: errorMessage, status: resp.status });
 
         switch (resp.status) {
             case 400:
                 throw new Error(errorMessage);
             case 401: {
-                const recovered = await handle401();
-                if (recovered) {
-                    return apiFetch<T>(url, opts, withAuth);
+                if (!opts?._isRetry) {
+                    const recovered = await handle401();
+                    if (recovered) {
+                        return apiFetch<T>(url, { ...opts, _isRetry: true }, withAuth);
+                    }
                 }
                 throw new Error("Session expired. Please log in again.");
             }
@@ -164,6 +177,8 @@ export async function apiRequest<T = void>(
 			? window.localStorage.getItem("accessToken") ||
 				window.localStorage.getItem("respira_auth_token_v1")
 			: null;
+	const user = token ? parseJwt(token) : (typeof window !== "undefined" ? getStoredUser() : null);
+	const role = user?.role || "Admin";
 
 	let response: Response;
 	try {
@@ -174,6 +189,7 @@ export async function apiRequest<T = void>(
 				Accept: "application/json",
 				...(body !== undefined ? { "Content-Type": "application/json" } : {}),
 				...(token ? { Authorization: `Bearer ${token}` } : {}),
+				...(role ? { "X-Role": role } : {}),
 				...headers,
 			},
 			body: body !== undefined ? JSON.stringify(body) : undefined,

@@ -33,6 +33,7 @@ interface AuditLogRollbackDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	onSuccess?: () => void;
+	availableItems?: AuditLogItem[];
 }
 
 export function AuditLogRollbackDialog({
@@ -40,7 +41,10 @@ export function AuditLogRollbackDialog({
 	open,
 	onOpenChange,
 	onSuccess,
+	availableItems = [],
 }: AuditLogRollbackDialogProps) {
+	const [activeItem, setActiveItem] = useState<AuditLogItem | null>(item);
+	const [manualId, setManualId] = useState("");
 	const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 	const [preview, setPreview] = useState<ClinicalRollbackPreview | null>(null);
 	const [previewError, setPreviewError] = useState<string | null>(null);
@@ -48,40 +52,55 @@ export function AuditLogRollbackDialog({
 	const [isApplying, setIsApplying] = useState(false);
 	const [result, setResult] = useState<ClinicalRollbackResult | null>(null);
 
-	// Tải preview khi mở dialog
+	const loadPreview = (targetId: string) => {
+		if (!targetId || !targetId.trim()) return;
+		setResult(null);
+		setPreview(null);
+		setPreviewError(null);
+		setIsLoadingPreview(true);
+
+		previewClinicalRollback(targetId.trim())
+			.then((res) => {
+				setPreview(res);
+			})
+			.catch((err) => {
+				console.error("Lỗi khi tải rollback preview:", err);
+				setPreviewError(
+					err instanceof Error
+						? err.message
+						: "Không thể tải bản xem trước hoàn tác."
+				);
+			})
+			.finally(() => {
+				setIsLoadingPreview(false);
+			});
+	};
+
+	// Tải preview khi mở dialog hoặc thay đổi item
 	useEffect(() => {
-		if (open && item) {
+		if (open) {
 			setResult(null);
 			setPreview(null);
 			setPreviewError(null);
-			setIsLoadingPreview(true);
 
-			previewClinicalRollback(item.id)
-				.then((res) => {
-					setPreview(res);
-				})
-				.catch((err) => {
-					console.error("Lỗi khi tải rollback preview:", err);
-					setPreviewError(
-						err instanceof Error
-							? err.message
-							: "Không thể tải bản xem trước hoàn tác."
-					);
-				})
-				.finally(() => {
-					setIsLoadingPreview(false);
-				});
+			const target = item || (availableItems.length > 0 ? availableItems[0] : null);
+			setActiveItem(target);
+			const targetId = target?.id || "";
+			setManualId(targetId);
+
+			if (targetId) {
+				loadPreview(targetId);
+			}
 		}
 	}, [open, item]);
 
-	if (!item) return null;
-
 	const handleApplyRollback = async () => {
-		if (!preview || !preview.canApply) return;
+		const targetId = activeItem?.id || manualId.trim();
+		if (!targetId || !preview || !preview.canApply) return;
 
 		setIsApplying(true);
 		try {
-			const res = await applyClinicalRollback(item.id);
+			const res = await applyClinicalRollback(targetId);
 			setResult(res);
 			toast.success("Hoàn tác dữ liệu lâm sàng thành công!");
 			if (onSuccess) {
@@ -98,6 +117,9 @@ export function AuditLogRollbackDialog({
 			setIsApplying(false);
 		}
 	};
+
+	const displayId = activeItem?.id || manualId || "(Chưa chọn)";
+	const displayService = activeItem?.service || (preview ? "Clinical" : "System");
 
 	return (
 		<Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -119,11 +141,61 @@ export function AuditLogRollbackDialog({
 								</span>
 							</div>
 							<p className="text-xs text-slate-500 font-mono">
-								ID Sự kiện: {item.id} • Dịch vụ: {item.service}
+								ID Sự kiện: {displayId} • Dịch vụ: {displayService}
 							</p>
 						</div>
 					</div>
 				</div>
+
+				{/* Selector Bar */}
+				{availableItems.length > 0 && (
+					<div className="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+						<label className="text-xs font-bold text-slate-700 block">
+							Chọn sự kiện kiểm toán để hoàn tác:
+						</label>
+						<select
+							value={activeItem?.id || manualId}
+							onChange={(e) => {
+								const val = e.target.value;
+								const found = availableItems.find((i) => i.id === val) || null;
+								setActiveItem(found);
+								setManualId(val);
+								loadPreview(val);
+							}}
+							className="w-full h-9 px-3 rounded-lg border border-slate-300 bg-white text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+						>
+							{availableItems.map((log) => (
+								<option key={log.id} value={log.id}>
+									[{new Date(log.timestamp).toLocaleTimeString("vi-VN")}] {log.action} • {log.service} ({log.id.slice(0, 8)}...)
+								</option>
+							))}
+						</select>
+
+						<div className="flex gap-2 items-center pt-1">
+							<input
+								type="text"
+								placeholder="Hoặc nhập mã ID sự kiện kiểm toán khác (GUID)..."
+								value={manualId}
+								onChange={(e) => setManualId(e.target.value)}
+								className="flex-1 h-8 px-3 rounded-lg border border-slate-200 bg-white text-xs font-mono placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+							/>
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								onClick={() => {
+									const found = availableItems.find((i) => i.id.toLowerCase() === manualId.trim().toLowerCase()) || null;
+									setActiveItem(found);
+									loadPreview(manualId.trim());
+								}}
+								disabled={!manualId.trim() || isLoadingPreview}
+								className="h-8 px-3 text-xs font-semibold cursor-pointer border-amber-300 text-amber-800 hover:bg-amber-50"
+							>
+								Kiểm tra ID
+							</Button>
+						</div>
+					</div>
+				)}
 
 				{/* Body Content */}
 				<div className="mt-4 space-y-4 text-xs">

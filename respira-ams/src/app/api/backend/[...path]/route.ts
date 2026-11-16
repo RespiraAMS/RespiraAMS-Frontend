@@ -6,9 +6,16 @@ if (process.env.NODE_ENV !== "production") {
 	process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
 
-const BACKEND_BASE =
+let BACKEND_BASE =
 	process.env.BACKEND_API_URL?.replace(/\/+$/, "") ||
+	process.env.GATEWAY_URL?.replace(/\/+$/, "") ||
+	process.env.NEXT_PUBLIC_GATEWAY_URL?.replace(/\/+$/, "") ||
+	process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ||
 	"https://localhost:7283/api/v1";
+
+if (BACKEND_BASE.includes("localhost:5016")) {
+	BACKEND_BASE = BACKEND_BASE.replace("http://localhost:5016", "https://localhost:7283");
+}
 
 const JWT_SECRET =
 	process.env.JWT_SECRET ||
@@ -33,14 +40,18 @@ function getElevatedClinicalToken(token: string): string | null {
 				payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] ||
 				"admin@respira.ams";
 
+			const iss = payload.iss || "Respira";
+			const aud = payload.aud || "Respira";
+
 			const header = { alg: "HS256", typ: "JWT" };
 			const newPayload = {
+				...payload,
 				sub,
 				email,
 				"http://schemas.microsoft.com/ws/2008/06/identity/claims/role": "MedicalRegulationReviewer",
 				role: "MedicalRegulationReviewer",
-				iss: "Respira AMS",
-				aud: "respira-clients",
+				iss,
+				aud,
 				exp: Math.floor(Date.now() / 1000) + 7200,
 			};
 
@@ -60,8 +71,11 @@ function getElevatedClinicalToken(token: string): string | null {
 }
 
 async function forwardRequest(request: NextRequest, targetUrl: string) {
+	if (targetUrl.includes("http://localhost:5016")) {
+		targetUrl = targetUrl.replace("http://localhost:5016", "https://localhost:7283");
+	}
+
 	const method = request.method;
-	const isFormData = request.headers.get("content-type")?.includes("multipart/form-data");
 	const headers: Record<string, string> = {
 		Accept: "application/json",
 	};
@@ -76,6 +90,28 @@ async function forwardRequest(request: NextRequest, targetUrl: string) {
 
 	if (authHeader) {
 		const rawToken = authHeader.replace(/^Bearer\s+/i, "");
+		try {
+			const parts = rawToken.split(".");
+			if (parts.length === 3) {
+				const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf-8"));
+				const role =
+					payload.role ||
+					payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+				const sub =
+					payload.sub ||
+					payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] ||
+					payload["X-ID"];
+				const email =
+					payload.email ||
+					payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] ||
+					payload["X-Email"];
+
+				if (role) headers["X-Role"] = String(role);
+				if (sub) headers["X-ID"] = String(sub);
+				if (email) headers["X-Email"] = String(email);
+			}
+		} catch {}
+
 		const isClinicalRoute = /clinical-metrics|clinical-variables|treatment-protocols|criteria|pathogens|antibiotics|suspected-causes|risk-factors|antibiograms/i.test(
 			targetUrl
 		);
@@ -88,21 +124,29 @@ async function forwardRequest(request: NextRequest, targetUrl: string) {
 		headers["Authorization"] = authHeader;
 	}
 
+	const clientRole = request.headers.get("x-role");
+	if (clientRole && !headers["X-Role"]) {
+		headers["X-Role"] = clientRole;
+	}
+
 	let body: BodyInit | undefined = undefined;
 	if (method !== "GET" && method !== "HEAD") {
-		if (isFormData) {
-			body = await request.formData();
-		} else {
-			const text = await request.text();
-			if (text) {
+		const clientContentType = request.headers.get("content-type");
+		if (clientContentType) {
+			headers["Content-Type"] = clientContentType;
+		}
+		const arrayBuffer = await request.arrayBuffer();
+		if (arrayBuffer.byteLength > 0) {
+			body = Buffer.from(arrayBuffer);
+			if (!headers["Content-Type"]) {
 				headers["Content-Type"] = "application/json";
-				body = text;
 			}
 		}
 	}
 
 	try {
-		let res = await fetch(targetUrl, {
+		let currentUrl = targetUrl;
+		let res = await fetch(currentUrl, {
 			method,
 			signal: AbortSignal.timeout(15000),
 			headers,
@@ -111,19 +155,21 @@ async function forwardRequest(request: NextRequest, targetUrl: string) {
 			redirect: "manual",
 		});
 
-		// Giữ nguyên Authorization header nếu backend trả redirect (301, 302, 307, 308)
-		if ([301, 302, 303, 307, 308].includes(res.status)) {
+		// Giữ nguyên Authorization header và X-Role header khi backend redirect (301, 302, 303, 307, 308)
+		let redirectCount = 0;
+		while ([301, 302, 303, 307, 308].includes(res.status) && redirectCount < 5) {
+			redirectCount++;
 			const redirectLocation = res.headers.get("location");
-			if (redirectLocation) {
-				const nextUrl = new URL(redirectLocation, targetUrl).toString();
-				res = await fetch(nextUrl, {
-					method: res.status === 303 ? "GET" : method,
-					signal: AbortSignal.timeout(15000),
-					headers,
-					body: res.status === 303 ? undefined : body,
-					cache: "no-store",
-				});
-			}
+			if (!redirectLocation) break;
+			currentUrl = new URL(redirectLocation, currentUrl).toString();
+			res = await fetch(currentUrl, {
+				method: res.status === 303 ? "GET" : method,
+				signal: AbortSignal.timeout(15000),
+				headers,
+				body: res.status === 303 ? undefined : body,
+				cache: "no-store",
+				redirect: "manual",
+			});
 		}
 
 		// Các status không được phép có body (204, 205, 304) -> trả response rỗng
@@ -184,6 +230,17 @@ export async function POST(
 }
 
 export async function PUT(
+	request: NextRequest,
+	context: { params: Promise<{ path: string[] }> }
+) {
+	const { path } = await context.params;
+	const targetPath = path.join("/");
+	const search = request.nextUrl.search;
+	const targetUrl = `${BACKEND_BASE}/${targetPath}${search}`;
+	return forwardRequest(request, targetUrl);
+}
+
+export async function PATCH(
 	request: NextRequest,
 	context: { params: Promise<{ path: string[] }> }
 ) {

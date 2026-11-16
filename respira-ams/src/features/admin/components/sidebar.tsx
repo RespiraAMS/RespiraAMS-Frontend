@@ -11,8 +11,9 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-	LayoutDashboard,
 	Users,
+	Stethoscope,
+	ClipboardCheck,
 	FileText,
 	ShieldCheck,
 	Settings,
@@ -37,28 +38,22 @@ interface AdminNavItemProps {
 
 export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
 	{
-		icon: LayoutDashboard,
-		label: "Tổng quan hệ thống",
-		key: "dashboard",
-		href: "/admin/dashboard",
-	},
-	{
-		icon: Users,
-		label: "Quản lý người dùng",
-		key: "users",
-		href: "/admin/users",
-	},
-	{
-		icon: FileText,
-		label: "Phác đồ & Phiên bản",
-		key: "protocols",
-		href: "/admin/protocols",
-	},
-	{
 		icon: ShieldCheck,
 		label: "Nhật ký kiểm toán",
 		key: "auditLogs",
 		href: "/admin/audit-logs",
+	},
+	{
+		icon: Stethoscope,
+		label: "Quản lý Bác sĩ",
+		key: "doctors",
+		href: "/admin/users",
+	},
+	{
+		icon: ClipboardCheck,
+		label: "Hội đồng thẩm định",
+		key: "regulationReviews",
+		href: "/admin/regulation-reviews",
 	},
 	{
 		icon: Settings,
@@ -159,7 +154,7 @@ export function AdminSidebar() {
 					)}
 				>
 					<Link
-						href="/admin/dashboard"
+						href="/admin/audit-logs"
 						className="flex items-center gap-2.5 min-w-0"
 						id="admin-brand-link"
 					>

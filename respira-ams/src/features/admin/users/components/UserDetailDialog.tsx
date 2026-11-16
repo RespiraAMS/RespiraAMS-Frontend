@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
 	Mail,
 	Phone,
@@ -12,6 +13,8 @@ import {
 	Shield,
 	CheckCircle2,
 	Lock,
+	XCircle,
+	AlertCircle,
 } from "lucide-react";
 import {
 	Dialog,
@@ -22,6 +25,7 @@ import { UserDialogContent } from "./UserDialogContent";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { UserItem } from "../types";
+import { fetchAccountConfirmation } from "../api";
 import {
 	ACADEMIC_TITLE_LABELS,
 	POSITION_LABELS,
@@ -38,14 +42,41 @@ interface UserDetailDialogProps {
 }
 
 export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProps) {
+	// Trạng thái xác nhận tài khoản thực tế từ /api/v1/auth/accounts (sử dụng in-memory cache phản hồi 0ms)
+	const accountId = user?.accountId || user?.id;
+	const accountEmail = user?.email;
+	const { data: authAccount } = useQuery({
+		queryKey: ["admin", "auth-account-confirmation", accountId, accountEmail],
+		queryFn: () => fetchAccountConfirmation(accountId, accountEmail),
+		enabled: isOpen && Boolean(accountId || accountEmail),
+		staleTime: 60 * 1000,
+		initialData: user ? { isEmailConfirmed: user.isEmailConfirmed, status: user.status } : undefined,
+	});
+
 	if (!user) return null;
 
-	const initials = `${user.lastName[0] || ""}${user.firstName[0] || ""}`.toUpperCase();
+	const isConfirmed =
+		authAccount !== undefined && authAccount !== null
+			? Boolean(authAccount.isEmailConfirmed)
+			: user.isEmailConfirmed;
+
+	const accountStatus = authAccount?.status
+		? (authAccount.status === "Inactive" ? "Inactive" : "Active")
+		: user.status;
+
+	// Dữ liệu hồ sơ bác sĩ đã có đầy đủ 100% từ danh sách /api/v1/doctors (28ms)
+	const currentDoctor: UserItem = {
+		...user,
+		status: accountStatus,
+		isEmailConfirmed: isConfirmed,
+	};
+
+	const initials = `${currentDoctor.lastName[0] || ""}${currentDoctor.firstName[0] || ""}`.toUpperCase();
 	const displayName = formatFullNameWithTitle(
-		user.lastName,
-		user.firstName,
-		user.academicTitle,
-		user.degrees
+		currentDoctor.lastName,
+		currentDoctor.firstName,
+		currentDoctor.academicTitle,
+		currentDoctor.degrees
 	);
 
 	return (
@@ -61,7 +92,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 					{/* Header banner */}
 					<div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-sky-50 to-indigo-50/50 dark:from-slate-950 dark:to-slate-900 border border-sky-100 dark:border-slate-800">
 						<Avatar className="h-16 w-16 border-2 border-white shadow-md">
-							{user.avatarUrl && <AvatarImage src={user.avatarUrl} alt={displayName} />}
+							{currentDoctor.avatarUrl && <AvatarImage src={currentDoctor.avatarUrl} alt={displayName} />}
 							<AvatarFallback className="bg-sky-500 text-white font-bold text-lg">
 								{initials || "U"}
 							</AvatarFallback>
@@ -76,14 +107,14 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 									variant="outline"
 									className="bg-white/80 dark:bg-slate-800 font-bold text-xs"
 								>
-									{ROLE_LABELS[user.role]}
+									{ROLE_LABELS[currentDoctor.role]}
 								</Badge>
 							</div>
 							<p className="text-xs text-slate-500 mt-0.5">
-								{POSITION_LABELS[user.position] || user.position}
+								{POSITION_LABELS[currentDoctor.position] || currentDoctor.position}
 							</p>
 							<div className="flex items-center gap-2 mt-2">
-								{user.status === "Active" ? (
+								{currentDoctor.status === "Active" ? (
 									<span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
 										<CheckCircle2 className="w-3 h-3" />
 										Đang hoạt động
@@ -94,9 +125,15 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 										Đã khóa
 									</span>
 								)}
-								{user.isEmailConfirmed && (
-									<span className="text-[11px] font-medium text-slate-400">
-										• Email đã xác thực
+								{currentDoctor.isEmailConfirmed ? (
+									<span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+										<CheckCircle2 className="w-3 h-3" />
+										Email đã xác thực
+									</span>
+								) : (
+									<span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+										<AlertCircle className="w-3 h-3" />
+										Tài khoản đang chờ xác nhận
 									</span>
 								)}
 							</div>
@@ -111,7 +148,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 								<span>Email đăng nhập</span>
 							</div>
 							<p className="font-bold text-slate-900 dark:text-white text-sm break-all">
-								{user.email}
+								{currentDoctor.email}
 							</p>
 						</div>
 
@@ -121,7 +158,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 								<span>Số điện thoại</span>
 							</div>
 							<p className="font-bold text-slate-900 dark:text-white text-sm">
-								{user.phone || "—"}
+								{currentDoctor.phone || "—"}
 							</p>
 						</div>
 
@@ -131,7 +168,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 								<span>Số CCCD / CMND</span>
 							</div>
 							<p className="font-bold text-slate-900 dark:text-white text-sm">
-								{user.citizenIdentificationNumber || "—"}
+								{currentDoctor.citizenIdentificationNumber || "—"}
 							</p>
 						</div>
 
@@ -141,7 +178,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 								<span>Ngày sinh / Giới tính</span>
 							</div>
 							<p className="font-bold text-slate-900 dark:text-white text-sm">
-								{formatDate(user.dateOfBirth)} ({user.gender === "Male" ? "Nam" : "Nữ"})
+								{formatDate(currentDoctor.dateOfBirth)} ({currentDoctor.gender === "Male" ? "Nam" : "Nữ"})
 							</p>
 						</div>
 
@@ -151,7 +188,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 								<span>Địa chỉ nơi cư trú / Khoa phòng</span>
 							</div>
 							<p className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-								{user.address || "—"}
+								{currentDoctor.address || "—"}
 							</p>
 						</div>
 
@@ -161,7 +198,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 								<span>Học hàm</span>
 							</div>
 							<p className="font-bold text-slate-900 dark:text-white text-sm">
-								{ACADEMIC_TITLE_LABELS[user.academicTitle] || "Không"}
+								{ACADEMIC_TITLE_LABELS[currentDoctor.academicTitle] || "Không"}
 							</p>
 						</div>
 
@@ -171,15 +208,38 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 								<span>Học vị y khoa</span>
 							</div>
 							<p className="font-bold text-slate-900 dark:text-white text-sm">
-								{formatDegrees(user.degrees)}
+								{formatDegrees(currentDoctor.degrees)}
 							</p>
+						</div>
+
+						<div className="sm:col-span-2 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200/80 dark:border-slate-800 space-y-1">
+							<div className="flex items-center gap-1.5 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+								<Mail className="w-3.5 h-3.5 text-slate-400" />
+								<span>Trạng thái xác thực Email</span>
+							</div>
+							<div className="pt-0.5">
+								{currentDoctor.isEmailConfirmed ? (
+									<span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg">
+										<CheckCircle2 className="w-3.5 h-3.5" /> Đã xác thực trong cơ sở dữ liệu
+									</span>
+								) : (
+									<div className="space-y-1">
+										<span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-lg">
+											<XCircle className="w-3.5 h-3.5" /> Tài khoản đang chờ xác nhận
+										</span>
+										<p className="text-[11px] text-amber-700 dark:text-amber-300">
+											Tài khoản này chưa hoàn tất xác thực qua email. Người dùng cần bấm vào liên kết trong email gửi tới <b>{currentDoctor.email}</b> để xác thực và kích hoạt.
+										</p>
+									</div>
+								)}
+							</div>
 						</div>
 					</div>
 
 					{/* Metadata */}
 					<div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400">
-						<span>Account ID: {user.id}</span>
-						<span>Ngày tạo: {formatDate(user.createdAt)}</span>
+						<span>Account ID: {currentDoctor.id}</span>
+						<span>Ngày tạo: {formatDate(currentDoctor.createdAt)}</span>
 					</div>
 				</div>
 			</UserDialogContent>

@@ -1,4 +1,8 @@
-export type UserRole = "Doctor" | "Manager" | "Admin";
+export type UserRole =
+	| "Doctor"
+	| "MedicalRegulationReviewer"
+	| "Admin"
+	| "HeadDepartmentDoctor";
 
 export type UserStatus = "Active" | "Inactive";
 
@@ -28,6 +32,7 @@ export type GenderType = "Male" | "Female";
 export interface UserItem {
 	id: string; // Account ID
 	doctorId?: string; // Doctor / Profile ID
+	accountId?: string; // Explicit Account ID
 	mediaId?: string; // Avatar Media ID
 	email: string;
 	phone: string;
@@ -51,7 +56,7 @@ export interface CreateUserPayload {
 	email: string;
 	password: string;
 	phone: string;
-	role: "Doctor" | "Manager";
+	role: UserRole;
 	firstName: string;
 	lastName: string;
 	degrees: DegreeType[];
@@ -93,8 +98,7 @@ export interface UserFilters {
 export interface UserStats {
 	total: number;
 	doctors: number;
-	managers: number;
-	admins: number;
+	headDoctors: number;
 	active: number;
 	inactive: number;
 }
