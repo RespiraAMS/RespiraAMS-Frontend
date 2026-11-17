@@ -714,11 +714,25 @@ export function DiagnoseAssessmentForm({
 																			type="button"
 																			onClick={() => {
 																				setValues(
-																					(prev) => ({
-																						...prev,
-																						[v.id]:
-																							opt.boolVal,
-																					})
+																					(prev) => {
+																						const next = {
+																							...prev,
+																						};
+																						// Clicking the selected option clears
+																						// the observation instead of re-selecting it.
+																						if (
+																							next[v.id] ===
+																							opt.boolVal
+																						) {
+																							delete next[
+																								v.id
+																							];
+																						} else {
+																							next[v.id] =
+																								opt.boolVal;
+																						}
+																						return next;
+																					}
 																				);
 																				setFieldErrors(
 																					(prev) => {
