@@ -944,8 +944,8 @@
                 "Professor": "Professor"
             },
             "positions": {
-                "StaffDoctor": "Attending Physician",
-                "SeniorDoctor": "Senior Physician",
+                "StaffDoctor": "Staff Doctor",
+                "SeniorDoctor": "Senior Doctor",
                 "DepartmentDeputyHead": "Deputy Head of Department",
                 "HeadOfDepartment": "Head of Department",
                 "DeputyDirector": "Deputy Hospital Director",
@@ -1437,8 +1437,8 @@
                 "Professor": "Professor (Prof.)"
             },
             "position": {
-                "StaffDoctor": "Attending Physician",
-                "SeniorDoctor": "Senior Physician",
+                "StaffDoctor": "Staff Doctor",
+                "SeniorDoctor": "Senior Doctor",
                 "DepartmentDeputyHead": "Deputy Head of Department",
                 "HeadOfDepartment": "Head of Department",
                 "DeputyDirector": "Deputy Director",
@@ -1483,6 +1483,7 @@
                 "allPositions": "All positions"
             },
             "actions": {
+                "createDoctor": "Create Doctor",
                 "createReportTitle": "Generate analysis report",
                 "viewDetailTitle": "View physician details"
             },
@@ -1492,7 +1493,14 @@
             "toast": {
                 "defaultDoctorName": "the physician",
                 "createReportSuccess": "Analysis report created for {name}!",
-                "createReportError": "Error creating report: {error}"
+                "createReportError": "Error creating report: {error}",
+                "created": "Doctor {name} created successfully!",
+                "emailFailed": "The account was created but the verification email could not be sent.",
+                "createError": "Cannot create doctor.",
+                "updated": "Doctor updated successfully!",
+                "updateError": "Cannot update doctor infomation.",
+                "deleted": "Doctor {name} deleted!",
+                "deleteError": "Cannot delete doctor."
             },
             "detailModal": {
                 "title": "Physician Details",
