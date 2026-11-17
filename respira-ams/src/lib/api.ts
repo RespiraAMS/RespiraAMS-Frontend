@@ -60,6 +60,13 @@ export async function apiFetch<T>(
 	// Check both HTTP status and the API's custom error object
 	if (!response.ok || result?.error) {
 		const errorMessage = result?.error?.description || "An unexpected error occurred";
+		// The backend puts the machine-readable error payload in `detail`
+		// (some endpoints have historically used `details`). Preserve it so
+		// callers can map validation errors back to individual fields.
+		const errorDetail =
+			result?.error?.detail ??
+			(result?.error as { details?: unknown } | null | undefined)?.details ??
+			null;
 		logger.error("Failed to make API request", {
 			url,
 			message: errorMessage,
@@ -68,19 +75,19 @@ export async function apiFetch<T>(
 
 		switch (response.status) {
 			case 400:
-				throw new Error(errorMessage);
+				throw new ApiError(errorMessage, response.status, errorDetail);
 			case 401:
 				handleSessionExpired();
 			case 403:
-				throw new Error("Bạn không có quyền thực hiện thao tác này.");
+				throw new ApiError("Bạn không có quyền thực hiện thao tác này.", response.status, errorDetail);
 			case 404:
-				throw new Error(errorMessage);
+				throw new ApiError(errorMessage, response.status, errorDetail);
 			case 500:
-				throw new Error("Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.");
+				throw new ApiError("Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.", response.status, errorDetail);
 			case 503:
-				throw new Error("Dịch vụ tạm thời không khả dụng. Vui lòng thử lại sau.");
+				throw new ApiError("Dịch vụ tạm thời không khả dụng. Vui lòng thử lại sau.", response.status, errorDetail);
 			default:
-				throw new Error(errorMessage);
+				throw new ApiError(errorMessage, response.status, errorDetail);
 		}
 	}
 

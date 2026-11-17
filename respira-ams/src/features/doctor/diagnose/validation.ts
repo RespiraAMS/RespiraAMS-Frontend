@@ -46,6 +46,35 @@ export function parseDiagnosisJson(rawDiagnosis?: string | null): DiagnosisResul
 	}
 }
 
+/**
+ * Normalize the `detail` payload of a diagnose API error into a map of
+ * clinical variable id -> validation message.
+ *
+ * The backend returns a JSON object (`Dictionary<Guid, string>`), but be
+ * defensive about arrays/other shapes so an unexpected payload never breaks
+ * the form.
+ */
+export function normalizeObservationErrorDetails(
+	detail: unknown
+): Record<string, string> {
+	if (!detail || typeof detail !== "object" || Array.isArray(detail)) {
+		return {};
+	}
+
+	const normalized: Record<string, string> = {};
+	for (const [key, value] of Object.entries(detail as Record<string, unknown>)) {
+		if (typeof value === "string" && value.trim()) {
+			normalized[key] = value.trim();
+		} else if (Array.isArray(value)) {
+			const joined = value
+				.filter((item): item is string => typeof item === "string" && item.trim() !== "")
+				.join(", ");
+			if (joined) normalized[key] = joined;
+		}
+	}
+	return normalized;
+}
+
 export function extractPreviousObservations(
 	previousDiagnosis: DiagnosisResultDto | null,
 	variables: ClinicalVariableDto[]

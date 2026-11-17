@@ -1751,6 +1751,9 @@
                     "loadPatientFallback": "Unable to load patient profile information.",
                     "loadMetaFallback": "Unable to load diagnostic form metadata.",
                     "submitFallback": "Error submitting diagnosis request.",
+                    "submitTitle": "Diagnosis failed",
+                    "invalidObservations": "The following clinical observations are invalid or conflicting:",
+                    "dismiss": "Dismiss",
                     "patientLoadPrefix": "Error loading patient profile: {error}",
                     "dataLoadPrefix": "Error loading data: {error}"
                 }

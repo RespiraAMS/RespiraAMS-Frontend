@@ -3,18 +3,33 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Loader2, UserPlus, ArrowLeft } from "lucide-react";
+import { Loader2, UserPlus, ArrowLeft, CircleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogMedia,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { ApiError } from "@/lib/api";
 import { diagnoseApi } from "../api";
 import type {
 	DiagnoseFormResponse,
 	DiagnosisResultDto,
 	PatientDetailWithPlans,
 	SubmitDiagnosisRequest,
+	SubmitErrorInfo,
 } from "../types";
-import { parseDiagnosisJson } from "../validation";
+import {
+	normalizeObservationErrorDetails,
+	parseDiagnosisJson,
+} from "../validation";
 import { PatientContextHeader } from "./PatientContextHeader";
 import { CreatePatientModal } from "./CreatePatientModal";
 import { DiagnoseAssessmentForm } from "./DiagnoseAssessmentForm";
@@ -43,7 +58,8 @@ export function DiagnoseWorkspace() {
 	const [loadError, setLoadError] = useState<string | null>(null);
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [submitError, setSubmitError] = useState<string | null>(null);
+	const [submitError, setSubmitError] = useState<SubmitErrorInfo | null>(null);
+	const [isSubmitErrorOpen, setIsSubmitErrorOpen] = useState(false);
 	const [diagnosisResult, setDiagnosisResult] =
 		useState<DiagnosisResultDto | null>(null);
 
@@ -122,22 +138,36 @@ export function DiagnoseWorkspace() {
 		};
 	}, [t]);
 
-	const handleSubmitDiagnosis = async (payload: SubmitDiagnosisRequest) => {
+	const handleSubmitDiagnosis = async (
+		payload: SubmitDiagnosisRequest
+	): Promise<SubmitErrorInfo | null> => {
 		setIsSubmitting(true);
 		setSubmitError(null);
+		setIsSubmitErrorOpen(false);
 		try {
 			const result = await diagnoseApi.submitDiagnosis(payload);
 			setDiagnosisResult(result);
+			return null;
 		} catch (err) {
-			setSubmitError(
-				err instanceof Error
-					? err.message
-					: t("workspace.errors.submitFallback")
-			);
+			const message =
+				err instanceof Error ? err.message : t("workspace.errors.submitFallback");
+			const details =
+				err instanceof ApiError
+					? normalizeObservationErrorDetails(err.detail)
+					: {};
+			const errorInfo: SubmitErrorInfo = { message, details };
+
+			setSubmitError(errorInfo);
+			setIsSubmitErrorOpen(true);
+			return errorInfo;
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
+
+	const submitErrorDetails = submitError
+		? Array.from(new Set(Object.values(submitError.details)))
+		: [];
 
 	const isReadyToDiagnose =
 		Boolean(patientId) && !isLoadingPatient && !isLoadingMeta;
@@ -204,12 +234,6 @@ export function DiagnoseWorkspace() {
 						</div>
 					)}
 
-					{submitError && (
-						<div className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 p-3.5 text-xs font-medium text-destructive">
-							{submitError}
-						</div>
-					)}
-
 					{(isLoadingMeta || isLoadingPatient) && (
 						<div className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card text-card-foreground p-10 text-sm text-muted-foreground">
 							<Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -257,6 +281,44 @@ export function DiagnoseWorkspace() {
 					}}
 				/>
 			)}
+
+			<AlertDialog
+				open={isSubmitErrorOpen}
+				onOpenChange={setIsSubmitErrorOpen}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogMedia className="bg-destructive/10 text-destructive">
+							<CircleAlert />
+						</AlertDialogMedia>
+						<AlertDialogTitle>
+							{t("workspace.errors.submitTitle")}
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							{submitError?.message ?? t("workspace.errors.submitFallback")}
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+
+					{submitErrorDetails.length > 0 && (
+						<div className="space-y-1.5 text-left">
+							<p className="text-xs font-semibold text-foreground">
+								{t("workspace.errors.invalidObservations")}
+							</p>
+							<ul className="max-h-56 list-disc space-y-1 overflow-y-auto pl-5 text-xs font-medium text-destructive">
+								{submitErrorDetails.map((detail, index) => (
+									<li key={`${index}-${detail}`}>{detail}</li>
+								))}
+							</ul>
+						</div>
+					)}
+
+					<AlertDialogFooter>
+						<AlertDialogAction onClick={() => setIsSubmitErrorOpen(false)}>
+							{t("workspace.errors.dismiss")}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }

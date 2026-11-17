@@ -27,8 +27,20 @@ export interface ApiResponse<T> {
 	error?: {
 		code?: string;
 		description?: string;
-		details?: string[];
+		/**
+		 * Observation validation errors keyed by clinical variable id.
+		 * The backend returns a `Dictionary<Guid, string>` here.
+		 */
+		detail?: ObservationErrorDetails | null;
 	} | null;
+}
+
+/** Validation messages returned by the diagnose endpoint, keyed by variable id. */
+export type ObservationErrorDetails = Record<string, string>;
+
+export interface SubmitErrorInfo {
+	message: string;
+	details: ObservationErrorDetails;
 }
 
 export interface RangeDto {

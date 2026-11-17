@@ -25,6 +25,7 @@ import {
 	type MicCategory,
 	SAMPLE_TYPES,
 	type SubmitDiagnosisRequest,
+	type SubmitErrorInfo,
 	type VariableCategory,
 } from "../types";
 import {
@@ -47,7 +48,11 @@ interface DiagnoseAssessmentFormProps {
 	patient: PatientDetail | null;
 	previousDiagnosis?: DiagnosisResultDto | null;
 	isSubmitting: boolean;
-	onSubmit: (payload: SubmitDiagnosisRequest) => Promise<void>;
+	/**
+	 * Submits the diagnosis. Resolves with the API validation error when the
+	 * request was rejected (e.g. HTTP 400), or `null` when it succeeded.
+	 */
+	onSubmit: (payload: SubmitDiagnosisRequest) => Promise<SubmitErrorInfo | null>;
 }
 
 const STEP_NUMBERS = [1, 2, 3, 4, 5] as const;
@@ -328,12 +333,46 @@ export function DiagnoseAssessmentForm({
 		};
 	};
 
+	/**
+	 * Surface observation errors returned by the API (HTTP 400). The `detail`
+	 * payload maps variable ids to messages, so highlight the matching fields,
+	 * jump back to the observations step (clearing any active search filter) and
+	 * scroll the first offending variable into view.
+	 */
+	const applyServerFieldErrors = (details: Record<string, string>) => {
+		const canonicalIdByKey = new Map(
+			metadata.clinicalVariables.map((v) => [v.id.toLowerCase(), v.id])
+		);
+		const appliedErrors: Record<string, string> = {};
+
+		for (const [rawId, message] of Object.entries(details)) {
+			if (!message) continue;
+			const canonicalId = canonicalIdByKey.get(rawId.toLowerCase());
+			if (canonicalId) appliedErrors[canonicalId] = message;
+		}
+
+		if (Object.keys(appliedErrors).length === 0) return;
+
+		setFieldErrors((prev) => ({ ...prev, ...appliedErrors }));
+		if (variableSearch.trim()) setVariableSearch("");
+		setCurrentStep(1);
+
+		const firstInvalid = orderedVariables.find((v) => appliedErrors[v.id]);
+		if (firstInvalid) {
+			setPendingScrollId(`clinical-var-${firstInvalid.id}`);
+		}
+	};
+
 	const handleFormSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!validateStep1(true)) return;
 		if (!validateStep2(true)) return;
 		if (!validateStep5(true)) return;
-		await onSubmit(buildPayload());
+
+		const submitError = await onSubmit(buildPayload());
+		if (submitError) {
+			applyServerFieldErrors(submitError.details);
+		}
 	};
 
 	const handleExportJson = () => {

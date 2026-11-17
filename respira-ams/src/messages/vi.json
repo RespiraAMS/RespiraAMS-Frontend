@@ -1751,6 +1751,9 @@
                     "loadPatientFallback": "Không thể tải thông tin hồ sơ bệnh nhân.",
                     "loadMetaFallback": "Không thể tải dữ liệu biểu mẫu chẩn đoán.",
                     "submitFallback": "Lỗi khi gửi yêu cầu chẩn đoán.",
+                    "submitTitle": "Chẩn đoán thất bại",
+                    "invalidObservations": "Các chỉ số lâm sàng sau không hợp lệ hoặc mâu thuẫn:",
+                    "dismiss": "Đóng",
                     "patientLoadPrefix": "Lỗi tải hồ sơ bệnh nhân: {error}",
                     "dataLoadPrefix": "Lỗi tải dữ liệu: {error}"
                 }
