@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import { useFont, FontOption } from '@/providers/FontContext';
+import { useFont, FontOption } from "@/providers/FontContext";
+import { cn } from "@/lib/utils";
 
 const FONT_OPTIONS: { id: FontOption; label: string; previewStyle: string }[] = [
   {
@@ -21,7 +22,7 @@ const FONT_OPTIONS: { id: FontOption; label: string; previewStyle: string }[] = 
 ];
 
 export function FontSelector() {
-  const { font, setFont } = useFont();
+	const { font, setFont } = useFont();
 
   return (
     <div className="inline-flex rounded-lg border border-border-default bg-surface-secondary p-1">

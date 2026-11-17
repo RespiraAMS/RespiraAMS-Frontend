@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
@@ -12,14 +12,14 @@ export default function LanguageSwitcher() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const handleSelect = (nextLocale: Locale) => {
-    if (nextLocale === locale) return;
+	const handleSelect = (nextLocale: Locale) => {
+		if (nextLocale === locale) return;
 
-    startTransition(async () => {
-      await setUserLocale(nextLocale);
-      router.refresh();
-    });
-  };
+		startTransition(async () => {
+			await setUserLocale(nextLocale);
+			router.refresh();
+		});
+	};
 
   return (
     <div className="flex items-center gap-1 rounded-lg border border-border-default bg-surface-secondary p-1">

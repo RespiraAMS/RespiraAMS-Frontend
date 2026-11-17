@@ -53,8 +53,10 @@ export function VerifyEmailView() {
 		};
 	}, [token, router, pathname, t]);
 
-	const state: VerificationState = !token ? "error" : result?.status ?? "loading";
-	const message = !token ? t("errorMissingToken") : result?.message ?? "";
+	// const state: VerificationState = !token ? "error" : result?.status ?? "loading";
+	// const message = !token ? t("errorMissingToken") : result?.message ?? "";
+    const state: VerificationState = result ? result.status : token ? "loading" : "error";
+    const message = result?.message ?? (token ? "" : t("errorMissingToken"));
 
 	return (
 		<div className="flex min-h-screen w-full items-center justify-center bg-background px-4 py-10 font-sans">
