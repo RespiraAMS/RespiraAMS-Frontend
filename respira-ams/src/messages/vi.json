@@ -1483,6 +1483,7 @@
                 "allPositions": "Tất cả chức vụ"
             },
             "actions": {
+                "createDoctor": "Thêm bác sĩ",
                 "createReportTitle": "Tạo báo cáo phân tích",
                 "viewDetailTitle": "Xem chi tiết bác sĩ"
             },
@@ -1492,7 +1493,14 @@
             "toast": {
                 "defaultDoctorName": "bác sĩ",
                 "createReportSuccess": "Đã tạo báo cáo phân tích cho {name}!",
-                "createReportError": "Lỗi khi tạo báo cáo: {error}"
+                "createReportError": "Lỗi khi tạo báo cáo: {error}",
+                "created": "Đã thêm bác sĩ {name} thành công!",
+                "emailFailed": "Tạo tài khoản thành công nhưng gửi email thông báo thất bại.",
+                "createError": "Không thể thêm bác sĩ mới.",
+                "updated": "Đã cập nhật thông tin bác sĩ!",
+                "updateError": "Không thể cập nhật thông tin bác sĩ.",
+                "deleted": "Đã xóa bác sĩ {name}!",
+                "deleteError": "Không thể xóa bác sĩ."
             },
             "detailModal": {
                 "title": "Thông tin chi tiết Bác sĩ",

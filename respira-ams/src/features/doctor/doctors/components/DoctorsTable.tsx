@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Eye, FileSpreadsheet, ListFilter, Loader2, RotateCcw } from "lucide-react";
+import {
+	Eye,
+	FileSpreadsheet,
+	ListFilter,
+	Loader2,
+	Pencil,
+	RotateCcw,
+	Trash,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -61,9 +69,16 @@ const PAGE_SIZE = 10;
 interface DoctorsTableProps {
 	onViewDetail: (doctor: DoctorSubordinateItem) => void;
 	onCreateReport: (doctor: DoctorSubordinateItem) => void;
+	onEditDoctor: (doctor: DoctorSubordinateItem) => void;
+	onDeleteDoctor: (doctor: DoctorSubordinateItem) => void;
 }
 
-export function DoctorsTable({ onViewDetail, onCreateReport }: DoctorsTableProps) {
+export function DoctorsTable({
+	onViewDetail,
+	onCreateReport,
+	onEditDoctor,
+	onDeleteDoctor,
+}: DoctorsTableProps) {
 	const t = useTranslations("doctor.doctors");
 	const tCommon = useTranslations("common");
 
@@ -148,7 +163,7 @@ export function DoctorsTable({ onViewDetail, onCreateReport }: DoctorsTableProps
 						<TableHead className="text-muted-foreground font-semibold w-[150px]">
 							{t("table.status")}
 						</TableHead>
-						<TableHead className="text-muted-foreground text-right font-semibold w-[135px]">
+						<TableHead className="text-muted-foreground text-right font-semibold w-[180px]">
 							<div className="flex items-center justify-end gap-2">
 								{tCommon("actions")}
 								<Popover>
@@ -444,6 +459,24 @@ export function DoctorsTable({ onViewDetail, onCreateReport }: DoctorsTableProps
 											className="hover:bg-accent text-foreground h-8 w-8"
 										>
 											<Eye className="h-4 w-4" />
+										</Button>
+										<Button
+											variant="ghost"
+											size="icon"
+											title={tCommon("update")}
+											onClick={() => onEditDoctor(item)}
+											className="hover:bg-accent text-foreground h-8 w-8"
+										>
+											<Pencil className="h-4 w-4" />
+										</Button>
+										<Button
+											variant="ghost"
+											size="icon"
+											title={tCommon("delete")}
+											onClick={() => onDeleteDoctor(item)}
+											className="hover:bg-destructive/10 h-8 w-8"
+										>
+											<Trash className="h-4 w-4 text-destructive" />
 										</Button>
 									</div>
 								</TableCell>

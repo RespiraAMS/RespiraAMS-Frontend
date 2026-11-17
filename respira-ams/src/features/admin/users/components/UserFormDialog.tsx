@@ -41,6 +41,7 @@ interface UserFormDialogProps {
 	onSubmitCreate: (payload: CreateUserPayload) => Promise<void>;
 	onSubmitUpdate: (payload: UpdateUserPayload) => Promise<void>;
 	isSubmitting?: boolean;
+	isHeadpartmentDoctor?: boolean;
 }
 
 const ALL_DEGREES: DegreeType[] = [
@@ -71,6 +72,7 @@ export function UserFormDialog({
 	onSubmitCreate,
 	onSubmitUpdate,
 	isSubmitting = false,
+	isHeadpartmentDoctor = false
 }: UserFormDialogProps) {
 	const t = useTranslations("admin.users.form");
 	const tCommon = useTranslations("common");
@@ -565,7 +567,7 @@ export function UserFormDialog({
 								<Select
 									value={role}
 									onValueChange={(val: UserRole) => handleRoleChange(val)}
-									disabled={isEdit}
+									disabled={isEdit || isHeadpartmentDoctor}
 								>
 									<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
 										<SelectValue />
