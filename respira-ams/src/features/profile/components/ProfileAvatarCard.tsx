@@ -15,13 +15,15 @@ import {
 	IdCard,
 	Loader2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
+
 import {
 	DoctorProfile,
 	formatDate,
 	maskValue,
 	getDoctorDisplayName,
-	ROLE_LABELS,
-	POSITION_LABELS,
+	getRoleLabel,
+	getPositionLabel,
 } from "../types";
 
 interface ProfileAvatarCardProps {
@@ -43,27 +45,32 @@ export function ProfileAvatarCard({
 	onToggleCccd,
 	onAvatarChange,
 }: ProfileAvatarCardProps) {
+	const t = useTranslations("doctor.profile");
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
-	const fullName = [doctor.lastName, doctor.firstName].filter(Boolean).join(" ").trim();
-	const displayName = getDoctorDisplayName(doctor);
-	const roleText = ROLE_LABELS[doctor.role || "Doctor"] || "Bác sĩ chuyên môn";
-	const positionText = POSITION_LABELS[doctor.position] || doctor.position || "Bác sĩ điều trị";
-	const dob = formatDate(doctor.dateOfBirth);
+	const fullName = [doctor.lastName, doctor.firstName]
+		.filter(Boolean)
+		.join(" ")
+		.trim();
+	const displayName = getDoctorDisplayName(doctor, t);
+	const roleText = getRoleLabel(doctor.role || "Doctor", t);
+	const positionText = getPositionLabel(doctor.position || "StaffDoctor", t);
+	const dob = formatDate(doctor.dateOfBirth, t);
 
 	const avatarSrc = doctor.mediaUrl || doctor.avatarUrl;
+	const fallbackChar = t("initialsFallback").charAt(0) || "B";
 	const initial = doctor.firstName
 		? doctor.firstName.charAt(0).toUpperCase()
 		: doctor.lastName
 			? doctor.lastName.charAt(0).toUpperCase()
-			: "B";
+			: fallbackChar;
 
 	return (
-		<div className="rounded-[14px] border border-slate-200/80 bg-white p-6 shadow-2xs">
+		<div className="rounded-[14px] border border-border bg-card text-card-foreground p-6 shadow-2xs">
 			{/* ── Avatar & Name Header ── */}
 			<div className="flex flex-col items-center text-center">
 				<div className="relative group">
-					<div className="relative h-28 w-28 rounded-full ring-4 ring-sky-100 overflow-hidden bg-slate-100 flex items-center justify-center shadow-xs">
+					<div className="relative h-28 w-28 rounded-full ring-4 ring-sky-500/20 overflow-hidden bg-muted flex items-center justify-center shadow-xs">
 						{avatarSrc ? (
 							<img
 								src={avatarSrc}
@@ -78,17 +85,19 @@ export function ProfileAvatarCard({
 
 						{/* Overlay loading khi đang upload avatar */}
 						{isUploadingAvatar && (
-							<div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex flex-col items-center justify-center text-white z-10">
+							<div className="absolute inset-0 bg-black/50 backdrop-blur-[1px] flex flex-col items-center justify-center text-white z-10">
 								<Loader2 className="h-6 w-6 animate-spin text-white" />
-								<span className="text-[9px] font-semibold mt-1">Đang tải...</span>
+								<span className="text-[9px] font-semibold mt-1">
+									{t("avatarCard.uploading")}
+								</span>
 							</div>
 						)}
 					</div>
 
 					{/* Online status indicator */}
 					<span
-						className="absolute bottom-1 right-2 h-4 w-4 rounded-full bg-[#10B981] ring-3 ring-white"
-						title="Đang trực tuyến"
+						className="absolute bottom-1 right-2 h-4 w-4 rounded-full bg-emerald-500 ring-3 ring-card"
+						title={t("avatarCard.online")}
 					/>
 
 					{/* Camera button to upload avatar */}
@@ -96,12 +105,12 @@ export function ProfileAvatarCard({
 						type="button"
 						onClick={() => fileInputRef.current?.click()}
 						disabled={isUploadingAvatar}
-						className="absolute top-0 right-0 h-8 w-8 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-sky-600 shadow-sm flex items-center justify-center transition-all cursor-pointer hover:scale-105 disabled:opacity-75 disabled:cursor-not-allowed"
-						title="Tải ảnh đại diện mới"
+						className="absolute top-0 right-0 h-8 w-8 rounded-full border border-border bg-card hover:bg-accent text-muted-foreground hover:text-primary shadow-sm flex items-center justify-center transition-all cursor-pointer hover:scale-105 disabled:opacity-75 disabled:cursor-not-allowed"
+						title={t("avatarCard.uploadTooltip")}
 						id="btn-upload-avatar"
 					>
 						{isUploadingAvatar ? (
-							<Loader2 className="h-4 w-4 animate-spin text-[#0EA5E9]" />
+							<Loader2 className="h-4 w-4 animate-spin text-primary" />
 						) : (
 							<Camera className="h-4 w-4" />
 						)}
@@ -117,185 +126,216 @@ export function ProfileAvatarCard({
 					/>
 				</div>
 
-				<h2 className="mt-4 text-base font-bold text-slate-900 tracking-tight">
+				<h2 className="mt-4 text-base font-bold text-foreground tracking-tight">
 					{displayName}
 				</h2>
 
-				<div className="mt-1 flex flex-wrap items-center justify-center gap-1.5">
-					<span className="inline-flex items-center gap-1 rounded-full bg-[#E0F2FE] px-2.5 py-0.5 text-[11px] font-semibold text-[#0369A1]">
+				<div className="mt-1.5 flex flex-wrap items-center justify-center gap-1.5">
+					<span className="inline-flex items-center gap-1 rounded-full border border-sky-500/20 bg-sky-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700 dark:text-sky-300">
 						{positionText}
 					</span>
-					<span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+					<span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
 						{roleText}
 					</span>
 				</div>
 
 				{doctor.email && (
-					<p className="mt-2 text-xs text-slate-500 max-w-[240px] truncate" title={doctor.email}>
+					<p
+						className="mt-2 text-xs text-muted-foreground max-w-[240px] truncate"
+						title={doctor.email}
+					>
 						{doctor.email}
 					</p>
 				)}
 			</div>
 
-			<div className="my-5 border-t border-slate-100" />
+			<div className="my-5 border-t border-border" />
 
 			{/* ── Personal Info List ── */}
 			<div>
-				<h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3.5 flex items-center gap-1.5">
-					<User className="h-3.5 w-3.5 text-slate-400" />
-					<span>Thông tin cá nhân</span>
+				<h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3.5 flex items-center gap-1.5">
+					<User className="h-3.5 w-3.5 text-muted-foreground" />
+					<span>{t("avatarCard.personalInfoTitle")}</span>
 				</h3>
 
 				<div className="space-y-3 text-xs">
 					{/* Họ và tên */}
-					<div className="flex items-start justify-between gap-2 py-1 border-b border-slate-50">
-						<div className="flex items-center gap-2 text-slate-500">
-							<User className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-							<span>Họ và tên:</span>
+					<div className="flex items-start justify-between gap-2 py-1 border-b border-border/60">
+						<div className="flex items-center gap-2 text-muted-foreground">
+							<User className="h-3.5 w-3.5 shrink-0 text-muted-foreground/80" />
+							<span>{t("avatarCard.fullName")}</span>
 						</div>
-						<span className="font-semibold text-slate-800">
-							{fullName || "Chưa cập nhật"}
+						<span className="font-semibold text-foreground text-right">
+							{fullName || t("notUpdated")}
 						</span>
 					</div>
 
 					{/* Ngày sinh */}
-					<div className="flex items-start justify-between gap-2 py-1 border-b border-slate-50">
-						<div className="flex items-center gap-2 text-slate-500">
-							<Calendar className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-							<span>Ngày sinh:</span>
+					<div className="flex items-start justify-between gap-2 py-1 border-b border-border/60">
+						<div className="flex items-center gap-2 text-muted-foreground">
+							<Calendar className="h-3.5 w-3.5 shrink-0 text-muted-foreground/80" />
+							<span>{t("avatarCard.dob")}</span>
 						</div>
-						<span className="font-semibold text-slate-800">{dob}</span>
+						<span className="font-semibold text-foreground">{dob}</span>
 					</div>
 
 					{/* Giới tính */}
-					<div className="flex items-start justify-between gap-2 py-1 border-b border-slate-50">
-						<div className="flex items-center gap-2 text-slate-500">
-							<User className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-							<span>Giới tính:</span>
+					<div className="flex items-start justify-between gap-2 py-1 border-b border-border/60">
+						<div className="flex items-center gap-2 text-muted-foreground">
+							<User className="h-3.5 w-3.5 shrink-0 text-muted-foreground/80" />
+							<span>{t("avatarCard.gender")}</span>
 						</div>
-						<span className="font-semibold text-slate-800">
-							{doctor.gender ? "Nam" : "Nữ"}
+						<span className="font-semibold text-foreground">
+							{doctor.gender ? t("avatarCard.male") : t("avatarCard.female")}
 						</span>
 					</div>
 
 					{/* CCCD / CMND */}
-					<div className="flex items-start justify-between gap-2 py-1 border-b border-slate-50">
-						<div className="flex items-center gap-2 text-slate-500">
-							<Fingerprint className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-							<span>Số CCCD/CMND:</span>
+					<div className="flex items-start justify-between gap-2 py-1 border-b border-border/60">
+						<div className="flex items-center gap-2 text-muted-foreground">
+							<Fingerprint className="h-3.5 w-3.5 shrink-0 text-muted-foreground/80" />
+							<span>{t("avatarCard.cccd")}</span>
 						</div>
 						<div className="flex items-center gap-1.5">
-							<span className="font-semibold font-mono text-slate-800">
+							<span className="font-semibold font-mono text-foreground">
 								{showCccd
-									? doctor.citizenIdentificationCard || "Chưa cập nhật"
-									: maskValue(doctor.citizenIdentificationCard)}
+									? doctor.citizenIdentificationCard || t("notUpdated")
+									: maskValue(doctor.citizenIdentificationCard, t)}
 							</span>
 							<button
 								type="button"
 								onClick={onToggleCccd}
-								className="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
-								title={showCccd ? "Ẩn số CCCD" : "Xem số CCCD"}
+								className="text-muted-foreground hover:text-foreground p-0.5 cursor-pointer transition-colors"
+								title={
+									showCccd
+										? t("avatarCard.hideCccd")
+										: t("avatarCard.showCccd")
+								}
 							>
-								{showCccd ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+								{showCccd ? (
+									<EyeOff className="h-3.5 w-3.5" />
+								) : (
+									<Eye className="h-3.5 w-3.5" />
+								)}
 							</button>
 						</div>
 					</div>
 
 					{/* Số điện thoại */}
-					<div className="flex items-start justify-between gap-2 py-1 border-b border-slate-50">
-						<div className="flex items-center gap-2 text-slate-500">
-							<Phone className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-							<span>Số điện thoại:</span>
+					<div className="flex items-start justify-between gap-2 py-1 border-b border-border/60">
+						<div className="flex items-center gap-2 text-muted-foreground">
+							<Phone className="h-3.5 w-3.5 shrink-0 text-muted-foreground/80" />
+							<span>{t("avatarCard.phone")}</span>
 						</div>
-						<a
-							href={`tel:${doctor.phoneNumber}`}
-							className="font-semibold text-[#0EA5E9] hover:underline"
-						>
-							{doctor.phoneNumber || "Chưa cập nhật"}
-						</a>
+						{doctor.phoneNumber ? (
+							<a
+								href={`tel:${doctor.phoneNumber}`}
+								className="font-semibold text-primary hover:underline"
+							>
+								{doctor.phoneNumber}
+							</a>
+						) : (
+							<span className="font-semibold text-foreground">
+								{t("notUpdated")}
+							</span>
+						)}
 					</div>
 
 					{/* Email */}
-					<div className="flex items-start justify-between gap-2 py-1 border-b border-slate-50">
-						<div className="flex items-center gap-2 text-slate-500">
-							<Mail className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-							<span>Email:</span>
+					<div className="flex items-start justify-between gap-2 py-1 border-b border-border/60">
+						<div className="flex items-center gap-2 text-muted-foreground">
+							<Mail className="h-3.5 w-3.5 shrink-0 text-muted-foreground/80" />
+							<span>{t("avatarCard.email")}</span>
 						</div>
 						<div className="flex items-center gap-1 max-w-[170px] justify-end">
 							<span
-								className="font-semibold text-slate-800 truncate"
+								className="font-semibold text-foreground truncate"
 								title={doctor.email}
 							>
 								{showEmail
-									? doctor.email || "Chưa cập nhật"
-									: maskValue(doctor.email)}
+									? doctor.email || t("notUpdated")
+									: maskValue(doctor.email, t)}
 							</span>
 							<button
 								type="button"
 								onClick={onToggleEmail}
-								className="text-slate-400 hover:text-slate-600 p-0.5 shrink-0 cursor-pointer"
-								title={showEmail ? "Ẩn email" : "Xem email đầy đủ"}
+								className="text-muted-foreground hover:text-foreground p-0.5 shrink-0 cursor-pointer transition-colors"
+								title={
+									showEmail
+										? t("avatarCard.hideEmail")
+										: t("avatarCard.showEmail")
+								}
 							>
-								{showEmail ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+								{showEmail ? (
+									<EyeOff className="h-3.5 w-3.5" />
+								) : (
+									<Eye className="h-3.5 w-3.5" />
+								)}
 							</button>
 						</div>
 					</div>
 
 					{/* Địa chỉ */}
 					<div className="pt-1">
-						<div className="flex items-center gap-2 text-slate-500 mb-1">
-							<MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-							<span>Địa chỉ thường trú:</span>
+						<div className="flex items-center gap-2 text-muted-foreground mb-1">
+							<MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground/80" />
+							<span>{t("avatarCard.address")}</span>
 						</div>
-						<p className="font-medium text-slate-800 pl-5.5 leading-relaxed text-[11.5px]">
-							{doctor.address || "Chưa cập nhật"}
+						<p className="font-medium text-foreground pl-5.5 leading-relaxed text-[11.5px]">
+							{doctor.address || t("notUpdated")}
 						</p>
 					</div>
 				</div>
 			</div>
 
-			<div className="my-5 border-t border-slate-100" />
+			<div className="my-5 border-t border-border" />
 
 			{/* ── System Identification Info ── */}
-			<div className="rounded-[10px] bg-slate-50 p-3 text-[11px] text-slate-500 space-y-1.5">
+			<div className="rounded-[10px] border border-border/60 bg-muted/50 p-3 text-[11px] text-muted-foreground space-y-1.5">
 				<div className="flex items-center justify-between">
-					<span className="flex items-center gap-1 text-slate-400">
+					<span className="flex items-center gap-1 text-muted-foreground">
 						<IdCard className="h-3 w-3" />
-						Mã hồ sơ:
+						{t("avatarCard.profileId")}
 					</span>
-					<span className="font-mono font-medium text-slate-700 truncate max-w-[140px]" title={doctor.doctorId || doctor.id}>
+					<span
+						className="font-mono font-medium text-foreground truncate max-w-[140px]"
+						title={doctor.doctorId || doctor.id}
+					>
 						{doctor.doctorId || doctor.id || "N/A"}
 					</span>
 				</div>
 				{doctor.accountId && (
 					<div className="flex items-center justify-between">
-						<span className="flex items-center gap-1 text-slate-400">
+						<span className="flex items-center gap-1 text-muted-foreground">
 							<Fingerprint className="h-3 w-3" />
-							Mã tài khoản:
+							{t("avatarCard.accountId")}
 						</span>
-						<span className="font-mono font-medium text-slate-700 truncate max-w-[140px]" title={doctor.accountId}>
+						<span
+							className="font-mono font-medium text-foreground truncate max-w-[140px]"
+							title={doctor.accountId}
+						>
 							{doctor.accountId}
 						</span>
 					</div>
 				)}
 				{doctor.createdAt && (
 					<div className="flex items-center justify-between">
-						<span className="flex items-center gap-1 text-slate-400">
+						<span className="flex items-center gap-1 text-muted-foreground">
 							<Calendar className="h-3 w-3" />
-							Ngày tạo:
+							{t("avatarCard.createdAt")}
 						</span>
-						<span className="font-medium text-slate-700">
-							{formatDate(doctor.createdAt)}
+						<span className="font-medium text-foreground">
+							{formatDate(doctor.createdAt, t)}
 						</span>
 					</div>
 				)}
 				<div className="flex items-center justify-between">
-					<span className="flex items-center gap-1 text-slate-400">
+					<span className="flex items-center gap-1 text-muted-foreground">
 						<CheckCircle2 className="h-3 w-3 text-emerald-500" />
-						Trạng thái tài khoản:
+						{t("avatarCard.accountStatus")}
 					</span>
-					<span className="font-medium text-emerald-700">
-						{doctor.accountStatus || "Đang hoạt động"}
+					<span className="font-medium text-emerald-600 dark:text-emerald-400">
+						{doctor.accountStatus || t("avatarCard.activeStatus")}
 					</span>
 				</div>
 			</div>
