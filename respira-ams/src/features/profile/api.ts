@@ -13,6 +13,13 @@ import {
 
 const PROFILE_STORAGE_KEY = "respira_doctor_profile_v1";
 
+/**
+ * Object URLs created with URL.createObjectURL are only valid for the page that
+ * created them, so they must never be persisted across reloads.
+ */
+const isEphemeralAvatarUrl = (value?: string | null): boolean =>
+	typeof value === "string" && value.startsWith("blob:");
+
 export interface BackendDoctorProfileDto {
 	id: string;
 	accountId: string;
@@ -115,7 +122,9 @@ export function getStoredDoctorProfile(): DoctorProfile {
 	try {
 		const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
 		if (raw) {
-			const parsed = JSON.parse(raw);
+			const parsed = JSON.parse(raw) as Partial<DoctorProfile>;
+			if (isEphemeralAvatarUrl(parsed.mediaUrl)) parsed.mediaUrl = undefined;
+			if (isEphemeralAvatarUrl(parsed.avatarUrl)) parsed.avatarUrl = undefined;
 			return { ...defaultDoctor, ...parsed };
 		}
 	} catch {
@@ -130,7 +139,12 @@ export function getStoredDoctorProfile(): DoctorProfile {
 export function saveStoredDoctorProfile(profile: DoctorProfile): void {
 	if (typeof window === "undefined") return;
 	try {
-		localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+		const persistable: DoctorProfile = {
+			...profile,
+			mediaUrl: isEphemeralAvatarUrl(profile.mediaUrl) ? undefined : profile.mediaUrl,
+			avatarUrl: isEphemeralAvatarUrl(profile.avatarUrl) ? undefined : profile.avatarUrl,
+		};
+		localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(persistable));
 		window.dispatchEvent(
 			new CustomEvent("respira:profile-updated", { detail: profile })
 		);

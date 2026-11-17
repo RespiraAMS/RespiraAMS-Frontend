@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
 	Camera,
 	Eye,
@@ -47,6 +47,7 @@ export function ProfileAvatarCard({
 }: ProfileAvatarCardProps) {
 	const t = useTranslations("doctor.profile");
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [failedAvatarSrc, setFailedAvatarSrc] = useState<string | null>(null);
 
 	const fullName = [doctor.lastName, doctor.firstName]
 		.filter(Boolean)
@@ -58,6 +59,8 @@ export function ProfileAvatarCard({
 	const dob = formatDate(doctor.dateOfBirth, t);
 
 	const avatarSrc = doctor.mediaUrl || doctor.avatarUrl;
+	// A stored URL can expire or point at a revoked blob; fall back to the initial.
+	const showAvatarImage = Boolean(avatarSrc) && failedAvatarSrc !== avatarSrc;
 	const fallbackChar = t("initialsFallback").charAt(0) || "B";
 	const initial = doctor.firstName
 		? doctor.firstName.charAt(0).toUpperCase()
@@ -71,10 +74,12 @@ export function ProfileAvatarCard({
 			<div className="flex flex-col items-center text-center">
 				<div className="relative group">
 					<div className="relative h-28 w-28 rounded-full ring-4 ring-sky-500/20 overflow-hidden bg-muted flex items-center justify-center shadow-xs">
-						{avatarSrc ? (
+						{showAvatarImage ? (
 							<img
+								key={avatarSrc}
 								src={avatarSrc}
 								alt={displayName}
+								onError={() => setFailedAvatarSrc(avatarSrc ?? null)}
 								className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
 							/>
 						) : (
