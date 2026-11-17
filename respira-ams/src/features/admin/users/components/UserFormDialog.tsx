@@ -167,7 +167,7 @@ export function UserFormDialog({
 				setAvatarFile(null);
 			} else {
 				setEmail("");
-				setPassword("Respira@123");
+				setPassword("");
 				setShowPassword(false);
 				setPhone("");
 				setRole("Doctor");
