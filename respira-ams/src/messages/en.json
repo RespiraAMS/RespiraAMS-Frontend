@@ -1118,7 +1118,12 @@
       "themeDescription": "Choose light, dark or follow your system.",
       "themeLight": "Light",
       "themeDark": "Dark",
-      "themeSystem": "System"
+      "themeSystem": "System",
+      "fontSizeTitle": "Font size",
+      "fontSizeDescription": "Adjust the text size across the system.",
+      "fontSizeSmall": "Small",
+      "fontSizeMedium": "Medium",
+      "fontSizeLarge": "Large"
     },
     "nav": {
       "mainNavigation": "Main Navigation",

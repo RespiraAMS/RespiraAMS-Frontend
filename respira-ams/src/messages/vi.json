@@ -1118,7 +1118,12 @@
       "themeDescription": "Chọn chế độ sáng, tối hoặc theo hệ thống.",
       "themeLight": "Sáng",
       "themeDark": "Tối",
-      "themeSystem": "Hệ thống"
+      "themeSystem": "Hệ thống",
+      "fontSizeTitle": "Cỡ chữ",
+      "fontSizeDescription": "Chọn cỡ chữ hiển thị.",
+      "fontSizeSmall": "Nhỏ",
+      "fontSizeMedium": "Vừa",
+      "fontSizeLarge": "Lớn"
     },
     "nav": {
       "mainNavigation": "Điều hướng chính",
