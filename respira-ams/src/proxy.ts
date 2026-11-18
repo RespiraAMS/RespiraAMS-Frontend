@@ -31,7 +31,7 @@ function getDefaultDashboard(role: string) {
 	return "/doctor/patients";
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 	const response = NextResponse.next();
 	const session = await getIronSession<SessionData>(
