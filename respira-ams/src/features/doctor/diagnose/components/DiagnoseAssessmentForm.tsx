@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import type { PatientDetail } from "@/features/doctor/patients/types";
 import {
 	ALLERGY_TYPE_OPTIONS,
 	type AllergyType,
@@ -23,6 +22,7 @@ import {
 	INFECTION_TYPES,
 	MIC_CATEGORIES,
 	type MicCategory,
+	type PatientDetailWithPlans,
 	SAMPLE_TYPES,
 	type SubmitDiagnosisRequest,
 	type SubmitErrorInfo,
@@ -45,7 +45,7 @@ interface SampleRow {
 
 interface DiagnoseAssessmentFormProps {
 	metadata: DiagnoseFormResponse;
-	patient: PatientDetail | null;
+	patient: PatientDetailWithPlans | null;
 	previousDiagnosis?: DiagnosisResultDto | null;
 	isSubmitting: boolean;
 	/**
