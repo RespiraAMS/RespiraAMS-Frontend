@@ -6,11 +6,11 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { PatientDetail } from "@/features/doctor/patients/types";
+import type { PatientDetailWithPlans } from "../types";
 import { calculateAge } from "../validation";
 
 interface PatientContextHeaderProps {
-	patient: PatientDetail | null;
+	patient: PatientDetailWithPlans | null;
 	patientId: string;
 	isLoadingPatient?: boolean;
 	hasPreviousDiagnosis?: boolean;
