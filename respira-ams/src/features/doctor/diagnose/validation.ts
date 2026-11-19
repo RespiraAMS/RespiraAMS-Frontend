@@ -24,6 +24,26 @@ export type DiagnoseTranslateFn = (
 	values?: Record<string, string | number>
 ) => string;
 
+/**
+ * Clinical variables whose values are sourced from the patient profile
+ * (age, gender, weight, height). They are shown in the assessment form for
+ * context but must not be edited there — the patient record is the source of
+ * truth.
+ */
+export const PATIENT_PROFILE_VARIABLE_CODES = [
+	"AGE",
+	"GENDER",
+	"WEIGHT",
+	"HEIGHT",
+] as const;
+
+export function isPatientProfileVariable(
+	variable: Pick<ClinicalVariableDto, "code">
+): boolean {
+	const code = (variable.code || "").trim().toUpperCase();
+	return (PATIENT_PROFILE_VARIABLE_CODES as readonly string[]).includes(code);
+}
+
 export function calculateAge(dateOfBirth?: string): number | undefined {
 	if (!dateOfBirth) return undefined;
 	const dob = new Date(dateOfBirth);

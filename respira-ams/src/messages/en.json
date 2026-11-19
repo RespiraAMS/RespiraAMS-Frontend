@@ -1790,6 +1790,8 @@
                     "title": "1. Clinical & Paraclinical Assessment",
                     "description": "Fields marked with <required>*</required> are required. Values outside the normal range show a yellow warning; values outside the accepted range will be rejected.",
                     "searchPlaceholder": "Search by variable name or code (e.g., CURB, RR, SPO2, AGE)...",
+                    "profileLockedBadge": "From profile",
+                    "profileLockedHint": "This value is automatically taken from the patient profile and cannot be edited.",
                     "booleanYes": "Yes",
                     "booleanNo": "No",
                     "nextButton": "Next: Antibiotic Allergy →"
