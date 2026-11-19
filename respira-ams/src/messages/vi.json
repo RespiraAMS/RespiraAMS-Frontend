@@ -1790,6 +1790,8 @@
                     "title": "1. Đánh giá chỉ số lâm sàng",
                     "description": "Các trường có dấu <required>*</required> là bắt buộc. Giá trị ngoài ngưỡng bình thường sẽ hiển thị cảnh báo vàng; ngoài ngưỡng cho phép sẽ bị từ chối.",
                     "searchPlaceholder": "Tìm theo tên biến, mã code (VD: CURB, RR, SPO2, AGE)...",
+                    "profileLockedBadge": "Từ hồ sơ",
+                    "profileLockedHint": "Chỉ số này được lấy tự động từ hồ sơ bệnh nhân và không thể chỉnh sửa.",
                     "booleanYes": "Có",
                     "booleanNo": "Không",
                     "nextButton": "Tiếp theo: Dị ứng kháng sinh →"
