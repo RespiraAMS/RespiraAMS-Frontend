@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Upload, Download, Plus, Trash2, Loader2, Check } from "lucide-react";
+import { Upload, Download, Plus, Trash2, Loader2, Check, Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ import {
 	calculateAge,
 	extractPreviousObservations,
 	getNormalPlaceholder,
+	isPatientProfileVariable,
 	plainNumber,
 	validateVariableValue,
 } from "../validation";
@@ -319,7 +320,7 @@ export function DiagnoseAssessmentForm({
 					allergyType === "Yes" ? Array.from(selectedAllergyIds) : [],
 				otherAllergy:
 					allergyType === "NonRegisteredAntibiotic" ||
-					allergyType === "Unknown"
+						allergyType === "Unknown"
 						? otherAllergy.trim()
 						: null,
 			},
@@ -400,7 +401,7 @@ export function DiagnoseAssessmentForm({
 					const meta = metadata.clinicalVariables.find(
 						(v) => v.id === obs.variableId
 					);
-					if (!meta) continue;
+					if (!meta || isPatientProfileVariable(meta)) continue;
 					nextValues[obs.variableId] =
 						meta.valueType === "Boolean"
 							? String(obs.value).toLowerCase() === "true"
@@ -586,6 +587,7 @@ export function DiagnoseAssessmentForm({
 										const val = values[v.id];
 										const { warning } = validateVariableValue(v, val, t);
 										const error = fieldErrors[v.id];
+										const isLocked = isPatientProfileVariable(v);
 
 										return (
 											<div
@@ -593,11 +595,13 @@ export function DiagnoseAssessmentForm({
 												id={`clinical-var-${v.id}`}
 												className={cn(
 													"rounded-lg border p-3.5 transition",
-													error
-														? "border-destructive bg-destructive/5 dark:bg-destructive/10 ring-1 ring-destructive/30"
-														: warning
-															? "border-amber-500/40 bg-amber-500/10 dark:border-amber-500/30 dark:bg-amber-500/15"
-															: "border-border bg-muted/20 focus-within:border-primary/60"
+													isLocked
+														? "border-border bg-muted/30"
+														: error
+															? "border-destructive bg-destructive/5 dark:bg-destructive/10 ring-1 ring-destructive/30"
+															: warning
+																? "border-amber-500/40 bg-amber-500/10 dark:border-amber-500/30 dark:bg-amber-500/15"
+																: "border-border bg-muted/20 focus-within:border-primary/60"
 												)}
 											>
 												<div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_260px] md:items-center">
@@ -617,10 +621,28 @@ export function DiagnoseAssessmentForm({
 															>
 																{v.code}
 															</Badge>
+															{isLocked && (
+																<Badge
+																	variant="secondary"
+																	className="gap-1 border-border text-[10px] font-medium text-muted-foreground"
+																>
+																	<Lock className="h-3 w-3" />
+																	{t(
+																		"assessmentForm.step1.profileLockedBadge"
+																	)}
+																</Badge>
+															)}
 														</div>
 														{v.description && (
 															<p className="mt-0.5 text-xs text-muted-foreground">
 																{v.description}
+															</p>
+														)}
+														{isLocked && (
+															<p className="mt-0.5 text-[11px] italic text-muted-foreground">
+																{t(
+																	"assessmentForm.step1.profileLockedHint"
+																)}
 															</p>
 														)}
 													</div>
@@ -630,14 +652,18 @@ export function DiagnoseAssessmentForm({
 															<div
 																className={cn(
 																	"group flex h-10 items-center overflow-hidden rounded-md border bg-background transition-all",
-																	error
-																		? "border-destructive focus-within:ring-2 focus-within:ring-destructive/20"
-																		: "border-input hover:border-foreground/40 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
+																	isLocked
+																		? "border-border bg-muted/50"
+																		: error
+																			? "border-destructive focus-within:ring-2 focus-within:ring-destructive/20"
+																			: "border-input hover:border-foreground/40 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
 																)}
 															>
 																<input
 																	type="number"
 																	step="any"
+																	readOnly={isLocked}
+																	aria-readonly={isLocked}
 																	value={
 																		typeof val === "string"
 																			? val
@@ -648,6 +674,7 @@ export function DiagnoseAssessmentForm({
 																		t
 																	)}
 																	onChange={(e) => {
+																		if (isLocked) return;
 																		const nextVal =
 																			e.target.value;
 																		setValues((prev) => ({
@@ -671,15 +698,18 @@ export function DiagnoseAssessmentForm({
 																			return copy;
 																		});
 																	}}
-																	className="h-full w-full min-w-0 bg-transparent px-3 text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none"
+																	className="h-full w-full min-w-0 bg-transparent px-3 text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none data-[locked=true]:cursor-not-allowed"
+																	data-locked={isLocked}
 																/>
 																{v.canonicalUnit && (
 																	<span
 																		className={cn(
 																			"flex h-full shrink-0 items-center border-l px-3 text-xs font-semibold transition-colors select-none",
-																			error
-																				? "border-destructive/30 bg-destructive/10 text-destructive"
-																				: "border-input bg-muted text-muted-foreground group-focus-within:border-primary/30 group-focus-within:bg-primary/10 group-focus-within:text-primary"
+																			isLocked
+																				? "border-border bg-muted text-muted-foreground"
+																				: error
+																					? "border-destructive/30 bg-destructive/10 text-destructive"
+																					: "border-input bg-muted text-muted-foreground group-focus-within:border-primary/30 group-focus-within:bg-primary/10 group-focus-within:text-primary"
 																		)}
 																	>
 																		{v.canonicalUnit}
@@ -712,7 +742,9 @@ export function DiagnoseAssessmentForm({
 																				opt.boolVal
 																			)}
 																			type="button"
+																			disabled={isLocked}
 																			onClick={() => {
+																				if (isLocked) return;
 																				setValues(
 																					(prev) => {
 																						const next = {
@@ -737,9 +769,9 @@ export function DiagnoseAssessmentForm({
 																				setFieldErrors(
 																					(prev) => {
 																						const copy =
-																							{
-																								...prev,
-																							};
+																						{
+																							...prev,
+																						};
 																						delete copy[
 																							v.id
 																						];
@@ -749,9 +781,15 @@ export function DiagnoseAssessmentForm({
 																			}}
 																			className={cn(
 																				"flex h-full cursor-pointer items-center justify-center rounded-sm text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+																				isLocked &&
+																					"cursor-not-allowed",
 																				active
 																					? "bg-primary font-semibold text-primary-foreground shadow-sm"
-																					: "font-medium text-muted-foreground hover:bg-background/60 hover:text-foreground"
+																					: cn(
+																						"font-medium text-muted-foreground",
+																						!isLocked &&
+																							"hover:bg-background/60 hover:text-foreground"
+																					)
 																			)}
 																		>
 																			{opt.label}
@@ -776,21 +814,23 @@ export function DiagnoseAssessmentForm({
 																			val === option;
 																		const displayLabel =
 																			option.toUpperCase() ===
-																			"MALE"
+																				"MALE"
 																				? t(
-																						"patientHeader.gender.male"
-																					)
+																					"patientHeader.gender.male"
+																				)
 																				: option.toUpperCase() ===
-																					  "FEMALE"
+																					"FEMALE"
 																					? t(
-																							"patientHeader.gender.female"
-																						)
+																						"patientHeader.gender.female"
+																					)
 																					: option;
 																		return (
 																			<button
 																				key={option}
 																				type="button"
+																				disabled={isLocked}
 																				onClick={() => {
+																					if (isLocked) return;
 																					setValues(
 																						(prev) => ({
 																							...prev,
@@ -801,9 +841,9 @@ export function DiagnoseAssessmentForm({
 																					setFieldErrors(
 																						(prev) => {
 																							const copy =
-																								{
-																									...prev,
-																								};
+																							{
+																								...prev,
+																							};
 																							delete copy[
 																								v.id
 																							];
@@ -812,10 +852,14 @@ export function DiagnoseAssessmentForm({
 																					);
 																				}}
 																				className={cn(
-																					"flex h-full flex-1 cursor-pointer items-center justify-center rounded-sm px-2.5 text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+																					"flex h-full flex-1 disabled:cursor-not-allowed items-center justify-center rounded-sm px-2.5 text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
 																					active
 																						? "bg-primary font-semibold text-primary-foreground shadow-sm"
-																						: "font-medium text-muted-foreground hover:bg-background/60 hover:text-foreground"
+																						: cn(
+																							"font-medium text-muted-foreground",
+																							!isLocked &&
+																								"hover:bg-background/60 hover:text-foreground"
+																						)
 																				)}
 																			>
 																				{displayLabel}
@@ -895,22 +939,22 @@ export function DiagnoseAssessmentForm({
 
 					{(allergyType === "NonRegisteredAntibiotic" ||
 						allergyType === "Unknown") && (
-						<div id="step-2-other-allergy-input" className="space-y-1.5">
-							<Label className="text-foreground">
-								{t("assessmentForm.step2.otherAllergyLabel")}{" "}
-								<span className="text-destructive">*</span>
-							</Label>
-							<Input
-								value={otherAllergy}
-								onChange={(e) => {
-									setOtherAllergy(e.target.value);
-									setAllergyError(null);
-								}}
-								placeholder={t("assessmentForm.step2.otherAllergyPlaceholder")}
-								className="bg-background text-foreground border-input"
-							/>
-						</div>
-					)}
+							<div id="step-2-other-allergy-input" className="space-y-1.5">
+								<Label className="text-foreground">
+									{t("assessmentForm.step2.otherAllergyLabel")}{" "}
+									<span className="text-destructive">*</span>
+								</Label>
+								<Input
+									value={otherAllergy}
+									onChange={(e) => {
+										setOtherAllergy(e.target.value);
+										setAllergyError(null);
+									}}
+									placeholder={t("assessmentForm.step2.otherAllergyPlaceholder")}
+									className="bg-background text-foreground border-input"
+								/>
+							</div>
+						)}
 
 					{allergyType === "Yes" && (
 						<div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
