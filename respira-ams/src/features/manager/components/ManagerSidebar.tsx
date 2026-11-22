@@ -79,7 +79,7 @@ function NavItemLink({
                         : 'text-muted-foreground group-hover:text-sidebar-foreground',
                 )}
             />
-            {!collapsed && <span className="truncate leading-none">{label}</span>}
+            {!collapsed && <span className="leading-none">{label}</span>}
             {!collapsed && badge != null && (
                 <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-sidebar-primary/15 px-1.5 text-[11px] font-semibold text-sidebar-primary">
                     {badge}
@@ -208,7 +208,7 @@ export function ManagerSidebar({
 
                 {/* Account Section */}
                 <div className="p-2.5 shrink-0 border-t border-slate-100">
-                    <AccountSection collapsed={collapsed} route='manage'/>
+                    <AccountSection collapsed={collapsed} route='manage' />
                 </div>
             </aside>
         </TooltipProvider>

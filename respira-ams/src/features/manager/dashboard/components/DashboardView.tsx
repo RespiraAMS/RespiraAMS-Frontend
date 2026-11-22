@@ -103,12 +103,6 @@ export function ManagerDashboardView() {
 				<div>
 					<div className="flex items-center gap-2">
 						<h1 className="text-3xl font-bold tracking-tight text-foreground">{t("title")}</h1>
-						<Badge
-							variant="secondary"
-							className="bg-primary/10 text-primary border border-primary/20 font-semibold"
-						>
-							{t("badge")}
-						</Badge>
 					</div>
 					<p className="text-muted-foreground mt-1 text-sm">{t("subtitle")}</p>
 				</div>
