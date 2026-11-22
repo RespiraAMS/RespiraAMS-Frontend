@@ -33,6 +33,14 @@ import {
 	UserRole,
 } from "../types";
 import { checkDoctorDuplicates } from "../api";
+import {
+	CITIZEN_ID_LENGTH,
+	DOCTOR_POSITIONS,
+	HEAD_DEPARTMENT_POSITION,
+	PHONE_MAX_LENGTH,
+	sanitizeCitizenIdInput,
+	sanitizePhoneInput,
+} from "../utils";
 
 interface UserFormDialogProps {
 	isOpen: boolean;
@@ -54,15 +62,6 @@ const ALL_DEGREES: DegreeType[] = [
 	"Associate",
 	"Graduate",
 	"Undergraduate",
-];
-
-const ALL_POSITIONS: PositionType[] = [
-	"StaffDoctor",
-	"SeniorDoctor",
-	"DepartmentDeputyHead",
-	"HeadOfDepartment",
-	"DeputyDirector",
-	"Director",
 ];
 
 export function UserFormDialog({
@@ -102,6 +101,21 @@ export function UserFormDialog({
 	// không có hồ sơ bác sĩ.
 	const isAccountOnly = role === "Manager" || role === "Admin";
 
+	// Chỉ bác sĩ điều trị và bác sĩ cao cấp được tạo với role Doctor; trưởng khoa
+	// luôn giữ chức vụ Trưởng khoa.
+	const allowedPositions: PositionType[] =
+		role === "Doctor"
+			? DOCTOR_POSITIONS
+			: role === "HeadDepartmentDoctor"
+				? [HEAD_DEPARTMENT_POSITION]
+				: [];
+
+	// Khi sửa hồ sơ cũ, giữ chức vụ hiện tại trong danh sách để không làm mất dữ liệu.
+	const positionOptions =
+		!isAccountOnly && position && !allowedPositions.includes(position)
+			? [...allowedPositions, position]
+			: allowedPositions;
+
 	// Avatar file & preview
 	const [avatarFile, setAvatarFile] = useState<File | null>(null);
 	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -114,12 +128,15 @@ export function UserFormDialog({
 	const wasOpenRef = useRef(false);
 
 	const handleRoleChange = (nextRole: UserRole) => {
-		const previousRole = role;
 		setRole(nextRole);
 
 		if (nextRole === "HeadDepartmentDoctor") {
-			setPosition("HeadOfDepartment");
-		} else if (previousRole === "HeadDepartmentDoctor") {
+			setPosition(HEAD_DEPARTMENT_POSITION);
+		} else if (nextRole === "Doctor") {
+			setPosition((current) =>
+				DOCTOR_POSITIONS.includes(current) ? current : "StaffDoctor"
+			);
+		} else {
 			setPosition("StaffDoctor");
 		}
 
@@ -241,7 +258,7 @@ export function UserFormDialog({
 				return null;
 			case "phone":
 				if (!val) return t("errors.phoneRequired");
-				if (!/^(0|\+84|84)(3|5|7|8|9)[0-9]{8}$/.test(val)) {
+				if (!/^(?:0[35789]\d{8}|\+?84[35789]\d{8})$/.test(val)) {
 					return t("errors.phoneInvalid");
 				}
 				return null;
@@ -258,7 +275,7 @@ export function UserFormDialog({
 			case "citizenId":
 				const rawCccd = val.replace(/\s+/g, "");
 				if (!rawCccd) return t("errors.citizenIdRequired");
-				if (!/^[0-9]{9,12}$/.test(rawCccd)) {
+				if (!/^\d{12}$/.test(rawCccd)) {
 					return t("errors.citizenIdInvalid");
 				}
 				return null;
@@ -481,8 +498,10 @@ export function UserFormDialog({
 					position: isAccountOnly
 						? "StaffDoctor"
 						: createRole === "HeadDepartmentDoctor"
-							? "HeadOfDepartment"
-							: position,
+							? HEAD_DEPARTMENT_POSITION
+							: DOCTOR_POSITIONS.includes(position)
+								? position
+								: "StaffDoctor",
 					gender,
 					citizenIdentificationNumber: isAccountOnly ? "" : citizenId.trim(),
 					dateOfBirth: isAccountOnly ? undefined : dobIso,
@@ -617,9 +636,14 @@ export function UserFormDialog({
 								id="usr-phone"
 								type="tel"
 								value={phone}
-								onChange={(e) => handleFieldChange("phone", e.target.value, setPhone)}
+								onChange={(e) =>
+									handleFieldChange("phone", sanitizePhoneInput(e.target.value), setPhone)
+								}
 								onBlur={() => handleBlur("phone", phone)}
 								placeholder={t("phonePlaceholder")}
+								maxLength={PHONE_MAX_LENGTH}
+								inputMode="tel"
+								autoComplete="tel"
 								className={`mt-1 h-9 text-xs ${touched.phone && errors.phone ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 									}`}
 							/>
@@ -732,9 +756,19 @@ export function UserFormDialog({
 										<Input
 											id="usr-citizen"
 											value={citizenId}
-											onChange={(e) => handleFieldChange("citizenId", e.target.value, setCitizenId)}
+											onChange={(e) =>
+												handleFieldChange(
+													"citizenId",
+													sanitizeCitizenIdInput(e.target.value),
+													setCitizenId
+												)
+											}
 											onBlur={() => handleBlur("citizenId", citizenId)}
 											placeholder={t("citizenIdPlaceholder")}
+											maxLength={CITIZEN_ID_LENGTH}
+											inputMode="numeric"
+											pattern="[0-9]*"
+											autoComplete="off"
 											className={`mt-1 h-9 text-xs ${touched.citizenId && errors.citizenId ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 												}`}
 										/>
@@ -845,7 +879,7 @@ export function UserFormDialog({
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
-												{ALL_POSITIONS.map((pos) => (
+												{positionOptions.map((pos) => (
 													<SelectItem key={pos} value={pos}>
 														{positionLabels[pos] || pos}
 													</SelectItem>
