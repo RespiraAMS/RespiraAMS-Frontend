@@ -29,17 +29,39 @@ function decodeBase64Url(value: string): string {
 	return new TextDecoder().decode(bytes);
 }
 
-export function normalizeBackendRole(rawRole: string): BackendRole {
-	const normalized = rawRole.trim().toLowerCase();
-
-	if (normalized === "admin") return "Admin";
-	if (normalized === "medicalregulationreviewer") return "MedicalRegulationReviewer";
-	if (normalized === "headdepartmentdoctor") return "HeadDepartmentDoctor";
-	return "Doctor";
+function readRawRole(rawRole: unknown): string | null {
+	if (typeof rawRole === "string") return rawRole;
+	if (Array.isArray(rawRole)) {
+		const first = rawRole.find((value): value is string => typeof value === "string");
+		return first ?? null;
+	}
+	return null;
 }
 
-export function toDisplayRole(rawRole: string): DisplayRole {
+/**
+ * Maps a backend role to its canonical form. Unknown or missing roles return
+ * null so callers fail closed instead of silently granting Doctor access.
+ */
+export function normalizeBackendRole(rawRole: string | null | undefined): BackendRole | null {
+	if (!rawRole) return null;
+
+	switch (rawRole.trim().toLowerCase()) {
+		case "admin":
+			return "Admin";
+		case "medicalregulationreviewer":
+			return "MedicalRegulationReviewer";
+		case "headdepartmentdoctor":
+			return "HeadDepartmentDoctor";
+		case "doctor":
+			return "Doctor";
+		default:
+			return null;
+	}
+}
+
+export function toDisplayRole(rawRole: string | null | undefined): DisplayRole | null {
 	const role = normalizeBackendRole(rawRole);
+	if (!role) return null;
 	if (role === "Admin") return "Admin";
 	if (role === "MedicalRegulationReviewer") return "Manager";
 	return "Doctor";
@@ -51,7 +73,9 @@ export function parseJwt(token: string): DecodedAuthToken | null {
 		if (parts.length < 2) return null;
 
 		const decoded = JSON.parse(decodeBase64Url(parts[1])) as Record<string, unknown>;
-		const rawRole = String(decoded.role ?? decoded[ROLE_CLAIM] ?? "Doctor");
+		const rawRole = readRawRole(decoded.role) ?? readRawRole(decoded[ROLE_CLAIM]);
+		const role = normalizeBackendRole(rawRole);
+		if (!role) return null;
 
 		const rawId =
 			decoded.sub ??
@@ -63,7 +87,7 @@ export function parseJwt(token: string): DecodedAuthToken | null {
 		return {
 			id: String(rawId),
 			email: String(rawEmail),
-			role: normalizeBackendRole(rawRole),
+			role,
 			exp: typeof decoded.exp === "number" ? decoded.exp : undefined,
 		};
 	} catch {

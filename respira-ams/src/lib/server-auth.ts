@@ -25,14 +25,21 @@ export interface SessionUser {
 
 export type RefreshOutcome = "ok" | "unauthorized" | "error";
 
-export function toSessionUser(session: IronSession<SessionData>): SessionUser {
+/**
+ * Builds the client-facing user payload. Returns null when the stored role is
+ * missing or unknown so routes can reject the session instead of guessing.
+ */
+export function toSessionUser(session: IronSession<SessionData>): SessionUser | null {
+	const role = toDisplayRole(session.role);
+	if (!role) return null;
+
 	return {
 		id: session.id ?? "",
 		firstName: session.firstName ?? "",
 		lastName: session.lastName ?? "",
 		email: session.email ?? "",
 		phoneNumber: session.phoneNumber ?? "",
-		role: toDisplayRole(session.role ?? ""),
+		role,
 	};
 }
 
@@ -85,14 +92,16 @@ export async function refreshSessionTokens(
 
 		const decoded = parseJwt(payload.data.accessToken);
 
+		if (!decoded) {
+			console.warn("[auth/refresh] Refreshed access token has no valid role");
+			return "unauthorized";
+		}
+
 		session.accessToken = payload.data.accessToken;
 		session.refreshToken = payload.data.refreshToken;
-
-		if (decoded) {
-			session.id = decoded.id;
-			session.email = decoded.email;
-			session.role = decoded.role;
-		}
+		session.id = decoded.id;
+		session.email = decoded.email;
+		session.role = decoded.role;
 
 		await session.save();
 		return "ok";

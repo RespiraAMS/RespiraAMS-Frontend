@@ -7,7 +7,16 @@ export async function POST() {
 	const outcome = await refreshSessionTokens(session);
 
 	if (outcome === "ok") {
-		return NextResponse.json({ success: true, data: toSessionUser(session) });
+		const user = toSessionUser(session);
+		if (user) {
+			return NextResponse.json({ success: true, data: user });
+		}
+
+		session.destroy();
+		return NextResponse.json(
+			{ success: false, message: "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại." },
+			{ status: 401 }
+		);
 	}
 
 	if (outcome === "unauthorized") {
