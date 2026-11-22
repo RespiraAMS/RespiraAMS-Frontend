@@ -956,7 +956,7 @@
                 "Doctor": "Specialist Physician",
                 "HeadDepartmentDoctor": "Department Head Physician",
                 "Admin": "Administrator",
-                "Manager": "Manager"
+                "Manager": "Medical Regulation Reviewer"
             },
             "view": {
                 "backToHome": "Back to Dashboard",
@@ -1140,7 +1140,7 @@
             "pathogens": "Pathogen",
             "antibiograms": "Antibiograms",
             "suspectedCauses": "Suspected Cause",
-            "treatments": "Treatments",
+            "treatments": "Treatment Protocols",
             "clinicalVariables": "Clinical Variables",
             "criteria": "Criteria",
             "clinicalMetrics": "Clinical Metrics",
@@ -2027,7 +2027,7 @@
             "roleDoctor": "Clinician",
             "roleHeadDoctor": "Department Head",
             "roleManager": "Clinical Manager",
-            "roleReviewer": "Regulation Reviewer",
+            "roleReviewer": "Medical Regulation Reviewer",
             "colUser": "USER",
             "colRole": "ROLE",
             "colStatus": "STATUS",
@@ -2061,7 +2061,7 @@
                 "roleLabel": "Role",
                 "roleDoctor": "Doctor",
                 "roleHeadDoctor": "Head of Department",
-                "roleManager": "Clinical Manager",
+                "roleReviewer": "Medical Regulation Reviewer",
                 "roleAdmin": "Administrator",
                 "emailLabel": "Sign-in email",
                 "phoneLabel": "Contact phone",

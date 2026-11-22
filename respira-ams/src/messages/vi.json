@@ -956,7 +956,7 @@
                 "Doctor": "Bác sĩ chuyên môn",
                 "HeadDepartmentDoctor": "Bác sĩ Trưởng khoa",
                 "Admin": "Quản trị viên",
-                "Manager": "Quản lý"
+                "Manager": "Người kiểm duyệt tiêu chuẩn y tế"
             },
             "view": {
                 "backToHome": "Quay lại trang chính",
@@ -2027,7 +2027,7 @@
             "roleDoctor": "Bác sĩ điều trị",
             "roleHeadDoctor": "Trưởng khoa lâm sàng",
             "roleManager": "Quản lý chuyên môn",
-            "roleReviewer": "Duyệt quy chế",
+            "roleReviewer": "Người kiểm duyệt quy chế",
             "colUser": "NGƯỜI DÙNG",
             "colRole": "VAI TRÒ",
             "colStatus": "TRẠNG THÁI",
@@ -2061,7 +2061,7 @@
                 "roleLabel": "Vai trò phân quyền",
                 "roleDoctor": "Bác sĩ",
                 "roleHeadDoctor": "Trưởng khoa",
-                "roleManager": "Quản lý chuyên môn",
+                "roleReviewer": "Người kiểm duyệt quy chế",
                 "roleAdmin": "Quản trị viên",
                 "emailLabel": "Email đăng nhập",
                 "phoneLabel": "Số điện thoại liên hệ",

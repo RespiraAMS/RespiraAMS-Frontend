@@ -77,8 +77,9 @@ interface BackendAccountDto {
 const ACCOUNT_ROLE_TO_USER_ROLE: Record<string, UserRole> = {
 	Doctor: "Doctor",
 	HeadDepartmentDoctor: "HeadDepartmentDoctor",
-	MedicalRegulationReviewer: "Manager",
-	Manager: "Manager",
+	MedicalRegulationReviewer: "MedicalRegulationReviewer",
+	// Legacy alias kept for records written before the role was renamed.
+	Manager: "MedicalRegulationReviewer",
 	Admin: "Admin",
 };
 
@@ -112,7 +113,7 @@ function mapBackendDoctorToUser(doc: BackendDoctorDto): UserItem {
 	if (roleStr === "Admin") {
 		role = "Admin";
 	} else if (roleStr === "MedicalRegulationReviewer") {
-		role = "Manager";
+		role = "MedicalRegulationReviewer";
 	} else if (roleStr === "HeadDepartmentDoctor") {
 		role = "HeadDepartmentDoctor";
 	}
@@ -268,7 +269,7 @@ export async function fetchUsers(
 		total: allUsers.length,
 		doctors: allUsers.filter((u) => u.role === "Doctor").length,
 		managers: allUsers.filter(
-			(u) => u.role === "Manager" || u.role === "HeadDepartmentDoctor"
+			(u) => u.role === "MedicalRegulationReviewer" || u.role === "HeadDepartmentDoctor"
 		).length,
 		admins: allUsers.filter((u) => u.role === "Admin").length,
 		active: allUsers.filter((u) => u.status === "Active").length,
@@ -547,7 +548,7 @@ async function waitForCreatedAccount(
 
 		lastAudit = await readCreateAudit(sagaId);
 
-		if (payload.role !== "Manager") {
+		if (payload.role !== "MedicalRegulationReviewer") {
 			const doctor = await findDoctorByEmail(payload.email);
 			if (doctor) {
 				return { sagaId, user: doctor, emailSent: !lastAudit.emailFailed };
@@ -555,7 +556,7 @@ async function waitForCreatedAccount(
 		}
 
 		if (lastAudit.created) {
-			if (payload.role !== "Manager") {
+			if (payload.role !== "MedicalRegulationReviewer") {
 				const doctor = await findDoctorByEmail(payload.email);
 				if (doctor) {
 					return { sagaId, user: doctor, emailSent: !lastAudit.emailFailed };
@@ -590,7 +591,7 @@ async function waitForCreatedAccount(
  * Manager được tạo với role MedicalRegulationReviewer (account-only).
  */
 export async function createUser(payload: CreateUserPayload): Promise<CreateUserResult> {
-	const isManager = payload.role === "Manager";
+	const isManager = payload.role === "MedicalRegulationReviewer";
 
 	const duplicates = await checkDoctorDuplicates({
 		email: payload.email,

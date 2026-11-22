@@ -99,7 +99,7 @@ export function UserFormDialog({
 
 	// Tài khoản Quản lý chuyên môn (MedicalRegulationReviewer) và Quản trị viên
 	// không có hồ sơ bác sĩ.
-	const isAccountOnly = role === "Manager" || role === "Admin";
+	const isAccountOnly = role === "MedicalRegulationReviewer" || role === "Admin";
 
 	// Chỉ bác sĩ điều trị và bác sĩ cao cấp được tạo với role Doctor; trưởng khoa
 	// luôn giữ chức vụ Trưởng khoa.
@@ -115,6 +115,14 @@ export function UserFormDialog({
 		!isAccountOnly && position && !allowedPositions.includes(position)
 			? [...allowedPositions, position]
 			: allowedPositions;
+
+	// Nhãn đầy đủ của role đang chọn, dùng cho tooltip khi nhãn bị rút gọn.
+	const roleLabel: Record<UserRole, string> = {
+		Doctor: t("roleDoctor"),
+		HeadDepartmentDoctor: t("roleHeadDoctor"),
+		MedicalRegulationReviewer: t("roleReviewer"),
+		Admin: t("roleAdmin"),
+	};
 
 	// Avatar file & preview
 	const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -140,7 +148,7 @@ export function UserFormDialog({
 			setPosition("StaffDoctor");
 		}
 
-		if (nextRole !== "Manager") return;
+		if (nextRole !== "MedicalRegulationReviewer") return;
 
 		setAvatarFile(null);
 		setAvatarPreview(null);
@@ -482,8 +490,8 @@ export function UserFormDialog({
 				const createRole: CreateUserPayload["role"] =
 					role === "HeadDepartmentDoctor"
 						? "HeadDepartmentDoctor"
-						: role === "Manager"
-							? "Manager"
+						: role === "MedicalRegulationReviewer"
+							? "MedicalRegulationReviewer"
 							: "Doctor";
 
 				const payload: CreateUserPayload = {
@@ -529,7 +537,7 @@ export function UserFormDialog({
 
 				<form onSubmit={handleSubmit} noValidate className="space-y-5 pt-2 min-w-0">
 					{/* Avatar & Basic Role */}
-					<div className="flex items-center gap-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800">
+					<div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:gap-5 dark:border-slate-800 dark:bg-slate-950/40">
 						<Avatar className="h-16 w-16 border-2 border-white shadow-sm shrink-0">
 							{avatarPreview ? (
 								<AvatarImage src={avatarPreview} alt={firstName || "Avatar"} />
@@ -540,7 +548,7 @@ export function UserFormDialog({
 							)}
 						</Avatar>
 
-						<div className="flex-1 space-y-1.5">
+						<div className="min-w-0 space-y-1.5 sm:flex-1">
 							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
 								{t("avatarLabel")}
 							</Label>
@@ -578,8 +586,8 @@ export function UserFormDialog({
 							)}
 						</div>
 
-						<div className="flex items-center gap-3">
-							<div className="w-36">
+						<div className="flex shrink-0 items-center gap-3">
+							<div className="w-full sm:w-44">
 								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
 									{t("roleLabel")} <span className="text-red-500">*</span>
 								</Label>
@@ -588,13 +596,16 @@ export function UserFormDialog({
 									onValueChange={(val: UserRole) => handleRoleChange(val)}
 									disabled={isEdit || isHeadpartmentDoctor}
 								>
-									<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
+									<SelectTrigger
+										title={roleLabel[role]}
+										className="mt-1 h-9 w-full min-w-0 overflow-hidden text-xs font-semibold bg-white dark:bg-slate-900 *:data-[slot=select-value]:min-w-0"
+									>
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="Doctor">{t("roleDoctor")}</SelectItem>
 										<SelectItem value="HeadDepartmentDoctor">{t("roleHeadDoctor")}</SelectItem>
-										<SelectItem value="Manager">{t("roleManager")}</SelectItem>
+										<SelectItem value="MedicalRegulationReviewer">{t("roleReviewer")}</SelectItem>
 										{editingUser?.role === "Admin" && (
 											<SelectItem value="Admin">{t("roleAdmin")}</SelectItem>
 										)}
