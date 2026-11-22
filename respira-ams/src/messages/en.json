@@ -686,6 +686,7 @@
                 "filterActive": "Active",
                 "filterInactive": "Inactive",
                 "empty": "No clinical metrics data found.",
+                "loadError": "Unable to load clinical metrics from the server. Please try again.",
                 "viewDetailTooltip": "View details & configure rules"
             },
             "form": {

@@ -1,15 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { LogOut, Settings, User } from "lucide-react";
-import { logout, getUser } from "@/lib/auth";
-import {
-	getStoredDoctorProfile,
-	fetchCurrentDoctorProfile,
-} from "@/features/profile/api";
+import { logout, ensureSessionUser } from "@/lib/auth";
+import { fetchCurrentDoctorProfile } from "@/features/profile/api";
 import {
 	getDoctorDisplayName,
 	POSITION_LABELS,
@@ -145,18 +142,11 @@ export function AccountSection({
 		return buildUserInfo(userInfoLabels, null, null);
 	});
 
+	const authUserRef = useRef<{ name?: string; email?: string } | null>(null);
+
 	const applyDoctorProfile = useCallback(
 		(profile: DoctorProfile) => {
-			const storedUser = getUser();
-			const authUser = storedUser
-				? {
-						name: [storedUser.firstName, storedUser.lastName]
-							.filter(Boolean)
-							.join(" "),
-						email: storedUser.email,
-					}
-				: null;
-			const info = buildUserInfo(userInfoLabels, profile, authUser);
+			const info = buildUserInfo(userInfoLabels, profile, authUserRef.current);
 			setCurrentUserInfo(info);
 		},
 		[userInfoLabels]
@@ -166,55 +156,59 @@ export function AccountSection({
 	useEffect(() => {
 		setMounted(true);
 
-		// 1. Kiểm tra cache có sẵn
-		const cached = getStoredDoctorProfile();
-		const storedUser = getUser();
-		if (cached && (cached.firstName || cached.lastName)) {
-			applyDoctorProfile(cached);
-		} else if (storedUser) {
-			setCurrentUserInfo(
-				buildUserInfo(userInfoLabels, null, {
-					name: [storedUser.firstName, storedUser.lastName]
-						.filter(Boolean)
-						.join(" "),
-					email: storedUser.email,
-				})
-			);
-		} else if (!initialUser) {
-			setCurrentUserInfo(buildUserInfo(userInfoLabels, null, null));
-		}
+		let cancelled = false;
 
-		// 2. Luôn chủ động fetch mới nhất từ backend
-		fetchCurrentDoctorProfile()
-			.then((latest) => {
-				if (latest && (latest.firstName || latest.lastName)) {
+		void (async () => {
+			// 1. Lấy thông tin tài khoản từ server session (không dùng browser storage)
+			const sessionUser = await ensureSessionUser();
+			if (cancelled) return;
+
+			authUserRef.current = sessionUser
+				? {
+						name: [sessionUser.firstName, sessionUser.lastName]
+							.filter(Boolean)
+							.join(" "),
+						email: sessionUser.email,
+					}
+				: null;
+
+			if (authUserRef.current) {
+				setCurrentUserInfo(
+					buildUserInfo(userInfoLabels, null, authUserRef.current)
+				);
+			} else if (!initialUser) {
+				setCurrentUserInfo(buildUserInfo(userInfoLabels, null, null));
+			}
+
+			// 2. Luôn chủ động fetch mới nhất từ backend
+			try {
+				const latest = await fetchCurrentDoctorProfile();
+				if (
+					!cancelled &&
+					latest &&
+					(latest.firstName || latest.lastName)
+				) {
 					applyDoctorProfile(latest);
 				}
-			})
-			.catch((err) => {
+			} catch (err) {
 				console.warn("[AccountSection] Could not sync doctor profile:", err);
-			});
+			}
+		})();
 
-		// 3. Lắng nghe event phát ra khi profile thay đổi hoặc lưu
+		// 3. Lắng nghe event phát ra khi profile thay đổi trong phiên
 		const handleProfileUpdate = (e: Event) => {
 			const customEvent = e as CustomEvent<DoctorProfile>;
-			if (customEvent.detail) {
-				applyDoctorProfile(customEvent.detail);
-			} else {
-				const updated = getStoredDoctorProfile();
-				if (updated) applyDoctorProfile(updated);
-			}
+			if (customEvent.detail) applyDoctorProfile(customEvent.detail);
 		};
 
 		window.addEventListener("respira:profile-updated", handleProfileUpdate);
-		window.addEventListener("storage", handleProfileUpdate);
 
 		return () => {
+			cancelled = true;
 			window.removeEventListener(
 				"respira:profile-updated",
 				handleProfileUpdate
 			);
-			window.removeEventListener("storage", handleProfileUpdate);
 		};
 	}, [applyDoctorProfile, initialUser, userInfoLabels]);
 

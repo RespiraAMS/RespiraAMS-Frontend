@@ -686,6 +686,7 @@
                 "filterActive": "Đang áp dụng",
                 "filterInactive": "Ngừng áp dụng",
                 "empty": "Không tìm thấy dữ liệu thang điểm nào.",
+                "loadError": "Không thể tải dữ liệu thang điểm từ máy chủ. Vui lòng thử lại.",
                 "viewDetailTooltip": "Xem chi tiết & Cấu hình Luật"
             },
             "form": {
