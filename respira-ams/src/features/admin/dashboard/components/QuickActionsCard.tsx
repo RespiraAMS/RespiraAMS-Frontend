@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { UserPlus, FileText, ShieldAlert, Sliders, ArrowUpRight } from "lucide-react";
+import { UserPlus, ShieldAlert, Sliders, ArrowUpRight } from "lucide-react";
 
 export function QuickActionsCard() {
 	const t = useTranslations("admin.dashboard");
@@ -14,13 +14,6 @@ export function QuickActionsCard() {
 			href: "/admin/users",
 			icon: UserPlus,
 			color: "text-primary bg-primary/10 border-primary/30",
-		},
-		{
-			title: t("actionProtocolsTitle", { defaultMessage: "Thang điểm lâm sàng" }),
-			description: t("actionProtocolsDesc", { defaultMessage: "Quản lý thang điểm đánh giá độ nặng & quy tắc chấm điểm" }),
-			href: "/admin/protocols",
-			icon: FileText,
-			color: "text-info bg-info/10 border-info/30",
 		},
 		{
 			title: t("actionAuditsTitle", { defaultMessage: "Nhật ký kiểm toán" }),
@@ -49,7 +42,7 @@ export function QuickActionsCard() {
 				</p>
 			</div>
 
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 				{actions.map((action) => {
 					const Icon = action.icon;
 					return (
