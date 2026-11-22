@@ -1,6 +1,7 @@
 import { getIronSession, nextProxyCookies } from "iron-session";
 import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_NAME, DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/config";
+import { canAccessArea, getDefaultDashboard, isKnownRole } from "@/lib/roles";
 import { sessionOptions, type SessionData } from "@/lib/session-config";
 
 function applyLocaleCookie(request: NextRequest, response: NextResponse) {
@@ -23,12 +24,6 @@ function applyLocaleCookie(request: NextRequest, response: NextResponse) {
 			sameSite: "lax",
 		});
 	}
-}
-
-function getDefaultDashboard(role: string) {
-	if (role === "admin") return "/admin/dashboard";
-	if (role === "manager" || role === "medicalregulationreviewer") return "/manage/dashboard";
-	return "/doctor/patients";
 }
 
 export async function proxy(request: NextRequest) {
@@ -80,6 +75,22 @@ export async function proxy(request: NextRequest) {
 		return response;
 	}
 
+	// 1.b. Session có token nhưng role không xác định: fail-closed, xóa phiên
+	// thay vì mặc định coi là Doctor.
+	if (!isKnownRole(userRole)) {
+		const loginUrl = new URL("/login", request.url);
+		const redirectResponse = NextResponse.redirect(loginUrl);
+
+		redirectResponse.cookies.delete(sessionOptions.cookieName);
+		redirectResponse.cookies.delete("accessToken");
+		redirectResponse.cookies.delete("refreshToken");
+		redirectResponse.cookies.delete("user_role");
+		redirectResponse.cookies.delete("user_data");
+
+		applyLocaleCookie(request, redirectResponse);
+		return redirectResponse;
+	}
+
 	// -------------------------------------------------------------
 	// 2. Trường hợp ĐÃ ĐĂNG NHẬP HỢP LỆ
 	// -------------------------------------------------------------
@@ -94,38 +105,27 @@ export async function proxy(request: NextRequest) {
 
 	// 2.2. Phân quyền truy cập theo vai trò (Role-Based Access Control)
 	// Khu vực Admin: Chỉ dành riêng cho quyền "admin"
-	if (pathname.startsWith("/admin")) {
-		if (userRole !== "admin") {
-			const target = getDefaultDashboard(userRole);
-			const redirectResponse = NextResponse.redirect(new URL(target, request.url));
-			applyLocaleCookie(request, redirectResponse);
-			return redirectResponse;
-		}
+	if (pathname.startsWith("/admin") && !canAccessArea(userRole, "admin")) {
+		const target = getDefaultDashboard(userRole);
+		const redirectResponse = NextResponse.redirect(new URL(target, request.url));
+		applyLocaleCookie(request, redirectResponse);
+		return redirectResponse;
 	}
 
-	// Khu vực Doctor: Dành cho doctor, headdepartmentdoctor, admin
-	if (pathname.startsWith("/doctor")) {
-		if (userRole !== "doctor" && userRole !== "headdepartmentdoctor" && userRole !== "admin") {
-			const target = getDefaultDashboard(userRole);
-			const redirectResponse = NextResponse.redirect(new URL(target, request.url));
-			applyLocaleCookie(request, redirectResponse);
-			return redirectResponse;
-		}
+	// Khu vực Doctor: Dành cho doctor, headdepartmentdoctor
+	if (pathname.startsWith("/doctor") && !canAccessArea(userRole, "doctor")) {
+		const target = getDefaultDashboard(userRole);
+		const redirectResponse = NextResponse.redirect(new URL(target, request.url));
+		applyLocaleCookie(request, redirectResponse);
+		return redirectResponse;
 	}
 
-	// Khu vực Quản lý / Manager: Dành cho manager, medicalregulationreviewer, headdepartmentdoctor, admin
-	if (pathname.startsWith("/manage")) {
-		if (
-			userRole !== "manager" &&
-			userRole !== "medicalregulationreviewer" &&
-			userRole !== "headdepartmentdoctor" &&
-			userRole !== "admin"
-		) {
-			const target = getDefaultDashboard(userRole);
-			const redirectResponse = NextResponse.redirect(new URL(target, request.url));
-			applyLocaleCookie(request, redirectResponse);
-			return redirectResponse;
-		}
+	// Khu vực Quản lý / Reviewer: manager, medicalregulationreviewer, headdepartmentdoctor
+	if (pathname.startsWith("/manage") && !canAccessArea(userRole, "manage")) {
+		const target = getDefaultDashboard(userRole);
+		const redirectResponse = NextResponse.redirect(new URL(target, request.url));
+		applyLocaleCookie(request, redirectResponse);
+		return redirectResponse;
 	}
 
 	// Route Profile (/profile)

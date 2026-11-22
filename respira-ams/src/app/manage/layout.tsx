@@ -1,10 +1,19 @@
+import { redirect } from "next/navigation";
 import { ManagerSidebar } from "@/features/manager/components/ManagerSidebar";
+import { canAccessArea, getDefaultDashboard } from "@/lib/roles";
+import { getSession } from "@/lib/session";
 
-export default function ManageLayout({
+export default async function ManageLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
+	const session = await getSession();
+
+	if (!canAccessArea(session.role, "manage")) {
+		redirect(getDefaultDashboard(session.role));
+	}
+
 	return (
 		<div className="flex h-screen overflow-hidden bg-background text-foreground">
 			<ManagerSidebar />
