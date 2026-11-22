@@ -60,7 +60,7 @@ export function UsersTable({
 
 	const roleLabel = (role: UserItem["role"]): string => {
 		if (role === "Admin") return tForm("roleAdmin");
-		if (role === "Manager") return tForm("roleManager");
+		if (role === "MedicalRegulationReviewer") return tForm("roleReviewer");
 		if (role === "HeadDepartmentDoctor") return tForm("roleHeadDoctor");
 		return tForm("roleDoctor");
 	};
@@ -194,7 +194,7 @@ export function UsersTable({
 											{roleLabel(user.role)}
 										</Badge>
 									)}
-									{user.role === "Manager" && (
+									{user.role === "MedicalRegulationReviewer" && (
 										<Badge
 											variant="outline"
 											className="bg-warning/10 text-warning border-warning/30 dark:bg-warning/10 dark:text-warning dark:border-warning/30 font-bold"

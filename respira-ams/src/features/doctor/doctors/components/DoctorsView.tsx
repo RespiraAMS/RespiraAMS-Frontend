@@ -17,6 +17,7 @@ import {
 
 import { DoctorsTable } from "./DoctorsTable";
 import { DoctorDetailModal } from "./DoctorDetailModal";
+import { TableSearchInput } from "@/features/manager/components/TableSearchInput";
 import { DoctorSubordinateItem } from "../types";
 import { formatDoctorFullName } from "../constants";
 import { doctorKeys } from "../queries";
@@ -74,6 +75,9 @@ export function DoctorsView() {
 	// Detail & Analysis Report modal states
 	const [detailDoctor, setDetailDoctor] = useState<DoctorSubordinateItem | null>(null);
 	const [reportDoctor, setReportDoctor] = useState<DoctorSubordinateItem | null>(null);
+
+	// Search term for the subordinate doctor list
+	const [searchTerm, setSearchTerm] = useState("");
 
 	// Create / Update / Delete dialog states
 	const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
@@ -215,9 +219,16 @@ export function DoctorsView() {
 				</Button>
 			</div>
 
+			{/* Search */}
+			<TableSearchInput
+				onSearchChange={setSearchTerm}
+				placeholder={t("searchPlaceholder")}
+			/>
+
 			{/* Table */}
 			<div className="rounded-xl border border-border bg-card text-card-foreground p-4 shadow-sm overflow-x-auto">
 				<DoctorsTable
+					searchTerm={searchTerm}
 					onViewDetail={(doctor) => setDetailDoctor(doctor)}
 					onCreateReport={(doctor) => setReportDoctor(doctor)}
 					onEditDoctor={(doctor) => {

@@ -1,4 +1,35 @@
-import { AcademicTitle, DegreeType } from "./types";
+import { AcademicTitle, DegreeType, PositionType } from "./types";
+
+/** Maximum characters accepted by the phone input, including the leading "+". */
+export const PHONE_MAX_LENGTH = 12;
+
+/** Citizen identification numbers are always 12 digits. */
+export const CITIZEN_ID_LENGTH = 12;
+
+/** Positions a Doctor account may hold when created from the admin dialog. */
+export const DOCTOR_POSITIONS: PositionType[] = ["StaffDoctor", "SeniorDoctor"];
+
+/** A HeadDepartmentDoctor account always holds this position. */
+export const HEAD_DEPARTMENT_POSITION: PositionType = "HeadOfDepartment";
+
+/**
+ * Keeps only digits and enforces the supported Vietnamese phone shapes:
+ * 0xxxxxxxxx, +84xxxxxxxxx, or 84xxxxxxxxx.
+ */
+export function sanitizePhoneInput(value: string): string {
+	const startsWithPlus = value.trimStart().startsWith("+");
+	const digits = value.replace(/\D/g, "");
+
+	if (startsWithPlus) return `+${digits.slice(0, 11)}`;
+	if (digits.startsWith("84")) return digits.slice(0, 11);
+
+	return digits.slice(0, 10);
+}
+
+/** Keeps only digits and caps the value at the citizen ID length. */
+export function sanitizeCitizenIdInput(value: string): string {
+	return value.replace(/\D/g, "").slice(0, CITIZEN_ID_LENGTH);
+}
 
 export function formatFullNameWithTitle(
 	lastName: string,

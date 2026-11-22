@@ -88,7 +88,16 @@ export async function POST(request: NextRequest) {
 
 		await session.save();
 
-		return NextResponse.json({ success: true, data: toSessionUser(session) });
+		const user = toSessionUser(session);
+		if (!user) {
+			await session.destroy();
+			return NextResponse.json(
+				{ success: false, message: "Máy chủ trả về token không hợp lệ." },
+				{ status: 502 }
+			);
+		}
+
+		return NextResponse.json({ success: true, data: user });
 	} catch (error) {
 		console.error("[api/auth/login] Backend login failed", error);
 		return NextResponse.json(

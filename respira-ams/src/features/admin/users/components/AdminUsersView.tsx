@@ -38,7 +38,10 @@ function applyUserStatsDelta(stats: UserStats, user: UserItem, direction: 1 | -1
 		doctors: stats.doctors + direction * (user.role === "Doctor" ? 1 : 0),
 		managers:
 			stats.managers +
-			direction * (user.role === "Manager" || user.role === "HeadDepartmentDoctor" ? 1 : 0),
+			direction *
+				(user.role === "MedicalRegulationReviewer" || user.role === "HeadDepartmentDoctor"
+					? 1
+					: 0),
 		admins: stats.admins + direction * (user.role === "Admin" ? 1 : 0),
 		active: stats.active + direction * (user.status === "Active" ? 1 : 0),
 		inactive: stats.inactive + direction * (user.status === "Inactive" ? 1 : 0),

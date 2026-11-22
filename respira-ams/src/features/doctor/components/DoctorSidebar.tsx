@@ -126,7 +126,7 @@ function NavItemLink({
                         : 'text-muted-foreground group-hover:text-sidebar-foreground',
                 )}
             />
-            {(!collapsed || isSubItem) && <span className="truncate leading-none">{label}</span>}
+            {(!collapsed || isSubItem) && <span className="leading-none">{label}</span>}
             {(!collapsed || isSubItem) && badge != null && (
                 <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-sidebar-primary/15 px-1.5 text-[11px] font-semibold text-sidebar-primary">
                     {badge}

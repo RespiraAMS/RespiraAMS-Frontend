@@ -8,12 +8,11 @@ import { useAdminSidebarStore } from "@/features/admin/components/sidebarStore";
 
 const PAGE_TITLE_KEYS: Record<
 	string,
-	"pageDashboard" | "pageUsers" | "pageProtocols" | "pageAuditLogs" | "pageSettings"
+	"pageDashboard" | "pageUsers" | "pageAuditLogs" | "pageSettings"
 > = {
 	"/admin": "pageDashboard",
 	"/admin/dashboard": "pageDashboard",
 	"/admin/users": "pageUsers",
-	"/admin/protocols": "pageProtocols",
 	"/admin/audit-logs": "pageAuditLogs",
 	"/admin/settings": "pageSettings",
 };

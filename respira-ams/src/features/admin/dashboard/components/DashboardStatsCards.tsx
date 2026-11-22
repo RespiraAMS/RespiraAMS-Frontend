@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Pill, Bug, Server, ClipboardList } from "lucide-react";
+import { Users, Stethoscope, ClipboardList, Server } from "lucide-react";
 import { DashboardMetrics } from "../types";
 
 interface DashboardStatsCardsProps {
@@ -14,63 +14,59 @@ export function DashboardStatsCards({ metrics }: DashboardStatsCardsProps) {
 
 	return (
 		<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-			{/* Card 1: Thang điểm lâm sàng */}
+			{/* Card 1: Tổng người dùng */}
 			<div className="bg-surface rounded-[12px] p-5 border border-border-subtle shadow-2xs hover:shadow-xs transition-all relative overflow-hidden group">
 				<div className="flex items-center justify-between">
 					<p className="text-[10.5px] font-bold text-text-secondary uppercase tracking-wider">
-						{t("cardClinicalMetrics", { defaultMessage: "Thang điểm lâm sàng" })}
+						{t("totalUsers", { defaultMessage: "Tổng người dùng" })}
 					</p>
 					<div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-primary/10 text-primary">
-						<ClipboardList className="h-4 w-4" />
+						<Users className="h-4 w-4" />
 					</div>
 				</div>
 				<p className="text-2xl font-bold text-text-primary mt-2 tracking-tight">
-					{formatCount(metrics.totalClinicalMetrics)}
+					{formatCount(metrics.totalUsers)}
 				</p>
 				<div className="flex items-center justify-between mt-3 text-xs text-text-secondary">
-					<span>
-						{t("clinicalMetricsSubtitle", {
-							defaultMessage: "Thang điểm & phác đồ đánh giá",
-						})}
-					</span>
+					<span>{t("usersSubtitle", { defaultMessage: "Tài khoản trong hệ thống" })}</span>
 				</div>
 				<div className="h-1 w-20 bg-primary rounded-full mt-2" />
 			</div>
 
-			{/* Card 2: Danh mục Kháng sinh */}
+			{/* Card 2: Bác sĩ */}
 			<div className="bg-surface rounded-[12px] p-5 border border-border-subtle shadow-2xs hover:shadow-xs transition-all relative overflow-hidden group">
 				<div className="flex items-center justify-between">
 					<p className="text-[10.5px] font-bold text-text-secondary uppercase tracking-wider">
-						{t("cardAntibiotics", { defaultMessage: "Danh mục Kháng sinh" })}
+						{t("totalDoctors", { defaultMessage: "Bác sĩ" })}
 					</p>
 					<div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-info/10 text-info">
-						<Pill className="h-4 w-4" />
+						<Stethoscope className="h-4 w-4" />
 					</div>
 				</div>
 				<p className="text-2xl font-bold text-info mt-2 tracking-tight">
-					{formatCount(metrics.totalAntibiotics)}
+					{formatCount(metrics.totalDoctors)}
 				</p>
 				<div className="flex items-center justify-between mt-3 text-xs text-text-secondary">
-					<span>{metrics.totalAntibioticGroups} {t("groupsSuffix", { defaultMessage: "nhóm kháng sinh" })}</span>
+					<span>{t("doctorsSubtitle", { defaultMessage: "Hồ sơ bác sĩ" })}</span>
 				</div>
 				<div className="h-1 w-16 bg-info rounded-full mt-2" />
 			</div>
 
-			{/* Card 3: Tác nhân gây bệnh */}
+			{/* Card 3: Sự kiện kiểm toán */}
 			<div className="bg-surface rounded-[12px] p-5 border border-border-subtle shadow-2xs hover:shadow-xs transition-all relative overflow-hidden group">
 				<div className="flex items-center justify-between">
 					<p className="text-[10.5px] font-bold text-text-secondary uppercase tracking-wider">
-						{t("cardPathogens", { defaultMessage: "Tác nhân gây bệnh" })}
+						{t("totalAuditEvents", { defaultMessage: "Sự kiện kiểm toán" })}
 					</p>
 					<div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-success/10 text-success">
-						<Bug className="h-4 w-4" />
+						<ClipboardList className="h-4 w-4" />
 					</div>
 				</div>
 				<p className="text-2xl font-bold text-success mt-2 tracking-tight">
-					{formatCount(metrics.totalPathogens)}
+					{formatCount(metrics.totalAuditEvents)}
 				</p>
 				<div className="flex items-center justify-between mt-3 text-xs text-text-secondary">
-					<span>{t("pathogensSub", { defaultMessage: "Vi khuẩn & Mầm bệnh hô hấp" })}</span>
+					<span>{t("auditEventsSubtitle", { defaultMessage: "Sự kiện đã ghi nhận" })}</span>
 				</div>
 				<div className="h-1 w-16 bg-success rounded-full mt-2" />
 			</div>
@@ -121,4 +117,3 @@ export function DashboardStatsCards({ metrics }: DashboardStatsCardsProps) {
 		</div>
 	);
 }
-

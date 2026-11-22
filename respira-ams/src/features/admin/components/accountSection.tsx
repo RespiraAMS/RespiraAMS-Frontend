@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LogOut } from "lucide-react";
-import { logout, getUser } from "@/lib/auth";
+import { logout, ensureSessionUser } from "@/lib/auth";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -30,11 +30,12 @@ export interface AdminUserInfo {
 	avatarUrl?: string;
 }
 
-function resolveAdminAccount(customUser?: AdminUserInfo): AdminUserInfo {
+function resolveAdminAccount(
+	customUser: AdminUserInfo | undefined,
+	active: Awaited<ReturnType<typeof ensureSessionUser>>
+): AdminUserInfo {
 	if (customUser) return customUser;
 
-	const storedUser = getUser();
-	const active = storedUser;
 	const email = active?.email || "";
 	const role = active?.role || "Admin";
 
@@ -95,9 +96,11 @@ export function AdminAccountSection({
 
 	useEffect(() => {
 		let cancelled = false;
-		void Promise.resolve().then(() => {
-			if (!cancelled) setCurrentUser(resolveAdminAccount(propUser));
-		});
+		void (async () => {
+			const sessionUser = await ensureSessionUser();
+			if (cancelled) return;
+			setCurrentUser(resolveAdminAccount(propUser, sessionUser));
+		})();
 		return () => {
 			cancelled = true;
 		};

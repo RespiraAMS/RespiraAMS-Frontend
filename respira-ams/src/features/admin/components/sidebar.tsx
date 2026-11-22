@@ -13,7 +13,6 @@ import {
 import {
 	LayoutDashboard,
 	Users,
-	FileText,
 	ShieldCheck,
 	Settings,
 	type LucideIcon,
@@ -21,12 +20,7 @@ import {
 import AdminAccountSection from "@/features/admin/components/accountSection";
 import { useAdminSidebarStore } from "@/features/admin/components/sidebarStore";
 
-export type AdminNavKey =
-	| "dashboard"
-	| "users"
-	| "protocols"
-	| "auditLogs"
-	| "settings";
+export type AdminNavKey = "dashboard" | "users" | "auditLogs" | "settings";
 
 export interface AdminNavItem {
 	icon: LucideIcon;
@@ -51,11 +45,6 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
 		icon: Users,
 		key: "users",
 		href: "/admin/users",
-	},
-	{
-		icon: FileText,
-		key: "protocols",
-		href: "/admin/protocols",
 	},
 	{
 		icon: ShieldCheck,

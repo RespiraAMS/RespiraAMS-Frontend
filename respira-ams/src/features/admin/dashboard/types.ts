@@ -1,9 +1,7 @@
 export interface DashboardMetrics {
-	totalAntibiotics: number;
-	totalPathogens: number;
-	totalAntibioticGroups: number;
-	totalClinicalMetrics: number;
 	totalUsers: number;
+	totalDoctors: number;
+	totalAuditEvents: number;
 	activeServicesCount: number;
 	totalServicesCount: number;
 }
@@ -30,4 +28,3 @@ export interface AuditLogItem {
 	service: string;
 	status: AuditLogStatus;
 }
-

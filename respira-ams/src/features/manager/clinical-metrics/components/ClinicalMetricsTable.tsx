@@ -48,7 +48,7 @@ export function ClinicalMetricsTable({
 		setPage(1);
 	}
 
-	const { data: listData, isLoading, isFetching } = useClinicalMetricsList(
+	const { data: listData, isLoading, isFetching, isError } = useClinicalMetricsList(
 		page,
 		PAGE_SIZE,
 		searchName,
@@ -127,6 +127,12 @@ export function ClinicalMetricsTable({
 						<TableRow className="border-border">
 							<TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
 								<Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
+							</TableCell>
+						</TableRow>
+					) : isError ? (
+						<TableRow className="border-border">
+							<TableCell colSpan={5} className="text-center text-destructive py-10">
+								{tTable("loadError")}
 							</TableCell>
 						</TableRow>
 					) : items.length === 0 ? (

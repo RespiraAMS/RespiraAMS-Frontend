@@ -1,4 +1,6 @@
+import { redirect } from 'next/navigation';
 import { DoctorSidebar } from '@/features/doctor/components/DoctorSidebar';
+import { canAccessArea, getDefaultDashboard, normalizeRole, ROLE_HEAD_DEPARTMENT_DOCTOR } from '@/lib/roles';
 import { getSession } from '@/lib/session';
 
 
@@ -9,7 +11,12 @@ export default async function DoctorLayout({
     children: React.ReactNode;
 }>) {
     const session = await getSession();
-    const isHeadDepartmentDoctor = session.role?.toLowerCase()==="headdepartmentdoctor";
+
+    if (!canAccessArea(session.role, 'doctor')) {
+        redirect(getDefaultDashboard(session.role));
+    }
+
+    const isHeadDepartmentDoctor = normalizeRole(session.role) === ROLE_HEAD_DEPARTMENT_DOCTOR;
 
     return (
         <div className="flex h-screen overflow-hidden bg-background text-foreground">
