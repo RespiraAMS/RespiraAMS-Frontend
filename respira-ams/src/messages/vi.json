@@ -1422,6 +1422,7 @@
         "doctors": {
             "title": "Danh sách Bác sĩ trực thuộc",
             "subtitle": "Quản lý đội ngũ bác sĩ trong khoa, xem thông tin hồ sơ chuyên môn và xuất báo cáo đánh giá kê đơn cá nhân.",
+            "searchPlaceholder": "Tìm theo họ tên hoặc số CCCD...",
             "prefixes": {
                 "Professor": "GS.",
                 "AssociateProfessor": "PGS.",

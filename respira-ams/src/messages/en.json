@@ -1422,6 +1422,7 @@
         "doctors": {
             "title": "Department Doctors",
             "subtitle": "Manage physicians in the department, review professional profiles, and generate individual prescribing evaluation reports.",
+            "searchPlaceholder": "Search by name or citizen ID...",
             "prefixes": {
                 "Professor": "Prof.",
                 "AssociateProfessor": "Assoc. Prof.",
