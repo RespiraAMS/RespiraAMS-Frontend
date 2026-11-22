@@ -1,4 +1,3 @@
-import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { API_V1 } from "@/lib/api-base";
 import { parseJwt } from "@/lib/jwt";
@@ -10,12 +9,6 @@ if (process.env.NODE_ENV !== "production") {
 	process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_ISSUER = process.env.JWT_ISSUER || "Respira AMS";
-const JWT_AUDIENCE = process.env.JWT_AUDIENCE || "respira-clients";
-
-const ROLE_CLAIM = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
-
 function isPublicPath(targetPath: string): boolean {
 	return (
 		targetPath === "auth/email-verification" ||
@@ -23,50 +16,6 @@ function isPublicPath(targetPath: string): boolean {
 		targetPath === "auth/forgot-password" ||
 		targetPath.startsWith("auth/forgot-password/")
 	);
-}
-
-function isClinicalRoute(targetPath: string): boolean {
-	return /antibiotic-groups|antibiotics|clinical-metrics|clinical-variables|treatment-protocols|criteria|pathogens|suspected-causes|risk-factors|antibiograms/i.test(
-		targetPath
-	);
-}
-
-function getElevatedClinicalToken(token: string): string | null {
-	if (!JWT_SECRET) {
-		console.error(
-			"[API Proxy] JWT_SECRET is not configured; admin clinical requests cannot be elevated."
-		);
-		return null;
-	}
-
-	const decoded = parseJwt(token);
-	if (!decoded || decoded.role !== "Admin") return null;
-
-	// Never mint an elevated token from an already expired access token.
-	if (decoded.exp && decoded.exp * 1000 <= Date.now()) return null;
-
-	const nowSeconds = Math.floor(Date.now() / 1000);
-	const exp = decoded.exp ? Math.min(decoded.exp, nowSeconds + 7200) : nowSeconds + 7200;
-
-	const header = { alg: "HS256", typ: "JWT" };
-	const payload = {
-		sub: decoded.id || "11111111-1111-1111-1111-111111111111",
-		email: decoded.email || "admin@respira.ams",
-		[ROLE_CLAIM]: "MedicalRegulationReviewer",
-		role: "MedicalRegulationReviewer",
-		iss: JWT_ISSUER,
-		aud: JWT_AUDIENCE,
-		exp,
-	};
-
-	const encodedHeader = Buffer.from(JSON.stringify(header)).toString("base64url");
-	const encodedPayload = Buffer.from(JSON.stringify(payload)).toString("base64url");
-	const signature = crypto
-		.createHmac("sha256", JWT_SECRET)
-		.update(`${encodedHeader}.${encodedPayload}`)
-		.digest("base64url");
-
-	return `${encodedHeader}.${encodedPayload}.${signature}`;
 }
 
 async function forwardRequest(request: NextRequest, targetPath: string, search: string) {
@@ -119,21 +68,15 @@ async function forwardRequest(request: NextRequest, targetPath: string, search: 
 			headers["Content-Type"] = "application/json";
 		}
 
-		let header = authHeader;
-
-		if (header && isClinicalRoute(targetPath)) {
-			const rawToken = header.replace(/^Bearer\s+/i, "");
-			const elevated = getElevatedClinicalToken(rawToken);
-			if (elevated) header = `Bearer ${elevated}`;
-		}
+		const header = authHeader;
 
 		if (header) {
 			headers.Authorization = header;
 
 			// Downstream services rebuild the ClaimsPrincipal from these headers.
-			// They are derived from the token actually being forwarded (including the
-			// elevated clinical token) so they survive the gateway's HTTPS redirect,
-			// which bypasses the gateway transform that normally injects them.
+			// They are derived from the token actually being forwarded so they
+			// survive the gateway's HTTPS redirect, which bypasses the gateway
+			// transform that normally injects them.
 			if (isRedirectFollowUp) {
 				const forwardedToken = header.replace(/^Bearer\s+/i, "");
 				const decoded = parseJwt(forwardedToken);
