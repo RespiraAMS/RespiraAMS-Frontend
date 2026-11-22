@@ -17,7 +17,7 @@ import {
 import {
 	fetchCurrentDoctorProfile,
 	updateDoctorProfile,
-	saveStoredDoctorProfile,
+	notifyDoctorProfileUpdated,
 } from "../api";
 import { ProfileStatsCards } from "./ProfileStatsCards";
 import { ProfileAvatarCard } from "./ProfileAvatarCard";
@@ -53,9 +53,6 @@ export function ProfileView() {
 
 	const handleRefresh = async () => {
 		setIsRefreshing(true);
-		if (typeof window !== "undefined") {
-			localStorage.removeItem("respira_doctor_profile_v1");
-		}
 		try {
 			await queryClient.invalidateQueries({ queryKey: ["doctor", "profile"] });
 			toast.success(t("view.toast.refreshSuccess"));
@@ -160,7 +157,7 @@ export function ProfileView() {
 
 			const res = await updateDoctorProfile(doctor, currentForm, file);
 			setDoctor(res.profile);
-			saveStoredDoctorProfile(res.profile);
+			notifyDoctorProfileUpdated(res.profile);
 			queryClient.invalidateQueries({ queryKey: ["doctor", "profile"] });
 			toast.success(t("view.toast.avatarSuccess"));
 		} catch (err) {
@@ -179,7 +176,7 @@ export function ProfileView() {
 		try {
 			const res = await updateDoctorProfile(doctor, form, avatarFile);
 			setDoctor(res.profile);
-			saveStoredDoctorProfile(res.profile);
+			notifyDoctorProfileUpdated(res.profile);
 			setAvatarFile(null);
 			setIsEditOpen(false);
 			queryClient.invalidateQueries({ queryKey: ["doctor", "profile"] });

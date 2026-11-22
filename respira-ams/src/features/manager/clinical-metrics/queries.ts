@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
     getClinicalMetricsList, 
-    getStoredClinicalMetrics,
     getClinicalMetricDetail, 
     createClinicalMetric, 
     updateClinicalMetric, 

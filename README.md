@@ -9,8 +9,7 @@ This is frontend project for RespiraAMS
 ```env
 NEXT_PUBLIC_API_VERSION=v1 # Or actual API version
 NEXT_PUBLIC_API_URL=https://localhost:7283 # Or actual API Gateway URL
-SESSION_SECRET=<YOUR-SESSION-SECRET-KEY>
-JWT_SECRET=<JWT-SECRET> # Must match with backend key
+SESSION_SECRET=<YOUR-SESSION-SECRET-KEY> # Required in production
 ```
 
 ```bash

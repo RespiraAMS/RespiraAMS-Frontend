@@ -49,26 +49,21 @@ async function checkServiceLatency(
 }
 
 /**
- * Lấy dữ liệu tổng hợp metrics từ các endpoints thật của Backend.
+ * Lấy dữ liệu tổng hợp metrics từ các endpoints mà Admin được phép truy cập.
+ * Không gọi API clinical vì backend chặn role Admin ở Clinical service.
  * Số lượng dịch vụ được view tính từ kết quả ping thực tế, không hardcode.
  */
 export async function fetchAdminDashboardMetrics(): Promise<DashboardMetrics> {
-	const [antibioticsRes, pathogensRes, groupsRes, clinicalMetricsRes, accountsRes] =
-		await Promise.allSettled([
-			apiRequest<GenericPaginationResult<unknown>>("/antibiotics?page=1&size=1"),
-			apiRequest<GenericPaginationResult<unknown>>("/pathogens?page=1&size=1"),
-			apiRequest<GenericPaginationResult<unknown>>("/antibiotic-groups?page=1&size=1"),
-			apiRequest<GenericPaginationResult<unknown>>("/clinical-metrics?page=1&size=1"),
-			apiRequest<GenericPaginationResult<unknown>>("/auth/accounts?Page=1&Size=1"),
-		]);
+	const [accountsRes, doctorsRes, auditRes] = await Promise.allSettled([
+		apiRequest<GenericPaginationResult<unknown>>("/auth/accounts?Page=1&Size=1"),
+		apiRequest<GenericPaginationResult<unknown>>("/doctors?page=1&size=1"),
+		apiRequest<GenericPaginationResult<unknown>>("/audit-logs?page=1&pageSize=1"),
+	]);
 
 	return {
-		totalAntibiotics: antibioticsRes.status === "fulfilled" ? readTotal(antibioticsRes.value) : 0,
-		totalPathogens: pathogensRes.status === "fulfilled" ? readTotal(pathogensRes.value) : 0,
-		totalAntibioticGroups: groupsRes.status === "fulfilled" ? readTotal(groupsRes.value) : 0,
-		totalClinicalMetrics:
-			clinicalMetricsRes.status === "fulfilled" ? readTotal(clinicalMetricsRes.value) : 0,
 		totalUsers: accountsRes.status === "fulfilled" ? readTotal(accountsRes.value) : 0,
+		totalDoctors: doctorsRes.status === "fulfilled" ? readTotal(doctorsRes.value) : 0,
+		totalAuditEvents: auditRes.status === "fulfilled" ? readTotal(auditRes.value) : 0,
 		activeServicesCount: 0,
 		totalServicesCount: 0,
 	};
@@ -81,9 +76,9 @@ export async function fetchAdminDashboardMetrics(): Promise<DashboardMetrics> {
 export async function fetchMicroservicesStatus(): Promise<MicroserviceStatus[]> {
 	const [gwPing, authPing, clinicalPing, patientPing, doctorPing, sagaPing, mediaPing] =
 		await Promise.allSettled([
-			checkServiceLatency("/antibiotics?page=1&size=1"),
+			checkServiceLatency("/auth/accounts?Page=1&Size=1"),
 			checkServiceLatency("/auth/email-verification"),
-			checkServiceLatency("/clinical-metrics?page=1&size=1"),
+			checkServiceLatency("/clinical/audit-logs?page=1&pageSize=1"),
 			checkServiceLatency("/patients?page=1&size=1"),
 			checkServiceLatency("/doctors?page=1&size=1"),
 			checkServiceLatency("/audit-logs?page=1&size=1"),

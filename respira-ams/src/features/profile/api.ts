@@ -1,5 +1,5 @@
 import { apiRequest, buildQuery } from "@/lib/api";
-import { getUser } from "@/lib/auth";
+import { ensureSessionUser, type UserData } from "@/lib/auth";
 import { API_V1, CLIENT_API_BASE } from "@/lib/api-base";
 import {
 	DoctorProfile,
@@ -11,14 +11,7 @@ import {
 	parseIsoToLocalDate,
 } from "./types";
 
-const PROFILE_STORAGE_KEY = "respira_doctor_profile_v1";
-
-/**
- * Object URLs created with URL.createObjectURL are only valid for the page that
- * created them, so they must never be persisted across reloads.
- */
-const isEphemeralAvatarUrl = (value?: string | null): boolean =>
-	typeof value === "string" && value.startsWith("blob:");
+export const PROFILE_UPDATED_EVENT = "respira:profile-updated";
 
 export interface BackendDoctorProfileDto {
 	id: string;
@@ -115,42 +108,12 @@ export function mapBackendDtoToDoctorProfile(dto: BackendDoctorProfileDto): Doct
 }
 
 /**
- * Lấy hồ sơ từ bộ nhớ đệm LocalStorage
+ * Notifies listeners (for example the sidebar account section) that the doctor
+ * profile changed during this session. Nothing is persisted to browser storage.
  */
-export function getStoredDoctorProfile(): DoctorProfile {
-	if (typeof window === "undefined") return defaultDoctor;
-	try {
-		const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
-		if (raw) {
-			const parsed = JSON.parse(raw) as Partial<DoctorProfile>;
-			if (isEphemeralAvatarUrl(parsed.mediaUrl)) parsed.mediaUrl = undefined;
-			if (isEphemeralAvatarUrl(parsed.avatarUrl)) parsed.avatarUrl = undefined;
-			return { ...defaultDoctor, ...parsed };
-		}
-	} catch {
-		// Bỏ qua lỗi parse
-	}
-	return defaultDoctor;
-}
-
-/**
- * Lưu hồ sơ vào LocalStorage & phát thông báo cập nhật
- */
-export function saveStoredDoctorProfile(profile: DoctorProfile): void {
+export function notifyDoctorProfileUpdated(profile: DoctorProfile): void {
 	if (typeof window === "undefined") return;
-	try {
-		const persistable: DoctorProfile = {
-			...profile,
-			mediaUrl: isEphemeralAvatarUrl(profile.mediaUrl) ? undefined : profile.mediaUrl,
-			avatarUrl: isEphemeralAvatarUrl(profile.avatarUrl) ? undefined : profile.avatarUrl,
-		};
-		localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(persistable));
-		window.dispatchEvent(
-			new CustomEvent("respira:profile-updated", { detail: profile })
-		);
-	} catch {
-		// Bỏ qua lỗi storage
-	}
+	window.dispatchEvent(new CustomEvent(PROFILE_UPDATED_EVENT, { detail: profile }));
 }
 
 /**
@@ -158,57 +121,20 @@ export function saveStoredDoctorProfile(profile: DoctorProfile): void {
  * Sử dụng GET /api/v1/doctors/me
  */
 export async function fetchCurrentDoctorProfile(): Promise<DoctorProfile> {
-	const currentUser = getUser();
-	const stored = getStoredDoctorProfile();
+	const currentUser = await ensureSessionUser();
 
-	const isCacheValid = Boolean(
-		currentUser &&
-		stored &&
-		(stored.firstName || stored.lastName) &&
-		((stored.accountId && stored.accountId === currentUser.id) ||
-			(stored.email &&
-				currentUser.email &&
-				stored.email.toLowerCase() === currentUser.email.toLowerCase()))
-	);
-
-	// 1. Backend: load the profile bound to the authenticated account.
+	// Backend: load the profile bound to the authenticated account.
 	if (currentUser?.id || currentUser?.email) {
 		try {
 			const me = await apiRequest<BackendDoctorProfileDto>("/doctors/me");
 			if (me?.id) {
 				const mapped = mapBackendDtoToDoctorProfile(me);
 				fillProfileFromSession(mapped, currentUser);
-				if (!mapped.avatarUrl && isCacheValid) {
-					mapped.avatarUrl = stored.avatarUrl;
-					mapped.mediaUrl = stored.mediaUrl;
-				}
-				saveStoredDoctorProfile(mapped);
 				return mapped;
 			}
 		} catch (err) {
 			console.warn("[Profile] Could not fetch /doctors/me:", err);
-
-			// Fallback for accounts that already cached their doctorId.
-			if (isCacheValid && stored.doctorId && !stored.doctorId.startsWith("pat-")) {
-				try {
-					const directRes = await apiRequest<BackendDoctorProfileDto>(
-						`/doctors/${stored.doctorId}`
-					);
-					if (directRes?.id) {
-						const mapped = mapBackendDtoToDoctorProfile(directRes);
-						fillProfileFromSession(mapped, currentUser);
-						saveStoredDoctorProfile(mapped);
-						return mapped;
-					}
-				} catch {
-					// Ignore direct lookup errors.
-				}
-			}
 		}
-	}
-
-	if (isCacheValid) {
-		return stored;
 	}
 
 	if (currentUser?.email) {
@@ -229,7 +155,7 @@ export async function fetchCurrentDoctorProfile(): Promise<DoctorProfile> {
 
 function fillProfileFromSession(
 	profile: DoctorProfile,
-	currentUser: ReturnType<typeof getUser>
+	currentUser: UserData | null
 ): void {
 	if (!currentUser) return;
 	if (currentUser.email && !profile.email) profile.email = currentUser.email;
@@ -387,7 +313,7 @@ export async function updateDoctorProfile(
 	form: ProfileFormState,
 	avatarFile?: File | null
 ): Promise<{ sagaId: string; profile: DoctorProfile }> {
-	const currentUser = getUser();
+	const currentUser = await ensureSessionUser();
 
 	const accountId =
 		currentDoctor.accountId ||
@@ -477,8 +403,8 @@ export async function updateDoctorProfile(
 		avatarUrl: avatarFile ? URL.createObjectURL(avatarFile) : currentDoctor.avatarUrl,
 	};
 
-	// 3. Lưu vào local storage và phát event đồng bộ
-	saveStoredDoctorProfile(updatedProfile);
+	// 3. Phát event để các component đang hiển thị hồ sơ cập nhật theo
+	notifyDoctorProfileUpdated(updatedProfile);
 
 	return {
 		sagaId: backendSagaId || `saga-update-${Date.now()}`,

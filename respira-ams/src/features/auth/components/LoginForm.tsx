@@ -139,11 +139,6 @@ export function LoginForm() {
 
 			const role = (user.role || "").toLowerCase();
 
-			// Xóa cache cũ để tránh hiển thị nhầm thông tin của tài khoản trước đó
-			if (typeof window !== "undefined") {
-				localStorage.removeItem("respira_doctor_profile_v1");
-			}
-
 			// Nếu đăng nhập vai trò Bác sĩ, tự động đồng bộ hồ sơ thực tế từ Backend
 			if (role === "doctor" || role === "headdepartmentdoctor") {
 				await fetchCurrentDoctorProfile().catch(() => { });

@@ -95,7 +95,7 @@ export async function downloadAnalysisReportExcel(analysisId: string): Promise<v
 
 export async function getDoctorById(doctorId: string): Promise<DoctorProfile> {
     const result = await apiFetch<DoctorProfile>(
-        `${API_BASE_SERVER}${API_BASE}/doctors/${doctorId}`
+        `${API_BASE_SERVER}${API_BASE}/doctors/accounts/${doctorId}`
     );
     if (!result) throw new Error("Failed to fetch doctor profile");
     return result;

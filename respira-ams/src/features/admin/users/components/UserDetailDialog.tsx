@@ -44,7 +44,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 
 	const roleLabel = (role: UserItem["role"]): string => {
 		if (role === "Admin") return tForm("roleAdmin");
-		if (role === "Manager") return tForm("roleManager");
+		if (role === "MedicalRegulationReviewer") return tForm("roleReviewer");
 		if (role === "HeadDepartmentDoctor") return tForm("roleHeadDoctor");
 		return tForm("roleDoctor");
 	};

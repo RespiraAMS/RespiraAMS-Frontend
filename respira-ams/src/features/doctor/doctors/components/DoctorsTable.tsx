@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import {
 	Eye,
@@ -43,7 +43,6 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
-import { useSearchStore } from "@/features/manager/stores/searchStore";
 import { useSubordinateDoctors } from "../queries";
 import {
 	AcademicTitle,
@@ -67,6 +66,7 @@ import {
 const PAGE_SIZE = 10;
 
 interface DoctorsTableProps {
+	searchTerm?: string;
 	onViewDetail: (doctor: DoctorSubordinateItem) => void;
 	onCreateReport: (doctor: DoctorSubordinateItem) => void;
 	onEditDoctor: (doctor: DoctorSubordinateItem) => void;
@@ -74,6 +74,7 @@ interface DoctorsTableProps {
 }
 
 export function DoctorsTable({
+	searchTerm = "",
 	onViewDetail,
 	onCreateReport,
 	onEditDoctor,
@@ -86,13 +87,6 @@ export function DoctorsTable({
 	const [gender, setGender] = useState<DoctorGender | null>(null);
 	const [academicTitle, setAcademicTitle] = useState<AcademicTitle | null>(null);
 	const [position, setPosition] = useState<DoctorPosition | null>(null);
-
-	const searchTerm = useSearchStore((s) => s.value);
-	const clearSearch = useSearchStore((s) => s.clear);
-
-	useEffect(() => {
-		clearSearch();
-	}, [clearSearch]);
 
 	const [prevFilters, setPrevFilters] = useState({
 		searchTerm,

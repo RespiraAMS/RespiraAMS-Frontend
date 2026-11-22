@@ -14,8 +14,16 @@ export interface SessionData {
 
 const FALLBACK_PASSWORD = "complex_password_at_least_32_characters_long_for_security";
 
+const SESSION_SECRET = process.env.SESSION_SECRET;
+
+if (!SESSION_SECRET && process.env.NODE_ENV === "production") {
+	throw new Error(
+		"SESSION_SECRET is required in production. Set it before building or starting the app."
+	);
+}
+
 export const sessionOptions: SessionOptions = {
-	password: process.env.SESSION_SECRET || FALLBACK_PASSWORD,
+	password: SESSION_SECRET || FALLBACK_PASSWORD,
 	cookieName: "respira_session",
 	ttl: 60 * 60 * 24 * 7,
 	chunk: true,

@@ -67,7 +67,7 @@ export function UserSearchBar({
 						<SelectItem value="ALL">{t("allRoles")}</SelectItem>
 						<SelectItem value="Doctor">{t("roleDoctor")}</SelectItem>
 						<SelectItem value="HeadDepartmentDoctor">{t("roleHeadDoctor")}</SelectItem>
-						<SelectItem value="Manager">{t("roleManager")}</SelectItem>
+						<SelectItem value="MedicalRegulationReviewer">{t("roleReviewer")}</SelectItem>
 						<SelectItem value="Admin">{t("roleAdmin")}</SelectItem>
 					</SelectContent>
 				</Select>

@@ -1,7 +1,5 @@
 import logger from "./logger";
 
-const USER_KEY = "user_data";
-
 export interface UserData {
 	id: string;
 	firstName: string;
@@ -19,42 +17,68 @@ interface AuthApiResponse<T> {
 
 let authenticated = false;
 
-function getStorage(): Storage | null {
-	return typeof window !== "undefined" ? window.localStorage : null;
-}
+/**
+ * The current user only lives in memory. The server-side iron-session cookie is
+ * the single source of truth, so nothing is written to browser storage.
+ */
+let currentUser: UserData | null = null;
 
 export function getUser(): UserData | null {
-	try {
-		const raw = getStorage()?.getItem(USER_KEY);
-		return raw ? (JSON.parse(raw) as UserData) : null;
-	} catch {
-		return null;
-	}
-}
-
-export function saveUser(user: Partial<UserData>): void {
-	const storage = getStorage();
-	if (!storage) return;
-
-	const current = getUser() || ({} as UserData);
-	storage.setItem(USER_KEY, JSON.stringify({ ...current, ...user }));
-}
-
-function setUser(user: UserData): void {
-	getStorage()?.setItem(USER_KEY, JSON.stringify(user));
-}
-
-function clearUser(): void {
-	getStorage()?.removeItem(USER_KEY);
+	return currentUser;
 }
 
 export function clearAuth(): void {
 	authenticated = false;
-	clearUser();
+	currentUser = null;
 }
 
 export function isAuthenticated(): boolean {
 	return authenticated;
+}
+
+let pendingSessionLoad: Promise<UserData | null> | null = null;
+
+async function requestSessionUser(): Promise<UserData | null> {
+	try {
+		const response = await fetch("/api/auth/session", { cache: "no-store" });
+
+		if (response.status === 401) {
+			clearAuth();
+			return null;
+		}
+
+		const result = (await response.json().catch(() => null)) as AuthApiResponse<UserData> | null;
+
+		if (response.ok && result?.success && result.data) {
+			authenticated = true;
+			currentUser = result.data;
+			return result.data;
+		}
+	} catch (error) {
+		logger.error("Failed to load session", { error });
+	}
+
+	return null;
+}
+
+/** Loads the session once and shares the in-flight request between callers. */
+function fetchSessionUser(): Promise<UserData | null> {
+	if (pendingSessionLoad) return pendingSessionLoad;
+
+	pendingSessionLoad = requestSessionUser().finally(() => {
+		pendingSessionLoad = null;
+	});
+
+	return pendingSessionLoad;
+}
+
+/**
+ * Returns the in-memory user, loading it from the server session when the page
+ * was reloaded and the client cache is still empty.
+ */
+export async function ensureSessionUser(): Promise<UserData | null> {
+	if (currentUser) return currentUser;
+	return fetchSessionUser();
 }
 
 /**
@@ -62,26 +86,8 @@ export function isAuthenticated(): boolean {
  * Called on page load to restore the current user into the client.
  */
 export async function restoreSession(): Promise<boolean> {
-	try {
-		const response = await fetch("/api/auth/session", { cache: "no-store" });
-
-		if (response.status === 401) {
-			clearAuth();
-			return false;
-		}
-
-		const result = (await response.json().catch(() => null)) as AuthApiResponse<UserData> | null;
-
-		if (response.ok && result?.success && result.data) {
-			authenticated = true;
-			setUser(result.data);
-			return true;
-		}
-	} catch (error) {
-		logger.error("Failed to restore session", { error });
-	}
-
-	return false;
+	const user = await fetchSessionUser();
+	return user !== null;
 }
 
 /**
@@ -95,7 +101,7 @@ export async function refreshSession(): Promise<boolean> {
 
 		if (response.ok && result?.success) {
 			authenticated = true;
-			if (result.data) setUser(result.data);
+			if (result.data) currentUser = result.data;
 			return true;
 		}
 
@@ -129,7 +135,7 @@ export async function login(request: {
 	}
 
 	authenticated = true;
-	setUser(result.data);
+	currentUser = result.data;
 
 	return result.data;
 }

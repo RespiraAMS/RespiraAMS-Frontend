@@ -12,7 +12,7 @@ const REMEMBERED_EMAIL = "remembered_email";
 
 export function getRememberedEmail(): string {
 	if (typeof window === "undefined") return "";
-	return getCookie(REMEMBERED_EMAIL) || localStorage.getItem(REMEMBERED_EMAIL) || "";
+	return getCookie(REMEMBERED_EMAIL) || "";
 }
 
 export function setRememberedEmail(email: string, remember: boolean): void {
@@ -20,12 +20,10 @@ export function setRememberedEmail(email: string, remember: boolean): void {
 
 	if (remember && email) {
 		setCookie(REMEMBERED_EMAIL, email, { days: 30 });
-		localStorage.setItem(REMEMBERED_EMAIL, email);
 		return;
 	}
 
 	deleteCookie(REMEMBERED_EMAIL);
-	localStorage.removeItem(REMEMBERED_EMAIL);
 }
 
 /**

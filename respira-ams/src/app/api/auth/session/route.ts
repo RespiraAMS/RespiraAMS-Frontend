@@ -9,5 +9,11 @@ export async function GET() {
 		return NextResponse.json({ success: false }, { status: 401 });
 	}
 
-	return NextResponse.json({ success: true, data: toSessionUser(session) });
+	const user = toSessionUser(session);
+	if (!user) {
+		session.destroy();
+		return NextResponse.json({ success: false }, { status: 401 });
+	}
+
+	return NextResponse.json({ success: true, data: user });
 }

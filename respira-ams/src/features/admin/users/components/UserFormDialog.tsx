@@ -33,6 +33,14 @@ import {
 	UserRole,
 } from "../types";
 import { checkDoctorDuplicates } from "../api";
+import {
+	CITIZEN_ID_LENGTH,
+	DOCTOR_POSITIONS,
+	HEAD_DEPARTMENT_POSITION,
+	PHONE_MAX_LENGTH,
+	sanitizeCitizenIdInput,
+	sanitizePhoneInput,
+} from "../utils";
 
 interface UserFormDialogProps {
 	isOpen: boolean;
@@ -54,15 +62,6 @@ const ALL_DEGREES: DegreeType[] = [
 	"Associate",
 	"Graduate",
 	"Undergraduate",
-];
-
-const ALL_POSITIONS: PositionType[] = [
-	"StaffDoctor",
-	"SeniorDoctor",
-	"DepartmentDeputyHead",
-	"HeadOfDepartment",
-	"DeputyDirector",
-	"Director",
 ];
 
 export function UserFormDialog({
@@ -100,7 +99,30 @@ export function UserFormDialog({
 
 	// Tài khoản Quản lý chuyên môn (MedicalRegulationReviewer) và Quản trị viên
 	// không có hồ sơ bác sĩ.
-	const isAccountOnly = role === "Manager" || role === "Admin";
+	const isAccountOnly = role === "MedicalRegulationReviewer" || role === "Admin";
+
+	// Chỉ bác sĩ điều trị và bác sĩ cao cấp được tạo với role Doctor; trưởng khoa
+	// luôn giữ chức vụ Trưởng khoa.
+	const allowedPositions: PositionType[] =
+		role === "Doctor"
+			? DOCTOR_POSITIONS
+			: role === "HeadDepartmentDoctor"
+				? [HEAD_DEPARTMENT_POSITION]
+				: [];
+
+	// Khi sửa hồ sơ cũ, giữ chức vụ hiện tại trong danh sách để không làm mất dữ liệu.
+	const positionOptions =
+		!isAccountOnly && position && !allowedPositions.includes(position)
+			? [...allowedPositions, position]
+			: allowedPositions;
+
+	// Nhãn đầy đủ của role đang chọn, dùng cho tooltip khi nhãn bị rút gọn.
+	const roleLabel: Record<UserRole, string> = {
+		Doctor: t("roleDoctor"),
+		HeadDepartmentDoctor: t("roleHeadDoctor"),
+		MedicalRegulationReviewer: t("roleReviewer"),
+		Admin: t("roleAdmin"),
+	};
 
 	// Avatar file & preview
 	const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -114,16 +136,19 @@ export function UserFormDialog({
 	const wasOpenRef = useRef(false);
 
 	const handleRoleChange = (nextRole: UserRole) => {
-		const previousRole = role;
 		setRole(nextRole);
 
 		if (nextRole === "HeadDepartmentDoctor") {
-			setPosition("HeadOfDepartment");
-		} else if (previousRole === "HeadDepartmentDoctor") {
+			setPosition(HEAD_DEPARTMENT_POSITION);
+		} else if (nextRole === "Doctor") {
+			setPosition((current) =>
+				DOCTOR_POSITIONS.includes(current) ? current : "StaffDoctor"
+			);
+		} else {
 			setPosition("StaffDoctor");
 		}
 
-		if (nextRole !== "Manager") return;
+		if (nextRole !== "MedicalRegulationReviewer") return;
 
 		setAvatarFile(null);
 		setAvatarPreview(null);
@@ -241,7 +266,7 @@ export function UserFormDialog({
 				return null;
 			case "phone":
 				if (!val) return t("errors.phoneRequired");
-				if (!/^(0|\+84|84)(3|5|7|8|9)[0-9]{8}$/.test(val)) {
+				if (!/^(?:0[35789]\d{8}|\+?84[35789]\d{8})$/.test(val)) {
 					return t("errors.phoneInvalid");
 				}
 				return null;
@@ -258,7 +283,7 @@ export function UserFormDialog({
 			case "citizenId":
 				const rawCccd = val.replace(/\s+/g, "");
 				if (!rawCccd) return t("errors.citizenIdRequired");
-				if (!/^[0-9]{9,12}$/.test(rawCccd)) {
+				if (!/^\d{12}$/.test(rawCccd)) {
 					return t("errors.citizenIdInvalid");
 				}
 				return null;
@@ -465,8 +490,8 @@ export function UserFormDialog({
 				const createRole: CreateUserPayload["role"] =
 					role === "HeadDepartmentDoctor"
 						? "HeadDepartmentDoctor"
-						: role === "Manager"
-							? "Manager"
+						: role === "MedicalRegulationReviewer"
+							? "MedicalRegulationReviewer"
 							: "Doctor";
 
 				const payload: CreateUserPayload = {
@@ -481,8 +506,10 @@ export function UserFormDialog({
 					position: isAccountOnly
 						? "StaffDoctor"
 						: createRole === "HeadDepartmentDoctor"
-							? "HeadOfDepartment"
-							: position,
+							? HEAD_DEPARTMENT_POSITION
+							: DOCTOR_POSITIONS.includes(position)
+								? position
+								: "StaffDoctor",
 					gender,
 					citizenIdentificationNumber: isAccountOnly ? "" : citizenId.trim(),
 					dateOfBirth: isAccountOnly ? undefined : dobIso,
@@ -510,7 +537,7 @@ export function UserFormDialog({
 
 				<form onSubmit={handleSubmit} noValidate className="space-y-5 pt-2 min-w-0">
 					{/* Avatar & Basic Role */}
-					<div className="flex items-center gap-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800">
+					<div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:gap-5 dark:border-slate-800 dark:bg-slate-950/40">
 						<Avatar className="h-16 w-16 border-2 border-white shadow-sm shrink-0">
 							{avatarPreview ? (
 								<AvatarImage src={avatarPreview} alt={firstName || "Avatar"} />
@@ -521,7 +548,7 @@ export function UserFormDialog({
 							)}
 						</Avatar>
 
-						<div className="flex-1 space-y-1.5">
+						<div className="min-w-0 space-y-1.5 sm:flex-1">
 							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
 								{t("avatarLabel")}
 							</Label>
@@ -559,8 +586,8 @@ export function UserFormDialog({
 							)}
 						</div>
 
-						<div className="flex items-center gap-3">
-							<div className="w-36">
+						<div className="flex shrink-0 items-center gap-3">
+							<div className="w-full sm:w-44">
 								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
 									{t("roleLabel")} <span className="text-red-500">*</span>
 								</Label>
@@ -569,13 +596,16 @@ export function UserFormDialog({
 									onValueChange={(val: UserRole) => handleRoleChange(val)}
 									disabled={isEdit || isHeadpartmentDoctor}
 								>
-									<SelectTrigger className="mt-1 h-9 text-xs font-semibold bg-white dark:bg-slate-900">
+									<SelectTrigger
+										title={roleLabel[role]}
+										className="mt-1 h-9 w-full min-w-0 overflow-hidden text-xs font-semibold bg-white dark:bg-slate-900 *:data-[slot=select-value]:min-w-0"
+									>
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="Doctor">{t("roleDoctor")}</SelectItem>
 										<SelectItem value="HeadDepartmentDoctor">{t("roleHeadDoctor")}</SelectItem>
-										<SelectItem value="Manager">{t("roleManager")}</SelectItem>
+										<SelectItem value="MedicalRegulationReviewer">{t("roleReviewer")}</SelectItem>
 										{editingUser?.role === "Admin" && (
 											<SelectItem value="Admin">{t("roleAdmin")}</SelectItem>
 										)}
@@ -617,9 +647,14 @@ export function UserFormDialog({
 								id="usr-phone"
 								type="tel"
 								value={phone}
-								onChange={(e) => handleFieldChange("phone", e.target.value, setPhone)}
+								onChange={(e) =>
+									handleFieldChange("phone", sanitizePhoneInput(e.target.value), setPhone)
+								}
 								onBlur={() => handleBlur("phone", phone)}
 								placeholder={t("phonePlaceholder")}
+								maxLength={PHONE_MAX_LENGTH}
+								inputMode="tel"
+								autoComplete="tel"
 								className={`mt-1 h-9 text-xs ${touched.phone && errors.phone ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 									}`}
 							/>
@@ -732,9 +767,19 @@ export function UserFormDialog({
 										<Input
 											id="usr-citizen"
 											value={citizenId}
-											onChange={(e) => handleFieldChange("citizenId", e.target.value, setCitizenId)}
+											onChange={(e) =>
+												handleFieldChange(
+													"citizenId",
+													sanitizeCitizenIdInput(e.target.value),
+													setCitizenId
+												)
+											}
 											onBlur={() => handleBlur("citizenId", citizenId)}
 											placeholder={t("citizenIdPlaceholder")}
+											maxLength={CITIZEN_ID_LENGTH}
+											inputMode="numeric"
+											pattern="[0-9]*"
+											autoComplete="off"
 											className={`mt-1 h-9 text-xs ${touched.citizenId && errors.citizenId ? "border-error focus-visible:ring-error/40 bg-error/10" : ""
 												}`}
 										/>
@@ -845,7 +890,7 @@ export function UserFormDialog({
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
-												{ALL_POSITIONS.map((pos) => (
+												{positionOptions.map((pos) => (
 													<SelectItem key={pos} value={pos}>
 														{positionLabels[pos] || pos}
 													</SelectItem>
