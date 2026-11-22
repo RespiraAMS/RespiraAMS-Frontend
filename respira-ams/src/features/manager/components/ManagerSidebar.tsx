@@ -208,7 +208,7 @@ export function ManagerSidebar({
 
                 {/* Account Section */}
                 <div className="p-2.5 shrink-0 border-t border-slate-100">
-                    <AccountSection collapsed={collapsed} route='manage' />
+                    <AccountSection collapsed={collapsed} route='manage' showProfile={false} />
                 </div>
             </aside>
         </TooltipProvider>

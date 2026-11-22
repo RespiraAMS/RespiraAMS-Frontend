@@ -110,13 +110,15 @@ export interface AccountSectionProps {
 	collapsed?: boolean;
 	className?: string;
 	route?: string;
+	showProfile?: boolean;
 }
 
 export function AccountSection({
 	user: initialUser,
 	collapsed = false,
 	className,
-	route = "doctor"
+	route = "doctor",
+	showProfile = true,
 }: AccountSectionProps) {
 	const router = useRouter();
 	const t = useTranslations("doctor.account");
@@ -282,15 +284,17 @@ export function AccountSection({
 						</div>
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
-					<DropdownMenuItem asChild>
-						<Link
-							href={`/${route}/profile`}
-							className="flex items-center gap-2 cursor-pointer text-xs"
-						>
-							<User className="h-3.5 w-3.5" />
-							{t("profile")}
-						</Link>
-					</DropdownMenuItem>
+					{showProfile && (
+						<DropdownMenuItem asChild>
+							<Link
+								href={`/${route}/profile`}
+								className="flex items-center gap-2 cursor-pointer text-xs"
+							>
+								<User className="h-3.5 w-3.5" />
+								{t("profile")}
+							</Link>
+						</DropdownMenuItem>
+					)}
 					<DropdownMenuItem asChild>
 						<Link
 							href={`/${route}/settings`}
@@ -395,15 +399,17 @@ export function AccountSection({
 					</div>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem asChild>
-					<Link
-						href={`/${route}/profile`}
-						className="flex items-center gap-2 cursor-pointer text-xs"
-					>
-						<User className="h-3.5 w-3.5" />
-						{t("profile")}
-					</Link>
-				</DropdownMenuItem>
+				{showProfile && (
+					<DropdownMenuItem asChild>
+						<Link
+							href={`/${route}/profile`}
+							className="flex items-center gap-2 cursor-pointer text-xs"
+						>
+							<User className="h-3.5 w-3.5" />
+							{t("profile")}
+						</Link>
+					</DropdownMenuItem>
+				)}
 				<DropdownMenuItem asChild>
 					<Link
 						href={`/${route}/settings`}
