@@ -75,6 +75,7 @@ export function AntibioticGroupsTable({
     const items = listData?.items || [];
     const totalPages = listData?.metadata?.pageCount || 1;
     const columnCount = readOnly ? 3 : 4;
+    const hasActions = !readOnly && Boolean(onEdit || onDelete);
 
     const filterDropdown = (
         <DropdownMenu>
@@ -82,7 +83,7 @@ export function AntibioticGroupsTable({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="relative hover:bg-accent text-foreground"
+                    className="relative h-8 w-8 hover:bg-accent text-foreground"
                 >
                     <ListFilter className="h-4 w-4" />
                     {selectedParentId && (
@@ -94,145 +95,198 @@ export function AntibioticGroupsTable({
             </DropdownMenuTrigger>
             <DropdownMenuContent
                 align="end"
-                className="w-56 bg-popover text-popover-foreground border-border"
+                className="w-56 max-w-[calc(100vw-2rem)] bg-popover text-popover-foreground border-border"
             >
                 <DropdownMenuLabel>{t('filterData')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>{t('filterByParent')}</DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto bg-popover text-popover-foreground border-border">
-                        <DropdownMenuItem onClick={() => setSelectedParentId('')}>
-                            {tCommon('all')}
-                        </DropdownMenuItem>
-                        {parentGroups.map((group) => (
-                            <DropdownMenuItem
-                                key={group.id}
-                                onClick={() => setSelectedParentId(group.id)}
-                            >
-                                {group.name}
-                            </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuSubContent>
-                </DropdownMenuSub>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setSelectedParentId('')}>
-                    {t('clearFilter')}
+                <DropdownMenuItem
+					onClick={() => setSelectedParentId('')}
+					className={selectedParentId === null ? "bg-accent font-bold" : ""}
+				>
+                    {tCommon('all')}
                 </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-border" />
+				{parentGroups.map((group) => (
+					<DropdownMenuItem
+						key={group.id}
+                        onClick={() => setSelectedParentId(group.id)}
+						className={selectedParentId === group.id ? "bg-accent font-bold" : ""}
+					>
+						{group.name}
+					</DropdownMenuItem>
+				))}
             </DropdownMenuContent>
         </DropdownMenu>
     );
 
+    const renderActionButtons = (item: AntibioticGroupItem) => (
+        <div className="flex items-center justify-end gap-1.5 lg:gap-1">
+            {onEdit && (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(item)}
+                    className="h-8 w-8 hover:bg-accent text-foreground"
+                >
+                    <Edit className="h-4 w-4" />
+                </Button>
+            )}
+            {onDelete && (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDelete(item)}
+                    className="h-8 w-8 hover:bg-destructive/10"
+                >
+                    <Trash className="h-4 w-4 text-destructive" />
+                </Button>
+            )}
+        </div>
+    );
+
     return (
-        <div className="relative">
+        <div className="relative text-foreground">
             {isFetching && (
-                <div className="absolute top-0 right-0 left-0 h-1 bg-primary/20 overflow-hidden rounded-t-md">
+                <div className="absolute top-0 right-0 left-0 z-10 h-1 bg-primary/20 overflow-hidden rounded-t-md">
                     <div className="h-full bg-primary animate-pulse w-1/2 translate-x-1/2" />
                 </div>
             )}
-            <Table className="border-border">
-                <TableHeader>
-                    <TableRow className="border-border hover:bg-transparent">
-                        <TableHead className="text-muted-foreground w-1/4 font-semibold">
-                            {t('colName')}
-                        </TableHead>
-                        <TableHead className="text-muted-foreground w-1/4 font-semibold">
-                            {t('colParent')}
-                        </TableHead>
-                        <TableHead className="text-muted-foreground font-semibold">
-                            {readOnly ? (
-                                <div className="flex items-center justify-between gap-2">
-                                    <span>{t('colDescription')}</span>
-                                    {filterDropdown}
-                                </div>
-                            ) : (
-                                t('colDescription')
-                            )}
-                        </TableHead>
-                        {!readOnly && (
-                            <TableHead className="text-muted-foreground text-right font-semibold">
-                                <div className="flex items-center justify-end gap-2">
-                                    {tCommon('actions')}
-                                    {filterDropdown}
-                                </div>
-                            </TableHead>
-                        )}
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {isLoading ? (
-                        <TableRow className="border-border">
-                            <TableCell
-                                colSpan={columnCount}
-                                className="h-32 text-center text-muted-foreground"
-                            >
-                                <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
-                            </TableCell>
-                        </TableRow>
-                    ) : items.length === 0 ? (
-                        <TableRow className="border-border">
-                            <TableCell
-                                colSpan={columnCount}
-                                className="text-center text-muted-foreground py-10"
-                            >
-                                {t('empty')}
-                            </TableCell>
-                        </TableRow>
-                    ) : (
-                        items.map((item) => (
-                            <TableRow key={item.id} className="border-border hover:bg-accent/50">
-                                <TableCell className="font-semibold text-primary align-top">
+
+            <div className="space-y-3 md:hidden">
+                <div className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2">
+                    <span className="text-xs font-medium text-muted-foreground">
+                        {t('filterData')}
+                    </span>
+                    {filterDropdown}
+                </div>
+
+                {isLoading ? (
+                    <div className="flex h-32 items-center justify-center rounded-lg border border-border text-muted-foreground">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                ) : items.length === 0 ? (
+                    <div className="rounded-lg border border-border py-10 text-center text-sm text-muted-foreground">
+                        {t('empty')}
+                    </div>
+                ) : (
+                    items.map((item) => (
+                        <div
+                            key={item.id}
+                            className="space-y-2.5 rounded-lg border border-border bg-card p-3.5 shadow-xs"
+                        >
+                            <div className="space-y-1">
+                                <p className="font-semibold text-primary break-words">
                                     {item.name}
-                                </TableCell>
-                                <TableCell className="text-muted-foreground align-top">
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    <span className="font-medium">{t('colParent')}:</span>{' '}
                                     {item.parentName ? (
-                                        <span>{item.parentName}</span>
+                                        <span className="text-foreground">{item.parentName}</span>
                                     ) : (
                                         <span className="italic opacity-50">-</span>
                                     )}
-                                </TableCell>
-                                <TableCell className="align-top max-w-[60ch] whitespace-normal break-words">
-                                    <p
-                                        className="text-sm text-muted-foreground"
-                                        title={item.description}
-                                    >
-                                        {item.description || t('noDescription')}
-                                    </p>
-                                </TableCell>
-                                {!readOnly && (
-                                    <TableCell className="align-top">
-                                        <div className="flex justify-end gap-1">
-                                            {onEdit && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => onEdit(item)}
-                                                    className="hover:bg-accent text-foreground"
-                                                >
-                                                    <Edit className="h-4 w-4" />
-                                                </Button>
-                                            )}
-                                            {onDelete && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => onDelete(item)}
-                                                    className="hover:bg-destructive/10"
-                                                >
-                                                    <Trash className="h-4 w-4 text-destructive" />
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </TableCell>
+                                </p>
+                            </div>
+
+                            <p className="text-sm text-muted-foreground whitespace-normal break-words">
+                                {item.description || t('noDescription')}
+                            </p>
+
+                            {hasActions && (
+                                <div className="border-t border-border pt-2">
+                                    {renderActionButtons(item)}
+                                </div>
+                            )}
+                        </div>
+                    ))
+                )}
+            </div>
+
+            <div className="hidden md:block">
+                <Table className="border-border">
+                    <TableHeader>
+                        <TableRow className="border-border hover:bg-transparent">
+                            <TableHead className="min-w-40 lg:w-1/4 text-muted-foreground font-semibold">
+                                {t('colName')}
+                            </TableHead>
+                            <TableHead className="min-w-36 lg:w-1/4 text-muted-foreground font-semibold">
+                                {t('colParent')}
+                            </TableHead>
+                            <TableHead className="min-w-60 text-muted-foreground font-semibold">
+                                {readOnly ? (
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span>{t('colDescription')}</span>
+                                        {filterDropdown}
+                                    </div>
+                                ) : (
+                                    t('colDescription')
                                 )}
+                            </TableHead>
+                            {!readOnly && (
+                                <TableHead className="whitespace-nowrap text-muted-foreground text-right font-semibold">
+                                    <div className="flex items-center justify-end gap-2">
+                                        {tCommon('actions')}
+                                        {filterDropdown}
+                                    </div>
+                                </TableHead>
+                            )}
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {isLoading ? (
+                            <TableRow className="border-border">
+                                <TableCell
+                                    colSpan={columnCount}
+                                    className="h-32 text-center text-muted-foreground"
+                                >
+                                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
+                                </TableCell>
                             </TableRow>
-                        ))
-                    )}
-                </TableBody>
-            </Table>
+                        ) : items.length === 0 ? (
+                            <TableRow className="border-border">
+                                <TableCell
+                                    colSpan={columnCount}
+                                    className="text-center text-muted-foreground py-10"
+                                >
+                                    {t('empty')}
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            items.map((item) => (
+                                <TableRow key={item.id} className="border-border hover:bg-accent/50">
+                                    <TableCell className="font-semibold text-primary align-top">
+                                        {item.name}
+                                    </TableCell>
+                                    <TableCell className="text-muted-foreground align-top">
+                                        {item.parentName ? (
+                                            <span>{item.parentName}</span>
+                                        ) : (
+                                            <span className="italic opacity-50">-</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="align-top max-w-[60ch] whitespace-normal break-words">
+                                        <p
+                                            className="text-sm text-muted-foreground"
+                                            title={item.description}
+                                        >
+                                            {item.description || t('noDescription')}
+                                        </p>
+                                    </TableCell>
+                                    {!readOnly && (
+                                        <TableCell className="align-top whitespace-nowrap">
+                                            {renderActionButtons(item)}
+                                        </TableCell>
+                                    )}
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
 
             {totalPages > 1 && (
                 <Pagination className="mt-4">
-                    <PaginationContent>
+                    <PaginationContent className="flex-wrap justify-center">
                         <PaginationItem>
                             <PaginationPrevious
                                 className={
@@ -240,7 +294,7 @@ export function AntibioticGroupsTable({
                                         ? 'cursor-pointer hover:bg-accent'
                                         : 'pointer-events-none opacity-50'
                                 }
-                                onClick={() => setPage((p) => p - 1)}
+                                onClick={() => setPage((p) => Math.max(1, p - 1))}
                             />
                         </PaginationItem>
                         <span className="text-sm text-muted-foreground px-2">
@@ -253,7 +307,7 @@ export function AntibioticGroupsTable({
                                         ? 'cursor-pointer hover:bg-accent'
                                         : 'pointer-events-none opacity-50'
                                 }
-                                onClick={() => setPage((p) => p + 1)}
+                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                             />
                         </PaginationItem>
                     </PaginationContent>

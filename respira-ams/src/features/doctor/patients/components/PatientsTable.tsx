@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Edit, Eye, ListFilter, Loader2, LogOut, Trash } from "lucide-react";
+import { Edit, Eye, ListFilter, Loader2, LogOut, Trash, ChevronDown, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -28,11 +28,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
-	DropdownMenuSub,
-	DropdownMenuSubContent,
-	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 import { usePatientsList } from "../queries";
 import {
@@ -88,6 +86,170 @@ function OutcomeBadge({ outcome }: { outcome: TreatmentOutcome }) {
 
 export function renderOutcomeBadge(outcome: TreatmentOutcome) {
 	return <OutcomeBadge outcome={outcome} />;
+}
+
+interface PatientsFilterDropdownProps {
+	activeFilterCount: number;
+	selectedGender: Gender | "";
+	draftMinAge: string;
+	draftMaxAge: string;
+	onGenderChange: (gender: Gender | "") => void;
+	onDraftMinAgeChange: (value: string) => void;
+	onDraftMaxAgeChange: (value: string) => void;
+	onApplyAgeFilter: () => void;
+	onClearAllFilters: () => void;
+}
+
+function PatientsFilterDropdown({
+	activeFilterCount,
+	selectedGender,
+	draftMinAge,
+	draftMaxAge,
+	onGenderChange,
+	onDraftMinAgeChange,
+	onDraftMaxAgeChange,
+	onApplyAgeFilter,
+	onClearAllFilters,
+}: PatientsFilterDropdownProps) {
+	const tTable = useTranslations("doctor.patients.table");
+	const tGender = useTranslations("doctor.patients.gender");
+	const tCommon = useTranslations("common");
+	const [isGenderOpen, setIsGenderOpen] = useState(false);
+
+	return (
+		<DropdownMenu onOpenChange={(open) => !open && setIsGenderOpen(false)}>
+			<DropdownMenuTrigger asChild>
+				<Button
+					type="button"
+					variant="ghost"
+					size="icon"
+					className="relative h-8 w-8 text-foreground hover:bg-accent"
+				>
+					<ListFilter className="h-4 w-4" />
+					{activeFilterCount > 0 && (
+						<span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+							{activeFilterCount}
+						</span>
+					)}
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent
+				align="end"
+				collisionPadding={16}
+				className="w-64 max-w-[calc(100vw-2rem)] border-border bg-popover text-popover-foreground"
+			>
+				<DropdownMenuLabel className="text-foreground">
+					{tTable("filterTitle")}
+				</DropdownMenuLabel>
+				<DropdownMenuSeparator />
+
+				<div>
+					<button
+						type="button"
+						onClick={() => setIsGenderOpen((prev) => !prev)}
+						className="flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-sm text-foreground hover:bg-accent"
+					>
+						<span className="shrink-0 font-medium">{tTable("filterGender")}</span>
+						<span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+							{selectedGender && (
+								<span className="truncate font-medium text-primary">
+									{tGender(selectedGender)}
+								</span>
+							)}
+							<ChevronDown
+								className={cn(
+									"h-4 w-4 shrink-0 transition-transform duration-200",
+									isGenderOpen && "rotate-180",
+								)}
+							/>
+						</span>
+					</button>
+
+					{isGenderOpen && (
+						<div className="mt-1 space-y-0.5 border-l border-border pl-2">
+							<DropdownMenuItem
+								onClick={() => onGenderChange("")}
+								className={cn(
+									"justify-between text-xs",
+									selectedGender === "" && "bg-accent font-semibold",
+								)}
+							>
+								<span>{tCommon("all")}</span>
+								{selectedGender === "" && <Check className="h-3.5 w-3.5" />}
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								onClick={() => onGenderChange("Male")}
+								className={cn(
+									"justify-between text-xs",
+									selectedGender === "Male" && "bg-accent font-semibold",
+								)}
+							>
+								<span>{tGender("Male")}</span>
+								{selectedGender === "Male" && <Check className="h-3.5 w-3.5" />}
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								onClick={() => onGenderChange("Female")}
+								className={cn(
+									"justify-between text-xs",
+									selectedGender === "Female" && "bg-accent font-semibold",
+								)}
+							>
+								<span>{tGender("Female")}</span>
+								{selectedGender === "Female" && <Check className="h-3.5 w-3.5" />}
+							</DropdownMenuItem>
+						</div>
+					)}
+				</div>
+
+				<DropdownMenuSeparator />
+
+				<div className="space-y-2 p-2" onKeyDown={(e) => e.stopPropagation()}>
+					<Label className="text-xs font-semibold text-muted-foreground">
+						{tTable("filterAgeRange")}
+					</Label>
+					<div className="flex items-center gap-2">
+						<Input
+							type="number"
+							min={0}
+							placeholder={tTable("ageFromPlaceholder")}
+							value={draftMinAge}
+							onChange={(e) => onDraftMinAgeChange(e.target.value)}
+							className="h-8 border-input bg-background text-xs text-foreground"
+						/>
+						<span className="text-muted-foreground">-</span>
+						<Input
+							type="number"
+							min={0}
+							placeholder={tTable("ageToPlaceholder")}
+							value={draftMaxAge}
+							onChange={(e) => onDraftMaxAgeChange(e.target.value)}
+							className="h-8 border-input bg-background text-xs text-foreground"
+						/>
+					</div>
+					<Button
+						type="button"
+						size="sm"
+						variant="secondary"
+						className="h-7 w-full text-xs"
+						onClick={onApplyAgeFilter}
+					>
+						{tTable("applyAgeButton")}
+					</Button>
+				</div>
+
+				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					onClick={() => {
+						onClearAllFilters();
+						setIsGenderOpen(false);
+					}}
+					className="cursor-pointer text-destructive focus:text-destructive"
+				>
+					{tTable("clearAllFilters")}
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
 }
 
 export function PatientsTable({
@@ -152,104 +314,17 @@ export function PatientsTable({
 		setDraftMaxAge("");
 	};
 
-	const filterDropdown = (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button
-					variant="ghost"
-					size="icon"
-					className="relative h-8 w-8 text-foreground hover:bg-accent"
-				>
-					<ListFilter className="h-4 w-4" />
-					{activeFilterCount > 0 && (
-						<span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-							{activeFilterCount}
-						</span>
-					)}
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				align="end"
-				className="w-64 border-border bg-popover text-popover-foreground"
-			>
-				<DropdownMenuLabel className="text-foreground">
-					{tTable("filterTitle")}
-				</DropdownMenuLabel>
-				<DropdownMenuSeparator />
-
-				<DropdownMenuSub>
-					<DropdownMenuSubTrigger className="text-foreground">
-						{tTable("filterGender")}{" "}
-						{selectedGender ? `(${tGender(selectedGender)})` : ""}
-					</DropdownMenuSubTrigger>
-					<DropdownMenuSubContent className="border-border bg-popover text-popover-foreground">
-						<DropdownMenuItem
-							onClick={() => setSelectedGender("")}
-							className={selectedGender === "" ? "bg-accent font-semibold" : ""}
-						>
-							{tCommon("all")}
-						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={() => setSelectedGender("Male")}
-							className={selectedGender === "Male" ? "bg-accent font-semibold" : ""}
-						>
-							{tGender("Male")}
-						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={() => setSelectedGender("Female")}
-							className={selectedGender === "Female" ? "bg-accent font-semibold" : ""}
-						>
-							{tGender("Female")}
-						</DropdownMenuItem>
-					</DropdownMenuSubContent>
-				</DropdownMenuSub>
-
-				<DropdownMenuSeparator />
-
-				<div className="space-y-2 p-2" onKeyDown={(e) => e.stopPropagation()}>
-					<Label className="text-xs font-semibold text-muted-foreground">
-						{tTable("filterAgeRange")}
-					</Label>
-					<div className="flex items-center gap-2">
-						<Input
-							type="number"
-							min={0}
-							placeholder={tTable("ageFromPlaceholder")}
-							value={draftMinAge}
-							onChange={(e) => setDraftMinAge(e.target.value)}
-							className="h-8 border-input bg-background text-xs text-foreground"
-						/>
-						<span className="text-muted-foreground">-</span>
-						<Input
-							type="number"
-							min={0}
-							placeholder={tTable("ageToPlaceholder")}
-							value={draftMaxAge}
-							onChange={(e) => setDraftMaxAge(e.target.value)}
-							className="h-8 border-input bg-background text-xs text-foreground"
-						/>
-					</div>
-					<Button
-						type="button"
-						size="sm"
-						variant="secondary"
-						className="h-7 w-full text-xs"
-						onClick={applyAgeFilter}
-					>
-						{tTable("applyAgeButton")}
-					</Button>
-				</div>
-
-				<DropdownMenuSeparator />
-				<DropdownMenuItem
-					onClick={clearAllFilters}
-					className="cursor-pointer text-destructive focus:text-destructive"
-				>
-					{tTable("clearAllFilters")}
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
-	);
+	const filterProps: PatientsFilterDropdownProps = {
+		activeFilterCount,
+		selectedGender,
+		draftMinAge,
+		draftMaxAge,
+		onGenderChange: setSelectedGender,
+		onDraftMinAgeChange: setDraftMinAge,
+		onDraftMaxAgeChange: setDraftMaxAge,
+		onApplyAgeFilter: applyAgeFilter,
+		onClearAllFilters: clearAllFilters,
+	};
 
 	const renderActionButtons = (item: PatientItem) => (
 		<div className="flex items-center justify-end gap-1.5 lg:gap-1">
@@ -312,7 +387,7 @@ export function PatientsTable({
 					<span className="text-xs font-medium text-muted-foreground">
 						{tTable("filterTitle")}
 					</span>
-					{filterDropdown}
+					<PatientsFilterDropdown {...filterProps} />
 				</div>
 
 				{isLoading ? (
@@ -385,7 +460,7 @@ export function PatientsTable({
 							<TableHead className="whitespace-nowrap text-right font-semibold text-muted-foreground">
 								<div className="flex items-center justify-end gap-2">
 									{tCommon("actions")}
-									{filterDropdown}
+									<PatientsFilterDropdown {...filterProps} />
 								</div>
 							</TableHead>
 						</TableRow>
