@@ -489,7 +489,7 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
 				</div>
 
 				{/* Metadata Bar */}
-				<div className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-4 text-sm">
+				<div className="grid grid-cols-1 md:grid-cols-2 sm:grid-cols-4 gap-3 pt-4 text-sm">
 					<div className="flex items-center justify-between sm:justify-start gap-2 bg-muted/50 dark:bg-muted/30 px-3.5 py-2 rounded-lg border border-border">
 						<span className="text-muted-foreground">
 							{tDetail("meta.medicalRecordCode")}
