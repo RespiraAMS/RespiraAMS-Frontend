@@ -19,7 +19,7 @@ export default async function DoctorLayout({
     const isHeadDepartmentDoctor = normalizeRole(session.role) === ROLE_HEAD_DEPARTMENT_DOCTOR;
 
     return (
-        <div className="flex h-screen overflow-hidden bg-background text-foreground">
+        <div className="flex h-screen overflow-hidden bg-background text-foreground min-h-dvh flex-col lg:flex-row">
             <DoctorSidebar role={isHeadDepartmentDoctor ? "HeadDepartmentDoctor" : "Doctor"}/>
             <div className="flex flex-1 flex-col overflow-hidden">
                 <main className="flex-1 overflow-auto bg-background text-foreground">

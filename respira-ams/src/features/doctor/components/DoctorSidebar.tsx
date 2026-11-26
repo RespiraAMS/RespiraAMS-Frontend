@@ -8,6 +8,13 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet';
+import {
     Users,
     Stethoscope,
     UserCog,
@@ -19,6 +26,7 @@ import {
     ChevronLeft,
     ChevronRight,
     ChevronDown,
+    Menu,
     type LucideIcon,
     ShieldAlert,
     ClipboardCheck,
@@ -91,24 +99,48 @@ function isRouteActive(pathname: string, href?: string) {
     return pathname === href || pathname.startsWith(href + '/');
 }
 
+function BrandLogo({ collapsed = false }: { collapsed?: boolean }) {
+    return (
+        <Link href="/" className="flex items-center gap-2.5 min-w-0 overflow-hidden">
+            <div className="relative h-8 w-8 shrink-0">
+                <span className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-sm font-bold">
+                    R.
+                </span>
+            </div>
+            <span
+                className={cn(
+                    'overflow-hidden whitespace-nowrap transition-all duration-300',
+                    collapsed ? 'max-w-0 opacity-0' : 'max-w-40 opacity-100',
+                )}
+            >
+                <span className="font-bold text-foreground tracking-tight">Respira</span>
+                <span className="font-bold text-primary tracking-tight">AMS</span>
+            </span>
+        </Link>
+    );
+}
+
 function NavItemLink({
     item,
     label,
     collapsed,
     active,
     isSubItem = false,
+    onNavigate,
 }: {
     item: Omit<NavItemConfig, 'children'>;
     label: string;
     collapsed: boolean;
     active: boolean;
     isSubItem?: boolean;
+    onNavigate?: () => void;
 }) {
     const { icon: Icon, href = '#', badge } = item;
 
     const linkContent = (
         <Link
             href={href}
+            onClick={onNavigate}
             className={cn(
                 'flex items-center gap-3 rounded-lg font-medium transition-all duration-150 group relative',
                 isSubItem ? 'px-2.5 py-2 text-[13px]' : 'px-3 py-2.5 text-sm',
@@ -126,7 +158,7 @@ function NavItemLink({
                         : 'text-muted-foreground group-hover:text-sidebar-foreground',
                 )}
             />
-            {(!collapsed || isSubItem) && <span className="leading-none">{label}</span>}
+            {(!collapsed || isSubItem) && <span className="leading-none truncate">{label}</span>}
             {(!collapsed || isSubItem) && badge != null && (
                 <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-sidebar-primary/15 px-1.5 text-[11px] font-semibold text-sidebar-primary">
                     {badge}
@@ -162,11 +194,13 @@ function NavGroupItem({
     pathname,
     collapsed,
     tNav,
+    onNavigate,
 }: {
     item: NavItemConfig;
     pathname: string;
     collapsed: boolean;
     tNav: (key: string) => string;
+    onNavigate?: () => void;
 }) {
     const children = item.children ?? [];
     const hasActiveChild = children.some((child) => isRouteActive(pathname, child.href));
@@ -212,7 +246,7 @@ function NavGroupItem({
                             <div className="px-2.5 py-1.5 text-xs font-semibold text-muted-foreground border-b border-sidebar-border mb-1">
                                 {label}
                             </div>
-                            <div className="max-h-[70vh] overflow-y-auto space-y-0.5">
+                            <div className="max-h-[70dvh] overflow-y-auto space-y-0.5">
                                 {children.map((child) => (
                                     <NavItemLink
                                         key={child.href ?? child.key}
@@ -221,6 +255,10 @@ function NavGroupItem({
                                         collapsed={false}
                                         active={isRouteActive(pathname, child.href)}
                                         isSubItem
+                                        onNavigate={() => {
+                                            setFlyoutOpen(false);
+                                            onNavigate?.();
+                                        }}
                                     />
                                 ))}
                             </div>
@@ -271,11 +309,61 @@ function NavGroupItem({
                             collapsed={false}
                             active={isRouteActive(pathname, child.href)}
                             isSubItem
+                            onNavigate={onNavigate}
                         />
                     ))}
                 </div>
             )}
         </div>
+    );
+}
+
+function SidebarNavContent({
+    visibleNavItems,
+    pathname,
+    collapsed,
+    tNav,
+    onNavigate,
+}: {
+    visibleNavItems: NavItemConfig[];
+    pathname: string;
+    collapsed: boolean;
+    tNav: (key: string) => string;
+    onNavigate?: () => void;
+}) {
+    return (
+        <>
+            <nav
+                aria-label={tNav('mainNavigation')}
+                className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-1"
+            >
+                {visibleNavItems.map((item) =>
+                    item.children && item.children.length > 0 ? (
+                        <NavGroupItem
+                            key={item.key}
+                            item={item}
+                            pathname={pathname}
+                            collapsed={collapsed}
+                            tNav={tNav}
+                            onNavigate={onNavigate}
+                        />
+                    ) : (
+                        <NavItemLink
+                            key={item.href ?? item.key}
+                            item={item}
+                            label={tNav(item.key)}
+                            collapsed={collapsed}
+                            active={isRouteActive(pathname, item.href)}
+                            onNavigate={onNavigate}
+                        />
+                    ),
+                )}
+            </nav>
+
+            <div className="border-t border-sidebar-border px-2 py-3 shrink-0">
+                <AccountSection collapsed={collapsed} />
+            </div>
+        </>
     );
 }
 
@@ -293,6 +381,9 @@ export function DoctorSidebar({
     const collapsed = useSidebarStore((state) => state.collapsed);
     const collapse = useSidebarStore((state) => state.collapse);
     const expand = useSidebarStore((state) => state.expand);
+    const [mobileState, setMobileState] = useState({ pathname, open: false });
+    const mobileOpen = mobileState.pathname === pathname && mobileState.open;
+    const setMobileOpen = (open: boolean) => setMobileState({ pathname, open });
 
     const visibleNavItems = useMemo(() => {
         return navConfigs
@@ -310,37 +401,56 @@ export function DoctorSidebar({
 
     return (
         <TooltipProvider delayDuration={0}>
+            <header className="sticky top-0 z-40 flex h-14 w-full items-center justify-between border-b border-sidebar-border bg-sidebar px-4 text-sidebar-foreground lg:hidden">
+                <BrandLogo />
+
+                <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                    <SheetTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 text-sidebar-foreground hover:bg-sidebar-accent"
+                            aria-label={tNav('mainNavigation')}
+                        >
+                            <Menu className="h-5 w-5" />
+                        </Button>
+                    </SheetTrigger>
+
+                    <SheetContent
+                        side="left"
+                        className="flex flex-col w-72 max-w-[85vw] p-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border"
+                    >
+                        <SheetHeader className="flex flex-row items-center h-14 px-4 border-b border-sidebar-border shrink-0 space-y-0">
+                            <BrandLogo />
+                            <SheetTitle className="sr-only">{tNav('mainNavigation')}</SheetTitle>
+                        </SheetHeader>
+
+                        <SidebarNavContent
+                            visibleNavItems={visibleNavItems}
+                            pathname={pathname}
+                            collapsed={false}
+                            tNav={tNav}
+                            onNavigate={() => setMobileOpen(false)}
+                        />
+                    </SheetContent>
+                </Sheet>
+            </header>
+
             <aside
                 className={cn(
-                    'relative flex flex-col h-screen border-r border-sidebar-border bg-sidebar text-sidebar-foreground',
+                    'relative hidden lg:flex flex-col sticky top-0 h-dvh shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground',
                     'transition-[width] duration-300 ease-in-out',
                     collapsed ? 'w-16' : 'w-60',
                     className,
                 )}
             >
-                {/* Logo / Header*/}
                 <div
                     className={cn(
                         'flex items-center h-16 px-3 border-b border-sidebar-border shrink-0 overflow-hidden',
                         collapsed ? 'justify-center' : 'justify-between',
                     )}
                 >
-                    <Link href="/" className="flex items-center gap-2.5 min-w-0 overflow-hidden">
-                        <div className="relative h-8 w-8 shrink-0">
-                            <span className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-sm font-bold">
-                                R.
-                            </span>
-                        </div>
-                        <span
-                            className={cn(
-                                'overflow-hidden transition-all duration-300',
-                                collapsed ? 'max-w-0 opacity-0' : 'max-w-40 opacity-100',
-                            )}
-                        >
-                            <span className="font-bold text-foreground tracking-tight">Respira</span>
-                            <span className="font-bold text-primary tracking-tight">AMS</span>
-                        </span>
-                    </Link>
+                    <BrandLogo collapsed={collapsed} />
 
                     {!collapsed && (
                         <Button
@@ -356,7 +466,6 @@ export function DoctorSidebar({
                     )}
                 </div>
 
-                {/* Expand button floating when collapsed */}
                 {collapsed && (
                     <div className="absolute -right-3 top-[52px] z-10">
                         <Button
@@ -372,36 +481,12 @@ export function DoctorSidebar({
                     </div>
                 )}
 
-                {/* Nav Links */}
-                <nav
-                    aria-label={tNav('mainNavigation')}
-                    className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-1"
-                >
-                    {visibleNavItems.map((item) =>
-                        item.children && item.children.length > 0 ? (
-                            <NavGroupItem
-                                key={item.key}
-                                item={item}
-                                pathname={pathname}
-                                collapsed={collapsed}
-                                tNav={tNav}
-                            />
-                        ) : (
-                            <NavItemLink
-                                key={item.href ?? item.key}
-                                item={item}
-                                label={tNav(item.key)}
-                                collapsed={collapsed}
-                                active={isRouteActive(pathname, item.href)}
-                            />
-                        ),
-                    )}
-                </nav>
-
-                {/* Account Section*/}
-                <div className="border-t border-sidebar-border px-2 py-3 shrink-0">
-                    <AccountSection collapsed={collapsed} />
-                </div>
+                <SidebarNavContent
+                    visibleNavItems={visibleNavItems}
+                    pathname={pathname}
+                    collapsed={collapsed}
+                    tNav={tNav}
+                />
             </aside>
         </TooltipProvider>
     );
