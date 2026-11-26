@@ -237,6 +237,7 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
 	const [isUpdateOpen, setIsUpdateOpen] = useState(false);
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const [isDischargeOpen, setIsDischargeOpen] = useState(false);
+	const [isOpenPlanErrorOpen, setIsOpenPlanErrorOpen] = useState(false);
 
 	const [kinModalOpen, setKinModalOpen] = useState(false);
 	const [editingKin, setEditingKin] = useState<NextOfKinItem | null>(null);
@@ -255,6 +256,11 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
 
 	const inProgressCount = useMemo(
 		() => sortedPlans.filter((p) => p.treatmentPlanStatus === 0).length,
+		[sortedPlans]
+	);
+
+	const openPlanId = useMemo(
+		() => sortedPlans.find((p) => p.treatmentPlanStatus === 0)?.id ?? null,
 		[sortedPlans]
 	);
 
@@ -336,6 +342,19 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
 				onError: (err) => toast.error(tToast("dischargeError", { error: err.message })),
 			}
 		);
+	};
+
+	const handleAddTreatment = () => {
+		if (openPlanId) {
+			setIsOpenPlanErrorOpen(true);
+			return;
+		}
+		router.push(`/doctor/diagnose?patientId=${patient.id}`);
+	};
+
+	const handleCloseOpenPlan = () => {
+		setIsOpenPlanErrorOpen(false);
+		if (openPlanId) setClosingPlanId(openPlanId);
 	};
 
 	const openAddKin = () => {
@@ -462,7 +481,7 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
 							variant="outline"
 							size="sm"
 							disabled={patient.treatmentOutcome !== "InTreatment"}
-							onClick={() => router.push(`/doctor/diagnose?patientId=${patient.id}`)}
+							onClick={handleAddTreatment}
 							className="border-border text-foreground hover:bg-accent"
 						>
 							<Plus className="w-4 h-4 mr-1.5 text-amber-600 dark:text-amber-400" />{" "}
@@ -489,7 +508,7 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
 				</div>
 
 				{/* Metadata Bar */}
-				<div className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-4 text-sm">
+				<div className="grid grid-cols-1 md:grid-cols-2 sm:grid-cols-4 gap-3 pt-4 text-sm">
 					<div className="flex items-center justify-between sm:justify-start gap-2 bg-muted/50 dark:bg-muted/30 px-3.5 py-2 rounded-lg border border-border">
 						<span className="text-muted-foreground">
 							{tDetail("meta.medicalRecordCode")}
@@ -1042,6 +1061,38 @@ export function PatientDetail({ id, isHeadDepartmentDoctor = false }: PatientDet
 				planId={detailPlanId}
 				onClose={() => setDetailPlanId(null)}
 			/>
+
+			{/* 9. Open Treatment Plan Alert (blocks creating a new treatment) */}
+			<AlertDialog
+				open={isOpenPlanErrorOpen}
+				onOpenChange={setIsOpenPlanErrorOpen}
+			>
+				<AlertDialogContent className="border-border bg-popover text-popover-foreground">
+					<AlertDialogHeader>
+						<AlertDialogTitle className="text-destructive font-semibold">
+							{tDetail("openPlanError.title")}
+						</AlertDialogTitle>
+						<AlertDialogDescription className="text-muted-foreground">
+							{tDetail("openPlanError.description", { name: patient.fullName })}
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<Button
+							variant="outline"
+							onClick={() => setIsOpenPlanErrorOpen(false)}
+							className="border-border text-foreground hover:bg-accent"
+						>
+							{tCommon("close")}
+						</Button>
+						<Button
+							onClick={handleCloseOpenPlan}
+							className="bg-primary text-primary-foreground hover:bg-primary/90"
+						>
+							{tDetail("openPlanError.closePlanButton")}
+						</Button>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }

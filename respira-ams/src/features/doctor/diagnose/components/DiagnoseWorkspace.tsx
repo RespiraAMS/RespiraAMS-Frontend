@@ -49,6 +49,8 @@ export function DiagnoseWorkspace() {
 		Boolean(queryPatientId)
 	);
 	const [patientLoadError, setPatientLoadError] = useState<string | null>(null);
+	const [openPlanBlocked, setOpenPlanBlocked] = useState<boolean>(false);
+	const [isOpenPlanErrorOpen, setIsOpenPlanErrorOpen] = useState<boolean>(false);
 
 	const [isCreatePatientModalOpen, setIsCreatePatientModalOpen] =
 		useState<boolean>(!queryPatientId);
@@ -78,10 +80,17 @@ export function DiagnoseWorkspace() {
 			try {
 				setIsLoadingPatient(true);
 				setPatientLoadError(null);
+				setOpenPlanBlocked(false);
 
 				const patientData = await diagnoseApi.getPatientDetail(queryPatientId);
 				if (!active) return;
 				setPatient(patientData);
+
+				const hasOpenPlan = (patientData.treatmentPlans ?? []).some(
+					(plan) => plan.treatmentPlanStatus === 0
+				);
+				setOpenPlanBlocked(hasOpenPlan);
+				if (hasOpenPlan) setIsOpenPlanErrorOpen(true);
 
 				const plans = patientData.treatmentPlans;
 				if (Array.isArray(plans) && plans.length > 0) {
@@ -249,7 +258,28 @@ export function DiagnoseWorkspace() {
 						</div>
 					)}
 
-					{isReadyToDiagnose && metadata && !diagnosisResult && (
+					{isReadyToDiagnose && openPlanBlocked && (
+						<div className="rounded-xl border border-destructive/40 bg-destructive/10 p-5 text-sm text-destructive">
+							<p className="font-semibold">
+								{t("workspace.openPlanError.title")}
+							</p>
+							<p className="mt-1 text-xs font-medium">
+								{t("workspace.openPlanError.description")}
+							</p>
+							<Button
+								variant="outline"
+								asChild
+								className="mt-3 gap-1.5 border-destructive/40 bg-background text-destructive hover:bg-destructive/10"
+							>
+								<Link href={`/doctor/patients/${patientId}`}>
+									<ArrowLeft className="h-4 w-4" />
+									{t("workspace.openPlanError.backToPatient")}
+								</Link>
+							</Button>
+						</div>
+					)}
+
+					{isReadyToDiagnose && metadata && !diagnosisResult && !openPlanBlocked && (
 						<DiagnoseAssessmentForm
 							metadata={metadata}
 							patient={patient}
@@ -281,6 +311,35 @@ export function DiagnoseWorkspace() {
 					}}
 				/>
 			)}
+
+			<AlertDialog
+				open={isOpenPlanErrorOpen}
+				onOpenChange={setIsOpenPlanErrorOpen}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogMedia className="bg-destructive/10 text-destructive">
+							<CircleAlert />
+						</AlertDialogMedia>
+						<AlertDialogTitle>
+							{t("workspace.openPlanError.title")}
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							{t("workspace.openPlanError.description")}
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<Button variant="outline" asChild>
+							<Link href={`/doctor/patients/${patientId}`}>
+								{t("workspace.openPlanError.backToPatient")}
+							</Link>
+						</Button>
+						<AlertDialogAction onClick={() => setIsOpenPlanErrorOpen(false)}>
+							{t("workspace.errors.dismiss")}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 
 			<AlertDialog
 				open={isSubmitErrorOpen}

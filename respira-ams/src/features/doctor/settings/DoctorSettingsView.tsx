@@ -113,7 +113,7 @@ export function DoctorSettingsView() {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between gap-4 rounded-xl border border-border-default bg-surface p-5 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-card text-card-foreground p-5 shadow-xs">
                 <div className="flex items-start gap-3">
                     <div className="rounded-lg bg-surface-secondary p-2 text-text-secondary">
                         <Type className="h-4 w-4" />
@@ -125,7 +125,7 @@ export function DoctorSettingsView() {
                         <p className="text-xs text-text-secondary">{t('fontSizeDescription')}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-1 rounded-lg border border-border-default bg-surface-secondary p-1">
+                <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/60 p-1 self-start sm:self-auto">
                     {FONT_SCALE_OPTIONS.map(({ value }) => {
                         const active = scale === value;
                         return (

@@ -1345,6 +1345,11 @@
                     "edit": "Edit",
                     "delete": "Delete"
                 },
+                "openPlanError": {
+                    "title": "Cannot start a new treatment",
+                    "description": "Patient \"{name}\" still has an open treatment plan. Please close the current plan before creating a new treatment.",
+                    "closePlanButton": "Close current plan"
+                },
                 "meta": {
                     "medicalRecordCode": "Medical Record ID:",
                     "medicalRecordCodeShort": "Record ID",
@@ -1766,6 +1771,11 @@
                     "dismiss": "Dismiss",
                     "patientLoadPrefix": "Error loading patient profile: {error}",
                     "dataLoadPrefix": "Error loading data: {error}"
+                },
+                "openPlanError": {
+                    "title": "Cannot start a new treatment",
+                    "description": "The patient still has an open treatment plan. Please close the current plan before creating a new treatment.",
+                    "backToPatient": "Back to patient profile"
                 }
             },
             "createPatientModal": {

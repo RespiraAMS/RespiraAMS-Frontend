@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit, Trash, Loader2, ListFilter } from "lucide-react";
+import { Plus, Edit, Trash, Loader2, ListFilter, ChevronDown, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -15,20 +15,31 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import {
+	Pagination,
+	PaginationContent,
+	PaginationItem,
+	PaginationNext,
+	PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
-	DropdownMenuSub,
-	DropdownMenuSubContent,
-	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 import { useAntibiogramsList, useAntibiogramMutations, usePathogensDropdown } from "../queries";
 import { AntibiogramForm } from "./AntibiogramForm";
@@ -40,6 +51,196 @@ import {
 } from "../types";
 
 const PAGE_SIZE = 10;
+
+interface AntibiogramsFilterDropdownProps {
+	activeFilterCount: number;
+	filterPathogenId: string | null;
+	filterMicCategory: MicCategory | null;
+	pathogensList: { id: string; name: string }[];
+	onPathogenChange: (id: string | null) => void;
+	onMicChange: (category: MicCategory | null) => void;
+	onClear: () => void;
+}
+
+function AntibiogramsFilterDropdown({
+	activeFilterCount,
+	filterPathogenId,
+	filterMicCategory,
+	pathogensList,
+	onPathogenChange,
+	onMicChange,
+	onClear,
+}: AntibiogramsFilterDropdownProps) {
+	const tTable = useTranslations("manager.antibiograms.table");
+	const tForm = useTranslations("manager.antibiograms.form");
+	const tCommon = useTranslations("common");
+	const [openSection, setOpenSection] = useState<"pathogen" | "mic" | null>(null);
+
+	const selectedPathogenName = pathogensList.find((p) => p.id === filterPathogenId)?.name;
+
+	const getMicLabel = (category: MicCategory) => {
+		switch (category) {
+			case "Susceptible":
+				return tForm("susceptible");
+			case "Intermediate":
+				return tForm("intermediate");
+			case "Resistant":
+				return tForm("resistant");
+		}
+	};
+
+	return (
+		<DropdownMenu onOpenChange={(open) => !open && setOpenSection(null)}>
+			<DropdownMenuTrigger asChild>
+				<Button
+					type="button"
+					variant="ghost"
+					size="icon"
+					className="relative h-8 w-8 text-foreground hover:bg-accent"
+				>
+					<ListFilter className="h-4 w-4" />
+					{activeFilterCount > 0 && (
+						<span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+							{activeFilterCount}
+						</span>
+					)}
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent
+				align="end"
+				collisionPadding={16}
+				className="w-64 max-w-[calc(100vw-2rem)] border-border bg-popover text-popover-foreground"
+			>
+				<DropdownMenuLabel>{tTable("filterTitle")}</DropdownMenuLabel>
+				<DropdownMenuSeparator className="bg-border" />
+
+				<div>
+					<button
+						type="button"
+						onClick={() =>
+							setOpenSection((prev) => (prev === "pathogen" ? null : "pathogen"))
+						}
+						className="flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+					>
+						<span className="shrink-0 font-medium">{tTable("filterByPathogen")}</span>
+						<span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+							{selectedPathogenName && (
+								<span className="truncate font-medium text-primary">
+									{selectedPathogenName}
+								</span>
+							)}
+							<ChevronDown
+								className={cn(
+									"h-4 w-4 shrink-0 transition-transform duration-200",
+									openSection === "pathogen" && "rotate-180",
+								)}
+							/>
+						</span>
+					</button>
+
+					{openSection === "pathogen" && (
+						<div className="mt-1 max-h-48 space-y-0.5 overflow-y-auto border-l border-border pl-2">
+							<DropdownMenuItem
+								onClick={() => onPathogenChange(null)}
+								className={cn(
+									"justify-between text-xs",
+									filterPathogenId === null && "bg-accent font-bold",
+								)}
+							>
+								<span>{tCommon("all")}</span>
+								{filterPathogenId === null && <Check className="h-3.5 w-3.5" />}
+							</DropdownMenuItem>
+							{pathogensList.map((p) => (
+								<DropdownMenuItem
+									key={p.id}
+									onClick={() => onPathogenChange(p.id)}
+									className={cn(
+										"justify-between gap-2 text-xs",
+										filterPathogenId === p.id && "bg-accent font-bold",
+									)}
+								>
+									<span className="truncate">{p.name}</span>
+									{filterPathogenId === p.id && (
+										<Check className="h-3.5 w-3.5 shrink-0" />
+									)}
+								</DropdownMenuItem>
+							))}
+						</div>
+					)}
+				</div>
+
+				<DropdownMenuSeparator className="bg-border" />
+
+				<div>
+					<button
+						type="button"
+						onClick={() => setOpenSection((prev) => (prev === "mic" ? null : "mic"))}
+						className="flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+					>
+						<span className="shrink-0 font-medium">{tTable("filterByMic")}</span>
+						<span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+							{filterMicCategory && (
+								<span className="truncate font-medium text-primary">
+									{getMicLabel(filterMicCategory)}
+								</span>
+							)}
+							<ChevronDown
+								className={cn(
+									"h-4 w-4 shrink-0 transition-transform duration-200",
+									openSection === "mic" && "rotate-180",
+								)}
+							/>
+						</span>
+					</button>
+
+					{openSection === "mic" && (
+						<div className="mt-1 space-y-0.5 border-l border-border pl-2">
+							<DropdownMenuItem
+								onClick={() => onMicChange(null)}
+								className={cn(
+									"justify-between text-xs",
+									filterMicCategory === null && "bg-accent font-bold",
+								)}
+							>
+								<span>{tCommon("all")}</span>
+								{filterMicCategory === null && <Check className="h-3.5 w-3.5" />}
+							</DropdownMenuItem>
+							{(["Susceptible", "Intermediate", "Resistant"] as MicCategory[]).map(
+								(cat) => (
+									<DropdownMenuItem
+										key={cat}
+										onClick={() => onMicChange(cat)}
+										className={cn(
+											"justify-between text-xs",
+											filterMicCategory === cat && "bg-accent font-bold",
+										)}
+									>
+										<span>{getMicLabel(cat)}</span>
+										{filterMicCategory === cat && (
+											<Check className="h-3.5 w-3.5" />
+										)}
+									</DropdownMenuItem>
+								),
+							)}
+						</div>
+					)}
+				</div>
+
+				<DropdownMenuSeparator className="bg-border" />
+				<DropdownMenuItem
+					onClick={() => {
+						onClear();
+						setOpenSection(null);
+					}}
+					disabled={activeFilterCount === 0}
+					className="cursor-pointer font-medium focus:bg-destructive/10 focus:text-destructive"
+				>
+					{tTable("clearFilters")}
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+}
 
 interface AntibiogramsViewProps {
 	readOnly?: boolean;
@@ -55,12 +256,11 @@ export function AntibiogramsView({ readOnly = false }: AntibiogramsViewProps) {
 	const [filterPathogenId, setFilterPathogenId] = useState<string | null>(null);
 	const [filterMicCategory, setFilterMicCategory] = useState<MicCategory | null>(null);
 
-	const { data: listData, isLoading, isFetching } = useAntibiogramsList(
-		page,
-		PAGE_SIZE,
-		filterPathogenId,
-		filterMicCategory
-	);
+	const {
+		data: listData,
+		isLoading,
+		isFetching,
+	} = useAntibiogramsList(page, PAGE_SIZE, filterPathogenId, filterMicCategory);
 	const { data: pathogensData } = usePathogensDropdown();
 	const { createMutation, updateMutation, deleteMutation } = useAntibiogramMutations();
 
@@ -70,7 +270,9 @@ export function AntibiogramsView({ readOnly = false }: AntibiogramsViewProps) {
 
 	const items = listData?.items || [];
 	const totalPages = listData?.metadata?.pageCount || 1;
-	const pathogensList = Array.isArray(pathogensData) ? pathogensData : pathogensData?.pathogens ?? [];
+	const pathogensList = Array.isArray(pathogensData)
+		? pathogensData
+		: (pathogensData?.pathogens ?? []);
 	const activeFilterCount = (filterPathogenId ? 1 : 0) + (filterMicCategory ? 1 : 0);
 	const columnCount = readOnly ? 3 : 4;
 
@@ -81,6 +283,12 @@ export function AntibiogramsView({ readOnly = false }: AntibiogramsViewProps) {
 
 	const handleFilterMic = (category: MicCategory | null) => {
 		setFilterMicCategory(category);
+		setPage(1);
+	};
+
+	const clearAllFilters = () => {
+		setFilterPathogenId(null);
+		setFilterMicCategory(null);
 		setPage(1);
 	};
 
@@ -117,7 +325,7 @@ export function AntibiogramsView({ readOnly = false }: AntibiogramsViewProps) {
 						toast.success(t("toast.updateSuccess"));
 					},
 					onError: (err) => toast.error(t("toast.updateError", { error: err.message })),
-				}
+				},
 			);
 		}
 	};
@@ -138,19 +346,19 @@ export function AntibiogramsView({ readOnly = false }: AntibiogramsViewProps) {
 		switch (category) {
 			case "Susceptible":
 				return (
-					<span className="inline-flex items-center rounded bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">
+					<span className="inline-flex shrink-0 items-center whitespace-nowrap rounded border border-emerald-500/30 bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
 						{tForm("susceptible")}
 					</span>
 				);
 			case "Intermediate":
 				return (
-					<span className="inline-flex items-center rounded bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
+					<span className="inline-flex shrink-0 items-center whitespace-nowrap rounded border border-amber-500/30 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
 						{tForm("intermediate")}
 					</span>
 				);
 			case "Resistant":
 				return (
-					<span className="inline-flex items-center rounded bg-rose-500/15 border border-rose-500/30 px-2.5 py-0.5 text-xs font-semibold text-rose-700 dark:text-rose-400 uppercase tracking-wide">
+					<span className="inline-flex shrink-0 items-center whitespace-nowrap rounded border border-rose-500/30 bg-rose-500/15 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-400">
 						{tForm("resistant")}
 					</span>
 				);
@@ -159,226 +367,234 @@ export function AntibiogramsView({ readOnly = false }: AntibiogramsViewProps) {
 		}
 	};
 
-	const filterDropdown = (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button variant="ghost" size="icon" className="relative hover:bg-accent text-foreground h-8 w-8">
-					<ListFilter className="h-4 w-4" />
-					{activeFilterCount > 0 && (
-						<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
-							{activeFilterCount}
-						</span>
-					)}
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				align="end"
-				className="w-56 bg-popover text-popover-foreground border-border"
+	const renderActionButtons = (item: AntibiogramItem) => (
+		<div className="flex items-center justify-end gap-1.5 lg:gap-1">
+			<Button
+				variant="ghost"
+				size="icon"
+				onClick={() => openUpdate(item)}
+				className="h-8 w-8 text-foreground hover:bg-accent"
 			>
-				<DropdownMenuLabel>{tTable("filterTitle")}</DropdownMenuLabel>
-				<DropdownMenuSeparator className="bg-border" />
-				<DropdownMenuSub>
-					<DropdownMenuSubTrigger className="hover:bg-accent">
-						{tTable("filterByPathogen")}
-					</DropdownMenuSubTrigger>
-					<DropdownMenuSubContent className="max-h-[300px] overflow-y-auto bg-popover text-popover-foreground border-border">
-						<DropdownMenuItem
-							onClick={() => handleFilterPathogen(null)}
-							className={filterPathogenId === null ? "bg-accent font-bold" : ""}
-						>
-							{tCommon("all")}
-						</DropdownMenuItem>
-						<DropdownMenuSeparator className="bg-border" />
-						{pathogensList.map((p) => (
-							<DropdownMenuItem
-								key={p.id}
-								onClick={() => handleFilterPathogen(p.id)}
-								className={filterPathogenId === p.id ? "bg-accent font-bold" : ""}
-							>
-								{p.name}
-							</DropdownMenuItem>
-						))}
-					</DropdownMenuSubContent>
-				</DropdownMenuSub>
-
-				<DropdownMenuSub>
-					<DropdownMenuSubTrigger className="hover:bg-accent">
-						{tTable("filterByMic")}
-					</DropdownMenuSubTrigger>
-					<DropdownMenuSubContent className="max-h-[300px] overflow-y-auto bg-popover text-popover-foreground border-border">
-						<DropdownMenuItem
-							onClick={() => handleFilterMic(null)}
-							className={filterMicCategory === null ? "bg-accent font-bold" : ""}
-						>
-							{tCommon("all")}
-						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={() => handleFilterMic("Susceptible")}
-							className={filterMicCategory === "Susceptible" ? "bg-accent font-bold" : ""}
-						>
-							{tForm("susceptible")}
-						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={() => handleFilterMic("Intermediate")}
-							className={filterMicCategory === "Intermediate" ? "bg-accent font-bold" : ""}
-						>
-							{tForm("intermediate")}
-						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={() => handleFilterMic("Resistant")}
-							className={filterMicCategory === "Resistant" ? "bg-accent font-bold" : ""}
-						>
-							{tForm("resistant")}
-						</DropdownMenuItem>
-					</DropdownMenuSubContent>
-				</DropdownMenuSub>
-
-				<DropdownMenuSeparator className="bg-border" />
-				<DropdownMenuItem
-					onClick={() => {
-						handleFilterPathogen(null);
-						handleFilterMic(null);
-					}}
-					className="font-medium focus:bg-destructive/10 focus:text-destructive"
-				>
-					{tTable("clearFilters")}
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
+				<Edit className="h-4 w-4" />
+			</Button>
+			<Button
+				variant="ghost"
+				size="icon"
+				onClick={() => setItemToDelete(item)}
+				className="h-8 w-8 text-destructive hover:bg-destructive/10"
+			>
+				<Trash className="h-4 w-4" />
+			</Button>
+		</div>
 	);
 
+	const filterProps: AntibiogramsFilterDropdownProps = {
+		activeFilterCount,
+		filterPathogenId,
+		filterMicCategory,
+		pathogensList,
+		onPathogenChange: handleFilterPathogen,
+		onMicChange: handleFilterMic,
+		onClear: clearAllFilters,
+	};
+
 	return (
-		<div className="space-y-6 text-foreground bg-background">
-			<div className="flex items-center justify-between">
-				<div>
-					<h2 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h2>
-					<p className="text-muted-foreground mt-1">{t("description")}</p>
+		<div className="space-y-4 bg-background text-foreground sm:space-y-6">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<div className="min-w-0">
+					<h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+						{t("title")}
+					</h2>
+					<p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
 				</div>
 				{!readOnly && (
-					<Button onClick={openCreate} className="bg-primary text-primary-foreground hover:bg-primary/90">
+					<Button
+						onClick={openCreate}
+						className="w-full shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto"
+					>
 						<Plus className="mr-2 h-4 w-4" /> {t("addButton")}
 					</Button>
 				)}
 			</div>
 
-			<div className="rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto text-card-foreground relative">
+			<div className="relative rounded-xl border border-border bg-card p-3 text-card-foreground shadow-sm sm:p-4">
 				{isFetching && (
-					<div className="absolute top-0 right-0 left-0 h-1 bg-primary/20 overflow-hidden rounded-t-md z-10">
-						<div className="h-full bg-primary animate-pulse w-1/2 translate-x-1/2" />
+					<div className="absolute left-0 right-0 top-0 z-10 h-1 overflow-hidden rounded-t-md bg-primary/20">
+						<div className="h-full w-1/2 translate-x-1/2 animate-pulse bg-primary" />
 					</div>
 				)}
 
-				<Table className="border-border">
-					<TableHeader>
-						<TableRow className="border-border hover:bg-transparent">
-							<TableHead className="text-muted-foreground font-semibold w-1/4">
-								{tTable("colPathogen")}
-							</TableHead>
+				<div className="space-y-3 md:hidden">
+					<div className="flex items-center justify-between rounded-lg border border-border bg-background/50 px-3 py-2">
+						<span className="text-xs font-medium text-muted-foreground">
+							{tTable("filterTitle")}
+						</span>
+						<AntibiogramsFilterDropdown {...filterProps} />
+					</div>
 
-							<TableHead className="text-muted-foreground font-semibold w-52 text-center">
-								{tTable("colMic")}
-							</TableHead>
+					{isLoading ? (
+						<div className="flex h-32 items-center justify-center rounded-lg border border-border text-muted-foreground">
+							<Loader2 className="h-6 w-6 animate-spin text-primary" />
+						</div>
+					) : items.length === 0 ? (
+						<div className="rounded-lg border border-border py-10 text-center text-sm text-muted-foreground">
+							{tTable("empty")}
+						</div>
+					) : (
+						items.map((item) => (
+							<div
+								key={item.id}
+								className="space-y-2.5 rounded-lg border border-border bg-background/50 p-3.5"
+							>
+								<div className="flex items-start justify-between gap-2">
+									<p className="min-w-0 font-semibold text-primary break-words">
+										{item.pathogen.name}
+									</p>
+									{renderMicBadge(item.micCategory)}
+								</div>
 
-							<TableHead className="overflow-visible text-muted-foreground font-semibold">
-								{readOnly ? (
-									<div className="flex items-center justify-between gap-2">
-										<span>{tTable("colAntibiotics")}</span>
-										{filterDropdown}
+								<div className="space-y-1.5">
+									<div className="text-xs font-medium text-muted-foreground">
+										{tTable("colAntibiotics")}
 									</div>
-								) : (
-									tTable("colAntibiotics")
+									<div className="flex flex-wrap gap-1.5">
+										{item.antibiotics.map((ab) => (
+											<Badge
+												key={ab.id}
+												variant="secondary"
+												className="whitespace-normal break-words border border-border bg-muted font-normal text-foreground"
+											>
+												{ab.name}
+											</Badge>
+										))}
+									</div>
+								</div>
+
+								{!readOnly && (
+									<div className="border-t border-border pt-2">
+										{renderActionButtons(item)}
+									</div>
 								)}
-							</TableHead>
+							</div>
+						))
+					)}
+				</div>
 
-							{!readOnly && (
-								<TableHead className="overflow-visible text-muted-foreground text-right font-semibold">
-									<div className="flex items-center justify-end gap-2">
-										{tCommon("actions")}
-										{filterDropdown}
-									</div>
+				<div className="hidden md:block">
+					<Table className="border-border">
+						<TableHeader>
+							<TableRow className="border-border hover:bg-transparent">
+								<TableHead className="min-w-44 font-semibold text-muted-foreground lg:w-1/4">
+									{tTable("colPathogen")}
 								</TableHead>
-							)}
-						</TableRow>
-					</TableHeader>
 
-					<TableBody>
-						{isLoading ? (
-							<TableRow className="border-border">
-								<TableCell colSpan={columnCount} className="h-32 text-center text-muted-foreground">
-									<Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
-								</TableCell>
-							</TableRow>
-						) : items.length === 0 ? (
-							<TableRow className="border-border">
-								<TableCell colSpan={columnCount} className="text-center text-muted-foreground py-10">
-									{tTable("empty")}
-								</TableCell>
-							</TableRow>
-						) : (
-							items.map((item) => (
-								<TableRow key={item.id} className="border-border hover:bg-accent/50 transition-colors">
-									<TableCell className="font-medium align-middle">
-										<span className="text-primary font-semibold">{item.pathogen.name}</span>
-									</TableCell>
-									<TableCell className="align-top text-center">
-										{renderMicBadge(item.micCategory)}
-									</TableCell>
-									<TableCell className="align-top">
-										<div className="flex flex-wrap gap-1.5">
-											{item.antibiotics.map((ab) => (
-												<Badge
-													key={ab.id}
-													variant="secondary"
-													className="font-normal bg-muted text-foreground border border-border"
-												>
-													{ab.name}
-												</Badge>
-											))}
+								<TableHead className="min-w-44 whitespace-nowrap text-center font-semibold text-muted-foreground lg:w-52">
+									{tTable("colMic")}
+								</TableHead>
+
+								<TableHead className="min-w-56 overflow-visible font-semibold text-muted-foreground">
+									{readOnly ? (
+										<div className="flex items-center justify-between gap-2">
+											<span>{tTable("colAntibiotics")}</span>
+											<AntibiogramsFilterDropdown {...filterProps} />
 										</div>
+									) : (
+										tTable("colAntibiotics")
+									)}
+								</TableHead>
+
+								{!readOnly && (
+									<TableHead className="overflow-visible whitespace-nowrap text-right font-semibold text-muted-foreground">
+										<div className="flex items-center justify-end gap-2">
+											{tCommon("actions")}
+											<AntibiogramsFilterDropdown {...filterProps} />
+										</div>
+									</TableHead>
+								)}
+							</TableRow>
+						</TableHeader>
+
+						<TableBody>
+							{isLoading ? (
+								<TableRow className="border-border">
+									<TableCell
+										colSpan={columnCount}
+										className="h-32 text-center text-muted-foreground"
+									>
+										<Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
 									</TableCell>
-									{!readOnly && (
+								</TableRow>
+							) : items.length === 0 ? (
+								<TableRow className="border-border">
+									<TableCell
+										colSpan={columnCount}
+										className="py-10 text-center text-muted-foreground"
+									>
+										{tTable("empty")}
+									</TableCell>
+								</TableRow>
+							) : (
+								items.map((item) => (
+									<TableRow
+										key={item.id}
+										className="border-border transition-colors hover:bg-accent/50"
+									>
+										<TableCell className="align-top font-medium whitespace-normal break-words">
+											<span className="font-semibold text-primary">
+												{item.pathogen.name}
+											</span>
+										</TableCell>
+										<TableCell className="whitespace-nowrap text-center align-top">
+											{renderMicBadge(item.micCategory)}
+										</TableCell>
 										<TableCell className="align-top">
-											<div className="flex justify-end gap-1">
-												<Button
-													variant="ghost"
-													size="icon"
-													onClick={() => openUpdate(item)}
-													className="hover:bg-accent text-foreground h-8 w-8"
-												>
-													<Edit className="h-4 w-4" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="icon"
-													onClick={() => setItemToDelete(item)}
-													className="hover:bg-destructive/10 text-destructive h-8 w-8"
-												>
-													<Trash className="h-4 w-4" />
-												</Button>
+											<div className="flex flex-wrap gap-1.5">
+												{item.antibiotics.map((ab) => (
+													<Badge
+														key={ab.id}
+														variant="secondary"
+														className="border border-border bg-muted font-normal text-foreground"
+													>
+														{ab.name}
+													</Badge>
+												))}
 											</div>
 										</TableCell>
-									)}
-								</TableRow>
-							))
-						)}
-					</TableBody>
-				</Table>
+										{!readOnly && (
+											<TableCell className="whitespace-nowrap align-top">
+												{renderActionButtons(item)}
+											</TableCell>
+										)}
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				</div>
 
 				{totalPages > 1 && (
 					<Pagination className="mt-4">
-						<PaginationContent>
+						<PaginationContent className="flex-wrap justify-center">
 							<PaginationItem>
 								<PaginationPrevious
-									className={page > 1 ? "cursor-pointer hover:bg-accent" : "pointer-events-none opacity-50"}
+									className={
+										page > 1
+											? "cursor-pointer hover:bg-accent"
+											: "pointer-events-none opacity-50"
+									}
 									onClick={() => setPage((p) => Math.max(1, p - 1))}
 								/>
 							</PaginationItem>
-							<span className="text-sm text-muted-foreground px-2">
+							<span className="px-2 text-sm text-muted-foreground">
 								{tCommon("pageOf", { page, totalPages })}
 							</span>
 							<PaginationItem>
 								<PaginationNext
-									className={page < totalPages ? "cursor-pointer hover:bg-accent" : "pointer-events-none opacity-50"}
+									className={
+										page < totalPages
+											? "cursor-pointer hover:bg-accent"
+											: "pointer-events-none opacity-50"
+									}
 									onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
 								/>
 							</PaginationItem>
@@ -390,10 +606,12 @@ export function AntibiogramsView({ readOnly = false }: AntibiogramsViewProps) {
 			{!readOnly && (
 				<>
 					<Dialog open={modalMode !== null} onOpenChange={(open) => !open && closeModal()}>
-						<DialogContent className="sm:max-w-xl border-border bg-popover text-popover-foreground">
+						<DialogContent className="max-h-[90dvh] w-[95vw] overflow-y-auto border-border bg-popover text-popover-foreground sm:max-w-xl">
 							<DialogHeader>
 								<DialogTitle className="text-foreground">
-									{modalMode === "create" ? t("dialog.createTitle") : t("dialog.updateTitle")}
+									{modalMode === "create"
+										? t("dialog.createTitle")
+										: t("dialog.updateTitle")}
 								</DialogTitle>
 							</DialogHeader>
 							{modalMode && (
@@ -407,20 +625,27 @@ export function AntibiogramsView({ readOnly = false }: AntibiogramsViewProps) {
 						</DialogContent>
 					</Dialog>
 
-					<AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
-						<AlertDialogContent className="border-border bg-popover text-popover-foreground">
+					<AlertDialog
+						open={!!itemToDelete}
+						onOpenChange={(open) => !open && setItemToDelete(null)}
+					>
+						<AlertDialogContent className="w-[95vw] border-border bg-popover text-popover-foreground sm:max-w-lg">
 							<AlertDialogHeader>
-								<AlertDialogTitle className="text-destructive font-semibold">
+								<AlertDialogTitle className="font-semibold text-destructive">
 									{t("dialog.deleteTitle")}
 								</AlertDialogTitle>
 								<AlertDialogDescription className="text-muted-foreground">
 									{t.rich("dialog.deleteDescription", {
 										pathogen: itemToDelete?.pathogen.name || "",
-										b: (chunks) => <span className="font-bold text-foreground">{chunks}</span>,
+										b: (chunks) => (
+											<span className="font-bold text-foreground">
+												{chunks}
+											</span>
+										),
 									})}
 								</AlertDialogDescription>
 							</AlertDialogHeader>
-							<AlertDialogFooter>
+							<AlertDialogFooter className="gap-2 sm:gap-0">
 								<Button
 									variant="outline"
 									onClick={() => setItemToDelete(null)}
@@ -434,7 +659,9 @@ export function AntibiogramsView({ readOnly = false }: AntibiogramsViewProps) {
 									disabled={deleteMutation.isPending}
 									className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 								>
-									{deleteMutation.isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}{" "}
+									{deleteMutation.isPending ? (
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									) : null}{" "}
 									{tCommon("delete")}
 								</Button>
 							</AlertDialogFooter>
