@@ -1345,6 +1345,11 @@
                     "edit": "Chỉnh sửa",
                     "delete": "Xóa"
                 },
+                "openPlanError": {
+                    "title": "Không thể tạo điều trị mới",
+                    "description": "Bệnh nhân \"{name}\" vẫn còn kế hoạch điều trị chưa đóng. Vui lòng đóng phác đồ hiện tại trước khi tạo điều trị mới.",
+                    "closePlanButton": "Đóng phác đồ hiện tại"
+                },
                 "meta": {
                     "medicalRecordCode": "Mã bệnh án:",
                     "medicalRecordCodeShort": "Mã BA",
@@ -1766,6 +1771,11 @@
                     "dismiss": "Đóng",
                     "patientLoadPrefix": "Lỗi tải hồ sơ bệnh nhân: {error}",
                     "dataLoadPrefix": "Lỗi tải dữ liệu: {error}"
+                },
+                "openPlanError": {
+                    "title": "Không thể tạo điều trị mới",
+                    "description": "Bệnh nhân vẫn còn kế hoạch điều trị chưa đóng. Vui lòng đóng phác đồ hiện tại trước khi tạo điều trị mới.",
+                    "backToPatient": "Quay lại hồ sơ bệnh nhân"
                 }
             },
             "createPatientModal": {

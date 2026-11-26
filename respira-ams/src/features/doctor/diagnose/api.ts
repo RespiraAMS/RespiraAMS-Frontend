@@ -9,8 +9,6 @@ import type {
     WarnCombinationResponse,
 } from "./types";
 
-const TREATMENT_PLAN_TOLERATED_ERROR = "failed to create patient's treatment plan";
-
 export async function getFormMetadata(): Promise<DiagnoseFormResponse> {
     const result = await apiFetch<DiagnoseFormResponse>(
         `${API_BASE_SERVER}${API_BASE}/diagnose`,
@@ -78,18 +76,10 @@ export async function warnAntibioticCombination(
 }
 
 export async function confirmTreatment(payload: ConfirmTreatmentRequest): Promise<void> {
-    try {
-        await apiFetch(`${API_BASE_SERVER}${API_BASE}/diagnose/confirm-treatment`, {
-            method: "POST",
-            body: JSON.stringify(payload),
-        });
-    } catch (error) {
-        const msg = error instanceof Error ? error.message.toLowerCase() : "";
-        if (msg.includes(TREATMENT_PLAN_TOLERATED_ERROR)) {
-            return;
-        }
-        throw error;
-    }
+    await apiFetch(`${API_BASE_SERVER}${API_BASE}/diagnose/confirm-treatment`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
 }
 
 export const diagnoseApi = {
