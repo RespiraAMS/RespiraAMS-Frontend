@@ -9,6 +9,7 @@ import { QueryProvider } from '@/providers/QueryProvider';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthBootstrap } from '@/components/AuthBootstrap';
 import { FontProvider } from '@/providers/FontContext';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
@@ -76,6 +77,7 @@ export default async function RootLayout({
                   {children}
                   <Toaster richColors position="top-center" duration={3000} closeButton />
                 </QueryProvider>
+                <Analytics />
               </NextIntlClientProvider>
             </FontProvider>
           </FontSizeProvider>
